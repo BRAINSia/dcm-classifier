@@ -70,6 +70,10 @@ def dicom_inference_and_conversion(
 
         plane = series.get_acquisition_plane()
         modality = series.get_modality()
+        if modality is None:
+            modality = "unknown"
+        if modality.lower() == "t2starw":
+            continue
         dir_type = get_bids_mri_type(modality)
         final_dir_path = f"{sub_ses_dir}/{dir_type}"
         if not os.path.exists(final_dir_path):
@@ -100,14 +104,18 @@ def dicom_inference_and_conversion(
                     dcm_dir=temp_dir,
                     desc=f"postB{b_value}",
                 )
-            adc = compute_adc_from_multi_b_values(tracew_im_list, b_val_list)
-            adc_run = 1
-            fname = f"{sub}_{ses}_run-00{adc_run}_acq-{plane}_desc-post_adc"
-            while os.path.exists(f"{final_dir_path}/{fname}.nii.gz"):
-                fname = fname.replace(f"run-00{adc_run}", f"run-00{adc_run + 1}")
-                adc_run += 1
-            itk.imwrite(adc, f"{final_dir_path}/{fname}.nii.gz")
-
+            try:
+                adc = compute_adc_from_multi_b_values(tracew_im_list, b_val_list)
+                adc_run = 1
+                fname = f"{sub}_{ses}_run-00{adc_run}_acq-{plane}_desc-post_adc"
+                while os.path.exists(f"{final_dir_path}/{fname}.nii.gz"):
+                    fname = fname.replace(f"run-00{adc_run}", f"run-00{adc_run + 1}")
+                    adc_run += 1
+                itk.imwrite(adc, f"{final_dir_path}/{fname}.nii.gz")
+            except RuntimeError:
+                pass
+            except ZeroDivisionError:
+                pass
         else:
             for volume in series.get_volume_list():
                 temp_dir = tempfile.mkdtemp()

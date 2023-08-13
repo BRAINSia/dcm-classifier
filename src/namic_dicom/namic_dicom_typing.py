@@ -357,7 +357,11 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
             if dicom_element.VR == "OB":
                 value = value.decode("utf-8")
             # print(f"Found BValue at {v} for {k}, {value} of type {dicom_element.VR}")
-            result = float(value)
+            try:
+                result = float(value)
+            except ValueError:
+                print(f"Could not convert {value} to float")
+                return -12345
             if round_to_nearst_10:
                 result = round(result / 10.0) * 10
             return result
