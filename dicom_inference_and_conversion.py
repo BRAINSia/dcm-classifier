@@ -59,7 +59,6 @@ def dicom_inference_and_conversion(
         study_directory=session_dir, inferer=inferer
     )
     study.run_inference()
-    print("DICOM Inference finished")
     for series_number, series in study.series_dictionary.items():
         info_dict = series.get_series_info_dict()
         sub = info_dict["PatientID"]
@@ -93,7 +92,6 @@ def dicom_inference_and_conversion(
                 for file in file_list:
                     shutil.copy(file, temp_dir)
 
-                print(glob(f"{temp_dir}/*"))
                 create_nifti_file(
                     dcm2niix_path=dcm2niix_path,
                     subject=sub,
