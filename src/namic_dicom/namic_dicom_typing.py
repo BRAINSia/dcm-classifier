@@ -369,12 +369,21 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
 
 
 def get_min_max(inputImage: FImageType) -> (float, float):
+    """
+    Calculate and return the minimum and maximum pixel values of the given image.
+
+    Parameters:
+    - inputImage (FImageType): The input image for which the minimum and maximum pixel values are to be calculated.
+
+    Returns:
+    - tuple: A tuple containing two floats: the minimum and maximum pixel values of the input image, respectively.
+    """
     min_max_image_filter = itk.MinimumMaximumImageCalculator[FImageType].New()
     min_max_image_filter.SetImage(inputImage)
     min_max_image_filter.Compute()
     pixel_min = min_max_image_filter.GetMinimum()
     pixel_max = min_max_image_filter.GetMaximum()
-    return (pixel_min, pixel_max)
+    return pixel_min, pixel_max
 
 
 def itk_get_center_slice(
