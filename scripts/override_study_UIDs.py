@@ -1,4 +1,4 @@
-from src.namic_dicom.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+from dcm_classify.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 import pydicom
 import pydicom.uid as uid
 

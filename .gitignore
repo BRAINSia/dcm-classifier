@@ -9,8 +9,6 @@
 # image files
 *.nii.gz
 
-# pytorch checkpoints file
-
 # directories
 **/cnn_logs
 **/.idea

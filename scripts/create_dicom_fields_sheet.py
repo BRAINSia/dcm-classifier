@@ -1,6 +1,6 @@
 import pandas as pd
 from glob import glob
-from src.namic_dicom.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+from dcm_classify.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 
 
 def generate_dicom_dataframe(session_dirs: list, output_file: str):

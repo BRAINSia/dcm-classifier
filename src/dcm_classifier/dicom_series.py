@@ -16,7 +16,7 @@
 #
 #  =========================================================================
 
-from src.namic_dicom.dicom_volume import (
+from dcm_classifier.dicom_volume import (
     DicomSingleVolumeInfoBase,
     merge_dictionaries,
 )
