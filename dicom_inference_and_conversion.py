@@ -2,9 +2,9 @@ import itk
 import pandas as pd
 from pathlib import Path
 from glob import glob
-from src.namic_dicom.study_processing import ProcessOneDicomStudyToVolumesMappingBase
-from src.namic_dicom.image_type_inference import ImageTypeClassifierBase
-from src.namic_dicom.namic_dicom_typing import *
+from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+from dcm_classifier.image_type_inference import ImageTypeClassifierBase
+from dcm_classifier.namic_dicom_typing import *
 import tempfile
 import os
 import re

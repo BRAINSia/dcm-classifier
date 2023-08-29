@@ -24,7 +24,7 @@ import json
 
 from typing import Dict, List, Any, Union, Optional
 import pydicom
-from src.namic_dicom.namic_dicom_typing import (
+from dcm_classifier.namic_dicom_typing import (
     get_bvalue,
     FImageType,
     itk_read_from_dicomfn_list,

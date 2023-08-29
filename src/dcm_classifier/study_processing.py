@@ -19,13 +19,11 @@
 import sys
 from pathlib import Path, PurePath
 from typing import List, Union, Optional, Dict
-
 import itk
 
-
-from src.namic_dicom.dicom_volume import DicomSingleVolumeInfoBase
-from src.namic_dicom.dicom_series import DicomSingleSeries
-from src.namic_dicom.image_type_inference import ImageTypeClassifierBase
+from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
+from dcm_classifier.dicom_series import DicomSingleSeries
+from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 
 
 class ProcessOneDicomStudyToVolumesMappingBase:

@@ -26,7 +26,7 @@ import itk
 import re
 import unicodedata
 
-from src.namic_dicom.dicom_config import (
+from dcm_classifier.dicom_config import (
     drop_columns_with_no_series_specific_information,
 )
 
