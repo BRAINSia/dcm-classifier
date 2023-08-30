@@ -31,3 +31,13 @@ Install required packages
 Run the script!
 
 `python3 classify_study.py -m models/rf_classifier.onnx -d <path_to_dicom_session>`
+
+# Authors
+
+1. **Michal Brzus**
+
+    github: [mbrzus](https://github.com/mbrzus), email: michal-brzus@uiowa.edu
+
+2. [**Hans J. Johnson**](https://engineering.uiowa.edu/people/hans-johnson)
+
+    github: [BRAINSia](https://github.com/BRAINSia), email: michal-brzus@uiowa.edu
