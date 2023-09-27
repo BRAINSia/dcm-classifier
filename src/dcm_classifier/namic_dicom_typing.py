@@ -37,11 +37,22 @@ UCImageType = itk.Image[itk.UC, 3]
 def two_point_compute_adc(
     list_of_raw_bimages: List[FImageType], list_of_bvalues: List[float]
 ) -> FImageType:
+    # """
+    # Compute ADC from the min and max bvalue images (assumes list_of_images is sorted by ascending bvalue)
+    # :param list_of_raw_bimages: a list of b-weighted images
+    # :param list_of_bvalues: a list of bvalues
+    # :return: The computed ADC image
+    # """
+
     """
-    Compute ADC from the min and max bvalue images (assumes list_of_images is sorted by ascending bvalue)
-    :param list_of_raw_bimages: a list of b-weighted images
-    :param list_of_bvalues: a list of bvalues
-    :return: The computed ADC image
+    Compute ADC from the min and max b-value images (assumes list_of_images is sorted by ascending b-value).
+
+    Args:
+        list_of_raw_bimages (List[FImageType]): A list of b-weighted images.
+        list_of_bvalues (List[float]): A list of b-values.
+
+    Returns:
+        FImageType: The computed ADC image.
     """
     # ADC = - (ln(SI_b1) - ln(SI_b2) ) / (b_1 - b_2)
     # ADC = - (ln(SI_b1/SI_b2))/ (b_1 - b_2)
@@ -65,12 +76,23 @@ def two_point_compute_adc(
 def compute_adc_from_multi_b_values(
     list_of_raw_bimages: List[FImageType], list_of_bvalues: List[float]
 ) -> FImageType:
-    """
-    https://www.ajronline.org/doi/full/10.2214/AJR.15.15945?mobileUi=0
+    # """
+    # https://www.ajronline.org/doi/full/10.2214/AJR.15.15945?mobileUi=0
+    #
+    # :param list_of_raw_bimages: a list of b-weighted images
+    # :param list_of_bvalues: a list of bvalues
+    # :return: The computed ADC image
+    # """
 
-    :param list_of_raw_bimages: a list of b-weighted images
-    :param list_of_bvalues: a list of bvalues
-    :return: The computed ADC image
+    """
+    Compute ADC from multiple b-value images.
+
+    Args:
+        list_of_raw_bimages (List[FImageType]): A list of b-weighted images.
+        list_of_bvalues (List[float]): A list of b-values.
+
+    Returns:
+        FImageType: The computed ADC image.
     """
 
     list_of_log_images: List[FImageType] = list()
@@ -116,6 +138,15 @@ def compute_adc_from_multi_b_values(
 def itk_read_from_dicomfn_list(
     single_volume_dcm_files_list: List[Union[str, Path]]
 ) -> FImageType:
+    """
+    Read DICOM files from a list and return an ITK image.
+
+    Args:
+        single_volume_dcm_files_list (List[Union[str, Path]]): A list of DICOM file paths.
+
+    Returns:
+        FImageType: The ITK image created from the DICOM files.
+    """
     import tempfile
     import shutil
     import os
@@ -162,11 +193,21 @@ def itk_read_from_dicomfn_list(
 
 
 def read_dwi_series_itk(dicom_directory: Path) -> (float, FImageType):
+    # """
+    # Given a directory of dicom images of coherent dicoms,
+    # read the volume and bvalue
+    # :param dicom_directory:
+    # :return:
+    # """
+
     """
-    Given a directory of dicom images of coherent dicoms,
-    read the volume and bvalue
-    :param dicom_directory:
-    :return:
+    Given a directory of DICOM images of coherent DICOMs, read the volume and b-value.
+
+    Args:
+        dicom_directory (Path): The directory containing DICOM image files.
+
+    Returns:
+        Tuple[float, FImageType]: A tuple containing the extracted b-value and the ITK image.
     """
     all_files: List[str] = [x.as_posix() for x in dicom_directory.glob("*.dcm")]
     bvalue_image = itk_read_from_dicomfn_list(all_files)
@@ -177,6 +218,15 @@ def read_dwi_series_itk(dicom_directory: Path) -> (float, FImageType):
 
 
 def cmd_exists(cmd):
+    """
+    Check if a command exists in the system's PATH.
+
+    Args:
+        cmd (str): The command to check for existence.
+
+    Returns:
+        bool: True if the command exists, False otherwise.
+    """
     import shutil
 
     return shutil.which(cmd) is not None
@@ -187,6 +237,18 @@ def rglob_for_singular_result(
     pattern: str,
     require_result_type: Optional[str] = None,
 ) -> Optional[Path]:
+    """
+    Recursively search for files or directories matching a pattern in a base directory.
+
+    Args:
+        base_dir (Path): The base directory to start the search from.
+        pattern (str): The pattern to match against.
+        require_result_type (Optional[str]): If specified, the type of result to require ("f" for file, "d" for directory).
+
+    Returns:
+        Optional[Path]: The matching result if found, or None if no result or multiple results are found.
+    """
+
     "./sub-DMI12007461_ses-01_run-01/nipype_cache/Study_sub_DMI12007461_ses_01_run_01/Classifier/"
     list_results: List[Path] = [x for x in base_dir.rglob(pattern)]
     if (len(list_results)) != 1:
@@ -204,6 +266,17 @@ def rglob_for_singular_result_from_pattern_list(
     patterns: List[str],
     require_result_type: Optional[str] = None,
 ) -> Optional[Path]:
+    """
+    Recursively search for files or directories matching patterns from a list in a base directory.
+
+    Args:
+        base_dir (Path): The base directory to start the search from.
+        patterns (List[str]): The list of patterns to match against.
+        require_result_type (Optional[str]): If specified, the type of result to require ("f" for file, "d" for directory).
+
+    Returns:
+        Optional[Path]: The matching result if found, or None if no result or multiple results are found.
+    """
     for pattern in patterns:
         candidate = rglob_for_singular_result(base_dir, pattern, require_result_type)
         if candidate is not None:
@@ -212,6 +285,18 @@ def rglob_for_singular_result_from_pattern_list(
 
 
 def compare_RGB_slices(refr_slice_fn: Path, test_slice_fn: Path) -> (int, dict):
+    """
+    Compare two RGB image slices and count the number of pixels with differences.
+
+    Args:
+        refr_slice_fn (Path): Filepath to the reference RGB image slice.
+        test_slice_fn (Path): Filepath to the test RGB image slice.
+
+    Returns:
+        Tuple[int, Dict[str, FImageType]]: A tuple containing the number of differing pixels
+        and a dictionary containing the reference, test, and difference images.
+    """
+
     images_dict: Dict[FImageType] = dict()
     refr_slice = itk.imread(filename=refr_slice_fn, pixel_type=itk.F)
     test_slice = itk.imread(filename=test_slice_fn, pixel_type=itk.F)
@@ -246,6 +331,22 @@ def compare_3d_float_images(
     tolerance_radius: float,
     force_exact_directions: bool,
 ) -> (int, dict, bool):
+    """
+    Compare two 3D float images and count the number of pixels with differences.
+
+    Args:
+        refr_fn (Path): Filepath to the reference image.
+        test_fn (Path): Filepath to the test image.
+        difference_threshold (float): Threshold for pixel differences.
+        tolerance_radius (float): Tolerance radius for comparison.
+        force_exact_directions (bool): Whether to force exact directions in comparison.
+
+    Returns:
+        Tuple[int, Dict[str, FImageType], bool]: A tuple containing the number of differing pixels,
+        a dictionary containing the reference, test, and difference images, and a boolean indicating
+        if the images are in the same space.
+    """
+
     images_dict: Dict[FImageType] = dict()
     images_dict["refr"] = itk.imread(filename=refr_fn, pixel_type=itk.F)
     images_dict["test"] = itk.imread(filename=test_fn, pixel_type=itk.F)
@@ -282,6 +383,17 @@ def compare_3d_float_images(
 
 def slugify(value, allow_unicode=False):
     """
+    Convert a string to a slug format.
+
+    Args:
+        value: The string to be converted.
+        allow_unicode (bool): If True, allows Unicode characters in the slug.
+
+    Returns:
+        str: The slugified string.
+    """
+
+    """
     Taken from https://github.com/django/django/blob/master/django/utils/text.py
     Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
     dashes to single dashes. Remove characters that aren't alphanumerics,
@@ -304,6 +416,17 @@ def slugify(value, allow_unicode=False):
 
 
 def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
+    """
+    Extract and compute the b-value from DICOM header information.
+
+    Args:
+        dicom_header_info: A pydicom object containing DICOM header information.
+        round_to_nearst_10: Whether to round the computed b-value to the nearest 10.
+
+    Returns:
+        float: The computed or extracted b-value.
+    """
+
     """
     How to compute b-values
     http://clinical-mri.com/wp-content/uploads/software_hardware_updates/Graessner.pdf
@@ -372,6 +495,16 @@ def get_min_max(inputImage: FImageType) -> (float, float):
     """
     Calculate and return the minimum and maximum pixel values of the given image.
 
+    Args:
+        inputImage (FImageType): The input image for which the minimum and maximum pixel values are to be calculated.
+
+    Returns:
+        Tuple[float, float]: A tuple containing two floats: the minimum and maximum pixel values of the input image.
+    """
+
+    """
+    Calculate and return the minimum and maximum pixel values of the given image.
+
     Parameters:
     - inputImage (FImageType): The input image for which the minimum and maximum pixel values are to be calculated.
 
@@ -389,6 +522,17 @@ def get_min_max(inputImage: FImageType) -> (float, float):
 def itk_get_center_slice(
     inputImage: FImageType, pixel_min: float, pixel_max: float
 ) -> UCImageType:
+    """
+    Extract the center slice of an input image and perform intensity windowing.
+
+    Args:
+        inputImage (FImageType): The input image.
+        pixel_min (float): Minimum pixel value.
+        pixel_max (float): Maximum pixel value.
+
+    Returns:
+        UCImageType: The center slice image with adjusted intensity values.
+    """
     extractFilter = itk.ExtractImageFilter[FImageType, FImageType].New()
     extractFilter.SetInput(inputImage)
     extractFilter.SetDirectionCollapseToSubmatrix()
@@ -426,6 +570,15 @@ def itk_get_center_slice(
 
 
 def log_image(inimage: FImageType) -> FImageType:
+    """
+    Compute the natural logarithm of pixel values in the input image.
+
+    Args:
+        inimage (FImageType): The input image.
+
+    Returns:
+        FImageType: The image with pixel values transformed using the natural logarithm.
+    """
     lif = itk.LogImageFilter[FImageType, FImageType].New()
     lif.SetInput(inimage)
     lif.Update()
@@ -433,6 +586,15 @@ def log_image(inimage: FImageType) -> FImageType:
 
 
 def exp_image(inimage: FImageType) -> FImageType:
+    """
+    Compute the exponential of pixel values in the input image.
+
+    Args:
+        inimage (FImageType): The input image.
+
+    Returns:
+        FImageType: The image with pixel values transformed using the exponential function.
+    """
     exp_image_filter = itk.ExpImageFilter[FImageType, FImageType].New()
     exp_image_filter.SetInput(inimage)
     exp_image_filter.Update()
@@ -440,6 +602,16 @@ def exp_image(inimage: FImageType) -> FImageType:
 
 
 def add_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
+    """
+    Add two input images element-wise.
+
+    Args:
+        im1 (FImageType): The first input image.
+        im2 (FImageType): The second input image.
+
+    Returns:
+        FImageType: The resulting image from adding the two input images element-wise.
+    """
     sum_image_filter = itk.AddImageFilter[FImageType, FImageType, FImageType].New()
     sum_image_filter.SetInput1(im1)
     sum_image_filter.SetInput2(im2)
@@ -448,6 +620,16 @@ def add_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
 
 
 def add_const_to_itk_images(im1: FImageType, offset: float) -> FImageType:
+    """
+    Add a constant offset to all pixel values in the input image.
+
+    Args:
+        im1 (FImageType): The input image.
+        offset (float): The constant offset to be added to each pixel value.
+
+    Returns:
+        FImageType: The image with the constant offset added to its pixel values.
+    """
     sum_image_filter = itk.AddImageFilter[FImageType, FImageType, FImageType].New()
     sum_image_filter.SetInput(im1)
     sum_image_filter.SetConstant(offset)
@@ -456,6 +638,17 @@ def add_const_to_itk_images(im1: FImageType, offset: float) -> FImageType:
 
 
 def sub_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
+    """
+    Subtract pixel values of the second input image from the first input image element-wise.
+
+    Args:
+        im1 (FImageType): The first input image.
+        im2 (FImageType): The second input image.
+
+    Returns:
+        FImageType: The resulting image from subtracting the pixel values of the second image from the first image.
+    """
+
     sub_image_filter = itk.SubtractImageFilter[FImageType, FImageType, FImageType].New()
     sub_image_filter.SetInput1(im1)
     sub_image_filter.SetInput2(im2)
@@ -464,6 +657,17 @@ def sub_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
 
 
 def div_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
+    """
+    Divide pixel values of the first input image by the corresponding pixel values of the second input image element-wise.
+
+    Args:
+        im1 (FImageType): The first input image.
+        im2 (FImageType): The second input image.
+
+    Returns:
+        FImageType: The resulting image from dividing the pixel values of the first image by the second image.
+    """
+
     div_image_filter = itk.DivideImageFilter[FImageType, FImageType, FImageType].New()
     div_image_filter.SetInput1(im1)
     div_image_filter.SetInput2(im2)
@@ -472,6 +676,17 @@ def div_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
 
 
 def multiply_itk_images(im1: FImageType, scale: float) -> FImageType:
+    """
+    Multiply all pixel values in the input image by a constant scale.
+
+    Args:
+        im1 (FImageType): The input image.
+        scale (float): The constant scale factor to multiply each pixel value.
+
+    Returns:
+        FImageType: The image with pixel values multiplied by the specified scale factor.
+    """
+
     # TODO: Add inplace computations for speed
     mult_image_filter = itk.MultiplyImageFilter[
         FImageType, FImageType, FImageType
@@ -483,6 +698,15 @@ def multiply_itk_images(im1: FImageType, scale: float) -> FImageType:
 
 
 def add_list_of_images(list_of_images: List[FImageType]) -> FImageType:
+    """
+    Sum the pixel values of a list of images element-wise.
+
+    Args:
+        list_of_images (List[FImageType]): A list of input images to be summed.
+
+    Returns:
+        FImageType: The resulting image after adding all the input images element-wise.
+    """
     if len(list_of_images) == 1:
         return list_of_images[0]
     accumulator: FImageType = add_itk_images(list_of_images[0], list_of_images[1])
@@ -494,6 +718,17 @@ def add_list_of_images(list_of_images: List[FImageType]) -> FImageType:
 def itk_clamp_image_filter(
     input_image: FImageType, lower_clamp: float, upper_clamp: float = 10**38
 ) -> FImageType:
+    """
+    Clamp pixel values of an input image within a specified range.
+
+    Args:
+        input_image (FImageType): The input image.
+        lower_clamp (float): The lower bound for clamping pixel values.
+        upper_clamp (float, optional): The upper bound for clamping pixel values. Default is 10^38.
+
+    Returns:
+        FImageType: The image with pixel values clamped within the specified range.
+    """
     cif = itk.ClampImageFilter[FImageType, FImageType].New()
     cif.SetInput(input_image)
     cif.SetBounds(lower_clamp, upper_clamp)
@@ -505,6 +740,17 @@ def itk_clamp_image_filter(
 def scaled_by_bvalue_images(
     list_of_images: List[FImageType], list_of_bvalues: List[float]
 ) -> List[FImageType]:
+    """
+    Multiply a list of images by their corresponding b-values element-wise.
+
+    Args:
+        list_of_images (List[FImageType]): A list of input images.
+        list_of_bvalues (List[float]): A list of b-values corresponding to the input images.
+
+    Returns:
+        List[FImageType]: A list of images with pixel values scaled by their respective b-values.
+    """
+
     """
     :param list_of_images: a list of b-weighted images
     :param list_of_bvalues: a list of bvalues
@@ -519,6 +765,13 @@ def scaled_by_bvalue_images(
 
 def uniform_adc_scale_factor() -> float:
     """
+    Return the uniform scaling factor for b-value images.
+
+    Returns:
+        float: The scale factor, which is 10^6.
+    """
+
+    """
     Return scale factor for bvalue images
     :return:  10**6
     """
@@ -530,6 +783,13 @@ def uniform_adc_scale_factor() -> float:
 
 
 def vprint(msg: str, verbose=False):
+    """
+    Conditionally print a message if the 'verbose' flag is set.
+
+    Args:
+        msg (str): The message to print.
+        verbose (bool, optional): Whether to print the message. Default is False.
+    """
     if verbose:
         print(msg)
 
@@ -539,6 +799,17 @@ def get_coded_dictionary_elements(
     one_entry_per_volume: bool = True,
     skip_info_list: List[str] = drop_columns_with_no_series_specific_information,
 ) -> Dict[str, Any]:
+    """
+    Extract specific information from a DICOM dataset and create a coded dictionary.
+
+    Args:
+        ro_dataset (pydicom.Dataset): The DICOM dataset to extract information from.
+        one_entry_per_volume (bool, optional): Whether to create one entry per volume. Default is True.
+        skip_info_list (List[str], optional): List of information to skip. Default is drop_columns_with_no_series_specific_information.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing extracted information in a coded format.
+    """
     dataset_dictionary: Dict[str, Any] = dict()
     dataset = copy.deepcopy(ro_dataset)  # DO NOT MODIFY THE INPUT DATASET!
     dataset = pydicom.Dataset(dataset)  # DO NOT MODIFY THE INPUT DATASET!
@@ -635,6 +906,17 @@ def get_coded_dictionary_elements(
 
 def convert_array_to_min_max(name, value_list) -> list:
     """
+    Compute the minimum and maximum values of a DICOM array field.
+
+    Args:
+        name: Original DICOM field name.
+        value_list: Original DICOM list values.
+
+    Returns:
+        list: A list of (name, value) pairs representing the minimum and maximum values.
+    """
+
+    """
     Takes a dicom array field and compute the min/max values
     :param name: Original dicom field name
     :param value_list: Original dicom list values
@@ -648,6 +930,17 @@ def convert_array_to_min_max(name, value_list) -> list:
 
 
 def convert_array_to_index_value(name, value_list) -> list:
+    """
+    Takes a DICOM array and expands it to an indexed list of values.
+
+    Args:
+        name: Original DICOM field name.
+        value_list: Original DICOM list values.
+
+    Returns:
+        A list of (name, value) pairs, where each value in the original list is indexed with a unique name.
+    """
+
     """
     Takes a dicom array and expands to an indexed list of values
     :param name: Original dicom field name
