@@ -79,6 +79,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
     @staticmethod
     def _is_pathlike_object(path_rep: Union[str, Path, PurePath]) -> bool:
+        """
+        Test docstring
+        """
         # checks if the variable is any instance of pathlib
         if isinstance(path_rep, PurePath) or isinstance(path_rep, str):
             return True
