@@ -16,6 +16,23 @@
 #
 #  =========================================================================
 
+
+"""
+List of DICOM header columns that typically do not contain series-specific information and
+can be safely dropped during data processing.
+
+These columns are usually metadata or general patient/study information that do not provide
+distinguishing details for identifying different scan types within a series. Removing them
+can help reduce the dimensionality of the data and improve processing efficiency.
+
+Attributes:
+    drop_columns_with_no_series_specific_information (tuple): A tuple containing the names of
+    DICOM header columns to be dropped from the dataset.
+
+Example:
+    Example usage to drop these columns from a DataFrame:
+    df.drop(columns=drop_columns_with_no_series_specific_information, inplace=True)
+"""
 drop_columns_with_no_series_specific_information = (  # These are columns that have no ability to distinguish how to identify scan types
     "SpecificCharacterSet",
     "InstanceCreationDate",
