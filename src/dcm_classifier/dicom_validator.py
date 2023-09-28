@@ -33,16 +33,38 @@ class DicomValidatorBase:
     def __init__(self, single_volume_info: DicomSingleVolumeInfoBase):
         # TODO:  we are accessing member variables directly from the single_volume_info
         # Add member functions for accessing private fields of DicomSingleVolumeInfoBase
+        """
+        Initialize the DicomValidatorBase.
+
+        Args:
+            single_volume_info (DicomSingleVolumeInfoBase): An instance of DicomSingleVolumeInfoBase
+                containing information about a single DICOM volume.
+        """
         # i.e. self.single_volume_info.series_dicom_info_dict -> self.single_volume_info.get_series_dicom_info_dict()
         self.single_volume_info: DicomSingleVolumeInfoBase = single_volume_info
         self._validation_failure_reports: List[str] = list()
         pass
 
     def append_to_validation_failure_reports(self, msg: str) -> None:
+        """
+        Append a validation failure message to the internal list.
+
+        Args:
+            msg (str): A validation failure message to append.
+        """
         if msg not in self._validation_failure_reports:
             self._validation_failure_reports.append(msg)
 
     def generate_validation_report_str(self, verbose_reporting: bool = False) -> str:
+        """
+        Generate a validation report as a formatted string.
+
+        Args:
+            verbose_reporting (bool): If True, includes verbose information in the report.
+
+        Returns:
+            str: A formatted validation report string.
+        """
         msg: str = ""
         if len(self._validation_failure_reports) > 0:
             # filename_listing: str = "\n".join(
@@ -81,6 +103,13 @@ class DicomValidatorBase:
     def write_validation_report(
         self, report_filename_to_append: Optional[Path]
     ) -> None:
+        """
+        Write the validation report to a file or print it.
+
+        Args:
+            report_filename_to_append (Optional[Path]): The filename to append the report to.
+                If None, the report will be printed to the console.
+        """
         msg: str = self.generate_validation_report_str()
 
         if report_filename_to_append is None:
@@ -90,6 +119,13 @@ class DicomValidatorBase:
                 vfid.write(f"{msg}\n")
 
     def validate(self) -> bool:
+        """
+        Perform validation checks on the DICOM volume.
+
+        Returns:
+            bool: True if the volume passes all validation criteria, false otherwise.
+        """
+
         """
 
         Returns: True if the volume passes all validation criteria, false otherwise
