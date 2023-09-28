@@ -35,7 +35,6 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
     Methods:
         _is_pathlike_object(path_rep: Union[str, Path, PurePath]) -> bool:
-            Check if the given object is a valid path representation.
 
         __init__(
             self,
@@ -43,48 +42,23 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             search_series: Optional[Dict[str, int]] = None,
             inferer: Optional[ImageTypeClassifierBase] = None,
         ):
-            Initialize the DICOM study processing base class.
-
-            Args:
-                study_directory (Union[str, Path]): The path to the DICOM study directory.
-                search_series (Optional[Dict[str, int]]): A dictionary of series to search within the study.
-                inferer (Optional[ImageTypeClassifierBase]): An image type classifier for inference.
 
         get_list_of_primary_volume_info(self) -> List[Dict[str, str]]:
-            Get a list of dictionaries containing primary volume information for all series.
-
-            Returns:
-                List[Dict[str, str]]: A list of dictionaries containing primary volume information.
 
         get_study_dictionary(self):
-            Get the dictionary mapping series numbers to DicomSingleSeries objects.
 
         set_inferer(self, inferer: ImageTypeClassifierBase):
-            Set the image type classifier for inference.
-
-            Args:
-                inferer (ImageTypeClassifierBase): The image type classifier for inference.
 
         run_inference(self):
-            Run inference on each series using the specified image type classifier.
 
         validate(self):
-            Placeholder method for validation.
 
         __identify_single_volumes(
             self,
             study_directory: Path,
         ) -> Dict[int, DicomSingleSeries]:
-            Identify single volumes within the DICOM study and return a dictionary of series.
-
-            Args:
-                study_directory (Path): The path to the DICOM study directory.
-
-            Returns:
-                Dict[int, DicomSingleSeries]: A dictionary mapping series numbers to DicomSingleSeries objects.
 
         series_inference(self):
-            Placeholder method for series-specific inference.
     """
     series_restrictions_list_dwi_subvolumes: List[str] = [
         # https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
