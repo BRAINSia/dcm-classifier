@@ -37,13 +37,6 @@ UCImageType = itk.Image[itk.UC, 3]
 def two_point_compute_adc(
     list_of_raw_bimages: List[FImageType], list_of_bvalues: List[float]
 ) -> FImageType:
-    # """
-    # Compute ADC from the min and max bvalue images (assumes list_of_images is sorted by ascending bvalue)
-    # :param list_of_raw_bimages: a list of b-weighted images
-    # :param list_of_bvalues: a list of bvalues
-    # :return: The computed ADC image
-    # """
-
     """
     Compute ADC from the min and max b-value images (assumes list_of_images is sorted by ascending b-value).
 
@@ -76,16 +69,10 @@ def two_point_compute_adc(
 def compute_adc_from_multi_b_values(
     list_of_raw_bimages: List[FImageType], list_of_bvalues: List[float]
 ) -> FImageType:
-    # """
-    # https://www.ajronline.org/doi/full/10.2214/AJR.15.15945?mobileUi=0
-    #
-    # :param list_of_raw_bimages: a list of b-weighted images
-    # :param list_of_bvalues: a list of bvalues
-    # :return: The computed ADC image
-    # """
-
     """
     Compute ADC from multiple b-value images.
+
+    https://www.ajronline.org/doi/full/10.2214/AJR.15.15945?mobileUi=0
 
     Args:
         list_of_raw_bimages (List[FImageType]): A list of b-weighted images.
@@ -193,13 +180,6 @@ def itk_read_from_dicomfn_list(
 
 
 def read_dwi_series_itk(dicom_directory: Path) -> (float, FImageType):
-    # """
-    # Given a directory of dicom images of coherent dicoms,
-    # read the volume and bvalue
-    # :param dicom_directory:
-    # :return:
-    # """
-
     """
     Given a directory of DICOM images of coherent DICOMs, read the volume and b-value.
 
@@ -385,6 +365,13 @@ def slugify(value, allow_unicode=False):
     """
     Convert a string to a slug format.
 
+    Taken from https://github.com/django/django/blob/master/django/utils/text.py
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
+    dashes to single dashes. Remove characters that aren't alphanumerics,
+    underscores, or hyphens. Convert to lowercase. Also strip leading and
+    trailing whitespace, dashes, and underscores.
+
+
     Args:
         value: The string to be converted.
         allow_unicode (bool): If True, allows Unicode characters in the slug.
@@ -393,13 +380,6 @@ def slugify(value, allow_unicode=False):
         str: The slugified string.
     """
 
-    """
-    Taken from https://github.com/django/django/blob/master/django/utils/text.py
-    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
-    dashes to single dashes. Remove characters that aren't alphanumerics,
-    underscores, or hyphens. Convert to lowercase. Also strip leading and
-    trailing whitespace, dashes, and underscores.
-    """
     "https://stackoverflow.com/a/295466"
     value = str(value)
     if allow_unicode:
@@ -419,15 +399,6 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
     """
     Extract and compute the b-value from DICOM header information.
 
-    Args:
-        dicom_header_info: A pydicom object containing DICOM header information.
-        round_to_nearst_10: Whether to round the computed b-value to the nearest 10.
-
-    Returns:
-        float: The computed or extracted b-value.
-    """
-
-    """
     How to compute b-values
     http://clinical-mri.com/wp-content/uploads/software_hardware_updates/Graessner.pdf
 
@@ -435,16 +406,18 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
     https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4610399/
 
     https://dicom.innolitics.com/ciods/enhanced-mr-image/enhanced-mr-image-multi-frame-functional-groups/52009229/00189117/00189087
-    NOTE Bvalue is conditionally required.  This script is to re-inject implied values based on manual inspection or other data sources
+    NOTE: Bvalue is conditionally required.  This script is to re-inject implied values based on manual inspection or other data sources
 
-
-    Extract bvalue from pydicom information
     `dicom_header_info = dicom.read_file(dicom_file_name, stop_before_pixels=True)`
-    :param dicom_header_info: A pydicom object
-    :param round_to_nearst_10: bvalues are rounded to the nearst 10 value,
-     i.e. bvalues of 46,47,48,49,50,51,52,53,54,55 are reported as 50
-    :return: a string representing the BValue
+
+    Args:
+        dicom_header_info: A pydicom object containing DICOM header information.
+        round_to_nearst_10: Whether to round the computed b-value to the nearest 10. (i.e. bvalues of 46,47,48,49,50,51,52,53,54,55 are reported as 50)
+
+    Returns:
+        float: The computed or extracted b-value.
     """
+
     # bvalue tags from private fields provided by https://www.nmr.mgh.harvard.edu/~greve/dicom-unpack
     # Prefer searching in order, in case multiple bvalue dicom elements are duplicated.
     private_tags_map = collections.OrderedDict(
@@ -502,15 +475,6 @@ def get_min_max(inputImage: FImageType) -> (float, float):
         Tuple[float, float]: A tuple containing two floats: the minimum and maximum pixel values of the input image.
     """
 
-    """
-    Calculate and return the minimum and maximum pixel values of the given image.
-
-    Parameters:
-    - inputImage (FImageType): The input image for which the minimum and maximum pixel values are to be calculated.
-
-    Returns:
-    - tuple: A tuple containing two floats: the minimum and maximum pixel values of the input image, respectively.
-    """
     min_max_image_filter = itk.MinimumMaximumImageCalculator[FImageType].New()
     min_max_image_filter.SetImage(inputImage)
     min_max_image_filter.Compute()
@@ -751,11 +715,6 @@ def scaled_by_bvalue_images(
         List[FImageType]: A list of images with pixel values scaled by their respective b-values.
     """
 
-    """
-    :param list_of_images: a list of b-weighted images
-    :param list_of_bvalues: a list of bvalues
-    :return: a list of the bvalues multiplied by the images
-    """
     scaled_by_bvalue_list: List[FImageType] = list()
     for index, image in enumerate(list_of_images):
         scaled_im: FImageType = multiply_itk_images(image, list_of_bvalues[index])
@@ -771,10 +730,6 @@ def uniform_adc_scale_factor() -> float:
         float: The scale factor, which is 10^6.
     """
 
-    """
-    Return scale factor for bvalue images
-    :return:  10**6
-    """
     # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3998685/
     # For GE and Siemens platforms tested, stored PVs of derived ADC
     # maps appear to be uniformly scaled by 106. That is, a true diffusion
@@ -916,12 +871,6 @@ def convert_array_to_min_max(name, value_list) -> list:
         list: A list of (name, value) pairs representing the minimum and maximum values.
     """
 
-    """
-    Takes a dicom array field and compute the min/max values
-    :param name: Original dicom field name
-    :param value_list: Original dicom list values
-    :return: list of (name, value) pairs
-    """
     name = name.replace(" ", "")
     number_list = [float(x) for x in value_list]
     list_min = min(number_list)
@@ -941,12 +890,6 @@ def convert_array_to_index_value(name, value_list) -> list:
         A list of (name, value) pairs, where each value in the original list is indexed with a unique name.
     """
 
-    """
-    Takes a dicom array and expands to an indexed list of values
-    :param name: Original dicom field name
-    :param value_list: Original dicom list values
-    :return: list of (name, value) pairs
-    """
     name = name.replace(" ", "").replace("(", "").replace(")", "")
     # Note Absolute value as only the magnitude can have importance
     number_list = [abs(float(x)) for x in value_list]
