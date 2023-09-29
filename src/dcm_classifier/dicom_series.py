@@ -169,7 +169,6 @@ class DicomSingleSeries:
 
         Args:
             new_volume_info (DicomSingleVolumeInfoBase): The volume information to add.
-
         """
         self.volume_info_list.append(new_volume_info)
         # Sort subvolumes based on bvalues similar to dcm2niix
