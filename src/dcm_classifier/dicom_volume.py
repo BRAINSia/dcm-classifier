@@ -45,7 +45,7 @@ def pydicom_read_cache(
         filename: The path to the DICOM file to be read.
         stop_before_pixels: If True, stops reading before pixel data (default: True).
     Returns:
-        A pydicom.Dataset containing the DICOM file's data.
+        (pydicom.Dataset): A pydicom.Dataset containing the DICOM file's data.
     """
 
     global pydicom_read_cache_static_filename_dict
@@ -142,7 +142,7 @@ class DicomSingleVolumeInfoBase:
         Initializes a DicomSingleVolumeInfoBase instance with a list of DICOM file paths.
 
         Args:
-            one_volume_dcm_filenames List[Union[Path, str]]: A list of DICOM file paths representing a single volume.
+            one_volume_dcm_filenames (List[Union[Path, str]]): A list of DICOM file paths representing a single volume.
         """
         self.one_volume_dcm_filenames: List[Path] = [
             Path(x).resolve() for x in one_volume_dcm_filenames
@@ -176,7 +176,7 @@ class DicomSingleVolumeInfoBase:
         Sets the modality of the DICOM data.
 
         Args:
-            modality: The modality information to be set.
+            modality (str): The modality information to be set.
         """
         self.modality = modality
 
@@ -185,7 +185,7 @@ class DicomSingleVolumeInfoBase:
         Retrieves the modality of the DICOM data.
 
         Returns:
-            Str: The modality information.
+            str: The modality information.
         """
         return self.modality
 
@@ -203,7 +203,7 @@ class DicomSingleVolumeInfoBase:
         Retrieves the modality probabilities for the DICOM data.
 
         Returns:
-            A pandas DataFrame containing modality probabilities.
+            pd.DataFrame: A pandas DataFrame containing modality probabilities.
         """
         return self.modality_probability
 
@@ -221,7 +221,7 @@ class DicomSingleVolumeInfoBase:
         Retrieves the acquisition plane information for the DICOM data.
 
         Returns:
-            Str: The acquisition plane information.
+            str: The acquisition plane information.
         """
         return self.acquisition_plane
 
@@ -242,7 +242,7 @@ class DicomSingleVolumeInfoBase:
         Get primary volume information for the specified volume index.
 
         Args:
-            vol_index (int) Optional: Index of the volume for which to retrieve information.
+            vol_index (int) Optional: Index of the volume for which to retrieve information, defaults to 0.
 
         Returns:
             Dict[str, str]: A dictionary containing primary volume information.
@@ -282,7 +282,7 @@ class DicomSingleVolumeInfoBase:
         Get the ITK image associated with the DICOM volume.
 
         Returns:
-            (FImageType): The ITK image of the DICOM volume.
+            FImageType: The ITK image of the DICOM volume.
         """
         if self.itk_image is None:
             self.itk_image = itk_read_from_dicomfn_list(
@@ -296,7 +296,7 @@ class DicomSingleVolumeInfoBase:
         Get the Series Instance UID of the DICOM volume.
 
         Returns:
-            (Str): The Series Instance UID.
+            str: The Series Instance UID.
         """
         return self.pydicom_info.SeriesInstanceUID
 
@@ -305,7 +305,7 @@ class DicomSingleVolumeInfoBase:
         Get the Study Instance UID of the DICOM volume.
 
         Returns:
-            (Str): The Study Instance UID.
+            str: The Study Instance UID.
         """
         return self.pydicom_info.StudyInstanceUID
 
@@ -314,7 +314,7 @@ class DicomSingleVolumeInfoBase:
         Get the pixel spacing of the DICOM series.
 
         Returns:
-            (Str): The pixel spacing as a string.
+            str: The pixel spacing as a string.
         """
         return str(self.pydicom_info.PixelSpacing)
 
@@ -323,7 +323,7 @@ class DicomSingleVolumeInfoBase:
         Get the spacing between slices in the DICOM series.
 
         Returns:
-            (Str): The spacing between slices as a string.
+            str: The spacing between slices as a string.
         """
         return str(self.average_slice_spacing)
 
@@ -332,7 +332,7 @@ class DicomSingleVolumeInfoBase:
         Get the size of the DICOM series.
 
         Returns:
-            (Str): The size of the DICOM series as a string.
+            str: The size of the DICOM series as a string.
         """
         size_list: List[int] = [
             self.pydicom_info.Rows,
@@ -373,7 +373,7 @@ class DicomSingleVolumeInfoBase:
         Get the b-value of the DICOM volume.
 
         Returns:
-            (float): The b-value of the DICOM volume as a float.
+            float: The b-value of the DICOM volume as a float.
         """
         return self.bvalue
 
@@ -382,7 +382,7 @@ class DicomSingleVolumeInfoBase:
         Get the Series Number of the DICOM volume.
 
         Returns:
-            (int): The Series Number as an integer.
+            int: The Series Number as an integer.
         """
         return int(self.pydicom_info.SeriesNumber)
 
@@ -391,7 +391,7 @@ class DicomSingleVolumeInfoBase:
         Check if the modality of the DICOM volume is MR (Magnetic Resonance).
 
         Returns:
-            (bool): True if the modality is MR, False otherwise.
+            status (bool): True if the modality is MR, False otherwise.
         """
         status = bool(self.pydicom_info.Modality != "MR")
         if not status:
@@ -461,7 +461,7 @@ class DicomSingleVolumeInfoBase:
         Generates diagnostic information about the DICOM image.
 
         Returns:
-            (str): Diagnostic information as a formatted string.
+            msg (str): Diagnostic information as a formatted string.
         """
         volume_info: str = json.dumps(
             self.get_primary_volume_info(), indent=4, sort_keys=True
