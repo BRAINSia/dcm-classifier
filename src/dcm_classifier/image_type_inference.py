@@ -58,6 +58,24 @@ imagetype_to_integer_mapping = {
 class ImageTypeClassifierBase:
     """
     Inference class for image type classification.
+
+    Attributes:
+        classification_model_filename (Union[str, Path]): Path to the classification model file.
+        classification_feature_list (List[str]): List of features used for classification.
+        image_type_map (Dict[str, str]): Mapping between class name and model integer output.
+        mode (str): "series" or "volume" to run inference on series or volume level.
+        min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4.
+
+    Methods:
+        get_int_to_type_map(self) -> dict:
+
+        set_series(self, series: DicomSingleSeries) -> None:
+
+        infer_acquisition_plane(self, feature_dict: dict = None) -> str:
+
+        infer_modality(self, feature_dict: dict = None) -> (str, pd.DataFrame):
+
+        run_inference(self) -> None:
     """
 
     def __init__(
@@ -72,20 +90,13 @@ class ImageTypeClassifierBase:
         Initialize the ImageTypeClassifierBase.
 
         Args:
-            classification_model_filename: Path to the classification model file.
-            classification_feature_list: List of features used for classification.
-            image_type_map: Mapping between class name and model integer output.
-            mode: "series" or "volume" to run inference on series or volume level.
-            min_probability_threshold: Minimum probability threshold for classification.
+            classification_model_filename (Union[str, Path]): Path to the classification model file.
+            classification_feature_list (List[str]): List of features used for classification.
+            image_type_map (Dict[str, str]): Mapping between class name and model integer output.
+            mode (str): "series" or "volume" to run inference on series or volume level.
+            min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4.
         """
 
-        """
-        Args:
-            classification_model_filename: path to the classification model file
-            classification_feature_list: list of features used for classification
-            image_type_map: map between class name and model integer output
-            mode: "series" or "volume" to run inference on series or volume level
-        """
         self.classification_model_filename: Union[str, Path] = Path(
             classification_model_filename
         )
@@ -103,7 +114,7 @@ class ImageTypeClassifierBase:
         Get the integer to image type mapping.
 
         Returns:
-            Dictionary mapping integers to image type names.
+            dict: Dictionary mapping integers to image type names.
         """
         return {v: k for k, v in self.imagetype_to_int_map.items()}
 
@@ -112,7 +123,7 @@ class ImageTypeClassifierBase:
         Set the DICOM series for classification.
 
         Args:
-            series: DicomSingleSeries object representing the DICOM series.
+            series (DicomSingleSeries): DicomSingleSeries object representing the DICOM series.
         """
         self.series = series
         self.series_number = series.get_series_number()
@@ -127,18 +138,12 @@ class ImageTypeClassifierBase:
         and returns the acquisition plane prediction.
 
         Args:
-            feature_dict: Optional dictionary of additional features for inference.
+            feature_dict (dict): Optional dictionary of additional features for inference.
 
         Returns:
-            A string representing the inferred acquisition plane ("iso" or other).
+            str: A string representing the inferred acquisition plane ("iso" or other).
         """
 
-        """
-        This is implementation of the decision tree for acquisition plane inference.
-        It takes the ImageOrientationPatient_0, ImageOrientationPatient_5 from info_dict and returns the
-        acquisition plane prediction.
-        Returns:
-        """
         volume = self.series.get_volume_list()[0]
         itk_im = itk_read_from_dicomfn_list(volume.get_one_volume_dcm_filenames())
         spacing = list(itk_im.GetSpacing())
@@ -166,10 +171,10 @@ class ImageTypeClassifierBase:
         This method uses an ONNX model for image type classification to predict the modality of the series.
 
         Args:
-            feature_dict: A dictionary containing features used for classification.
+            feature_dict (dict): A dictionary containing features used for classification.
 
         Returns:
-            A tuple containing:
+            Tuple(str, pd.DataFrame): A tuple containing:
                 - A string representing the inferred modality (image type).
                 - A Pandas DataFrame containing classification results, including class probabilities.
         """
