@@ -151,7 +151,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         Attributes:
             study_directory (Path): The path to the DICOM study directory as a pathlib Path object.
             search_series (Optional[Dict[str, int]]): A dictionary of series to search within the study.
-            *********series_dictionary (Dict[int, DicomSingleSeries]): A dictionary mapping series numbers to DicomSingleSeries objects.*********
+            series_dictionary (Dict[int, DicomSingleSeries]): A dictionary mapping series numbers to DicomSingleSeries objects.
             inferer (Optional[ImageTypeClassifierBase]): An image type classifier for inference.
         """
         if ProcessOneDicomStudyToVolumesMappingBase._is_pathlike_object(
