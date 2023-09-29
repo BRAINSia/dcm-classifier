@@ -30,6 +30,38 @@ class DicomSingleSeries:
     """
     This class is used to store information about a single DICOM series. It organizes DicomSingleVolumeInfoBase objects
     by series.
+
+    Attributes:
+        series_number (int): The series number.
+        volume_info_list (List[DicomSingleVolumeInfoBase]): A list to store
+            DicomSingleVolumeInfoBase objects for this series.
+        modality (Optional[str]): The modality of the series (e.g., "CT", "MRI").
+        modality_probability (Optional[pd.DataFrame]): A DataFrame containing modality
+            probabilities.
+        acquisition_plane (Optional[str]): The acquisition plane of the series (e.g.,
+            "Sagittal", "Axial").
+
+    Methods:
+        get_series_number(self) -> int:
+
+        set_modality(self, modality: str) -> None:
+
+        get_modality(self) -> str:
+
+        set_modality_probabilities(self, modality_probability: pd.DataFrame) -> None:
+
+        get_modality_probabilities(self) -> pd.DataFrame:
+
+        set_acquisition_plane(self, acquisition_plane: str) -> None:
+
+        get_acquisition_plane(self) -> str:
+
+        get_volume_list(self) -> List[DicomSingleVolumeInfoBase]:
+
+        add_volume_to_series(self, new_volume_info: DicomSingleVolumeInfoBase) -> None:
+
+        get_series_info_dict(self) -> Dict[str, Any]:
+
     """
 
     def __init__(
@@ -144,18 +176,11 @@ class DicomSingleSeries:
         sorted(self.volume_info_list, key=lambda x: x.get_volume_bvalue())
 
     def get_series_info_dict(self) -> Dict[str, Any]:
-        # """
-        # Returns a dictionary with information about the series.
-        # It merges the info_dicts of all volumes in the series and adds the bvalue-count, bvalue-max
-        # and series count fields.
-        # Returns:
-        #
-        # """
         """
         Get a dictionary with information about the series.
 
         This method merges information dictionaries from all volumes in the series and adds
-        additional fields such as b-value statistics and volume count.
+        additional fields such as the bvalue-count, bvalue-max, and series count.
 
         Returns:
             Dict[str, Any]: A dictionary with information about the series.
