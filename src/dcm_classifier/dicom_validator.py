@@ -28,6 +28,20 @@ from typing import List, Optional
 class DicomValidatorBase:
     """
     Baseclass with almost no functionality
+
+    Attributes:
+        single_volume_info (DicomSingleVolumeInfoBase): An instance of DicomSingleVolumeInfoBase
+            containing information about a single DICOM volume.
+        _validation_failure_reports (List[str]): A list of validation failure messages.
+
+    Methods:
+        append_to_validation_failure_reports(self, msg: str) -> None:
+
+        generate_validation_report_str(self, verbose_reporting: bool = False) -> str:
+
+        write_validation_report(self, report_filename_to_append: Optional[Path]) -> None:
+
+        validate(self) -> bool:
     """
 
     def __init__(self, single_volume_info: DicomSingleVolumeInfoBase):
@@ -124,10 +138,5 @@ class DicomValidatorBase:
 
         Returns:
             bool: True if the volume passes all validation criteria, false otherwise.
-        """
-
-        """
-
-        Returns: True if the volume passes all validation criteria, false otherwise
         """
         return True
