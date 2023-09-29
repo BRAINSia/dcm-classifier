@@ -412,7 +412,7 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
 
     Args:
         dicom_header_info: A pydicom object containing DICOM header information.
-        round_to_nearst_10: Whether to round the computed b-value to the nearest 10. (i.e. bvalues of 46,47,48,49,50,51,52,53,54,55 are reported as 50)
+        round_to_nearst_10 (bool): Whether to round the computed b-value to the nearest 10. (i.e. bvalues of 46,47,48,49,50,51,52,53,54,55 are reported as 50)
 
     Returns:
         float: The computed or extracted b-value.
