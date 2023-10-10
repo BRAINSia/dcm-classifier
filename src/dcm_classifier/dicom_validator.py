@@ -27,27 +27,57 @@ from typing import List, Optional
 
 class DicomValidatorBase:
     """
-    Baseclass with almost no functionality
+    This is a baseclass with almost no functionality to facilitate the creation of Validator classes for
+    specific user projects
+
+    Attributes:
+        single_volume_info (DicomSingleVolumeInfoBase): An instance of DicomSingleVolumeInfoBase
+            containing information about a single DICOM volume.
+        _validation_failure_reports (List[str]): A list of validation failure messages.
+
+    Methods:
+        append_to_validation_failure_reports(self, msg: str) -> None:
+
+        generate_validation_report_str(self, verbose_reporting: bool = False) -> str:
+
+        write_validation_report(self, report_filename_to_append: Optional[Path]) -> None:
+
+        validate(self) -> bool:
     """
 
     def __init__(self, single_volume_info: DicomSingleVolumeInfoBase):
-        # TODO:  we are accessing member variables directly from the single_volume_info
-        # Add member functions for accessing private fields of DicomSingleVolumeInfoBase
-        # i.e. self.single_volume_info.series_dicom_info_dict -> self.single_volume_info.get_series_dicom_info_dict()
+        """
+        Initialize the DicomValidatorBase.
+
+        Args:
+            single_volume_info (DicomSingleVolumeInfoBase): An instance of DicomSingleVolumeInfoBase
+                containing information about a single DICOM volume.
+        """
         self.single_volume_info: DicomSingleVolumeInfoBase = single_volume_info
         self._validation_failure_reports: List[str] = list()
-        pass
 
     def append_to_validation_failure_reports(self, msg: str) -> None:
+        """
+        Append a validation failure message to the internal list.
+
+        Args:
+            msg (str): A validation failure message to append.
+        """
         if msg not in self._validation_failure_reports:
             self._validation_failure_reports.append(msg)
 
     def generate_validation_report_str(self, verbose_reporting: bool = False) -> str:
+        """
+        Generate a validation report as a formatted string.
+
+        Args:
+            verbose_reporting (bool): If True, includes verbose information in the report.
+
+        Returns:
+            str: A formatted validation report string.
+        """
         msg: str = ""
         if len(self._validation_failure_reports) > 0:
-            # filename_listing: str = "\n".join(
-            #     [str(f"\t{x}") for x in self.one_volume_dcm_filenames]
-            # )
             validation_failure_listing: str = "\n".join(
                 [str(f"\t{x}") for x in self._validation_failure_reports]
             )
@@ -78,20 +108,27 @@ class DicomValidatorBase:
     """
         return msg
 
-    def write_validation_report(
-        self, report_filename_to_append: Optional[Path]
-    ) -> None:
+    def write_validation_report(self, report_filename: Optional[Path]) -> None:
+        """
+        Write the validation report to a file or print it.
+
+        Args:
+            report_filename (Optional[Path]): The filename to write the report to.
+                If None, the report will be printed to the console.
+        """
         msg: str = self.generate_validation_report_str()
 
-        if report_filename_to_append is None:
+        if report_filename is None:
             print(f"{msg}")
         else:
-            with open(report_filename_to_append, "a") as vfid:
+            with open(report_filename, "a") as vfid:
                 vfid.write(f"{msg}\n")
 
     def validate(self) -> bool:
         """
+        Perform validation checks on the DICOM volume.
 
-        Returns: True if the volume passes all validation criteria, false otherwise
+        Returns:
+            bool: True if the volume passes all validation criteria, false otherwise.
         """
         return True

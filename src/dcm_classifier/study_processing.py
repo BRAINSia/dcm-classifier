@@ -27,6 +27,40 @@ from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 
 
 class ProcessOneDicomStudyToVolumesMappingBase:
+    """
+    Base class for processing a DICOM study. A study is typically all MRI scans for a single patient's scanning session.
+
+    Attributes:
+        series_restrictions_list_dwi_subvolumes (List[str]): List of DICOM tags used for filtering DWI sub-volumes.
+
+    Methods:
+        _is_pathlike_object(path_rep: Union[str, Path, PurePath]) -> bool:
+
+        __init__(
+            self,
+            study_directory: Union[str, Path],
+            search_series: Optional[Dict[str, int]] = None,
+            inferer: Optional[ImageTypeClassifierBase] = None,
+        ):
+
+        get_list_of_primary_volume_info(self) -> List[Dict[str, str]]:
+
+        get_study_dictionary(self):
+
+        set_inferer(self, inferer: ImageTypeClassifierBase):
+
+        run_inference(self):
+
+        validate(self):
+
+        __identify_single_volumes(
+            self,
+            study_directory: Path,
+        ) -> Dict[int, DicomSingleSeries]:
+
+        series_inference(self):
+    """
+
     series_restrictions_list_dwi_subvolumes: List[str] = [
         # https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
         # STANDARD
@@ -79,6 +113,17 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
     @staticmethod
     def _is_pathlike_object(path_rep: Union[str, Path, PurePath]) -> bool:
+        """
+        Check if the given object represents a valid path or path-like object.
+
+        This method determines whether the provided object is an instance of pathlib's PurePath or a string.
+
+        Args:
+            path_rep (Union[str, Path, PurePath]): The object to check for path-likeness.
+
+        Returns:
+            bool: True if the object is a valid path or path-like object, False otherwise.
+        """
         # checks if the variable is any instance of pathlib
         if isinstance(path_rep, PurePath) or isinstance(path_rep, str):
             return True
@@ -90,6 +135,26 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         search_series: Optional[Dict[str, int]] = None,
         inferer: Optional[ImageTypeClassifierBase] = None,
     ):
+        """
+        Initialize an instance of ProcessOneDicomStudyToVolumesMappingBase.
+
+        This constructor sets up the object with the provided parameters, including the study directory,
+        search_series dictionary, and optional image type classifier.
+
+        Args:
+            study_directory (Union[str, Path]): The path to the DICOM study directory.
+            search_series (Optional[Dict[str, int]]): A dictionary of series to search within the study.
+            inferer (Optional[ImageTypeClassifierBase]): An image type classifier for inference.
+
+        Raises:
+            ValueError: If the provided study_directory is not a valid path or path-like object.
+
+        Attributes:
+            study_directory (Path): The path to the DICOM study directory as a pathlib Path object.
+            search_series (Optional[Dict[str, int]]): A dictionary of series to search within the study.
+            series_dictionary (Dict[int, DicomSingleSeries]): A dictionary mapping series numbers to DicomSingleSeries objects.
+            inferer (Optional[ImageTypeClassifierBase]): An image type classifier for inference.
+        """
         if ProcessOneDicomStudyToVolumesMappingBase._is_pathlike_object(
             study_directory
         ):
@@ -104,6 +169,19 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         self.inferer: Optional[ImageTypeClassifierBase] = inferer
 
     def get_list_of_primary_volume_info(self) -> List[Dict[str, str]]:
+        """
+        Retrieve a list of dictionaries containing primary volume information from all series.
+
+        This method iterates through the series stored in the class's series_dictionary and
+        extracts primary volume information from each subseries within those series. It then
+        compiles this information into a list of dictionaries, with each dictionary representing
+        primary volume information for a single subseries.
+
+        Returns:
+            List[Dict[str, str]]: A list of dictionaries containing primary volume information.
+                Each dictionary includes keys and values for primary volume attributes. See get_primary_volume_info function in dicom_volume.py
+
+        """
         list_of_volume_info_dictionaries: List[Dict[str, str]] = list()
         for (
             series_number,
@@ -119,12 +197,58 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         return list_of_volume_info_dictionaries
 
     def get_study_dictionary(self):
+        """
+        Get the dictionary mapping series numbers to DicomSingleSeries objects.
+
+        This method provides access to the internal dictionary that maps series numbers to
+        DicomSingleSeries objects within the instance of the class. The dictionary stores
+        information about DICOM series associated with the DICOM study.
+
+        Returns:
+            Dict[int, DicomSingleSeries]: A dictionary where keys are series numbers (integers)
+            and values are DicomSingleSeries objects containing information about each series.
+
+        Example:
+            Example usage to retrieve series information:
+            study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
+            study_dict = study.get_study_dictionary()
+            series_info = study_dict.get(1)  # Retrieve information for series number 1
+        """
         return self.series_dictionary
 
     def set_inferer(self, inferer: ImageTypeClassifierBase):
+        """
+        Set the image type classifier for inference.
+
+        This method allows you to set the image type classifier (inferer) to be used for
+        inference on the DICOM series. The provided `inferer` should be an instance of
+        a class that derives from `ImageTypeClassifierBase`.
+
+        Args:
+            inferer (ImageTypeClassifierBase): An image type classifier object for inference.
+
+        Example:
+            Example usage to set an image type classifier:
+            study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
+            image_classifier = MyImageTypeClassifier()  # Replace with your classifier instance
+            study.set_inferer(image_classifier)
+        """
         self.inferer = inferer
 
     def run_inference(self):
+        """
+        Run inference on each DICOM series using the specified image type classifier.
+
+        This method iterates through the DICOM series stored in the class's series_dictionary
+        and performs inference on each series using the configured image type classifier
+        (inferer). It sets the current series for inference using `set_series` and then
+        invokes the `run_inference` method of the image type classifier for each series.
+
+        Note:
+            Ensure that you have configured an image type classifier (inferer) using the
+            `set_inferer` method before calling this method.
+
+        """
         for (
             series_number,
             series_object,
@@ -139,6 +263,32 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         self,
         study_directory: Path,
     ) -> Dict[int, DicomSingleSeries]:
+        """
+        Identify and map single volumes within the DICOM study directory.
+
+        This method scans the provided DICOM study directory for series that match the specified
+        restrictions and organizes them into a dictionary, mapping series numbers to
+        DicomSingleSeries objects.
+
+        Args:
+            study_directory (Path): The path to the DICOM study directory.
+
+        Returns:
+            Dict[int, DicomSingleSeries]: A dictionary mapping series numbers (integers)
+            to DicomSingleSeries objects that represent the identified series.
+
+        Notes:
+            - This method uses ITK's GDCMSeriesFileNames to identify series within the study
+              based on defined restrictions.
+            - Series matching the restrictions are organized into DicomSingleSeries objects
+              within the returned dictionary.
+
+        Example:
+            Example usage to identify and map DICOM series:
+            study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
+            series_mapping = study.__identify_single_volumes(study_directory_path)
+            series_info = series_mapping.get(1)  # Retrieve information for series number 1
+        """
         namesGenerator = itk.GDCMSeriesFileNames.New()
         namesGenerator.SetUseSeriesDetails(True)
         namesGenerator.SetLoadPrivateTags(True)

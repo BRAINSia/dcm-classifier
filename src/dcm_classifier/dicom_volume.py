@@ -38,6 +38,16 @@ pydicom_read_cache_static_filename_dict: Dict[str, pydicom.Dataset] = dict()
 def pydicom_read_cache(
     filename: Union[Path, str], stop_before_pixels=True
 ) -> pydicom.Dataset:
+    """
+    Reads a DICOM file header and caches the result to improve performance on subsequent reads.
+
+    Args:
+        filename: The path to the DICOM file to be read.
+        stop_before_pixels: If True, stops reading before pixel data (default: True).
+    Returns:
+        (pydicom.Dataset): A pydicom.Dataset containing the DICOM file's header data.
+    """
+
     global pydicom_read_cache_static_filename_dict
     lookup_filename: str = str(filename)
     if lookup_filename in pydicom_read_cache_static_filename_dict:
@@ -51,13 +61,90 @@ def pydicom_read_cache(
 
 
 def merge_dictionaries(rw_dict_to_update, ro_dict):
+    """
+    Merges two dictionaries, updating the first dictionary with the contents of the second.
+
+    Args:
+        rw_dict_to_update: The dictionary to be updated.
+        ro_dict: The dictionary containing read-only data to be merged into the first dictionary.
+
+    Returns:
+        The updated first dictionary after merging.
+    """
     for key in ro_dict.keys():
         rw_dict_to_update[key] = ro_dict[key]
     return rw_dict_to_update
 
 
 class DicomSingleVolumeInfoBase:
+    """
+    This class is used to store information about a single DICOM volume.
+
+    Attributes:
+        one_volume_dcm_filenames (List[Path]): A list of DICOM file paths representing a single volume.
+        ro_user_supplied_dcm_filenames (List[Path]): A list of DICOM file paths representing a single volume.
+        pydicom_info (pydicom.Dataset): A pydicom.Dataset containing information about the DICOM volume.
+        bvalue (float): The b-value of the DICOM volume.
+        average_slice_spacing (float): The average slice spacing of the DICOM volume.
+        volume_info_dict (Dict[str, Any]): A dictionary containing information about the DICOM volume.
+        itk_image (Optional[FImageType]): The ITK image of the DICOM volume.
+        modality (Optional[str]): The modality of the DICOM volume (e.g., "CT", "MRI").
+        modality_probability (Optional[pd.DataFrame]): A DataFrame containing modality probabilities.
+        acquisition_plane (Optional[str]): The acquisition plane of the DICOM volume (e.g., "Sagittal", "Axial").
+
+    Methods:
+        set_modality(self, modality: str) -> None:
+
+        get_modality(self) -> str:
+
+        set_modality_probabilities(self, modality_probability: pd.DataFrame) -> None:
+
+        get_modality_probabilities(self) -> pd.DataFrame:
+
+        set_acquisition_plane(self, acquisition_plane: str) -> None:
+
+        get_acquisition_plane(self) -> str:
+
+        get_volume_info_dict(self) -> Dict[str, Any]:
+
+        get_primary_volume_info(self, vol_index: int = 0) -> Dict[str, str]:
+
+        get_itk_image(self) -> FImageType:
+
+        get_series_uid(self) -> str:
+
+        get_study_uid(self) -> str:
+
+        get_series_pixel_spacing(self) -> str:
+
+        get_series_spacing_between_slices(self) -> str:
+
+        get_series_size(self) -> str:
+
+        get_one_volume_dcm_filenames(self) -> List[Path]:
+
+        get_volume_dictionary(self) -> Dict[str, Any]:
+
+        get_volume_datatype(self) -> str:
+
+        get_volume_bvalue(self) -> float:
+
+        get_series_number(self) -> int:
+
+        is_MR_modality(self):
+
+        _make_one_study_info_mapping_from_filelist(self) -> (str, dict):
+
+        get_image_diagnostics(self) -> str:
+    """
+
     def __init__(self, one_volume_dcm_filenames: List[Union[Path, str]]) -> None:
+        """
+        Initializes a DicomSingleVolumeInfoBase instance with a list of DICOM file paths.
+
+        Args:
+            one_volume_dcm_filenames (List[Union[Path, str]]): A list of DICOM file paths representing a single volume.
+        """
         self.one_volume_dcm_filenames: List[Path] = [
             Path(x).resolve() for x in one_volume_dcm_filenames
         ]
@@ -86,45 +173,86 @@ class DicomSingleVolumeInfoBase:
         self.acquisition_plane: Optional[str] = None
 
     def set_modality(self, modality: str) -> None:
+        """
+        Sets the modality of the DICOM data.
+
+        Args:
+            modality (str): The modality information to be set.
+        """
         self.modality = modality
 
     def get_modality(self) -> str:
+        """
+        Retrieves the modality of the DICOM data.
+
+        Returns:
+            str: The modality information.
+        """
         return self.modality
 
     def set_modality_probabilities(self, modality_probability: pd.DataFrame) -> None:
+        """
+        Sets the modality probabilities for the DICOM data.
+
+        Args:
+            modality_probability (pd.DataFrame): A pandas DataFrame containing modality probabilities.
+        """
         self.modality_probability = modality_probability
 
     def get_modality_probabilities(self) -> pd.DataFrame:
+        """
+        Get the modality probabilities DataFrame that returns probability per modality class.
+
+        Returns:
+            pd.DataFrame: A pandas DataFrame containing modality probabilities.
+        """
         return self.modality_probability
 
     def set_acquisition_plane(self, acquisition_plane: str) -> None:
+        """
+        Sets the acquisition plane information for the DICOM data.
+
+        Args:
+            acquisition_plane (str): The acquisition plane information to be set.
+        """
         self.acquisition_plane = acquisition_plane
 
     def get_acquisition_plane(self) -> str:
+        """
+        Retrieves the acquisition plane information for the DICOM data.
+
+        Returns:
+            str: The acquisition plane information.
+        """
         return self.acquisition_plane
 
     def get_volume_info_dict(self) -> Dict[str, Any]:
+        """
+        Retrieves a dictionary containing volume information for the DICOM data.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing volume information.
+        """
         return self.volume_info_dict
 
-    # This is a bad measurement!!
-    # def get_slice_thickness(self) -> float:
-    #     return self.pydicom_info.SliceThickness
     def get_primary_volume_info(self, vol_index: int = 0) -> Dict[str, str]:
+        """
+        Get primary volume information for the specified volume index.
+
+        Args:
+            vol_index (int) Optional: Index of the volume for which to retrieve information, defaults to 0.
+
+        Returns:
+            Dict[str, str]: A dictionary containing primary volume information.
+        """
         fields_to_copy: Dict[str, str] = {
             "SeriesNumber": "SeriesNum",
             "Diffusionb-value": "Bval",
             "SeriesDescription": "SeriesDescription",
-            # "ImageTypeADC",
-            # "ImageTypeTrace",
-            # "AxialIndicator",
-            # "CoronalIndicator",
-            # "SaggitalIndicator",
-            # "IsDerivedImageType",
             "RepetitionTime": "TR",
             "EchoTime": "TE",
             "FlipAngle": "FA",
             "SAR": "SAR",
-            # "SeriesVolumeCount": "Vols",
         }
 
         ref_vol_info = self.get_volume_dictionary()
@@ -141,6 +269,12 @@ class DicomSingleVolumeInfoBase:
         return return_dict
 
     def get_itk_image(self) -> FImageType:
+        """
+        Get the ITK image associated with the DICOM volume.
+
+        Returns:
+            FImageType: The ITK image of the DICOM volume with pixel type itk.F (float).
+        """
         if self.itk_image is None:
             self.itk_image = itk_read_from_dicomfn_list(
                 self.get_one_volume_dcm_filenames()
@@ -149,18 +283,48 @@ class DicomSingleVolumeInfoBase:
         return self.itk_image
 
     def get_series_uid(self) -> str:
+        """
+        Get the Series Instance UID of the DICOM volume.
+
+        Returns:
+            str: The Series Instance UID.
+        """
         return self.pydicom_info.SeriesInstanceUID
 
     def get_study_uid(self) -> str:
+        """
+        Get the Study Instance UID of the DICOM volume.
+
+        Returns:
+            str: The Study Instance UID.
+        """
         return self.pydicom_info.StudyInstanceUID
 
     def get_series_pixel_spacing(self) -> str:
+        """
+        Get the pixel spacing of the DICOM series.
+
+        Returns:
+            str: The pixel spacing as a string.
+        """
         return str(self.pydicom_info.PixelSpacing)
 
     def get_series_spacing_between_slices(self) -> str:
+        """
+        Get the spacing between slices in the DICOM series.
+
+        Returns:
+            str: The spacing between slices as a string.
+        """
         return str(self.average_slice_spacing)
 
     def get_series_size(self) -> str:
+        """
+        Get the size of the DICOM series.
+
+        Returns:
+            str: The size of the DICOM series as a string.
+        """
         size_list: List[int] = [
             self.pydicom_info.Rows,
             self.pydicom_info.Columns,
@@ -169,33 +333,62 @@ class DicomSingleVolumeInfoBase:
         return str(size_list)
 
     def get_one_volume_dcm_filenames(self) -> List[Path]:
+        """
+        Get the list of DICOM file paths for the single DICOM volume.
+
+        Returns:
+            List[Path]: A list of file paths for the DICOM files in the single volume.
+        """
         return self.one_volume_dcm_filenames
 
     def get_volume_dictionary(self) -> Dict[str, Any]:
-        return self.volume_info_dict
-        # for f in fileNames:
-        #     print(f"\t{f}")
-        # print(len(self.one_volume_dcm_filenames))
-        # print(
-        #     f'XXXXXXXXXXXXXXXXXXX  {series_number}: {len(self.one_volume_dictionary["list_of_ordered_volume_files"])}'
-        # )
+        """
+        Get the dictionary containing information about the DICOM volume.
 
-    # def get_volume_datatype(self) -> str:
-    #     return "unknown"
+        Returns:
+            Dict[str, Any]: A dictionary containing information about the DICOM volume.
+        """
+        return self.volume_info_dict
 
     def get_volume_bvalue(self) -> float:
+        """
+        Get the b-value of the DICOM volume.
+
+        Returns:
+            float: The b-value of the DICOM volume as a float.
+        """
         return self.bvalue
 
     def get_series_number(self) -> int:
+        """
+        Get the Series Number of the DICOM volume.
+
+        Returns:
+            int: The Series Number as an integer.
+        """
         return int(self.pydicom_info.SeriesNumber)
 
     def is_MR_modality(self):
+        """
+        Check if the modality of the DICOM volume is MR (Magnetic Resonance).
+
+        Returns:
+            status (bool): True if the modality is MR, False otherwise.
+        """
         status = bool(self.pydicom_info.Modality != "MR")
         if not status:
             vprint(f"Skipping non-MR modality : {self.pydicom_info.Modality}")
         return status
 
     def _make_one_study_info_mapping_from_filelist(self) -> (str, dict):
+        """
+        Create a dictionary containing information about the DICOM volume from the list of DICOM files.
+
+        Returns:
+            Tuple[str, dict]: A tuple containing the Study Instance UID and a dictionary with volume information.
+                 The dictionary includes Series Number, Echo Time, SAR, b-values, file name,
+                 Series and Study Instance UID, Series Description, and various indicators.
+        """
         dicom_file_name: Path = Path(self.pydicom_info.filename)
 
         volume_info_dict = dict()
@@ -205,7 +398,7 @@ class DicomSingleVolumeInfoBase:
             vprint(f"Missing required echo time value {dicom_file_name}")
             volume_info_dict["EchoTime"] = -123456789.0
         if "SAR" not in self.pydicom_info:
-            # Some derived datasets do not have SAR listed, so fill with zero
+            # Some derived datasets do not have SAR listed, so fill with dummy number
             vprint(f"Missing required SAR value {dicom_file_name}")
             volume_info_dict["SAR"] = -123456789.0
         bvalue_current_dicom: int = int(self.get_volume_bvalue())
@@ -229,7 +422,6 @@ class DicomSingleVolumeInfoBase:
         volume_info_dict["CoronalIndicator"] = missing_info_flag
         volume_info_dict["SaggitalIndicator"] = missing_info_flag
         volume_info_dict["IsDerivedImageType"] = missing_info_flag
-        # values_dict[series_key]["IsSecondaryOrProcessed"] = missing_info_flag
         volume_info_dict["ImageType"] = "NOT_PROVIDED"
 
         curr_prostat_encoded_dict: Dict[str, Any] = get_coded_dictionary_elements(
@@ -246,6 +438,12 @@ class DicomSingleVolumeInfoBase:
         return self.get_study_uid, volume_info_dict
 
     def get_image_diagnostics(self) -> str:
+        """
+        Generates diagnostic information about the DICOM image.
+
+        Returns:
+            msg (str): Diagnostic information as a formatted string.
+        """
         volume_info: str = json.dumps(
             self.get_primary_volume_info(), indent=4, sort_keys=True
         )

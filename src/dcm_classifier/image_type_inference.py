@@ -57,7 +57,26 @@ imagetype_to_integer_mapping = {
 
 class ImageTypeClassifierBase:
     """
-    Inference class.
+    Inference class for image type classification. The base implementation is for our standard model. This class
+    can be customized by users to implement their own models for targeted for specific datasets.
+
+    Attributes:
+        classification_model_filename (Union[str, Path]): Path to the classification model file (base implementation requires ONNX file).
+        classification_feature_list (List[str]): List of features used for classification.
+        image_type_map (Dict[str, str]): Mapping between class name and model integer output.
+        mode (str): "series" or "volume" to run inference on series or volume level (a series could have multiple subvolumes).
+        min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
+
+    Methods:
+        get_int_to_type_map(self) -> dict:
+
+        set_series(self, series: DicomSingleSeries) -> None:
+
+        infer_acquisition_plane(self, feature_dict: dict = None) -> str:
+
+        infer_modality(self, feature_dict: dict = None) -> (str, pd.DataFrame):
+
+        run_inference(self) -> None:
     """
 
     def __init__(
@@ -69,12 +88,16 @@ class ImageTypeClassifierBase:
         min_probability_threshold: float = 0.4,
     ):
         """
+        Initialize the ImageTypeClassifierBase.
+
         Args:
-            classification_model_filename: path to the classification model file
-            classification_feature_list: list of features used for classification
-            image_type_map: map between class name and model integer output
-            mode: "series" or "volume" to run inference on series or volume level
+            classification_model_filename (Union[str, Path]): Path to the classification model file (base implementation requires ONNX file).
+            classification_feature_list (List[str]): List of features used for classification.
+            image_type_map (Dict[str, str]): Mapping between class name and model integer output.
+            mode (str): "series" or "volume" to run inference on series or volume level (a series could have multiple subvolumes).
+            min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
         """
+
         self.classification_model_filename: Union[str, Path] = Path(
             classification_model_filename
         )
@@ -88,20 +111,40 @@ class ImageTypeClassifierBase:
         self.info_dict: Optional[Dict[str, Any]] = None
 
     def get_int_to_type_map(self) -> dict:
+        """
+        Get the integer to image type mapping.
+
+        Returns:
+            dict: Dictionary mapping integers to image type names.
+        """
         return {v: k for k, v in self.imagetype_to_int_map.items()}
 
     def set_series(self, series: DicomSingleSeries) -> None:
+        """
+        Set the DICOM series for classification.
+
+        Args:
+            series (DicomSingleSeries): DicomSingleSeries object representing the DICOM series.
+        """
         self.series = series
         self.series_number = series.get_series_number()
         self.info_dict = self.series.get_series_info_dict()
 
     def infer_acquisition_plane(self, feature_dict: dict = None) -> str:
         """
-        This is implementation of the decision tree for acquisition plane inference.
-        It takes the ImageOrientationPatient_0, ImageOrientationPatient_5 from info_dict and returns the
-        acquisition plane prediction.
+        Infer the acquisition plane based on DICOM information and image properties.
+
+        This is an implementation of the decision tree for acquisition plane inference.
+        It takes the ImageOrientationPatient_0, ImageOrientationPatient_5 from info_dict
+        and returns the acquisition plane prediction. This can be implemented multiple ways. For more details, see the publication.
+
+        Args:
+            feature_dict (dict): Optional dictionary of additional features for inference.
+
         Returns:
+            str: A string representing the inferred acquisition plane ("iso" for isotropic, "ax" for axial, "sag" for sagittal and "cor" for coronal).
         """
+
         volume = self.series.get_volume_list()[0]
         itk_im = itk_read_from_dicomfn_list(volume.get_one_volume_dcm_filenames())
         spacing = list(itk_im.GetSpacing())
@@ -123,6 +166,20 @@ class ImageTypeClassifierBase:
                 return "cor"
 
     def infer_modality(self, feature_dict: dict = None) -> (str, pd.DataFrame):
+        """
+        Infer the modality (image type) of the DICOM series based on a feature dictionary.
+
+        This method uses an ONNX model for image type classification to predict the modality of the series.
+
+        Args:
+            feature_dict (dict): A dictionary containing features used for classification.
+
+        Returns:
+            Tuple(str, pd.DataFrame): A tuple containing:
+                - A string representing the inferred modality (image type).
+                - A Pandas DataFrame containing classification results, including class probabilities.
+        """
+
         import onnxruntime as rt
 
         e_inputs: pd.DataFrame = pd.DataFrame([feature_dict])
@@ -170,8 +227,40 @@ class ImageTypeClassifierBase:
         return image_type, full_outputs
 
     def run_inference(self):
-        # validate features
+        """
+        Run image type inference for the specified DICOM series or volumes.
+
+        This method performs image type classification and acquisition plane inference based on the provided features.
+
+        If the `mode` is set to "series," inference is performed on the entire series, and modality and acquisition
+        plane information is updated for the series.
+
+        If the `mode` is set to "volume," inference is performed for each volume within the series, and modality and
+        acquisition plane information is updated for each volume.
+
+        Args:
+            None
+
+        Returns:
+            None
+        Raises:
+            ValueError: If an unsupported `mode` is specified.
+        """
+
         def validate_features(input_dict: dict) -> bool:
+            """
+            Validate the presence of required features in the input feature dictionary.
+
+            This function checks if all the features specified in the `classification_feature_list` are present in
+            the input feature dictionary.
+
+            Args:
+                input_dict (dict): A dictionary containing features for classification.
+
+            Returns:
+                bool: True if all required features are present, False otherwise.
+
+            """
             missing_features = []
             for feature in self.classification_feature_list:
                 if feature not in input_dict.keys():
