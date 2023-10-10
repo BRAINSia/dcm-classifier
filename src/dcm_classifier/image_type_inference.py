@@ -57,14 +57,15 @@ imagetype_to_integer_mapping = {
 
 class ImageTypeClassifierBase:
     """
-    Inference class for image type classification.
+    Inference class for image type classification. The base implementation is for our standard model. This class
+    can be customized by users to implement their own models for targeted for specific datasets.
 
     Attributes:
-        classification_model_filename (Union[str, Path]): Path to the classification model file.
+        classification_model_filename (Union[str, Path]): Path to the classification model file (base implementation requires ONNX file).
         classification_feature_list (List[str]): List of features used for classification.
         image_type_map (Dict[str, str]): Mapping between class name and model integer output.
-        mode (str): "series" or "volume" to run inference on series or volume level.
-        min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4.
+        mode (str): "series" or "volume" to run inference on series or volume level (a series could have multiple subvolumes).
+        min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
 
     Methods:
         get_int_to_type_map(self) -> dict:
@@ -90,11 +91,11 @@ class ImageTypeClassifierBase:
         Initialize the ImageTypeClassifierBase.
 
         Args:
-            classification_model_filename (Union[str, Path]): Path to the classification model file.
+            classification_model_filename (Union[str, Path]): Path to the classification model file (base implementation requires ONNX file).
             classification_feature_list (List[str]): List of features used for classification.
             image_type_map (Dict[str, str]): Mapping between class name and model integer output.
-            mode (str): "series" or "volume" to run inference on series or volume level.
-            min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4.
+            mode (str): "series" or "volume" to run inference on series or volume level (a series could have multiple subvolumes).
+            min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
         """
 
         self.classification_model_filename: Union[str, Path] = Path(
@@ -135,13 +136,13 @@ class ImageTypeClassifierBase:
 
         This is an implementation of the decision tree for acquisition plane inference.
         It takes the ImageOrientationPatient_0, ImageOrientationPatient_5 from info_dict
-        and returns the acquisition plane prediction.
+        and returns the acquisition plane prediction. This can be implemented multiple ways. For more details, see the publication.
 
         Args:
             feature_dict (dict): Optional dictionary of additional features for inference.
 
         Returns:
-            str: A string representing the inferred acquisition plane ("iso" or other).
+            str: A string representing the inferred acquisition plane ("iso" for isotropic, "ax" for axial, "sag" for sagittal and "cor" for coronal).
         """
 
         volume = self.series.get_volume_list()[0]
@@ -226,7 +227,6 @@ class ImageTypeClassifierBase:
         return image_type, full_outputs
 
     def run_inference(self):
-        # validate features
         """
         Run image type inference for the specified DICOM series or volumes.
 
@@ -246,6 +246,7 @@ class ImageTypeClassifierBase:
         Raises:
             ValueError: If an unsupported `mode` is specified.
         """
+
         def validate_features(input_dict: dict) -> bool:
             """
             Validate the presence of required features in the input feature dictionary.

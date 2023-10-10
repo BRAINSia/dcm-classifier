@@ -45,7 +45,7 @@ def two_point_compute_adc(
         list_of_bvalues (List[float]): A list of b-values.
 
     Returns:
-        FImageType: The computed ADC image.
+        FImageType: The computed itk ADC image with pixel type itk.F (float).
     """
     # ADC = - (ln(SI_b1) - ln(SI_b2) ) / (b_1 - b_2)
     # ADC = - (ln(SI_b1/SI_b2))/ (b_1 - b_2)
@@ -79,7 +79,7 @@ def compute_adc_from_multi_b_values(
         list_of_bvalues (List[float]): A list of b-values.
 
     Returns:
-        FImageType: The computed ADC image.
+        FImageType: The computed itk ADC image with pixel type itk.F (float).
     """
 
     list_of_log_images: List[FImageType] = list()
@@ -132,7 +132,7 @@ def itk_read_from_dicomfn_list(
         single_volume_dcm_files_list (List[Union[str, Path]]): A list of DICOM file paths.
 
     Returns:
-        FImageType: The ITK image created from the DICOM files.
+        FImageType: The ITK image created from the DICOM files with pixel type itk.F (float).
     """
     import tempfile
     import shutil
@@ -146,7 +146,6 @@ def itk_read_from_dicomfn_list(
     for dcm_file in single_volume_dcm_files_list:
         dcm_file_path: Path = Path(dcm_file)
         new_dcm_file = dir_path / dcm_file_path.name
-        # print(f"in={dcm_file_path}\not={new_dcm_file}")
         os.symlink(dcm_file_path, new_dcm_file)
 
     del single_volume_dcm_files_list
@@ -167,10 +166,8 @@ def itk_read_from_dicomfn_list(
     ordered_filenames = namesGenerator.GetFileNames(seriesIdentifier)
 
     isr = itk.ImageSeriesReader[FImageType].New()
-    # Typical prostate slice spacing is > 1mm
-    # so a difference of 0.01 mm in slice spacing can be ignored.
-    # to suppress warnings like
-    # 'Non uniform sampling or missing slices detected,  maximum nonuniformity:0.000480769'
+    # Typical clinical image slice spacing is > 1mm so a difference of 0.01 mm in slice spacing can be ignored.
+    # to suppress warnings like 'Non uniform sampling or missing slices detected,  maximum nonuniformity:0.000480769'
     isr.SetSpacingWarningRelThreshold(0.01)
     isr.SetFileNames(ordered_filenames)
     isr.Update()
@@ -187,7 +184,7 @@ def read_dwi_series_itk(dicom_directory: Path) -> (float, FImageType):
         dicom_directory (Path): The directory containing DICOM image files.
 
     Returns:
-        Tuple[float, FImageType]: A tuple containing the extracted b-value and the ITK image.
+        Tuple[float, FImageType]: A tuple containing the extracted b-value and the ITK image with pixel type itk.F (float).
     """
     all_files: List[str] = [x.as_posix() for x in dicom_directory.glob("*.dcm")]
     bvalue_image = itk_read_from_dicomfn_list(all_files)
@@ -229,7 +226,6 @@ def rglob_for_singular_result(
         Optional[Path]: The matching result if found, or None if no result or multiple results are found.
     """
 
-    "./sub-DMI12007461_ses-01_run-01/nipype_cache/Study_sub_DMI12007461_ses_01_run_01/Classifier/"
     list_results: List[Path] = [x for x in base_dir.rglob(pattern)]
     if (len(list_results)) != 1:
         return None
@@ -280,11 +276,6 @@ def compare_RGB_slices(refr_slice_fn: Path, test_slice_fn: Path) -> (int, dict):
     images_dict: Dict[FImageType] = dict()
     refr_slice = itk.imread(filename=refr_slice_fn, pixel_type=itk.F)
     test_slice = itk.imread(filename=test_slice_fn, pixel_type=itk.F)
-    # absvif = itk.AbsoluteValueDifferenceImageFilter.New(
-    #     Input1=refr_slice, Input2=test_slice
-    # )
-    # absvif.Update()
-    # diff_im = absvif.GetOutput()
     cif = itk.ComparisonImageFilter[FImageType, FImageType].New(
         TestInput=refr_slice,
         ValidInput=test_slice,
@@ -358,7 +349,7 @@ def compare_3d_float_images(
         images_dict["diff"] = cif.GetOutput()
         num_pixels_in_error = cif.GetNumberOfPixelsWithDifferences()
 
-    return (num_pixels_in_error, images_dict, images_in_same_space)
+    return num_pixels_in_error, images_dict, images_in_same_space
 
 
 def slugify(value, allow_unicode=False):
@@ -441,7 +432,7 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
             if v == private_tags_map["GE"]:
                 large_number_modulo_for_GE = 100000
                 # value = dicom_element.value[0] % large_number_modulo_for_GE
-                # TODO: This is a hack to get around an error. Might be due to missing data in SickKids
+                # TODO: This is a hack to get around an error. Might be due to missing data in SickKids project
                 try:
                     value = dicom_element.value[0] % large_number_modulo_for_GE
                 except TypeError:
@@ -490,7 +481,7 @@ def itk_get_center_slice(
     Extract the center slice of an input image and perform intensity windowing.
 
     Args:
-        inputImage (FImageType): The input image.
+        inputImage (FImageType): The input itk image with pixel type itk.F (float).
         pixel_min (float): Minimum pixel value.
         pixel_max (float): Maximum pixel value.
 
@@ -755,7 +746,7 @@ def get_coded_dictionary_elements(
     skip_info_list: List[str] = drop_columns_with_no_series_specific_information,
 ) -> Dict[str, Any]:
     """
-    Extract specific information from a DICOM dataset and create a coded dictionary.
+    Extract specific information from a DICOM fields dataset and create a coded dictionary with extracted features.
 
     Args:
         ro_dataset (pydicom.Dataset): The DICOM dataset to extract information from.

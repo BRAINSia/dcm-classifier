@@ -27,7 +27,8 @@ from typing import List, Optional
 
 class DicomValidatorBase:
     """
-    Baseclass with almost no functionality
+    This is a baseclass with almost no functionality to facilitate the creation of Validator classes for
+    specific user projects
 
     Attributes:
         single_volume_info (DicomSingleVolumeInfoBase): An instance of DicomSingleVolumeInfoBase
@@ -45,8 +46,6 @@ class DicomValidatorBase:
     """
 
     def __init__(self, single_volume_info: DicomSingleVolumeInfoBase):
-        # TODO:  we are accessing member variables directly from the single_volume_info
-        # Add member functions for accessing private fields of DicomSingleVolumeInfoBase
         """
         Initialize the DicomValidatorBase.
 
@@ -54,10 +53,8 @@ class DicomValidatorBase:
             single_volume_info (DicomSingleVolumeInfoBase): An instance of DicomSingleVolumeInfoBase
                 containing information about a single DICOM volume.
         """
-        # i.e. self.single_volume_info.series_dicom_info_dict -> self.single_volume_info.get_series_dicom_info_dict()
         self.single_volume_info: DicomSingleVolumeInfoBase = single_volume_info
         self._validation_failure_reports: List[str] = list()
-        pass
 
     def append_to_validation_failure_reports(self, msg: str) -> None:
         """
@@ -81,9 +78,6 @@ class DicomValidatorBase:
         """
         msg: str = ""
         if len(self._validation_failure_reports) > 0:
-            # filename_listing: str = "\n".join(
-            #     [str(f"\t{x}") for x in self.one_volume_dcm_filenames]
-            # )
             validation_failure_listing: str = "\n".join(
                 [str(f"\t{x}") for x in self._validation_failure_reports]
             )
@@ -114,22 +108,20 @@ class DicomValidatorBase:
     """
         return msg
 
-    def write_validation_report(
-        self, report_filename_to_append: Optional[Path]
-    ) -> None:
+    def write_validation_report(self, report_filename: Optional[Path]) -> None:
         """
         Write the validation report to a file or print it.
 
         Args:
-            report_filename_to_append (Optional[Path]): The filename to append the report to.
+            report_filename (Optional[Path]): The filename to write the report to.
                 If None, the report will be printed to the console.
         """
         msg: str = self.generate_validation_report_str()
 
-        if report_filename_to_append is None:
+        if report_filename is None:
             print(f"{msg}")
         else:
-            with open(report_filename_to_append, "a") as vfid:
+            with open(report_filename, "a") as vfid:
                 vfid.write(f"{msg}\n")
 
     def validate(self) -> bool:

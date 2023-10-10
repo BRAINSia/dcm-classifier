@@ -39,13 +39,13 @@ def pydicom_read_cache(
     filename: Union[Path, str], stop_before_pixels=True
 ) -> pydicom.Dataset:
     """
-    Reads a DICOM file and caches the result to improve performance on subsequent reads.
+    Reads a DICOM file header and caches the result to improve performance on subsequent reads.
 
     Args:
         filename: The path to the DICOM file to be read.
         stop_before_pixels: If True, stops reading before pixel data (default: True).
     Returns:
-        (pydicom.Dataset): A pydicom.Dataset containing the DICOM file's data.
+        (pydicom.Dataset): A pydicom.Dataset containing the DICOM file's header data.
     """
 
     global pydicom_read_cache_static_filename_dict
@@ -137,6 +137,7 @@ class DicomSingleVolumeInfoBase:
 
         get_image_diagnostics(self) -> str:
     """
+
     def __init__(self, one_volume_dcm_filenames: List[Union[Path, str]]) -> None:
         """
         Initializes a DicomSingleVolumeInfoBase instance with a list of DICOM file paths.
@@ -200,7 +201,7 @@ class DicomSingleVolumeInfoBase:
 
     def get_modality_probabilities(self) -> pd.DataFrame:
         """
-        Retrieves the modality probabilities for the DICOM data.
+        Get the modality probabilities DataFrame that returns probability per modality class.
 
         Returns:
             pd.DataFrame: A pandas DataFrame containing modality probabilities.
@@ -234,9 +235,6 @@ class DicomSingleVolumeInfoBase:
         """
         return self.volume_info_dict
 
-    # This is a bad measurement!!
-    # def get_slice_thickness(self) -> float:
-    #     return self.pydicom_info.SliceThickness
     def get_primary_volume_info(self, vol_index: int = 0) -> Dict[str, str]:
         """
         Get primary volume information for the specified volume index.
@@ -251,17 +249,10 @@ class DicomSingleVolumeInfoBase:
             "SeriesNumber": "SeriesNum",
             "Diffusionb-value": "Bval",
             "SeriesDescription": "SeriesDescription",
-            # "ImageTypeADC",
-            # "ImageTypeTrace",
-            # "AxialIndicator",
-            # "CoronalIndicator",
-            # "SaggitalIndicator",
-            # "IsDerivedImageType",
             "RepetitionTime": "TR",
             "EchoTime": "TE",
             "FlipAngle": "FA",
             "SAR": "SAR",
-            # "SeriesVolumeCount": "Vols",
         }
 
         ref_vol_info = self.get_volume_dictionary()
@@ -282,7 +273,7 @@ class DicomSingleVolumeInfoBase:
         Get the ITK image associated with the DICOM volume.
 
         Returns:
-            FImageType: The ITK image of the DICOM volume.
+            FImageType: The ITK image of the DICOM volume with pixel type itk.F (float).
         """
         if self.itk_image is None:
             self.itk_image = itk_read_from_dicomfn_list(
@@ -358,15 +349,6 @@ class DicomSingleVolumeInfoBase:
             Dict[str, Any]: A dictionary containing information about the DICOM volume.
         """
         return self.volume_info_dict
-        # for f in fileNames:
-        #     print(f"\t{f}")
-        # print(len(self.one_volume_dcm_filenames))
-        # print(
-        #     f'XXXXXXXXXXXXXXXXXXX  {series_number}: {len(self.one_volume_dictionary["list_of_ordered_volume_files"])}'
-        # )
-
-    # def get_volume_datatype(self) -> str:
-    #     return "unknown"
 
     def get_volume_bvalue(self) -> float:
         """
@@ -416,7 +398,7 @@ class DicomSingleVolumeInfoBase:
             vprint(f"Missing required echo time value {dicom_file_name}")
             volume_info_dict["EchoTime"] = -123456789.0
         if "SAR" not in self.pydicom_info:
-            # Some derived datasets do not have SAR listed, so fill with zero
+            # Some derived datasets do not have SAR listed, so fill with dummy number
             vprint(f"Missing required SAR value {dicom_file_name}")
             volume_info_dict["SAR"] = -123456789.0
         bvalue_current_dicom: int = int(self.get_volume_bvalue())
@@ -440,7 +422,6 @@ class DicomSingleVolumeInfoBase:
         volume_info_dict["CoronalIndicator"] = missing_info_flag
         volume_info_dict["SaggitalIndicator"] = missing_info_flag
         volume_info_dict["IsDerivedImageType"] = missing_info_flag
-        # values_dict[series_key]["IsSecondaryOrProcessed"] = missing_info_flag
         volume_info_dict["ImageType"] = "NOT_PROVIDED"
 
         curr_prostat_encoded_dict: Dict[str, Any] = get_coded_dictionary_elements(

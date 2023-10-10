@@ -78,7 +78,7 @@ class DicomSingleSeries:
             series_number (int): The series number.
             volume_info_list (List[DicomSingleVolumeInfoBase]): A list to store
                 DicomSingleVolumeInfoBase objects for this series.
-            modality (Optional[str]): The modality of the series (e.g., "CT", "MRI").
+            modality (Optional[str]): The modality of the series (e.g., "t1w", "flair").
             modality_probability (Optional[pd.DataFrame]): A DataFrame containing modality
                 probabilities.
             acquisition_plane (Optional[str]): The acquisition plane of the series (e.g.,
@@ -104,7 +104,7 @@ class DicomSingleSeries:
         Set the modality of the DICOM series.
 
         Args:
-            modality (str): The modality of the series (e.g., "CT", "MRI").
+            modality (str): The modality of the series (e.g., "t1w", "flair").
         """
         self.modality = modality
 
@@ -128,7 +128,7 @@ class DicomSingleSeries:
 
     def get_modality_probabilities(self) -> pd.DataFrame:
         """
-        Get the modality probabilities DataFrame.
+        Get the modality probabilities DataFrame that returns probability per modality class.
 
         Returns:
             pd.DataFrame: A DataFrame containing modality probabilities.
@@ -165,7 +165,8 @@ class DicomSingleSeries:
 
     def add_volume_to_series(self, new_volume_info: DicomSingleVolumeInfoBase) -> None:
         """
-        Add a DicomSingleVolumeInfoBase object to the series.
+        Add a DicomSingleVolumeInfoBase object to the series. List containing subvolumes within the series is sorted
+        and maintained based on bvalues similar to dcm2niix tool.
 
         Args:
             new_volume_info (DicomSingleVolumeInfoBase): The volume information to add.

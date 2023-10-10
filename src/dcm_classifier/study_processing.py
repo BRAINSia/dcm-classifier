@@ -28,7 +28,7 @@ from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 
 class ProcessOneDicomStudyToVolumesMappingBase:
     """
-    Base class for processing a DICOM study and mapping its series to volumes.
+    Base class for processing a DICOM study. A study is typically all MRI scans for a single patient's scanning session.
 
     Attributes:
         series_restrictions_list_dwi_subvolumes (List[str]): List of DICOM tags used for filtering DWI sub-volumes.
@@ -60,6 +60,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         series_inference(self):
     """
+
     series_restrictions_list_dwi_subvolumes: List[str] = [
         # https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
         # STANDARD
@@ -178,15 +179,8 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         Returns:
             List[Dict[str, str]]: A list of dictionaries containing primary volume information.
-                Each dictionary includes keys and values for primary volume attributes.
+                Each dictionary includes keys and values for primary volume attributes. See get_primary_volume_info function in dicom_volume.py
 
-        Example:
-            Example output format:
-            [
-                {'VolumeName': 'Volume 1', 'VolumeType': 'T1-weighted', 'SliceThickness': '3.0'},
-                {'VolumeName': 'Volume 2', 'VolumeType': 'T2-weighted', 'SliceThickness': '2.5'},
-                # ... more dictionaries for other subseries ...
-            ]
         """
         list_of_volume_info_dictionaries: List[Dict[str, str]] = list()
         for (
@@ -254,12 +248,6 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             Ensure that you have configured an image type classifier (inferer) using the
             `set_inferer` method before calling this method.
 
-        Example:
-            Example usage to run inference on DICOM series:
-            study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
-            image_classifier = MyImageTypeClassifier()  # Replace with your classifier instance
-            study.set_inferer(image_classifier)
-            study.run_inference()
         """
         for (
             series_number,
