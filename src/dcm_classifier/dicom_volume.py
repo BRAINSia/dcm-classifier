@@ -248,7 +248,6 @@ class DicomSingleVolumeInfoBase:
         fields_to_copy: Dict[str, str] = {
             "SeriesNumber": "SeriesNum",
             "Diffusionb-value": "Bval",
-            "SeriesDescription": "SeriesDescription",
             "RepetitionTime": "TR",
             "EchoTime": "TE",
             "FlipAngle": "FA",
@@ -413,14 +412,10 @@ class DicomSingleVolumeInfoBase:
         volume_info_dict["FileName"] = dicom_file_name.as_posix()
         volume_info_dict["StudyInstanceUID"] = str(self.pydicom_info.StudyInstanceUID)
         volume_info_dict["SeriesInstanceUID"] = str(self.pydicom_info.SeriesInstanceUID)
-        volume_info_dict["SeriesDescription"] = str(self.pydicom_info.SeriesDescription)
         volume_info_dict["SeriesNumber"] = self.get_series_number()
         missing_info_flag: int = -1
         volume_info_dict["ImageTypeADC"] = missing_info_flag
         volume_info_dict["ImageTypeTrace"] = missing_info_flag
-        volume_info_dict["AxialIndicator"] = missing_info_flag
-        volume_info_dict["CoronalIndicator"] = missing_info_flag
-        volume_info_dict["SaggitalIndicator"] = missing_info_flag
         volume_info_dict["IsDerivedImageType"] = missing_info_flag
         volume_info_dict["ImageType"] = "NOT_PROVIDED"
 

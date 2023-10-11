@@ -829,22 +829,6 @@ def get_coded_dictionary_elements(
             else:
                 manufacturer_code = 0
             dataset_dictionary["ManufacturerCode"] = manufacturer_code
-        elif name == "SeriesDescription":
-            dataset_dictionary[name] = value_str
-            value_str_lower = value_str.lower()
-            contains_t2_in_name: bool = "T2".lower() in value_str_lower
-            if "Ax".lower() in value_str_lower:
-                dataset_dictionary["AxialIndicator"] = 1
-            else:
-                dataset_dictionary["AxialIndicator"] = 0
-            if "Cor".lower() in value_str_lower:
-                dataset_dictionary["CoronalIndicator"] = 1
-            else:
-                dataset_dictionary["CoronalIndicator"] = 0
-            if "Sag".lower() in value_str_lower:
-                dataset_dictionary["SaggitalIndicator"] = 1
-            else:
-                dataset_dictionary["SaggitalIndicator"] = 0
         else:
             dataset_dictionary[name] = value_str
     return dataset_dictionary
