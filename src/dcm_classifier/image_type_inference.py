@@ -138,6 +138,8 @@ class ImageTypeClassifierBase:
         It takes the ImageOrientationPatient_0, ImageOrientationPatient_5 from info_dict
         and returns the acquisition plane prediction. This can be implemented multiple ways. For more details, see the publication.
 
+        To determine if the image is isotropic, we check if the all spacing components are within 10% of the cube root of the voxel volume.
+
         Args:
             feature_dict (dict): Optional dictionary of additional features for inference.
 
