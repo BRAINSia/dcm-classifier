@@ -31,8 +31,9 @@ Attributes:
 
 Example:
     Example usage to drop these columns from a DataFrame:
-    df.drop(columns=drop_columns_with_no_series_specific_information, inplace=True)
+    df.drop(columns=required_DICOM_fields, inplace=True)
 """
+
 required_DICOM_fields = (
     "StudyInstanceUID",
     "SeriesInstanceUID",

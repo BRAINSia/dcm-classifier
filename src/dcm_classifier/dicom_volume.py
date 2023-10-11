@@ -31,6 +31,7 @@ from dcm_classifier.namic_dicom_typing import (
     vprint,
     get_coded_dictionary_elements,
 )
+from dcm_classifier.dicom_config import required_DICOM_fields
 
 pydicom_read_cache_static_filename_dict: Dict[str, pydicom.Dataset] = dict()
 
@@ -158,6 +159,7 @@ class DicomSingleVolumeInfoBase:
         self.pydicom_info: pydicom.Dataset = pydicom_read_cache(
             _first_filename_for_volume, stop_before_pixels=True
         )
+        self.validate_dicom_fields()
 
         self.bvalue = get_bvalue(self.pydicom_info, round_to_nearst_10=True)
         self.average_slice_spacing = -12345.0
@@ -171,6 +173,24 @@ class DicomSingleVolumeInfoBase:
         self.modality: Optional[str] = None
         self.modality_probability: Optional[pd.DataFrame] = None
         self.acquisition_plane: Optional[str] = None
+
+    def validate_dicom_fields(self) -> None:
+        """
+        Validates the DICOM fields in the DICOM header to ensure all required fields are present.
+
+        Raises an exception if any required fields are missing.
+        TODO: Think about where this should be handled in processing of the whole study and what should be the action.
+        TODO: We probably need to skip the volume as a whole but continue with the study processing.
+        """
+        # check if all fields in the required_DICOM_fields are present in self.pydicom_info
+        missing_fields = []
+        for field in required_DICOM_fields:
+            if field not in self.pydicom_info:
+                missing_fields.append(field)
+        if len(missing_fields) > 0:
+            raise Exception(
+                f"Missing required DICOM fields: {missing_fields} in {self.one_volume_dcm_filenames}"
+            )
 
     def set_modality(self, modality: str) -> None:
         """

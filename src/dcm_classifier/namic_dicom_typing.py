@@ -26,9 +26,8 @@ import itk
 import re
 import unicodedata
 
-from dcm_classifier.dicom_config import (
-    drop_columns_with_no_series_specific_information,
-)
+from dcm_classifier.dicom_config import required_DICOM_fields
+
 
 FImageType = itk.Image[itk.F, 3]
 UCImageType = itk.Image[itk.UC, 3]
@@ -743,7 +742,7 @@ def vprint(msg: str, verbose=False):
 def get_coded_dictionary_elements(
     ro_dataset: pydicom.Dataset,
     one_entry_per_volume: bool = True,
-    skip_info_list: List[str] = drop_columns_with_no_series_specific_information,
+    required_info_list: List[str] = required_DICOM_fields,
 ) -> Dict[str, Any]:
     """
     Extract specific information from a DICOM fields dataset and create a coded dictionary with extracted features.
@@ -751,7 +750,7 @@ def get_coded_dictionary_elements(
     Args:
         ro_dataset (pydicom.Dataset): The DICOM dataset to extract information from.
         one_entry_per_volume (bool, optional): Whether to create one entry per volume. Default is True.
-        skip_info_list (List[str], optional): List of information to skip. Default is drop_columns_with_no_series_specific_information.
+        required_info_list (List[str], optional): List of information to skip. Default is required_DICOM_fields.
 
     Returns:
         Dict[str, Any]: A dictionary containing extracted information in a coded format.
@@ -766,8 +765,8 @@ def get_coded_dictionary_elements(
             e = pydicom.dataelem.DataElement_from_raw(v)
         else:
             e = v
-        if e.name in skip_info_list:
-            # No need to process columns that have no information related to series identification
+        if e.name not in required_info_list:
+            # No need to process columns that are not required
             continue
 
         name = str(e.name).replace(" ", "").replace("(", "").replace(")", "")
