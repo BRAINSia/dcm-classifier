@@ -17,20 +17,11 @@ file_meta.ImplementationClassUID = UID("1.2.3.4")
 
 @pytest.fixture
 def get_valid_dcm():
-    # Create some temporary filenames
     realDcm = "valid_file" + suffix
-    # filename_little_endian = tempfile.NamedTemporaryFile(suffix=suffix).name
-    # filename_big_endian = tempfile.NamedTemporaryFile(suffix=suffix).name
 
-
-    print("Setting dataset values...")
-    # Create the FileDataset instance (initially no data elements, but file_meta
-    # supplied)
     valid_ds = FileDataset(realDcm, {},
                            file_meta=file_meta, preamble=b"\0" * 128)
 
-    # Add the data elements -- not trying to set all required here. Check DICOM
-    # standard
     valid_ds.PatientName = "Test^Firstname"
     valid_ds.PatientID = "123456"
 
@@ -43,11 +34,6 @@ def get_valid_dcm():
     valid_ds.ContentDate = dt.strftime('%Y%m%d')
     timeStr = dt.strftime('%H%M%S.%f')  # long format with micro seconds
     valid_ds.ContentTime = timeStr
-    # valid_ds.T
-
-    # print("Writing valid file", realDcm)
-    # valid_ds.save_as(realDcm)
-    # print("File saved.")
 
     # Write as a different transfer syntax XXX shouldn't need this but pydicom
     # 0.9.5 bug not recognizing transfer syntax
@@ -55,6 +41,7 @@ def get_valid_dcm():
     valid_ds.is_little_endian = False
     valid_ds.is_implicit_VR = False
 
+    realDcm = "testing/dcm_files/" + realDcm
     valid_ds.save_as(realDcm)
 
     return realDcm
@@ -64,7 +51,7 @@ def get_invalid_dcm():
 
     invalidDcm = "invalid_file" + suffix
 
-    invalid_ds = FileDataset(invalidDcm, {},
+    invalid_ds: pydicom.Dataset = FileDataset(invalidDcm, {},
                            file_meta=file_meta)
 
     # Add the data elements -- not trying to set all required here. Check DICOM
@@ -95,6 +82,57 @@ def get_invalid_dcm():
     # print("Writing test file as Big Endian Explicit VR", invalidDcm)
     # invalid_ds.save_as(invalidDcm)
 
+    invalidDcm = "testing/dcm_files/" + invalidDcm
     invalid_ds.save_as(invalidDcm)
 
     return invalidDcm
+
+@pytest.fixture
+def get_MR_dcm():
+    mrDcm = "mr_file" + suffix
+
+    ds: pydicom.Dataset = FileDataset(mrDcm, {},
+                           file_meta=file_meta, preamble=b"\0" * 128)
+
+    ds.PatientName = "Test^Firstname"
+    ds.PatientID = "123456"
+
+    ds.Modality = "MR"
+    ds.SeriesDescription = "T1"
+    ds.SeriesNumber = "1"
+
+    dt = datetime.datetime.now()
+    ds.ContentDate = dt.strftime('%Y%m%d')
+    timeStr = dt.strftime('%H%M%S.%f')  # long format with micro seconds
+    ds.ContentTime = timeStr
+
+    mrDcm = "testing/dcm_files/" + mrDcm
+    ds.save_as(mrDcm)
+
+    return mrDcm
+
+@pytest.fixture
+def get_CT_dcm():
+    ctDcm = "ct_file" + suffix
+
+    ds: pydicom.Dataset = FileDataset(ctDcm, {},
+                           file_meta=file_meta, preamble=b"\0" * 128)
+
+    ds.PatientName = "Test^Firstname"
+    ds.PatientID = "123456"
+
+    ds.Modality = "CT"
+    ds.SeriesDescription = "T1"
+    ds.SeriesNumber = "1"
+
+    dt = datetime.datetime.now()
+    ds.ContentDate = dt.strftime('%Y%m%d')
+    timeStr = dt.strftime('%H%M%S.%f')  # long format with micro seconds
+    ds.ContentTime = timeStr
+
+    ctDcm = "testing/dcm_files/" + ctDcm
+    ds.save_as(ctDcm)
+
+    return ctDcm
+
+
