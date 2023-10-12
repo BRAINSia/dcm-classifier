@@ -1,11 +1,14 @@
 import pydicom
 from pydicom.errors import InvalidDicomError
 import pytest
+from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 
+volumes = ProcessOneDicomStudyToVolumesMappingBase("testing/dcm_files").get_list_of_primary_volume_info()
 def test_valid_dcm(get_valid_dcm):
-    assert type(pydicom.dcmread(get_valid_dcm)) == pydicom.dataset.FileDataset
+
+    assert volumes[0] == pydicom.dataset.FileDataset
 
 def test_invalid_dcm(get_invalid_dcm):
     with pytest.raises(InvalidDicomError) as ex:
-        pydicom.dcmread(get_invalid_dcm)
+        volumes[1] == pydicom.dataset.FileDataset
     assert "File is missing DICOM File Meta Information" in str(ex.value)
