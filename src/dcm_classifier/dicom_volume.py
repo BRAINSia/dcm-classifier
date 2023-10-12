@@ -30,6 +30,7 @@ from dcm_classifier.namic_dicom_typing import (
     itk_read_from_dicomfn_list,
     vprint,
     get_coded_dictionary_elements,
+    is_number,
 )
 from dcm_classifier.dicom_config import required_DICOM_fields
 
@@ -155,7 +156,6 @@ class DicomSingleVolumeInfoBase:
 
         _first_filename_for_volume: Path = self.one_volume_dcm_filenames[0]
         # print(f"USING REFERENCE VOLUME:  {_first_filename_for_volume} for pydicom info")
-        # TODO: Remove self.pydicom_info from this section, it is useful for debugging
         self.pydicom_info: pydicom.Dataset = pydicom_read_cache(
             _first_filename_for_volume, stop_before_pixels=True
         )
@@ -179,9 +179,10 @@ class DicomSingleVolumeInfoBase:
         Validates the DICOM fields in the DICOM header to ensure all required fields are present.
 
         Raises an exception if any required fields are missing.
-        TODO: Think about where this should be handled in processing of the whole study and what should be the action.
-        TODO: We probably need to skip the volume as a whole but continue with the study processing.
+
         """
+        # TODO: Think about where this should be handled in processing of the whole study and what should be the action.
+        # TODO: We probably need to skip the volume as a whole but continue with the study processing.
         # check if all fields in the required_DICOM_fields are present in self.pydicom_info
         missing_fields = []
         for field in required_DICOM_fields:
@@ -413,13 +414,22 @@ class DicomSingleVolumeInfoBase:
         volume_info_dict = dict()
 
         volume_info_dict["SeriesNumber"] = self.get_series_number()
-        if "EchoTime" not in self.pydicom_info:
+        INVALID_VALUE = "INVALID_VALUE"
+        if "EchoTime" not in volume_info_dict or not is_number(
+                volume_info_dict["EchoTime"]
+        ):
             vprint(f"Missing required echo time value {dicom_file_name}")
-            volume_info_dict["EchoTime"] = -123456789.0
-        if "SAR" not in self.pydicom_info:
-            # Some derived datasets do not have SAR listed, so fill with dummy number
+            volume_info_dict["EchoTime"] = INVALID_VALUE
+        if "SAR" not in volume_info_dict or not is_number(volume_info_dict["SAR"]):
+            # Some derived datasets do not have SAR listed, so fill with zero
             vprint(f"Missing required SAR value {dicom_file_name}")
-            volume_info_dict["SAR"] = -123456789.0
+            volume_info_dict["SAR"] = INVALID_VALUE
+        if "PixelBandwidth" not in volume_info_dict or not is_number(
+                volume_info_dict["PixelBandwidth"]
+        ):
+            vprint(f"Missing required PixelBandwidth value {dicom_file_name}")
+            volume_info_dict["PixelBandwidth"] = INVALID_VALUE
+
         bvalue_current_dicom: int = int(self.get_volume_bvalue())
         volume_info_dict["Diffusionb-value"] = bvalue_current_dicom
         volume_info_dict["Diffusionb-valueMax"] = bvalue_current_dicom

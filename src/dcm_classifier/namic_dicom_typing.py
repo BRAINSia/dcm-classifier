@@ -208,6 +208,24 @@ def cmd_exists(cmd):
     return shutil.which(cmd) is not None
 
 
+def is_number(s: Any) -> bool:
+    """
+    Check if a string is a number.
+    https://stackoverflow.com/q/354038
+
+    Args:
+        s (Any): The string to check.
+
+    Returns:
+        bool: True if the string is a number, False otherwise.
+    """
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
 def rglob_for_singular_result(
     base_dir: Path,
     pattern: str,

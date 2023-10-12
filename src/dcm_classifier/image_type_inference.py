@@ -197,17 +197,23 @@ class ImageTypeClassifierBase:
         label_name: str = sess.get_outputs()[0].name
         prob_name: str = sess.get_outputs()[1].name
 
+        full_outputs: pd.DataFrame = pd.DataFrame()
+        full_outputs["SeriesNumber"] = [self.series_number]
         model_inputs: pd.DataFrame = e_inputs[self.classification_feature_list]
-        numeric_inputs: np.array = model_inputs.astype(np.float32).to_numpy()
+        try:
+            numeric_inputs: np.array = model_inputs.astype(np.float32).to_numpy()
+        except ValueError:
+            # Short circuit if the inputs are not sufficient for inference
+            full_outputs["GUESS_ONNX"] = "InvalidDicomInputs"
+            return "invalid", full_outputs
         pred_onx_run_output = sess.run(
             [label_name, prob_name], {input_name: numeric_inputs}
         )
         pred_onx = pred_onx_run_output[0]
         probability_onx = pred_onx_run_output[1]
-        full_outputs: pd.DataFrame = pd.DataFrame()
-        full_outputs["SeriesNumber"] = [self.series_number]
         full_outputs["GUESS_ONNX_CODE"] = pred_onx
         full_outputs["GUESS_ONNX"] = pred_onx
+
         for type_name, type_integer_code in self.imagetype_to_int_map.items():
             full_outputs["GUESS_ONNX"].replace(
                 to_replace=type_integer_code, value=type_name, inplace=True
