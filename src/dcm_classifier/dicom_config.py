@@ -48,6 +48,4 @@ required_DICOM_fields = (
     "EchoTime",
     "RepetitionTime",
     "FlipAngle",
-
-
 )

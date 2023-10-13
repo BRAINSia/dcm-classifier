@@ -85,7 +85,7 @@ class DicomSingleVolumeInfoBase:
     Attributes:
         one_volume_dcm_filenames (List[Path]): A list of DICOM file paths representing a single volume.
         ro_user_supplied_dcm_filenames (List[Path]): A list of DICOM file paths representing a single volume.
-        pydicom_info (pydicom.Dataset): A pydicom.Dataset containing information about the DICOM volume.
+        _pydicom_info (pydicom.Dataset): A pydicom.Dataset containing information about the DICOM volume.
         bvalue (float): The b-value of the DICOM volume.
         average_slice_spacing (float): The average slice spacing of the DICOM volume.
         volume_info_dict (Dict[str, Any]): A dictionary containing information about the DICOM volume.
@@ -156,12 +156,12 @@ class DicomSingleVolumeInfoBase:
 
         _first_filename_for_volume: Path = self.one_volume_dcm_filenames[0]
         # print(f"USING REFERENCE VOLUME:  {_first_filename_for_volume} for pydicom info")
-        self.pydicom_info: pydicom.Dataset = pydicom_read_cache(
+        self._pydicom_info: pydicom.Dataset = pydicom_read_cache(
             _first_filename_for_volume, stop_before_pixels=True
         )
         self.validate_dicom_fields()
 
-        self.bvalue = get_bvalue(self.pydicom_info, round_to_nearst_10=True)
+        self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
         self.average_slice_spacing = -12345.0
         (
             _one_study_found,
@@ -183,10 +183,10 @@ class DicomSingleVolumeInfoBase:
         """
         # TODO: Think about where this should be handled in processing of the whole study and what should be the action.
         # TODO: We probably need to skip the volume as a whole but continue with the study processing.
-        # check if all fields in the required_DICOM_fields are present in self.pydicom_info
+        # check if all fields in the required_DICOM_fields are present in self._pydicom_info
         missing_fields = []
         for field in required_DICOM_fields:
-            if field not in self.pydicom_info:
+            if field not in self._pydicom_info:
                 missing_fields.append(field)
         if len(missing_fields) > 0:
             raise Exception(
@@ -309,7 +309,7 @@ class DicomSingleVolumeInfoBase:
         Returns:
             str: The Series Instance UID.
         """
-        return self.pydicom_info.SeriesInstanceUID
+        return self._pydicom_info.SeriesInstanceUID
 
     def get_study_uid(self) -> str:
         """
@@ -318,7 +318,7 @@ class DicomSingleVolumeInfoBase:
         Returns:
             str: The Study Instance UID.
         """
-        return self.pydicom_info.StudyInstanceUID
+        return self._pydicom_info.StudyInstanceUID
 
     def get_series_pixel_spacing(self) -> str:
         """
@@ -327,7 +327,7 @@ class DicomSingleVolumeInfoBase:
         Returns:
             str: The pixel spacing as a string.
         """
-        return str(self.pydicom_info.PixelSpacing)
+        return str(self._pydicom_info.PixelSpacing)
 
     def get_series_spacing_between_slices(self) -> str:
         """
@@ -346,8 +346,8 @@ class DicomSingleVolumeInfoBase:
             str: The size of the DICOM series as a string.
         """
         size_list: List[int] = [
-            self.pydicom_info.Rows,
-            self.pydicom_info.Columns,
+            self._pydicom_info.Rows,
+            self._pydicom_info.Columns,
             len(self.one_volume_dcm_filenames),
         ]
         return str(size_list)
@@ -386,7 +386,7 @@ class DicomSingleVolumeInfoBase:
         Returns:
             int: The Series Number as an integer.
         """
-        return int(self.pydicom_info.SeriesNumber)
+        return int(self._pydicom_info.SeriesNumber)
 
     def is_MR_modality(self):
         """
@@ -395,9 +395,9 @@ class DicomSingleVolumeInfoBase:
         Returns:
             status (bool): True if the modality is MR, False otherwise.
         """
-        status = bool(self.pydicom_info.Modality != "MR")
+        status = bool(self._pydicom_info.Modality != "MR")
         if not status:
-            vprint(f"Skipping non-MR modality : {self.pydicom_info.Modality}")
+            vprint(f"Skipping non-MR modality : {self._pydicom_info.Modality}")
         return status
 
     def _make_one_study_info_mapping_from_filelist(self) -> (str, dict):
@@ -409,14 +409,14 @@ class DicomSingleVolumeInfoBase:
                  The dictionary includes Series Number, Echo Time, SAR, b-values, file name,
                  Series and Study Instance UID, Series Description, and various indicators.
         """
-        dicom_file_name: Path = Path(self.pydicom_info.filename)
+        dicom_file_name: Path = Path(self._pydicom_info.filename)
 
         volume_info_dict = dict()
 
         volume_info_dict["SeriesNumber"] = self.get_series_number()
         INVALID_VALUE = "INVALID_VALUE"
         if "EchoTime" not in volume_info_dict or not is_number(
-                volume_info_dict["EchoTime"]
+            volume_info_dict["EchoTime"]
         ):
             vprint(f"Missing required echo time value {dicom_file_name}")
             volume_info_dict["EchoTime"] = INVALID_VALUE
@@ -425,7 +425,7 @@ class DicomSingleVolumeInfoBase:
             vprint(f"Missing required SAR value {dicom_file_name}")
             volume_info_dict["SAR"] = INVALID_VALUE
         if "PixelBandwidth" not in volume_info_dict or not is_number(
-                volume_info_dict["PixelBandwidth"]
+            volume_info_dict["PixelBandwidth"]
         ):
             vprint(f"Missing required PixelBandwidth value {dicom_file_name}")
             volume_info_dict["PixelBandwidth"] = INVALID_VALUE
@@ -440,8 +440,10 @@ class DicomSingleVolumeInfoBase:
             volume_info_dict["HasDiffusionGradientOrientation"] = 1
 
         volume_info_dict["FileName"] = dicom_file_name.as_posix()
-        volume_info_dict["StudyInstanceUID"] = str(self.pydicom_info.StudyInstanceUID)
-        volume_info_dict["SeriesInstanceUID"] = str(self.pydicom_info.SeriesInstanceUID)
+        volume_info_dict["StudyInstanceUID"] = str(self._pydicom_info.StudyInstanceUID)
+        volume_info_dict["SeriesInstanceUID"] = str(
+            self._pydicom_info.SeriesInstanceUID
+        )
         volume_info_dict["SeriesNumber"] = self.get_series_number()
         missing_info_flag: int = -1
         volume_info_dict["ImageTypeADC"] = missing_info_flag
@@ -450,7 +452,7 @@ class DicomSingleVolumeInfoBase:
         volume_info_dict["ImageType"] = "NOT_PROVIDED"
 
         curr_prostat_encoded_dict: Dict[str, Any] = get_coded_dictionary_elements(
-            self.pydicom_info, True
+            self._pydicom_info, True
         )
         # those values are 1 in case of a single volume
         curr_prostat_encoded_dict["Diffusionb-valueCount"] = 1
