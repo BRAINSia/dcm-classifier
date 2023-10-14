@@ -30,9 +30,8 @@ from dcm_classifier.namic_dicom_typing import (
     itk_read_from_dicomfn_list,
     vprint,
     get_coded_dictionary_elements,
-    is_number,
+    sanitize_dicom_dataset,
 )
-from dcm_classifier.dicom_config import required_DICOM_fields
 
 pydicom_read_cache_static_filename_dict: Dict[str, pydicom.Dataset] = dict()
 
@@ -173,25 +172,6 @@ class DicomSingleVolumeInfoBase:
         self.modality: Optional[str] = None
         self.modality_probability: Optional[pd.DataFrame] = None
         self.acquisition_plane: Optional[str] = None
-
-    def validate_dicom_fields(self) -> None:
-        """
-        Validates the DICOM fields in the DICOM header to ensure all required fields are present.
-
-        Raises an exception if any required fields are missing.
-
-        """
-        # TODO: Think about where this should be handled in processing of the whole study and what should be the action.
-        # TODO: We probably need to skip the volume as a whole but continue with the study processing.
-        # check if all fields in the required_DICOM_fields are present in self._pydicom_info
-        missing_fields = []
-        for field in required_DICOM_fields:
-            if field not in self._pydicom_info:
-                missing_fields.append(field)
-        if len(missing_fields) > 0:
-            raise Exception(
-                f"Missing required DICOM fields: {missing_fields} in {self.one_volume_dcm_filenames}"
-            )
 
     def set_modality(self, modality: str) -> None:
         """
@@ -409,57 +389,27 @@ class DicomSingleVolumeInfoBase:
                  The dictionary includes Series Number, Echo Time, SAR, b-values, file name,
                  Series and Study Instance UID, Series Description, and various indicators.
         """
-        dicom_file_name: Path = Path(self._pydicom_info.filename)
+        sanitized_dicom_dict: Dict[str, Any] = sanitize_dicom_dataset(
+            self._pydicom_info
+        )
+        volume_info_dict: Dict[str, Any] = get_coded_dictionary_elements(
+            sanitized_dicom_dict
+        )
+        del sanitized_dicom_dict
 
-        volume_info_dict = dict()
-
-        volume_info_dict["SeriesNumber"] = self.get_series_number()
-        INVALID_VALUE = "INVALID_VALUE"
-        if "EchoTime" not in volume_info_dict or not is_number(
-            volume_info_dict["EchoTime"]
-        ):
-            vprint(f"Missing required echo time value {dicom_file_name}")
-            volume_info_dict["EchoTime"] = INVALID_VALUE
-        if "SAR" not in volume_info_dict or not is_number(volume_info_dict["SAR"]):
-            # Some derived datasets do not have SAR listed, so fill with zero
-            vprint(f"Missing required SAR value {dicom_file_name}")
-            volume_info_dict["SAR"] = INVALID_VALUE
-        if "PixelBandwidth" not in volume_info_dict or not is_number(
-            volume_info_dict["PixelBandwidth"]
-        ):
-            vprint(f"Missing required PixelBandwidth value {dicom_file_name}")
-            volume_info_dict["PixelBandwidth"] = INVALID_VALUE
-
+        # add features related to b-values and diffusion
         bvalue_current_dicom: int = int(self.get_volume_bvalue())
         volume_info_dict["Diffusionb-value"] = bvalue_current_dicom
         volume_info_dict["Diffusionb-valueMax"] = bvalue_current_dicom
-
         if bvalue_current_dicom < -1:
             volume_info_dict["HasDiffusionGradientOrientation"] = 0
         else:
             volume_info_dict["HasDiffusionGradientOrientation"] = 1
 
-        volume_info_dict["FileName"] = dicom_file_name.as_posix()
-        volume_info_dict["StudyInstanceUID"] = str(self._pydicom_info.StudyInstanceUID)
-        volume_info_dict["SeriesInstanceUID"] = str(
-            self._pydicom_info.SeriesInstanceUID
-        )
-        volume_info_dict["SeriesNumber"] = self.get_series_number()
-        missing_info_flag: int = -1
-        volume_info_dict["ImageTypeADC"] = missing_info_flag
-        volume_info_dict["ImageTypeTrace"] = missing_info_flag
-        volume_info_dict["IsDerivedImageType"] = missing_info_flag
-        volume_info_dict["ImageType"] = "NOT_PROVIDED"
-
-        curr_prostat_encoded_dict: Dict[str, Any] = get_coded_dictionary_elements(
-            self._pydicom_info, True
-        )
         # those values are 1 in case of a single volume
-        curr_prostat_encoded_dict["Diffusionb-valueCount"] = 1
-        curr_prostat_encoded_dict["SeriesVolumeCount"] = 1
-
-        merge_dictionaries(volume_info_dict, curr_prostat_encoded_dict)
-
+        volume_info_dict["Diffusionb-valueCount"] = 1
+        volume_info_dict["SeriesVolumeCount"] = 1
+        # add list of dicom files for the volume
         volume_info_dict["list_of_ordered_volume_files"] = self.one_volume_dcm_filenames
 
         return self.get_study_uid, volume_info_dict
