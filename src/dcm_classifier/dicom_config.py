@@ -40,7 +40,6 @@ required_DICOM_fields = (
     "SeriesNumber",
     "PixelSpacing",
     "ImageType",
-    "DiffusionGradientOrientation",
     "ImageOrientationPatient",
     "Manufacturer",
     "PixelBandwidth",
