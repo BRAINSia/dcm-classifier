@@ -158,7 +158,6 @@ class DicomSingleVolumeInfoBase:
         self._pydicom_info: pydicom.Dataset = pydicom_read_cache(
             _first_filename_for_volume, stop_before_pixels=True
         )
-        self.validate_dicom_fields()
 
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
         self.average_slice_spacing = -12345.0

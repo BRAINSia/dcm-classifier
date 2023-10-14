@@ -867,7 +867,7 @@ def get_coded_dictionary_elements(
         Dict[str, Any]: A dictionary containing extracted information in a coded format.
     """
     dataset_dictionary: Dict[str, Any] = deepcopy(dicom_sanitized_dataset)
-    for name, value in dataset_dictionary.items():
+    for name, value in dicom_sanitized_dataset.items():
         if name == "PixelSpacing":
             tuple_list = convert_array_to_min_max(name, value)
             for vv in tuple_list:
