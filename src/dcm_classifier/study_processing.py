@@ -369,6 +369,3 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 del volumes_dictionary[series_number]
             del series_numbers_to_remove
         return volumes_dictionary
-
-    def series_inference(self):
-        pass

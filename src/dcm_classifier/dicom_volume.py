@@ -161,16 +161,15 @@ class DicomSingleVolumeInfoBase:
 
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
         self.average_slice_spacing = -12345.0
-        (
-            _one_study_found,
-            self.volume_info_dict,
-        ) = self._make_one_study_info_mapping_from_filelist()
-
-        self.itk_image: Optional[FImageType] = None
 
         self.modality: Optional[str] = None
         self.modality_probability: Optional[pd.DataFrame] = None
         self.acquisition_plane: Optional[str] = None
+        self.itk_image: Optional[FImageType] = None
+        (
+            _one_study_found,
+            self.volume_info_dict,
+        ) = self._make_one_study_info_mapping_from_filelist()
 
     def set_modality(self, modality: str) -> None:
         """
@@ -388,9 +387,11 @@ class DicomSingleVolumeInfoBase:
                  The dictionary includes Series Number, Echo Time, SAR, b-values, file name,
                  Series and Study Instance UID, Series Description, and various indicators.
         """
-        sanitized_dicom_dict: Dict[str, Any] = sanitize_dicom_dataset(
-            self._pydicom_info
-        )
+        sanitized_dicom_dict, valid = sanitize_dicom_dataset(self._pydicom_info)
+        if not valid:
+            self.set_modality("INVALID")
+            self.set_acquisition_plane("INVALID")
+
         volume_info_dict: Dict[str, Any] = get_coded_dictionary_elements(
             sanitized_dicom_dict
         )

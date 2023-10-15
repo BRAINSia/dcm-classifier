@@ -25,6 +25,7 @@ from copy import deepcopy
 import itk
 import re
 import unicodedata
+import warnings
 
 from dcm_classifier.dicom_config import required_DICOM_fields
 
@@ -778,7 +779,7 @@ def vprint(msg: str, verbose=False):
 def sanitize_dicom_dataset(
     ro_dataset: pydicom.Dataset,
     required_info_list: List[str] = required_DICOM_fields,
-) -> dict:
+) -> tuple[dict, bool]:
     """
     Validates the DICOM fields in the DICOM header to ensure all required fields are present.
 
@@ -847,11 +848,12 @@ def sanitize_dicom_dataset(
 
     # Warn the user if there are INVALID_VALUE fields
     if len(missing_fields) > 0:
-        raise Exception(
-            f"Required DICOM fields: {missing_fields} in {dicom_filename} are missing or have invalid values."
+        warnings.warn(
+            f"\nWARNING: Required DICOM fields: {missing_fields} in {dicom_filename} are missing or have invalid values.\n"
         )
+        return dataset_dictionary, False
 
-    return dataset_dictionary
+    return dataset_dictionary, True
 
 
 def get_coded_dictionary_elements(

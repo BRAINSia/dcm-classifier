@@ -19,6 +19,7 @@
 from dcm_classifier.dicom_series import DicomSingleSeries
 from dcm_classifier.namic_dicom_typing import itk_read_from_dicomfn_list
 from pathlib import Path
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -146,6 +147,10 @@ class ImageTypeClassifierBase:
         Returns:
             str: A string representing the inferred acquisition plane ("iso" for isotropic, "ax" for axial, "sag" for sagittal and "cor" for coronal).
         """
+        # check if the volume was invalidated
+        for volume in self.series.get_volume_list():
+            if volume.get_acquisition_plane() == "INVALID":
+                return "INVALID"
 
         volume = self.series.get_volume_list()[0]
         itk_im = itk_read_from_dicomfn_list(volume.get_one_volume_dcm_filenames())
@@ -181,6 +186,10 @@ class ImageTypeClassifierBase:
                 - A string representing the inferred modality (image type).
                 - A Pandas DataFrame containing classification results, including class probabilities.
         """
+        # check if the volume was invalidated
+        for value in feature_dict.values():
+            if value == "INVALID":
+                return "INVALID", None
 
         import onnxruntime as rt
 
@@ -205,7 +214,7 @@ class ImageTypeClassifierBase:
         except ValueError:
             # Short circuit if the inputs are not sufficient for inference
             full_outputs["GUESS_ONNX"] = "InvalidDicomInputs"
-            return "invalid", full_outputs
+            return "INVALID", full_outputs
         pred_onx_run_output = sess.run(
             [label_name, prob_name], {input_name: numeric_inputs}
         )
@@ -274,7 +283,7 @@ class ImageTypeClassifierBase:
                 if feature not in input_dict.keys():
                     missing_features.append(feature)
             if len(missing_features) > 0:
-                print(
+                warnings.warn(
                     f"Missing features for SeriesNumber {self.series_number}: {missing_features}\n"
                     f"Series contains: {self.series.volume_info_list[0].get_one_volume_dcm_filenames()}"
                 )
