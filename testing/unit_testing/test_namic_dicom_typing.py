@@ -1,9 +1,9 @@
 import itk
 import pytest
-from botimageai.dicom_processing.write_volume_from_dicom import (
+from dcm_classifier.write_volume_from_dicom import (
     write_volume_from_series_directory,
 )
-from botimageai.namic_dicom.namic_dicom_typing import (
+from dcm_classifier.namic_dicom_typing import (
     two_point_compute_adc,
     compute_adc_from_multi_b_values,
     compare_3d_float_images,

@@ -1,7 +1,7 @@
 import pytest
 
-from botimageai.namic_dicom.image_type_inference import ImageTypeClassifierBase
-from botimageai.namic_dicom.study_processing import (
+from dcm_classifier.image_type_inference import ImageTypeClassifierBase
+from dcm_classifier.study_processing import (
     ProcessOneDicomStudyToVolumesMappingBase,
 )
 from pathlib import Path
@@ -92,6 +92,6 @@ def test_get_study_dictionary_and_set_inferer():
     assert study_to_volume_mapping_base.inferer.mode == "volume"
     assert study_to_volume_mapping_base.inferer.min_probability_threshold == 0.4
 
-@pytest.Mark.skip(reason="Not implemented yet")
-def test_run_inference():
-    pass
+# @pytest.Mark.skip(reason="Not implemented yet")
+# def test_run_inference():
+#     pass

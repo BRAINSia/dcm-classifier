@@ -1,4 +1,4 @@
-from botimageai.dicom_processing.dicom_single_volume_info import (
+from dcm_classifier.dicom_volume import (
     DicomSingleVolumeInfoBase,
 )
 from collections import OrderedDict
@@ -82,6 +82,7 @@ def test_get_series_size(mock_volumes):
 #     # assert "Identified image type: DWI" in validation_report_str
 #     # assert "Identified bvalue: 100" in validation_report_str
 #     # assert "Identified SeriesNumber: 702" in validation_report_str
+
 @pytest.Mark.skip(reason="Not implemented yet")
 def test_get_itk_image():
     # TODO - implement this test
