@@ -21,14 +21,14 @@ from pathlib import Path
 from typing import List, Union, Optional, Dict, Any
 import collections
 import pydicom
-import copy
+from copy import deepcopy
 import itk
 import re
 import unicodedata
+import warnings
 
-from dcm_classifier.dicom_config import (
-    drop_columns_with_no_series_specific_information,
-)
+from dcm_classifier.dicom_config import required_DICOM_fields
+
 
 FImageType = itk.Image[itk.F, 3]
 UCImageType = itk.Image[itk.UC, 3]
@@ -207,6 +207,42 @@ def cmd_exists(cmd):
     import shutil
 
     return shutil.which(cmd) is not None
+
+
+def is_number(s: Any) -> bool:
+    """
+    Check if a string is a number.
+    https://stackoverflow.com/q/354038
+
+    Args:
+        s (Any): The string to check.
+
+    Returns:
+        bool: True if the string is a number, False otherwise.
+    """
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+def is_integer(s: Any) -> bool:
+    """
+    Check if a string is a number.
+    https://stackoverflow.com/q/354038
+
+    Args:
+        s (Any): The string to check.
+
+    Returns:
+        bool: True if the string is a number, False otherwise.
+    """
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
 
 
 def rglob_for_singular_result(
@@ -740,46 +776,106 @@ def vprint(msg: str, verbose=False):
         print(msg)
 
 
-def get_coded_dictionary_elements(
+def sanitize_dicom_dataset(
     ro_dataset: pydicom.Dataset,
-    one_entry_per_volume: bool = True,
-    skip_info_list: List[str] = drop_columns_with_no_series_specific_information,
-) -> Dict[str, Any]:
+    required_info_list: List[str] = required_DICOM_fields,
+) -> tuple[dict, bool]:
     """
-    Extract specific information from a DICOM fields dataset and create a coded dictionary with extracted features.
+    Validates the DICOM fields in the DICOM header to ensure all required fields are present.
 
-    Args:
-        ro_dataset (pydicom.Dataset): The DICOM dataset to extract information from.
-        one_entry_per_volume (bool, optional): Whether to create one entry per volume. Default is True.
-        skip_info_list (List[str], optional): List of information to skip. Default is drop_columns_with_no_series_specific_information.
+    Raises an exception if any required fields are missing.
 
-    Returns:
-        Dict[str, Any]: A dictionary containing extracted information in a coded format.
     """
     dataset_dictionary: Dict[str, Any] = dict()
-    dataset = copy.deepcopy(ro_dataset)  # DO NOT MODIFY THE INPUT DATASET!
+    dataset = deepcopy(ro_dataset)  # DO NOT MODIFY THE INPUT DATASET!
+    dicom_filename: Path = dataset.filename
+    dataset_dictionary["FileName"]: str = dicom_filename
     dataset = pydicom.Dataset(dataset)  # DO NOT MODIFY THE INPUT DATASET!
     dataset.remove_private_tags()
     values = dataset.values()
+    INVALID_VALUE = "INVALID_VALUE"
     for v in values:
         if isinstance(v, pydicom.dataelem.RawDataElement):
             e = pydicom.dataelem.DataElement_from_raw(v)
         else:
             e = v
-        if e.name in skip_info_list:
-            # No need to process columns that have no information related to series identification
-            continue
 
+        # process the name to match naming in required_DICOM_fields
         name = str(e.name).replace(" ", "").replace("(", "").replace(")", "")
-        value = e.value
-        value_str: str = str(e.value)
-        del e
+        if name not in required_info_list:
+            # No need to process columns that are not required
+            continue
+        else:
+            value = e.value
+            dataset_dictionary[name] = value
+
+    # check if all fields in the required_DICOM_fields are present in dataset dictionary.
+    # If fields are not present or they are formatted incorrectly, add them with INVALID_VALUE
+    missing_fields = []
+    for field in required_info_list:
+        if field not in dataset_dictionary.keys():
+            dataset_dictionary[field] = INVALID_VALUE
+            missing_fields.append(field)
+        elif field == "EchoTime":
+            if not is_number(dataset_dictionary[field]):
+                dataset_dictionary[field] = INVALID_VALUE
+                missing_fields.append(field)
+                vprint(f"Missing required echo time value {dicom_filename}")
+        elif field == "SeriesNumber":
+            if not is_integer(dataset_dictionary[field]):
+                dataset_dictionary[field] = INVALID_VALUE
+                missing_fields.append(field)
+                vprint(f"Missing required echo time value {dicom_filename}")
+        elif field == "SAR":
+            if not is_number(dataset_dictionary[field]):
+                dataset_dictionary[field] = INVALID_VALUE
+                missing_fields.append(field)
+                vprint(f"Missing required SAR value {dicom_filename}")
+        elif field == "PixelBandwidth":
+            if not is_number(dataset_dictionary[field]):
+                dataset_dictionary[field] = INVALID_VALUE
+                missing_fields.append(field)
+                vprint(f"Missing required PixelBandwidth value {dicom_filename}")
+        else:
+            # check that the field is not empty or None
+            if (
+                dataset_dictionary[field] is None
+                or str(dataset_dictionary[field]) == ""
+            ):
+                dataset_dictionary[field] = INVALID_VALUE
+                missing_fields.append(field)
+                vprint(f"Missing required field {dicom_filename}")
+
+    # Warn the user if there are INVALID_VALUE fields
+    if len(missing_fields) > 0:
+        warnings.warn(
+            f"\nWARNING: Required DICOM fields: {missing_fields} in {dicom_filename} are missing or have invalid values.\n"
+        )
+        return dataset_dictionary, False
+
+    return dataset_dictionary, True
+
+
+def get_coded_dictionary_elements(
+    dicom_sanitized_dataset: dict,
+) -> Dict[str, Any]:
+    """
+    Extract specific information from a DICOM fields dataset and create a coded dictionary with extracted features.
+
+    Args:
+        dicom_sanitized_dataset (dict): Sanitized dictionary containing required DICOM header information.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing extracted information in a coded format.
+    """
+    dataset_dictionary: Dict[str, Any] = deepcopy(dicom_sanitized_dataset)
+    for name, value in dicom_sanitized_dataset.items():
         if name == "PixelSpacing":
             tuple_list = convert_array_to_min_max(name, value)
             for vv in tuple_list:
                 dataset_dictionary[vv[0]] = str(vv[1])
         elif name == "ImageType":
-            lower_value_str: str = value_str.lower()
+            lower_value_str: str = str(value).lower()
             dataset_dictionary["ImageType"] = str(value)
             if "'DERIVED'".lower() in lower_value_str:
                 dataset_dictionary["IsDerivedImageType"] = 1
@@ -804,9 +900,6 @@ def get_coded_dictionary_elements(
                 dataset_dictionary["ImageTypeTrace"] = 1
             else:
                 dataset_dictionary["ImageTypeTrace"] = 0
-        elif name == "DiffusionGradientOrientation":
-            # "DiffusionGradientOrientation"
-            dataset_dictionary["HasDiffusionGradientOrientation"] = 1
         elif name == "ImageOrientationPatient":
             tuple_list = convert_array_to_index_value(name, value)
             for vv in tuple_list:
@@ -829,24 +922,8 @@ def get_coded_dictionary_elements(
             else:
                 manufacturer_code = 0
             dataset_dictionary["ManufacturerCode"] = manufacturer_code
-        elif name == "SeriesDescription":
-            dataset_dictionary[name] = value_str
-            value_str_lower = value_str.lower()
-            contains_t2_in_name: bool = "T2".lower() in value_str_lower
-            if "Ax".lower() in value_str_lower:
-                dataset_dictionary["AxialIndicator"] = 1
-            else:
-                dataset_dictionary["AxialIndicator"] = 0
-            if "Cor".lower() in value_str_lower:
-                dataset_dictionary["CoronalIndicator"] = 1
-            else:
-                dataset_dictionary["CoronalIndicator"] = 0
-            if "Sag".lower() in value_str_lower:
-                dataset_dictionary["SaggitalIndicator"] = 1
-            else:
-                dataset_dictionary["SaggitalIndicator"] = 0
         else:
-            dataset_dictionary[name] = value_str
+            dataset_dictionary[name] = str(value)
     return dataset_dictionary
 
 

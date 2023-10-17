@@ -19,6 +19,7 @@
 from dcm_classifier.dicom_series import DicomSingleSeries
 from dcm_classifier.namic_dicom_typing import itk_read_from_dicomfn_list
 from pathlib import Path
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -138,12 +139,18 @@ class ImageTypeClassifierBase:
         It takes the ImageOrientationPatient_0, ImageOrientationPatient_5 from info_dict
         and returns the acquisition plane prediction. This can be implemented multiple ways. For more details, see the publication.
 
+        To determine if the image is isotropic, we check if the all spacing components are within 10% of the cube root of the voxel volume.
+
         Args:
             feature_dict (dict): Optional dictionary of additional features for inference.
 
         Returns:
             str: A string representing the inferred acquisition plane ("iso" for isotropic, "ax" for axial, "sag" for sagittal and "cor" for coronal).
         """
+        # check if the volume was invalidated
+        for volume in self.series.get_volume_list():
+            if volume.get_acquisition_plane() == "INVALID":
+                return "INVALID"
 
         volume = self.series.get_volume_list()[0]
         itk_im = itk_read_from_dicomfn_list(volume.get_one_volume_dcm_filenames())
@@ -179,6 +186,10 @@ class ImageTypeClassifierBase:
                 - A string representing the inferred modality (image type).
                 - A Pandas DataFrame containing classification results, including class probabilities.
         """
+        # check if the volume was invalidated
+        for value in feature_dict.values():
+            if value == "INVALID":
+                return "INVALID", None
 
         import onnxruntime as rt
 
@@ -195,17 +206,23 @@ class ImageTypeClassifierBase:
         label_name: str = sess.get_outputs()[0].name
         prob_name: str = sess.get_outputs()[1].name
 
+        full_outputs: pd.DataFrame = pd.DataFrame()
+        full_outputs["SeriesNumber"] = [self.series_number]
         model_inputs: pd.DataFrame = e_inputs[self.classification_feature_list]
-        numeric_inputs: np.array = model_inputs.astype(np.float32).to_numpy()
+        try:
+            numeric_inputs: np.array = model_inputs.astype(np.float32).to_numpy()
+        except ValueError:
+            # Short circuit if the inputs are not sufficient for inference
+            full_outputs["GUESS_ONNX"] = "InvalidDicomInputs"
+            return "INVALID", full_outputs
         pred_onx_run_output = sess.run(
             [label_name, prob_name], {input_name: numeric_inputs}
         )
         pred_onx = pred_onx_run_output[0]
         probability_onx = pred_onx_run_output[1]
-        full_outputs: pd.DataFrame = pd.DataFrame()
-        full_outputs["SeriesNumber"] = [self.series_number]
         full_outputs["GUESS_ONNX_CODE"] = pred_onx
         full_outputs["GUESS_ONNX"] = pred_onx
+
         for type_name, type_integer_code in self.imagetype_to_int_map.items():
             full_outputs["GUESS_ONNX"].replace(
                 to_replace=type_integer_code, value=type_name, inplace=True
@@ -266,7 +283,7 @@ class ImageTypeClassifierBase:
                 if feature not in input_dict.keys():
                     missing_features.append(feature)
             if len(missing_features) > 0:
-                print(
+                warnings.warn(
                     f"Missing features for SeriesNumber {self.series_number}: {missing_features}\n"
                     f"Series contains: {self.series.volume_info_list[0].get_one_volume_dcm_filenames()}"
                 )

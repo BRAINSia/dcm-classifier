@@ -25,7 +25,7 @@ import argparse
 
 from dcm_classify.dicom_config import (
     # make_unique_ordered_list,
-    drop_columns_with_no_series_specific_information,
+    required_DICOM_fields,
 )
 
 rcParams.update({"figure.autolayout": True})
