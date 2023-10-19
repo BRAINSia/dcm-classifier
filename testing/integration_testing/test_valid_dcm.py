@@ -11,11 +11,12 @@ current_file_path = Path(__file__).parent.resolve()
 inference_model_path = list(Path(__file__).parent.parent.parent.rglob("models/rf_classifier.onnx"))[0]
 
 
+# @pytest.mark.parametrize("file", [])
 def test_dcm_validity():
     inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
     study = ProcessOneDicomStudyToVolumesMappingBase(
         study_directory=current_file_path.parent / "dcm_files", inferer=inferer
-        )
+    )
     # study.run_inference()
 
     volumes = study.get_list_of_primary_volume_info()
@@ -25,18 +26,20 @@ def test_dcm_validity():
     assert len(volumes) == 1
 
 
-def test_mr_dcm():
-    inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
-    study = ProcessOneDicomStudyToVolumesMappingBase(
-        study_directory=current_file_path.parent.parent.parent / "dcm_files", inferer=inferer
-        )
+@pytest.mark.parametrize("file, modality", [("new_MRBRAIN.DCM", "MR"), ("a_valid_file.dcm", "MR"), ("valid_CT_file.dcm", "CT")])
+def test_mr_dcm(file, modality):
+    # inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
+    # study = ProcessOneDicomStudyToVolumesMappingBase(
+    #     study_directory=current_file_path.parent.parent.parent / "dcm_files", inferer=inferer
+    # )
     # study.run_inference()
 
-    print(study.get_list_of_primary_volume_info())
-    print(study.series_dictionary.get(3).volume_info_list)
-    assert not DicomSingleVolumeInfoBase([current_file_path.parent / "dcm_files/new_MRBRAIN.DCM"]).get_modality() == "MR"
-
     # print(study.get_list_of_primary_volume_info())
-    # assert study.get_list_of_primary_volume_info()[0]["Modality"] == "MR"
+    # print(study.series_dictionary.get(3).volume_info_list)
+    print(DicomSingleVolumeInfoBase([current_file_path.parent / "dcm_files" / file]).get_modality())
+    assert DicomSingleVolumeInfoBase(
+        [current_file_path.parent / "dcm_files" / file]).get_modality() == modality
 
 
+def test_CT_dcm():
+    pass

@@ -23,7 +23,7 @@ def test_dcm_validity():
     # volumes = ProcessOneDicomStudyToVolumesMappingBase("testing/dcm_files").get_list_of_primary_volume_info()
     print(relative_testing_path)
     assert relative_testing_path.exists()
-    volume = DicomSingleVolumeInfoBase([relative_testing_path / "dcm_files/valid_file.dcm"])
+    volume = DicomSingleVolumeInfoBase([relative_testing_path / "dcm_files/a_valid_file.dcm"])
     print(volume)
     # assert len(volumes) == 1
     # assert len(study.get_list_of_primary_volume_info()) == 1

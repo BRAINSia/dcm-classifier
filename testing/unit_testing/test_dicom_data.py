@@ -28,9 +28,9 @@ def test_dcm_modality():
 
 
 # def test_ct_dcm_single_vol(get_ct_dcm):
-#     inferer = ImageTypeClassifierBase(classification_model_filename="testing/dcm_files/valid_file.dcm")
+#     inferer = ImageTypeClassifierBase(classification_model_filename="testing/dcm_files/a_valid_file.dcm")
 #     study = ProcessOneDicomStudyToVolumesMappingBase(
-#         study_directory="testing/dcm_files/valid_file.dcm", inferer=inferer
+#         study_directory="testing/dcm_files/a_valid_file.dcm", inferer=inferer
 #         )
 #     study.run_inference()
 #
