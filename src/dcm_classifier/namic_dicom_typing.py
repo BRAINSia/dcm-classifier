@@ -394,7 +394,7 @@ def compare_3d_float_images(
     return num_pixels_in_error, images_dict, images_in_same_space
 
 
-def slugify(value, allow_unicode=False):
+def slugify(value, allow_uppercase=False, allow_unicode=False):
     """
     Convert a string to a slug format.
 
@@ -423,7 +423,9 @@ def slugify(value, allow_unicode=False):
             .encode("ascii", "ignore")
             .decode("ascii")
         )
-    value = re.sub(r"[^\w\s-]", "", value.lower())
+    if not allow_uppercase:
+        value = value.lower()
+    value = re.sub(r"[^\w\s-]", "", value)
     final_value = re.sub(r"[-\s]+", "-", value).strip("-_")
     return final_value
 
