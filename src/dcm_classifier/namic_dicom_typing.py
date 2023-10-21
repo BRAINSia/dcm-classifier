@@ -250,6 +250,7 @@ def rglob_for_singular_result(
     base_dir: Path,
     pattern: str,
     require_result_type: Optional[str] = None,
+    recursive_search=True,
 ) -> Optional[Path]:
     """
     Recursively search for files or directories matching a pattern in a base directory.
@@ -263,7 +264,8 @@ def rglob_for_singular_result(
         Optional[Path]: The matching result if found, or None if no result or multiple results are found.
     """
 
-    list_results: List[Path] = [x for x in base_dir.rglob(pattern)]
+    glob_obj = base_dir.rglob(pattern) if recursive_search else base_dir.glob(pattern)
+    list_results: List[Path] = list(glob_obj)
     if (len(list_results)) != 1:
         return None
     singular_result = list_results[0]
@@ -278,6 +280,7 @@ def rglob_for_singular_result_from_pattern_list(
     base_dir: Path,
     patterns: List[str],
     require_result_type: Optional[str] = None,
+    recursive_search: bool = True,
 ) -> Optional[Path]:
     """
     Recursively search for files or directories matching patterns from a list in a base directory.
@@ -291,7 +294,9 @@ def rglob_for_singular_result_from_pattern_list(
         Optional[Path]: The matching result if found, or None if no result or multiple results are found.
     """
     for pattern in patterns:
-        candidate = rglob_for_singular_result(base_dir, pattern, require_result_type)
+        candidate = rglob_for_singular_result(
+            base_dir, pattern, require_result_type, recursive_search
+        )
         if candidate is not None:
             return candidate
     return None
