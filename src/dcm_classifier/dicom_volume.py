@@ -55,8 +55,8 @@ def pydicom_read_cache(
         # print(f"Using cached value for {lookup_filename}")
         pass
     else:
-        pydicom_read_cache_static_filename_dict[lookup_filename] = pydicom.read_file(
-            lookup_filename, stop_before_pixels=stop_before_pixels
+        pydicom_read_cache_static_filename_dict[lookup_filename] = pydicom.dcmread(
+            lookup_filename, stop_before_pixels=stop_before_pixels, force=True
         )
     return pydicom_read_cache_static_filename_dict.get(lookup_filename)
 

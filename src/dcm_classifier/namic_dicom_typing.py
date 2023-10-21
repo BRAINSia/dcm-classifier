@@ -189,7 +189,7 @@ def read_dwi_series_itk(dicom_directory: Path) -> (float, FImageType):
     all_files: List[str] = [x.as_posix() for x in dicom_directory.glob("*.dcm")]
     bvalue_image = itk_read_from_dicomfn_list(all_files)
 
-    dataset = pydicom.read_file(all_files[0], stop_before_pixels=True)
+    dataset = pydicom.dcmread(all_files[0], stop_before_pixels=True)
     dicom_extracted_bvalue = get_bvalue(dataset, round_to_nearst_10=True)
     return dicom_extracted_bvalue, bvalue_image
 
@@ -435,7 +435,7 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
     https://dicom.innolitics.com/ciods/enhanced-mr-image/enhanced-mr-image-multi-frame-functional-groups/52009229/00189117/00189087
     NOTE: Bvalue is conditionally required.  This script is to re-inject implied values based on manual inspection or other data sources
 
-    `dicom_header_info = dicom.read_file(dicom_file_name, stop_before_pixels=True)`
+    `dicom_header_info = dicom.dcmread(dicom_file_name, stop_before_pixels=True)`
 
     Args:
         dicom_header_info: A pydicom object containing DICOM header information.
