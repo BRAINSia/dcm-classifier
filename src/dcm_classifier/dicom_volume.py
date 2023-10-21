@@ -86,7 +86,6 @@ class DicomSingleVolumeInfoBase:
         ro_user_supplied_dcm_filenames (List[Path]): A list of DICOM file paths representing a single volume.
         _pydicom_info (pydicom.Dataset): A pydicom.Dataset containing information about the DICOM volume.
         bvalue (float): The b-value of the DICOM volume.
-        average_slice_spacing (float): The average slice spacing of the DICOM volume.
         volume_info_dict (Dict[str, Any]): A dictionary containing information about the DICOM volume.
         itk_image (Optional[FImageType]): The ITK image of the DICOM volume.
         modality (Optional[str]): The modality of the DICOM volume (e.g., "CT", "MRI").
@@ -117,8 +116,6 @@ class DicomSingleVolumeInfoBase:
         get_study_uid(self) -> str:
 
         get_series_pixel_spacing(self) -> str:
-
-        get_series_spacing_between_slices(self) -> str:
 
         get_series_size(self) -> str:
 
@@ -160,7 +157,6 @@ class DicomSingleVolumeInfoBase:
         )
 
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
-        self.average_slice_spacing = -12345.0
 
         self.modality: Optional[str] = None
         self.modality_probability: Optional[pd.DataFrame] = None
@@ -306,15 +302,6 @@ class DicomSingleVolumeInfoBase:
             str: The pixel spacing as a string.
         """
         return str(self._pydicom_info.PixelSpacing)
-
-    def get_series_spacing_between_slices(self) -> str:
-        """
-        Get the spacing between slices in the DICOM series.
-
-        Returns:
-            str: The spacing between slices as a string.
-        """
-        return str(self.average_slice_spacing)
 
     def get_series_size(self) -> str:
         """
