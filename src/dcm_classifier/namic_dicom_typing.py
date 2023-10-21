@@ -27,8 +27,6 @@ import re
 import unicodedata
 import warnings
 
-from dcm_classifier.dicom_config import required_DICOM_fields
-
 
 FImageType = itk.Image[itk.F, 3]
 UCImageType = itk.Image[itk.UC, 3]
@@ -789,7 +787,8 @@ def vprint(msg: str, verbose=False):
 
 def sanitize_dicom_dataset(
     ro_dataset: pydicom.Dataset,
-    required_info_list: List[str] = required_DICOM_fields,
+    required_info_list: List[str],
+    optional_info_list: List[str],
 ) -> tuple[dict, bool]:
     """
     Validates the DICOM fields in the DICOM header to ensure all required fields are present.
@@ -805,23 +804,25 @@ def sanitize_dicom_dataset(
     dataset.remove_private_tags()
     values = dataset.values()
     INVALID_VALUE = "INVALID_VALUE"
+    all_candidate_info_fields: List[str] = required_info_list + optional_info_list
+
     for v in values:
         if isinstance(v, pydicom.dataelem.RawDataElement):
             e = pydicom.dataelem.DataElement_from_raw(v)
         else:
             e = v
 
-        # process the name to match naming in required_DICOM_fields
+        # process the name to match naming in required_info_list
         name = str(e.name).replace(" ", "").replace("(", "").replace(")", "")
-        if name not in required_info_list:
-            # No need to process columns that are not required
-            continue
-        else:
+        # Only add entities that are in the required or optional lists
+
+        if name in all_candidate_info_fields:
             value = e.value
             dataset_dictionary[name] = value
+    del all_candidate_info_fields
 
-    # check if all fields in the required_DICOM_fields are present in dataset dictionary.
-    # If fields are not present or they are formatted incorrectly, add them with INVALID_VALUE
+    # check if all fields in the required_info_list are present in dataset dictionary.
+    # If fields are not present, or they are formatted incorrectly, add them with INVALID_VALUE
     missing_fields = []
     for field in required_info_list:
         if field not in dataset_dictionary.keys():
@@ -836,12 +837,7 @@ def sanitize_dicom_dataset(
             if not is_integer(dataset_dictionary[field]):
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
-                vprint(f"Missing required echo time value {dicom_filename}")
-        elif field == "SAR":
-            if not is_number(dataset_dictionary[field]):
-                dataset_dictionary[field] = INVALID_VALUE
-                missing_fields.append(field)
-                vprint(f"Missing required SAR value {dicom_filename}")
+                vprint(f"Missing required SeriesNumber value {dicom_filename}")
         elif field == "PixelBandwidth":
             if not is_number(dataset_dictionary[field]):
                 dataset_dictionary[field] = INVALID_VALUE
@@ -856,6 +852,39 @@ def sanitize_dicom_dataset(
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
                 vprint(f"Missing required field {dicom_filename}")
+
+    # set the default values for optional dicom fields
+    for field in optional_info_list:
+        if field == "SAR":
+            if field not in dataset_dictionary.keys() or not is_number(
+                dataset_dictionary[field]
+            ):
+                # SAR is allowed to be empty or not a number because derived images often do not have SAR
+                # for example, ADC images are derived images that are computed, so there is not
+                # SAR impact on the patient for the derived image.
+                # SAR Calculated whole body Specific Absorption Rate in watts/kilogram.
+                # indicate that there is no SAR for the computed image
+                _default_inferred_value = -12345.0
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "Manufacturer":
+            if field not in dataset_dictionary.keys():
+                # Manufacturer is not a required field, it can be unknown
+                _default_inferred_value = "UnknownManufacturer"
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "ImageType":
+            if field not in dataset_dictionary.keys():
+                # ImageType is not a required field, it can be unknown
+                _default_inferred_value = "UnknownImageType"
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
 
     # Warn the user if there are INVALID_VALUE fields
     if len(missing_fields) > 0:

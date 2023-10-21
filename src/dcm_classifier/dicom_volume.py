@@ -32,6 +32,10 @@ from dcm_classifier.namic_dicom_typing import (
     get_coded_dictionary_elements,
     sanitize_dicom_dataset,
 )
+from dcm_classifier.dicom_config import (
+    required_DICOM_fields,
+    optional_DICOM_fields,
+)
 
 pydicom_read_cache_static_filename_dict: Dict[str, pydicom.Dataset] = dict()
 
@@ -161,7 +165,7 @@ class DicomSingleVolumeInfoBase:
 
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
 
-        self.modality: Optional[str] = None
+        self.modality: str = "INVALID"
         self.modality_probability: Optional[pd.DataFrame] = None
         self.acquisition_plane: Optional[str] = None
         self.itk_image: Optional[FImageType] = None
@@ -377,7 +381,11 @@ class DicomSingleVolumeInfoBase:
                  The dictionary includes Series Number, Echo Time, SAR, b-values, file name,
                  Series and Study Instance UID, Series Description, and various indicators.
         """
-        sanitized_dicom_dict, valid = sanitize_dicom_dataset(self._pydicom_info)
+        sanitized_dicom_dict, valid = sanitize_dicom_dataset(
+            ro_dataset=self._pydicom_info,
+            required_info_list=required_DICOM_fields,
+            optional_info_list=optional_DICOM_fields,
+        )
         if not valid:
             self.set_modality("INVALID")
             self.set_acquisition_plane("INVALID")
