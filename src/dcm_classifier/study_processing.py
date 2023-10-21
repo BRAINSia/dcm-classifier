@@ -307,9 +307,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         seriesUID = namesGenerator.GetSeriesUIDs()
 
         if len(seriesUID) < 1:
-            print(f"No DICOMs in: {study_directory}")
-            # TODO: Need to fill out report of missing data rather than simple exit here
-            sys.exit(1)
+            raise FileNotFoundError(
+                f"No DICOMs in: {study_directory} (__identify_single_volumes)"
+            )
 
         print(
             f"The directory: {study_directory} contains {len(seriesUID)} DICOM Series "

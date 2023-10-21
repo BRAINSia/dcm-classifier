@@ -146,6 +146,9 @@ class DicomSingleVolumeInfoBase:
         self.one_volume_dcm_filenames: List[Path] = [
             Path(x).resolve() for x in one_volume_dcm_filenames
         ]
+        if len(self.one_volume_dcm_filenames) == 0:
+            raise ValueError("No file names provided list")
+
         # The ro_user_supplied_dcm_filenames should never be overriden after initialization
         # it is needed for repeated validation calls
         self.ro_user_supplied_dcm_filenames = list(self.one_volume_dcm_filenames)
