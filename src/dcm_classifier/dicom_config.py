@@ -48,6 +48,7 @@ required_DICOM_fields: List[str] = [
 ]
 
 optional_DICOM_fields: List[str] = [
+)
     "SAR",  # Not present in all derived image types
     "ImageType",  # Not required
     "Manufacturer",  # Not required
