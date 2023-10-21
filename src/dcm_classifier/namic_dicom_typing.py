@@ -459,6 +459,8 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
             # "Toshiba" : # Uses (0x0018, 0x9087) standard
         }
     )
+    # TODO: https://pydicom.github.io/pydicom/dev/auto_examples/metadata_processing/plot_add_dict_entries.html
+    # Add these private tags to the DICOM dictionary for better processing
 
     for k, v in private_tags_map.items():
         if v in dicom_header_info:
@@ -474,6 +476,7 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
                 except TypeError:
                     return -12345
             elif v == private_tags_map["Siemens_historical"]:
+                # This is not supported yet
                 continue
             else:
                 value = dicom_element.value
