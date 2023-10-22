@@ -92,6 +92,7 @@ def test_get_study_dictionary_and_set_inferer():
     assert study_to_volume_mapping_base.inferer.mode == "volume"
     assert study_to_volume_mapping_base.inferer.min_probability_threshold == 0.4
 
-# @pytest.Mark.skip(reason="Not implemented yet")
+
+# @pytest.mark.skip(reason="Not implemented yet")
 # def test_run_inference():
 #     pass

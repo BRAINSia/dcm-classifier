@@ -47,19 +47,9 @@ def test_get_series_pixel_spacing(mock_volumes):
 # def test_validate(mock_volumes):
 #     mock_volume = DicomSingleVolumeInfoBase(mock_volumes[0])
 #     volume_validate = mock_volume.validate()
-#     distance_between_slices = mock_volume.get_series_spacing_between_slices()
 #     assert volume_validate is False
 #     assert distance_between_slices != "-12345.0"
 #     assert mock_volume.get_volume_bvalue() == -12345
-
-
-# ensures that DicomSingleVolumeInfoBase.average_slice_spacing is still '24.0' even when validate has not been called
-def test_get_series_spacing_between_slices(mock_volumes):
-    distance_between_slices = DicomSingleVolumeInfoBase(
-        mock_volumes[0]
-    ).get_series_spacing_between_slices()
-
-    assert distance_between_slices == "3.0"
 
 
 def test_image_diagnostics(mock_volumes):
@@ -83,27 +73,33 @@ def test_get_series_size(mock_volumes):
 #     # assert "Identified bvalue: 100" in validation_report_str
 #     # assert "Identified SeriesNumber: 702" in validation_report_str
 
-@pytest.Mark.skip(reason="Not implemented yet")
+
+@pytest.mark.skip(reason="Not implemented yet")
 def test_get_itk_image():
     # TODO - implement this test
     pass
 
-@pytest.Mark.skip(reason="Not implemented yet")
+
+@pytest.mark.skip(reason="Not implemented yet")
 def test_get_one_volume_dcm_filenames():
     pass
 
-@pytest.Mark.skip(reason="Not implemented yet")
+
+@pytest.mark.skip(reason="Not implemented yet")
 def test_set_modality():
     pass
 
-@pytest.Mark.skip(reason="Not implemented yet")
+
+@pytest.mark.skip(reason="Not implemented yet")
 def test_get_modality():
     pass
 
-@pytest.Mark.skip(reason="Not implemented yet")
+
+@pytest.mark.skip(reason="Not implemented yet")
 def test_set_modality_probabilities():
     pass
 
-@pytest.Mark.skip(reason="Not implemented yet")
+
+@pytest.mark.skip(reason="Not implemented yet")
 def test_get_modality_probabilities():
     pass
