@@ -31,6 +31,7 @@ from dcm_classifier.namic_dicom_typing import (
     vprint,
     get_coded_dictionary_elements,
     sanitize_dicom_dataset,
+    check_for_diffusion_gradient,
 )
 
 pydicom_read_cache_static_filename_dict: Dict[str, pydicom.Dataset] = dict()
@@ -160,10 +161,20 @@ class DicomSingleVolumeInfoBase:
         )
 
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
-        self.average_slice_spacing = -12345.0
+        if self.bvalue >= 0:
+            self.has_diffusion_gradient = check_for_diffusion_gradient(self.one_volume_dcm_filenames)
+            if self.has_diffusion_gradient:
+                self.modality: Optional[str] = "dwig"
+                self.modality_probability: Optional[pd.DataFrame] = pd.DataFrame()
+            else:
+                self.modality: Optional[str] = None
+                self.modality_probability: Optional[pd.DataFrame] = None
+        else:
+            self.has_diffusion_gradient = False
+            self.modality: Optional[str] = None
+            self.modality_probability: Optional[pd.DataFrame] = None
 
-        self.modality: Optional[str] = None
-        self.modality_probability: Optional[pd.DataFrame] = None
+        self.average_slice_spacing = -12345.0
         self.acquisition_plane: Optional[str] = None
         self.itk_image: Optional[FImageType] = None
         (
@@ -387,6 +398,7 @@ class DicomSingleVolumeInfoBase:
                  The dictionary includes Series Number, Echo Time, SAR, b-values, file name,
                  Series and Study Instance UID, Series Description, and various indicators.
         """
+        # TODO: in case of diffusion gradient already established we might need to skip this logic
         sanitized_dicom_dict, valid = sanitize_dicom_dataset(self._pydicom_info)
         if not valid:
             self.set_modality("INVALID")
@@ -401,10 +413,7 @@ class DicomSingleVolumeInfoBase:
         bvalue_current_dicom: int = int(self.get_volume_bvalue())
         volume_info_dict["Diffusionb-value"] = bvalue_current_dicom
         volume_info_dict["Diffusionb-valueMax"] = bvalue_current_dicom
-        if bvalue_current_dicom < -1:
-            volume_info_dict["HasDiffusionGradientOrientation"] = 0
-        else:
-            volume_info_dict["HasDiffusionGradientOrientation"] = 1
+        volume_info_dict["HasDiffusionGradientOrientation"] = int(self.has_diffusion_gradient)
 
         # those values are 1 in case of a single volume
         volume_info_dict["Diffusionb-valueCount"] = 1
