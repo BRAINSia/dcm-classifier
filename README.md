@@ -32,6 +32,18 @@ Run the script!
 
 `python3 classify_study.py -m models/rf_classifier.onnx -d <path_to_dicom_session>`
 
+# Testing
+```bash
+  pytest
+```
+# Coverage Analysis
+```bash
+ coverage run --concurrency=multiprocessing --parallel-mode -m pytest tests --junitxml=tests/pytest.xml
+ coverage combine
+ coverage report --format=text -m |tee tests/pytest-coverage.txt\n          coverage xml -o tests/coverage.xml
+ coverage xml -o tests/coverage.xml
+```
+
 # Authors
 
 1. **Michal Brzus**
