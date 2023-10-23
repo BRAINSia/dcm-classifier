@@ -16,6 +16,7 @@
 #
 #  =========================================================================
 
+from typing import List
 
 """
 List of DICOM header columns that are required for this tool. In the future, the list can be expanded
@@ -34,17 +35,20 @@ Example:
     df.drop(columns=required_DICOM_fields, inplace=True)
 """
 
-required_DICOM_fields = (
+required_DICOM_fields: List[str] = [
     "StudyInstanceUID",
     "SeriesInstanceUID",
     "SeriesNumber",
     "PixelSpacing",
-    "ImageType",
     "ImageOrientationPatient",
-    "Manufacturer",
     "PixelBandwidth",
-    "SAR",
     "EchoTime",
     "RepetitionTime",
     "FlipAngle",
-)
+]
+
+optional_DICOM_fields: List[str] = [
+    "SAR",  # Not present in all derived image types
+    "ImageType",  # Not required
+    "Manufacturer",  # Not required
+]
