@@ -215,6 +215,7 @@ class ImageTypeClassifierBase:
             # Short circuit if the inputs are not sufficient for inference
             full_outputs["GUESS_ONNX"] = "InvalidDicomInputs"
             return "INVALID", full_outputs
+
         pred_onx_run_output = sess.run(
             [label_name, prob_name], {input_name: numeric_inputs}
         )
@@ -234,12 +235,11 @@ class ImageTypeClassifierBase:
             full_outputs[class_name] = class_probability
 
         del col_index, class_probability, col_name, class_name
+        image_type: str = full_outputs.iloc[
+            0, full_outputs.columns.get_loc("GUESS_ONNX")
+        ]
         if max(probability_onx[0].values()) < self.min_probability_threshold:
-            image_type = "unknown"
-        else:
-            image_type: str = full_outputs.iloc[
-                0, full_outputs.columns.get_loc("GUESS_ONNX")
-            ]
+            image_type = f"LOW_PROBABILITY_{image_type}"
 
         return image_type, full_outputs
 
@@ -312,8 +312,11 @@ class ImageTypeClassifierBase:
                     )
         elif self.mode == "volume":
             for volume in self.series.get_volume_list():
-                if validate_features(volume.get_volume_info_dict()):
-                    acquisition_plane = self.infer_acquisition_plane(
+                features_validated: bool = validate_features(
+                    volume.get_volume_info_dict()
+                )
+                if features_validated:
+                    acquisition_plane: str = self.infer_acquisition_plane(
                         feature_dict=volume.get_volume_info_dict()
                     )
                     volume.set_acquisition_plane(acquisition_plane)

@@ -108,20 +108,22 @@ class DicomValidatorBase:
     """
         return msg
 
-    def write_validation_report(self, report_filename: Optional[Path]) -> None:
+    def write_validation_report(
+        self, report_filename_to_append: Optional[Path]
+    ) -> None:
         """
         Write the validation report to a file or print it.
 
         Args:
-            report_filename (Optional[Path]): The filename to write the report to.
+            report_filename_to_append (Optional[Path]): The filename to write the report to.
                 If None, the report will be printed to the console.
         """
         msg: str = self.generate_validation_report_str()
 
-        if report_filename is None:
+        if report_filename_to_append is None:
             print(f"{msg}")
         else:
-            with open(report_filename, "a") as vfid:
+            with open(report_filename_to_append, "a") as vfid:
                 vfid.write(f"{msg}\n")
 
     def validate(self) -> bool:

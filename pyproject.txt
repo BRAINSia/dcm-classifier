@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dcm_classifier"
+version = '0.0.1'
+authors = [
+  { name="Michal Brzus", email="michal-brzus@uiowa.edu" },
+  { name="Hans Johnson", email="hans-johnson@uiowa.edu" },
+]
+description = "This is a consolidation of work from NAMIC efforts primarily at the University of Iowa."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.2"
+pythonpath = [
+  "src",
+  "src/dcm_classifier"
+]
+# NOTE tests/__init__.py is empty.  passing it as the config files
+# silences warnings about missing config.py and config-3.py files
+# pytest-cov breaks code python debugger addopts = "--cov "
+testpaths = [
+    "tests/unit_testing"
+]
+
+[tool.coverage.run]
+omit = [
+    "**/__init__.py",
+    "tests/**",
+    ]
+source = [
+    "src/dcm_classifier"
+]
+
+[tool.coverage.html]
+directory = "coverage_html_report"
+
+[tool.black]
+line-length = 88
+target-version = ['py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # The following are specific to Black, you probably don't want those.
+  tests/data
+  | profiling
+)/
+'''

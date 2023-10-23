@@ -27,8 +27,6 @@ import re
 import unicodedata
 import warnings
 
-from dcm_classifier.dicom_config import required_DICOM_fields
-
 
 FImageType = itk.Image[itk.F, 3]
 UCImageType = itk.Image[itk.UC, 3]
@@ -156,8 +154,9 @@ def itk_read_from_dicomfn_list(
     namesGenerator.SetDirectory(dir_path.as_posix())
     seriesUID_list = namesGenerator.GetSeriesUIDs()
     if len(seriesUID_list) < 1:
-        print(f"No DICOMs in: {dir_path.as_posix()}")
-        sys.exit(1)  # TODO, Throw exception
+        raise FileNotFoundError(
+            f"No DICOMs in: {dir_path.as_posix()} (itk_read_from_dicomfn_list)"
+        )
     if len(seriesUID_list) > 1:
         print(f"Too many series in DICOMs in: {dir_path.as_posix()}")
         sys.exit(2)  # TODO, Throw exception
@@ -189,7 +188,7 @@ def read_dwi_series_itk(dicom_directory: Path) -> (float, FImageType):
     all_files: List[str] = [x.as_posix() for x in dicom_directory.glob("*.dcm")]
     bvalue_image = itk_read_from_dicomfn_list(all_files)
 
-    dataset = pydicom.read_file(all_files[0], stop_before_pixels=True)
+    dataset = pydicom.dcmread(all_files[0], stop_before_pixels=True)
     dicom_extracted_bvalue = get_bvalue(dataset, round_to_nearst_10=True)
     return dicom_extracted_bvalue, bvalue_image
 
@@ -249,6 +248,7 @@ def rglob_for_singular_result(
     base_dir: Path,
     pattern: str,
     require_result_type: Optional[str] = None,
+    recursive_search=True,
 ) -> Optional[Path]:
     """
     Recursively search for files or directories matching a pattern in a base directory.
@@ -262,7 +262,8 @@ def rglob_for_singular_result(
         Optional[Path]: The matching result if found, or None if no result or multiple results are found.
     """
 
-    list_results: List[Path] = [x for x in base_dir.rglob(pattern)]
+    glob_obj = base_dir.rglob(pattern) if recursive_search else base_dir.glob(pattern)
+    list_results: List[Path] = list(glob_obj)
     if (len(list_results)) != 1:
         return None
     singular_result = list_results[0]
@@ -277,6 +278,7 @@ def rglob_for_singular_result_from_pattern_list(
     base_dir: Path,
     patterns: List[str],
     require_result_type: Optional[str] = None,
+    recursive_search: bool = True,
 ) -> Optional[Path]:
     """
     Recursively search for files or directories matching patterns from a list in a base directory.
@@ -290,7 +292,9 @@ def rglob_for_singular_result_from_pattern_list(
         Optional[Path]: The matching result if found, or None if no result or multiple results are found.
     """
     for pattern in patterns:
-        candidate = rglob_for_singular_result(base_dir, pattern, require_result_type)
+        candidate = rglob_for_singular_result(
+            base_dir, pattern, require_result_type, recursive_search
+        )
         if candidate is not None:
             return candidate
     return None
@@ -388,7 +392,7 @@ def compare_3d_float_images(
     return num_pixels_in_error, images_dict, images_in_same_space
 
 
-def slugify(value, allow_unicode=False):
+def slugify(value, allow_uppercase=False, allow_unicode=False):
     """
     Convert a string to a slug format.
 
@@ -417,7 +421,9 @@ def slugify(value, allow_unicode=False):
             .encode("ascii", "ignore")
             .decode("ascii")
         )
-    value = re.sub(r"[^\w\s-]", "", value.lower())
+    if not allow_uppercase:
+        value = value.lower()
+    value = re.sub(r"[^\w\s-]", "", value)
     final_value = re.sub(r"[-\s]+", "-", value).strip("-_")
     return final_value
 
@@ -435,7 +441,7 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
     https://dicom.innolitics.com/ciods/enhanced-mr-image/enhanced-mr-image-multi-frame-functional-groups/52009229/00189117/00189087
     NOTE: Bvalue is conditionally required.  This script is to re-inject implied values based on manual inspection or other data sources
 
-    `dicom_header_info = dicom.read_file(dicom_file_name, stop_before_pixels=True)`
+    `dicom_header_info = dicom.dcmread(dicom_file_name, stop_before_pixels=True)`
 
     Args:
         dicom_header_info: A pydicom object containing DICOM header information.
@@ -459,6 +465,8 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
             # "Toshiba" : # Uses (0x0018, 0x9087) standard
         }
     )
+    # TODO: https://pydicom.github.io/pydicom/dev/auto_examples/metadata_processing/plot_add_dict_entries.html
+    # Add these private tags to the DICOM dictionary for better processing
 
     for k, v in private_tags_map.items():
         if v in dicom_header_info:
@@ -474,6 +482,7 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
                 except TypeError:
                     return -12345
             elif v == private_tags_map["Siemens_historical"]:
+                # This is not supported yet
                 continue
             else:
                 value = dicom_element.value
@@ -794,7 +803,8 @@ def vprint(msg: str, verbose=False):
 
 def sanitize_dicom_dataset(
     ro_dataset: pydicom.Dataset,
-    required_info_list: List[str] = required_DICOM_fields,
+    required_info_list: List[str],
+    optional_info_list: List[str],
 ) -> tuple[dict, bool]:
     """
     Validates the DICOM fields in the DICOM header to ensure all required fields are present.
@@ -810,23 +820,25 @@ def sanitize_dicom_dataset(
     dataset.remove_private_tags()
     values = dataset.values()
     INVALID_VALUE = "INVALID_VALUE"
+    all_candidate_info_fields: List[str] = required_info_list + optional_info_list
+
     for v in values:
         if isinstance(v, pydicom.dataelem.RawDataElement):
             e = pydicom.dataelem.DataElement_from_raw(v)
         else:
             e = v
 
-        # process the name to match naming in required_DICOM_fields
+        # process the name to match naming in required_info_list
         name = str(e.name).replace(" ", "").replace("(", "").replace(")", "")
-        if name not in required_info_list:
-            # No need to process columns that are not required
-            continue
-        else:
+        # Only add entities that are in the required or optional lists
+
+        if name in all_candidate_info_fields:
             value = e.value
             dataset_dictionary[name] = value
+    del all_candidate_info_fields
 
-    # check if all fields in the required_DICOM_fields are present in dataset dictionary.
-    # If fields are not present or they are formatted incorrectly, add them with INVALID_VALUE
+    # check if all fields in the required_info_list are present in dataset dictionary.
+    # If fields are not present, or they are formatted incorrectly, add them with INVALID_VALUE
     missing_fields = []
     for field in required_info_list:
         if field not in dataset_dictionary.keys():
@@ -841,12 +853,7 @@ def sanitize_dicom_dataset(
             if not is_integer(dataset_dictionary[field]):
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
-                vprint(f"Missing required echo time value {dicom_filename}")
-        elif field == "SAR":
-            if not is_number(dataset_dictionary[field]):
-                dataset_dictionary[field] = INVALID_VALUE
-                missing_fields.append(field)
-                vprint(f"Missing required SAR value {dicom_filename}")
+                vprint(f"Missing required SeriesNumber value {dicom_filename}")
         elif field == "PixelBandwidth":
             if not is_number(dataset_dictionary[field]):
                 dataset_dictionary[field] = INVALID_VALUE
@@ -861,6 +868,39 @@ def sanitize_dicom_dataset(
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
                 vprint(f"Missing required field {dicom_filename}")
+
+    # set the default values for optional dicom fields
+    for field in optional_info_list:
+        if field == "SAR":
+            if field not in dataset_dictionary.keys() or not is_number(
+                dataset_dictionary[field]
+            ):
+                # SAR is allowed to be empty or not a number because derived images often do not have SAR
+                # for example, ADC images are derived images that are computed, so there is not
+                # SAR impact on the patient for the derived image.
+                # SAR Calculated whole body Specific Absorption Rate in watts/kilogram.
+                # indicate that there is no SAR for the computed image
+                _default_inferred_value = -12345.0
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "Manufacturer":
+            if field not in dataset_dictionary.keys():
+                # Manufacturer is not a required field, it can be unknown
+                _default_inferred_value = "UnknownManufacturer"
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "ImageType":
+            if field not in dataset_dictionary.keys():
+                # ImageType is not a required field, it can be unknown
+                _default_inferred_value = "UnknownImageType"
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
 
     # Warn the user if there are INVALID_VALUE fields
     if len(missing_fields) > 0:

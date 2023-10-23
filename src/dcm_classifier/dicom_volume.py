@@ -33,6 +33,10 @@ from dcm_classifier.namic_dicom_typing import (
     sanitize_dicom_dataset,
     check_for_diffusion_gradient,
 )
+from dcm_classifier.dicom_config import (
+    required_DICOM_fields,
+    optional_DICOM_fields,
+)
 
 pydicom_read_cache_static_filename_dict: Dict[str, pydicom.Dataset] = dict()
 
@@ -56,8 +60,8 @@ def pydicom_read_cache(
         # print(f"Using cached value for {lookup_filename}")
         pass
     else:
-        pydicom_read_cache_static_filename_dict[lookup_filename] = pydicom.read_file(
-            lookup_filename, stop_before_pixels=stop_before_pixels
+        pydicom_read_cache_static_filename_dict[lookup_filename] = pydicom.dcmread(
+            lookup_filename, stop_before_pixels=stop_before_pixels, force=True
         )
     return pydicom_read_cache_static_filename_dict.get(lookup_filename)
 
@@ -87,7 +91,6 @@ class DicomSingleVolumeInfoBase:
         ro_user_supplied_dcm_filenames (List[Path]): A list of DICOM file paths representing a single volume.
         _pydicom_info (pydicom.Dataset): A pydicom.Dataset containing information about the DICOM volume.
         bvalue (float): The b-value of the DICOM volume.
-        average_slice_spacing (float): The average slice spacing of the DICOM volume.
         volume_info_dict (Dict[str, Any]): A dictionary containing information about the DICOM volume.
         itk_image (Optional[FImageType]): The ITK image of the DICOM volume.
         modality (Optional[str]): The modality of the DICOM volume (e.g., "CT", "MRI").
@@ -119,8 +122,6 @@ class DicomSingleVolumeInfoBase:
 
         get_series_pixel_spacing(self) -> str:
 
-        get_series_spacing_between_slices(self) -> str:
-
         get_series_size(self) -> str:
 
         get_one_volume_dcm_filenames(self) -> List[Path]:
@@ -150,6 +151,9 @@ class DicomSingleVolumeInfoBase:
         self.one_volume_dcm_filenames: List[Path] = [
             Path(x).resolve() for x in one_volume_dcm_filenames
         ]
+        if len(self.one_volume_dcm_filenames) == 0:
+            raise ValueError("No file names provided list")
+
         # The ro_user_supplied_dcm_filenames should never be overriden after initialization
         # it is needed for repeated validation calls
         self.ro_user_supplied_dcm_filenames = list(self.one_volume_dcm_filenames)
@@ -318,15 +322,6 @@ class DicomSingleVolumeInfoBase:
         """
         return str(self._pydicom_info.PixelSpacing)
 
-    def get_series_spacing_between_slices(self) -> str:
-        """
-        Get the spacing between slices in the DICOM series.
-
-        Returns:
-            str: The spacing between slices as a string.
-        """
-        return str(self.average_slice_spacing)
-
     def get_series_size(self) -> str:
         """
         Get the size of the DICOM series.
@@ -398,8 +393,11 @@ class DicomSingleVolumeInfoBase:
                  The dictionary includes Series Number, Echo Time, SAR, b-values, file name,
                  Series and Study Instance UID, Series Description, and various indicators.
         """
-        # TODO: in case of diffusion gradient already established we might need to skip this logic
-        sanitized_dicom_dict, valid = sanitize_dicom_dataset(self._pydicom_info)
+        sanitized_dicom_dict, valid = sanitize_dicom_dataset(
+            ro_dataset=self._pydicom_info,
+            required_info_list=required_DICOM_fields,
+            optional_info_list=optional_DICOM_fields,
+        )
         if not valid:
             self.set_modality("INVALID")
             self.set_acquisition_plane("INVALID")
