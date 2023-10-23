@@ -295,14 +295,21 @@ class ImageTypeClassifierBase:
                 acquisition_plane = self.infer_acquisition_plane(
                     feature_dict=self.info_dict
                 )
-                modality, full_outputs = self.infer_modality(
-                    feature_dict=self.info_dict
-                )
-                self.series.set_modality(modality)
                 self.series.set_acquisition_plane(acquisition_plane)
-                self.series.set_modality_probabilities(
-                    pd.DataFrame(full_outputs, index=[0])
-                )
+
+                # If image already classified as diffusion gradient, simply return
+                if self.series.get_modality() == "dwig":
+                    self.series.set_modality_probabilities(
+                        pd.DataFrame()
+                    )
+                else:
+                    modality, full_outputs = self.infer_modality(
+                        feature_dict=self.info_dict
+                    )
+                    self.series.set_modality(modality)
+                    self.series.set_modality_probabilities(
+                        pd.DataFrame(full_outputs, index=[0])
+                    )
         elif self.mode == "volume":
             for volume in self.series.get_volume_list():
                 features_validated: bool = validate_features(
@@ -314,12 +321,17 @@ class ImageTypeClassifierBase:
                     )
                     volume.set_acquisition_plane(acquisition_plane)
 
-                    modality, full_outputs = self.infer_modality(
-                        feature_dict=volume.get_volume_info_dict()
-                    )
-                    volume.set_modality(modality)
-                    volume.set_modality_probabilities(
-                        pd.DataFrame(full_outputs, index=[0])
-                    )
+                    if volume.get_modality() == "dwig":
+                        volume.set_modality_probabilities(
+                            pd.DataFrame()
+                        )
+                    else:
+                        modality, full_outputs = self.infer_modality(
+                            feature_dict=volume.get_volume_info_dict()
+                        )
+                        volume.set_modality(modality)
+                        volume.set_modality_probabilities(
+                            pd.DataFrame(full_outputs, index=[0])
+                        )
         else:
             raise ValueError(f"Mode {self.mode} not supported.")

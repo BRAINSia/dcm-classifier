@@ -175,6 +175,10 @@ class DicomSingleSeries:
         # Sort subvolumes based on bvalues similar to dcm2niix
         sorted(self.volume_info_list, key=lambda x: x.get_volume_bvalue())
 
+        # if subvolume already classified as dwig, set series modality to dwig
+        if new_volume_info.get_modality() == "dwig":
+            self.set_modality(new_volume_info.get_modality())
+
     def get_series_info_dict(self) -> Dict[str, Any]:
         """
         Get a dictionary with information about the series.
