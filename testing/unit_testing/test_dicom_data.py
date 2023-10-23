@@ -16,7 +16,7 @@ def test_path():
 def test_dcm_modality():
     # inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
     study = ProcessOneDicomStudyToVolumesMappingBase(
-        study_directory="testing/dcm_files", inferer=None
+        study_directory="~/cavriley/programs/testDcm/dcm_files", inferer=None
         )
     # study.run_inference()
     assert study.get_list_of_primary_volume_info()[0]["modality"] == "MR"

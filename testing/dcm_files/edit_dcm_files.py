@@ -80,4 +80,4 @@ dcmwrite("a_valid_file.dcm", ds)  # use `dcmwrite()` if creating file from scrat
 # # ds.save_as("MRBRAIN.DCM")
 # dcmwrite("new_MRBRAIN.DCM", ds)
 print("*" * 80)
-
+file = pydicom.dcmread("a_valid_file.dcm", stop_before_pixels=True)
