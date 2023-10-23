@@ -52,4 +52,4 @@ Run the script!
 
 2. [**Hans J. Johnson**](https://engineering.uiowa.edu/people/hans-johnson)
 
-    github: [BRAINSia](https://github.com/BRAINSia), email: michal-brzus@uiowa.edu
+    github: [BRAINSia](https://github.com/BRAINSia), email: hans-johnson@uiowa.edu
