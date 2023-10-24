@@ -44,12 +44,13 @@ def itk_read_from_dicomfn_list(
     """
     with tempfile.TemporaryDirectory(
         prefix="all_dcm_for_volume_", suffix="_TMP"
-    ) as tmp_symlink_dir_path:
+    ) as tmpdir_symlink:
+        tmp_symlink_dir_path: Path = Path(tmpdir_symlink)
         for dcm_file_path in [
             Path(dcm_file) for dcm_file in single_volume_dcm_files_list
         ]:
             new_dcm_file: Path = tmp_symlink_dir_path / dcm_file_path.name
-            dcm_file_path.symlink_to(new_dcm_file)
+            new_dcm_file.symlink_to(dcm_file_path)
         del single_volume_dcm_files_list
 
         namesGenerator = itk.GDCMSeriesFileNames.New()
