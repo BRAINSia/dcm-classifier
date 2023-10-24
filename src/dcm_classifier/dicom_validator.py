@@ -16,7 +16,7 @@
 #
 #  =========================================================================
 
-from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
+from .dicom_volume import DicomSingleVolumeInfoBase
 
 from pathlib import Path
 

@@ -21,9 +21,9 @@ from pathlib import Path, PurePath
 from typing import List, Union, Optional, Dict
 import itk
 
-from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
-from dcm_classifier.dicom_series import DicomSingleSeries
-from dcm_classifier.image_type_inference import ImageTypeClassifierBase
+from .dicom_volume import DicomSingleVolumeInfoBase
+from .dicom_series import DicomSingleSeries
+from .image_type_inference import ImageTypeClassifierBase
 
 
 class ProcessOneDicomStudyToVolumesMappingBase:

@@ -16,8 +16,8 @@
 #
 #  =========================================================================
 
-from dcm_classifier.dicom_series import DicomSingleSeries
-from dcm_classifier.namic_dicom_typing import itk_read_from_dicomfn_list
+from .dicom_series import DicomSingleSeries
+from .namic_dicom_typing import itk_read_from_dicomfn_list
 from pathlib import Path
 import warnings
 
