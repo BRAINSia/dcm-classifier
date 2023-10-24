@@ -23,6 +23,7 @@ import pydicom
 from copy import deepcopy
 import itk
 import warnings
+import tempfile
 
 
 FImageType = itk.Image[itk.F, 3]
@@ -41,46 +42,42 @@ def itk_read_from_dicomfn_list(
     Returns:
         FImageType: The ITK image created from the DICOM files with pixel type itk.F (float).
     """
-    import tempfile
-    import shutil
-    import os
+    with tempfile.TemporaryDirectory(
+        prefix="all_dcm_for_volume_", suffix="_TMP"
+    ) as tmp_symlink_dir_path:
+        for dcm_file_path in [
+            Path(dcm_file) for dcm_file in single_volume_dcm_files_list
+        ]:
+            new_dcm_file: Path = tmp_symlink_dir_path / dcm_file_path.name
+            dcm_file_path.symlink_to(new_dcm_file)
+        del single_volume_dcm_files_list
 
-    dir_path = Path(tempfile.mkdtemp(suffix="XXX"))
-    shutil.rmtree(dir_path, ignore_errors=True)
-    dir_path.mkdir(exist_ok=True, parents=True)
+        namesGenerator = itk.GDCMSeriesFileNames.New()
+        namesGenerator.SetUseSeriesDetails(True)
+        # namesGenerator.AddSeriesRestriction("0008|0021")
+        # namesGenerator.SetGlobalWarningDisplay(False)
+        namesGenerator.SetDirectory(tmp_symlink_dir_path.as_posix())
+        seriesUID_list = namesGenerator.GetSeriesUIDs()
+        if len(seriesUID_list) < 1:
+            raise FileNotFoundError(
+                f"No DICOMs in: {tmp_symlink_dir_path.as_posix()} (itk_read_from_dicomfn_list)"
+            )
+        if len(seriesUID_list) > 1:
+            msg: str = (
+                f"Too many series in DICOMs in: {tmp_symlink_dir_path.as_posix()}"
+            )
+            raise AssertionError(msg)
 
-    # TODO: Files are sorted already,so don't resort the here
-    for dcm_file in single_volume_dcm_files_list:
-        dcm_file_path: Path = Path(dcm_file)
-        new_dcm_file = dir_path / dcm_file_path.name
-        os.symlink(dcm_file_path, new_dcm_file)
+        seriesIdentifier = seriesUID_list[0]
+        ordered_filenames = namesGenerator.GetFileNames(seriesIdentifier)
 
-    del single_volume_dcm_files_list
-    namesGenerator = itk.GDCMSeriesFileNames.New()
-    namesGenerator.SetUseSeriesDetails(True)
-    # namesGenerator.AddSeriesRestriction("0008|0021")
-    # namesGenerator.SetGlobalWarningDisplay(False)
-    namesGenerator.SetDirectory(dir_path.as_posix())
-    seriesUID_list = namesGenerator.GetSeriesUIDs()
-    if len(seriesUID_list) < 1:
-        raise FileNotFoundError(
-            f"No DICOMs in: {dir_path.as_posix()} (itk_read_from_dicomfn_list)"
-        )
-    if len(seriesUID_list) > 1:
-        print(f"Too many series in DICOMs in: {dir_path.as_posix()}")
-        sys.exit(2)  # TODO, Throw exception
-
-    seriesIdentifier = seriesUID_list[0]
-    ordered_filenames = namesGenerator.GetFileNames(seriesIdentifier)
-
-    isr = itk.ImageSeriesReader[FImageType].New()
-    # Typical clinical image slice spacing is > 1mm so a difference of 0.01 mm in slice spacing can be ignored.
-    # to suppress warnings like 'Non uniform sampling or missing slices detected,  maximum nonuniformity:0.000480769'
-    isr.SetSpacingWarningRelThreshold(0.01)
-    isr.SetFileNames(ordered_filenames)
-    isr.Update()
-    itk_image = isr.GetOutput()
-    shutil.rmtree(dir_path)
+        isr = itk.ImageSeriesReader[FImageType].New()
+        # Typical clinical image slice spacing is > 1mm so a difference of 0.01 mm in slice spacing can be ignored.
+        # to suppress warnings like 'Non uniform sampling or missing slices detected,  maximum nonuniformity:0.000480769'
+        isr.SetSpacingWarningRelThreshold(0.01)
+        isr.SetFileNames(ordered_filenames)
+        isr.Update()
+        itk_image = isr.GetOutput()
     return itk_image
 
 
