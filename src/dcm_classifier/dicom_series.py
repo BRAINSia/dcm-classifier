@@ -16,7 +16,7 @@
 #
 #  =========================================================================
 
-from dcm_classifier.dicom_volume import (
+from .dicom_volume import (
     DicomSingleVolumeInfoBase,
     merge_dictionaries,
 )

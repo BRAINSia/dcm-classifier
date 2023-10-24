@@ -1,0 +1,10 @@
+itk==5.4rc1
+itk-core==5.4rc1
+itk-filtering==5.4rc1
+itk-io==5.4rc1
+itk-numerics==5.4rc1
+itk-registration==5.4rc1
+itk-segmentation==5.4rc1
+onnxruntime==1.14.0
+pandas==1.5.3
+pydicom==2.3.1

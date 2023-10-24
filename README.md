@@ -40,7 +40,8 @@ Run the script!
 ```bash
  coverage run --concurrency=multiprocessing --parallel-mode -m pytest tests --junitxml=tests/pytest.xml
  coverage combine
- coverage report --format=text -m |tee tests/pytest-coverage.txt\n          coverage xml -o tests/coverage.xml
+ coverage report --format=text -m |tee tests/pytest-coverage.txt
+ coverage xml -o tests/coverage.xml
  coverage xml -o tests/coverage.xml
 ```
 

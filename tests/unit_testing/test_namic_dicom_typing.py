@@ -1,9 +1,5 @@
-import itk
 import pytest
-from dcm_classifier.namic_dicom_typing import (
-    rglob_for_singular_result,
-    slugify,
-)
+from dcm_classifier.example_image_processing import slugify, rglob_for_singular_result
 
 from pathlib import Path
 

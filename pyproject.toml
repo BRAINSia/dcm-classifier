@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dcm_classifier"
-version = '0.0.1'
+version = '0.3.1rc1'
 authors = [
   { name="Michal Brzus", email="michal-brzus@uiowa.edu" },
   { name="Hans Johnson", email="hans-johnson@uiowa.edu" },
@@ -33,7 +33,10 @@ testpaths = [
 [tool.coverage.run]
 omit = [
     "**/__init__.py",
+    "scripts/**",
+    "models/**",
     "tests/**",
+    "**/example_image_processing.py",
     ]
 source = [
     "src/dcm_classifier"

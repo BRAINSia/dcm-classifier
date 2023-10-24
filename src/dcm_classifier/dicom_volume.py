@@ -24,7 +24,7 @@ import json
 
 from typing import Dict, List, Any, Union, Optional
 import pydicom
-from dcm_classifier.namic_dicom_typing import (
+from .namic_dicom_typing import (
     get_bvalue,
     FImageType,
     itk_read_from_dicomfn_list,
@@ -33,37 +33,10 @@ from dcm_classifier.namic_dicom_typing import (
     sanitize_dicom_dataset,
     check_for_diffusion_gradient,
 )
-from dcm_classifier.dicom_config import (
+from .dicom_config import (
     required_DICOM_fields,
     optional_DICOM_fields,
 )
-
-pydicom_read_cache_static_filename_dict: Dict[str, pydicom.Dataset] = dict()
-
-
-def pydicom_read_cache(
-    filename: Union[Path, str], stop_before_pixels=True
-) -> pydicom.Dataset:
-    """
-    Reads a DICOM file header and caches the result to improve performance on subsequent reads.
-
-    Args:
-        filename: The path to the DICOM file to be read.
-        stop_before_pixels: If True, stops reading before pixel data (default: True).
-    Returns:
-        (pydicom.Dataset): A pydicom.Dataset containing the DICOM file's header data.
-    """
-
-    global pydicom_read_cache_static_filename_dict
-    lookup_filename: str = str(filename)
-    if lookup_filename in pydicom_read_cache_static_filename_dict:
-        # print(f"Using cached value for {lookup_filename}")
-        pass
-    else:
-        pydicom_read_cache_static_filename_dict[lookup_filename] = pydicom.dcmread(
-            lookup_filename, stop_before_pixels=stop_before_pixels, force=True
-        )
-    return pydicom_read_cache_static_filename_dict.get(lookup_filename)
 
 
 def merge_dictionaries(rw_dict_to_update, ro_dict):
@@ -160,13 +133,15 @@ class DicomSingleVolumeInfoBase:
 
         _first_filename_for_volume: Path = self.one_volume_dcm_filenames[0]
         # print(f"USING REFERENCE VOLUME:  {_first_filename_for_volume} for pydicom info")
-        self._pydicom_info: pydicom.Dataset = pydicom_read_cache(
-            _first_filename_for_volume, stop_before_pixels=True
+        self._pydicom_info: pydicom.Dataset = pydicom.dcmread(
+            _first_filename_for_volume, stop_before_pixels=True, force=True
         )
 
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
         if self.bvalue >= 0:
-            self.has_diffusion_gradient = check_for_diffusion_gradient(self.one_volume_dcm_filenames)
+            self.has_diffusion_gradient = check_for_diffusion_gradient(
+                self.one_volume_dcm_filenames
+            )
             if self.has_diffusion_gradient:
                 self.modality: Optional[str] = "dwig"
                 self.modality_probability: Optional[pd.DataFrame] = pd.DataFrame()
@@ -411,7 +386,9 @@ class DicomSingleVolumeInfoBase:
         bvalue_current_dicom: int = int(self.get_volume_bvalue())
         volume_info_dict["Diffusionb-value"] = bvalue_current_dicom
         volume_info_dict["Diffusionb-valueMax"] = bvalue_current_dicom
-        volume_info_dict["HasDiffusionGradientOrientation"] = int(self.has_diffusion_gradient)
+        volume_info_dict["HasDiffusionGradientOrientation"] = int(
+            self.has_diffusion_gradient
+        )
 
         # those values are 1 in case of a single volume
         volume_info_dict["Diffusionb-valueCount"] = 1
