@@ -2,6 +2,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks,latex,c,c++
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks,latex,c,c++
 
+# test files
+pytest.xml
+pytest-coverage.txt
+
 # data files
 *.xlsx
 *.pkl
