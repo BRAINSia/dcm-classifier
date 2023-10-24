@@ -507,7 +507,7 @@ def check_for_diffusion_gradient(filenames: List[Path]) -> bool:
         # TODO: Adjust this for all manufacturers similarly to B-Value
         # Currently only supporting Siemens data
         try:
-            gradient_direction = ds[0x0019, 0x100e].value
+            gradient_direction = ds[0x0019, 0x100E].value
             if gradient_direction != [0.0, 0.0, 0.0]:
                 has_non_zero_gradient = True
                 return has_non_zero_gradient

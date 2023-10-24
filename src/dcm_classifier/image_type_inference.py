@@ -299,9 +299,7 @@ class ImageTypeClassifierBase:
 
                 # If image already classified as diffusion gradient, simply return
                 if self.series.get_modality() == "dwig":
-                    self.series.set_modality_probabilities(
-                        pd.DataFrame()
-                    )
+                    self.series.set_modality_probabilities(pd.DataFrame())
                 else:
                     modality, full_outputs = self.infer_modality(
                         feature_dict=self.info_dict
@@ -322,9 +320,7 @@ class ImageTypeClassifierBase:
                     volume.set_acquisition_plane(acquisition_plane)
 
                     if volume.get_modality() == "dwig":
-                        volume.set_modality_probabilities(
-                            pd.DataFrame()
-                        )
+                        volume.set_modality_probabilities(pd.DataFrame())
                     else:
                         modality, full_outputs = self.infer_modality(
                             feature_dict=volume.get_volume_info_dict()

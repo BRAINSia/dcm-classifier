@@ -166,7 +166,9 @@ class DicomSingleVolumeInfoBase:
 
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
         if self.bvalue >= 0:
-            self.has_diffusion_gradient = check_for_diffusion_gradient(self.one_volume_dcm_filenames)
+            self.has_diffusion_gradient = check_for_diffusion_gradient(
+                self.one_volume_dcm_filenames
+            )
             if self.has_diffusion_gradient:
                 self.modality: Optional[str] = "dwig"
                 self.modality_probability: Optional[pd.DataFrame] = pd.DataFrame()
@@ -411,7 +413,9 @@ class DicomSingleVolumeInfoBase:
         bvalue_current_dicom: int = int(self.get_volume_bvalue())
         volume_info_dict["Diffusionb-value"] = bvalue_current_dicom
         volume_info_dict["Diffusionb-valueMax"] = bvalue_current_dicom
-        volume_info_dict["HasDiffusionGradientOrientation"] = int(self.has_diffusion_gradient)
+        volume_info_dict["HasDiffusionGradientOrientation"] = int(
+            self.has_diffusion_gradient
+        )
 
         # those values are 1 in case of a single volume
         volume_info_dict["Diffusionb-valueCount"] = 1
