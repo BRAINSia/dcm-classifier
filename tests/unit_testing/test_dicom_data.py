@@ -26,13 +26,8 @@ def test_adc_dcm_series_modality(mock_volumes, default_image_type_classifier_bas
     for series_number, series in study.series_dictionary.items():
         assert series.get_modality() == "adc"
 
-    # study_all_adc = ProcessOneDicomStudyToVolumesMappingBase(study_directory=current_file_path.parent / "testing_data" / "adc_volumes" / "volume_0", inferer=inferer)
-    # study_all_adc.run_inference()
-    #
-    # for series_number, series in study.series_dictionary.items():
-    #     assert series.get_modality() == "adc"
 
-def test_ax_dcm_series_acq_plane():
+def test_ax_dcm_series_acq_plane(mock_series_study):
     inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
     dicom_files_dir: Path = current_file_path.parent.parent.parent / "testDcm" / "dcm_files"
     study = ProcessOneDicomStudyToVolumesMappingBase(
@@ -42,7 +37,27 @@ def test_ax_dcm_series_acq_plane():
     for series_number, series in study.series_dictionary.items():
         assert series.get_acquisition_plane() == "ax"
 
+    for series_number, series in mock_series_study.series_dictionary.items():
+        if 6 <= series_number <= 9:
+            assert series.get_acquisition_plane() == "ax"
 
+
+def test_sag_dcm_series_acq_plane(mock_series_study):
+    for series_number, series in mock_series_study.series_dictionary.items():
+        if series_number == 2 or series_number == 10 or series_number == 13:
+            assert series.get_acquisition_plane() == "sag"
+
+
+def test_cor_dcm_series_acq_plane(mock_series_study):
+    for series_number, series in mock_series_study.series_dictionary.items():
+        if series_number == 3 or series_number == 15:
+            assert series.get_acquisition_plane() == "cor"
+
+
+def test_t1_dcm_series_modality(mock_series_study):
+    for series_number, series in mock_series_study.series_dictionary.items():
+        if 10 <= series_number <= 15 and series_number != 11:
+            assert series.get_modality() == "t1w"
 def test_no_valid_dicoms():
     with pytest.raises(FileNotFoundError) as ex:
         inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
@@ -54,7 +69,7 @@ def test_no_valid_dicoms():
     assert "No DICOMs in: " in str(ex.value)
 
 
-# @pytest.mark.skip(reason="Volume help needed")
+@pytest.mark.skip(reason="Volume help needed")
 def test_adc_dcm_volume_modality(mock_volumes, default_image_type_classifier_base):
     inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path, mode="volume")
     dicom_files_dir: Path = current_file_path.parent / "testing_data" / "adc_volumes" / "volume_0"

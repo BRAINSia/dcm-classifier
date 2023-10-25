@@ -3,6 +3,8 @@ import re
 import itk
 import pytest
 from pathlib import Path
+
+from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 from pydicom import Dataset
 from pydicom.dataset import FileMetaDataset
 from typing import List, Union
@@ -11,6 +13,21 @@ import random
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 
 adjacent_testing_data_path: Path = Path(__file__).parent / "testing_data"
+current_file_path: Path = Path(__file__).parent
+inference_model_path = list(
+    Path(__file__).parent.parent.rglob("models/rf_classifier.onnx")
+)[0]
+
+
+@pytest.fixture()
+def mock_series_study():
+    inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
+    dicom_files_dir: Path = current_file_path.parent.parent / "dcm_files"
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=dicom_files_dir, inferer=inferer
+    )
+    study.run_inference()
+    return study
 
 
 @pytest.fixture()
