@@ -24,6 +24,7 @@ from copy import deepcopy
 import itk
 import warnings
 import tempfile
+import numpy as np
 
 
 FImageType = itk.Image[itk.F, 3]
@@ -191,19 +192,42 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
 
 
 def check_for_diffusion_gradient(filenames: List[Path]) -> bool:
-    has_non_zero_gradient: bool = False
+    """
+    NAMIC Notes on DWI private fields:
+    https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
+
+    Args:
+        filenames:
+
+    Returns:
+
+    """
     for file in filenames:
         ds = pydicom.dcmread(file.as_posix(), stop_before_pixels=True)
+        image_type = ds[0x0008, 0x0008].value
+        image_type_lower_str = str(image_type).lower()
+        if "'TRACEW'".lower() in image_type_lower_str:
+            return False
         # TODO: Adjust this for all manufacturers similarly to B-Value
         # Currently only supporting Siemens data
         try:
-            gradient_direction = ds[0x0019, 0x100E].value
-            if gradient_direction != [0.0, 0.0, 0.0]:
-                has_non_zero_gradient = True
-                return has_non_zero_gradient
+            gradient_direction_element = ds[0x0019, 0x100E]
+            gradient_direction_raw = gradient_direction_element.value
+            if (
+                gradient_direction_element.VR == "OB"
+                and len(gradient_direction_raw) == 24
+            ):
+                gradient_direction = np.frombuffer(
+                    gradient_direction_raw, dtype="double"
+                )
+            else:
+                gradient_direction = np.array(gradient_direction_raw)
+
+            if np.linalg.norm(gradient_direction) > 1e-5:
+                return True
         except KeyError:
             continue
-    return has_non_zero_gradient
+    return False
 
 
 def vprint(msg: str, verbose=False):
