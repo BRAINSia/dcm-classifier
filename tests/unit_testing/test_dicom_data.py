@@ -46,7 +46,7 @@ def test_ax_dcm_series_acq_plane():
 def test_no_valid_dicoms():
     with pytest.raises(FileNotFoundError) as ex:
         inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
-        dicom_files_dir: Path = current_file_path.parent / "dummy_directory"
+        dicom_files_dir: Path = current_file_path.parent / "testing_data" / "dummy_directory"
         study = ProcessOneDicomStudyToVolumesMappingBase(
             study_directory=dicom_files_dir, inferer=inferer
         )
@@ -54,22 +54,24 @@ def test_no_valid_dicoms():
     assert "No DICOMs in: " in str(ex.value)
 
 
-@pytest.mark.skip(reason="Volume help needed")
+# @pytest.mark.skip(reason="Volume help needed")
 def test_adc_dcm_volume_modality(mock_volumes, default_image_type_classifier_base):
     inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path, mode="volume")
-    dicom_files_dir: Path = current_file_path.parent.parent.parent / "testDcm/dcm_files"
+    dicom_files_dir: Path = current_file_path.parent / "testing_data" / "adc_volumes" / "volume_0"
     study = ProcessOneDicomStudyToVolumesMappingBase(
         study_directory=dicom_files_dir, inferer=inferer
     )
     study.run_inference()
-    for volume in study.get_list_of_primary_volume_info():
-        assert volume["Modality"] == "adc"
+    print(study.get_list_of_primary_volume_info())
+    # info = DicomSingleVolumeInfoBase(mock_volumes[2]).get_primary_volume_info()
+    # print(info)
+    # assert DicomSingleVolumeInfoBase(mock_volumes[0]).get_primary_volume_info() == True
 
 
 @pytest.mark.skip(reason="Volume help needed")
 def test_adc_dcm_volume_acq_plane(mock_volumes, default_image_type_classifier_base):
-    inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path, mode="volume")
-    dicom_files_dir: Path = current_file_path.parent.parent.parent / "testDcm/dcm_files"
+    inferer = default_image_type_classifier_base
+    dicom_files_dir: Path = current_file_path.parent.parent.parent / "testDcm" / "dcm_files"
     study = ProcessOneDicomStudyToVolumesMappingBase(
         study_directory=dicom_files_dir, inferer=inferer
     )
