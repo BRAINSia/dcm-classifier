@@ -18,6 +18,58 @@ inference_model_path = list(
     Path(__file__).parent.parent.rglob("models/rf_classifier.onnx")
 )[0]
 
+inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
+dicom_files_dir: Path = current_file_path.parent.parent / "dcm_files"
+study = ProcessOneDicomStudyToVolumesMappingBase(
+    study_directory=dicom_files_dir, inferer=inferer
+)
+study.run_inference()
+
+ax_series = [study.series_dictionary.get(6), study.series_dictionary.get(7), study.series_dictionary.get(8),
+             study.series_dictionary.get(9), study.series_dictionary.get(11), study.series_dictionary.get(12),
+             study.series_dictionary.get(14)]
+sag_series = [study.series_dictionary.get(2), study.series_dictionary.get(10), study.series_dictionary.get(13)]
+cor_series = [study.series_dictionary.get(3), study.series_dictionary.get(15)]
+t1_series = [study.series_dictionary.get(10), study.series_dictionary.get(12), study.series_dictionary.get(13),
+             study.series_dictionary.get(14), study.series_dictionary.get(15)]
+flair_series = [study.series_dictionary.get(7)]
+t2_series = [study.series_dictionary.get(11)]
+adc_series = [study.series_dictionary.get(6)]
+
+
+@pytest.fixture()
+def mock_ax_series():
+    return ax_series
+
+
+@pytest.fixture()
+def mock_sag_series():
+    return sag_series
+
+
+@pytest.fixture()
+def mock_cor_series():
+    return cor_series
+
+
+@pytest.fixture()
+def mock_t1_series():
+    return t1_series
+
+
+@pytest.fixture()
+def mock_flair_series():
+    return flair_series
+
+
+@pytest.fixture()
+def mock_t2_series():
+    return t2_series
+
+
+@pytest.fixture()
+def mock_adc_series():
+    return adc_series
 
 @pytest.fixture()
 def mock_series_study():
