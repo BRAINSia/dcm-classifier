@@ -17,7 +17,7 @@
 #  =========================================================================
 
 from pathlib import Path
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Optional
 import collections
 import pydicom
 from copy import deepcopy
@@ -191,42 +191,81 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
     return -12345
 
 
+def get_diffusion_gradient_direction(
+    dicom_header_info: pydicom.Dataset,
+) -> Optional[np.ndarray]:
+    """
+    Extract the diffusion gradient direction from DICOM header information.
+    Args:
+        dicom_header_info: pydicom.Dataset object containing header information.
+
+    Returns:
+        numpy array containing the diffusion gradient direction.
+    """
+    # TODO: Adjust this for all manufacturers similarly to B-Value
+    # Currently only supporting Siemens data
+    try:
+        gradient_direction_element = dicom_header_info[0x0019, 0x100E]
+        gradient_direction_raw = gradient_direction_element.value
+        if gradient_direction_element.VR == "OB" and len(gradient_direction_raw) == 24:
+            gradient_direction = np.frombuffer(gradient_direction_raw, dtype="double")
+        else:
+            gradient_direction = np.array(gradient_direction_raw)
+
+        return gradient_direction
+
+    except KeyError:
+        return None
+
+
 def check_for_diffusion_gradient(filenames: List[Path]) -> bool:
     """
     NAMIC Notes on DWI private fields:
     https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
 
     Args:
-        filenames:
+        filenames: list of DICOM file names corresponding to a single volume
 
     Returns:
+        bool: True if the volume contains non-zero diffusion gradient directions
 
     """
-    for file in filenames:
-        ds = pydicom.dcmread(file.as_posix(), stop_before_pixels=True)
-        image_type = ds[0x0008, 0x0008].value
-        image_type_lower_str = str(image_type).lower()
-        if "'TRACEW'".lower() in image_type_lower_str:
-            return False
-        # TODO: Adjust this for all manufacturers similarly to B-Value
-        # Currently only supporting Siemens data
-        try:
-            gradient_direction_element = ds[0x0019, 0x100E]
-            gradient_direction_raw = gradient_direction_element.value
-            if (
-                gradient_direction_element.VR == "OB"
-                and len(gradient_direction_raw) == 24
-            ):
-                gradient_direction = np.frombuffer(
-                    gradient_direction_raw, dtype="double"
-                )
-            else:
-                gradient_direction = np.array(gradient_direction_raw)
+    # check for derived data with constant diffusion gradient direction
+    # this could happen when the header information is created based on one of the DWI files
+    ds1 = pydicom.dcmread(filenames[0].as_posix(), stop_before_pixels=True)
+    image_type = ds1[0x0008, 0x0008].value
+    image_type_lower_str = str(image_type).lower()
+    if "'DERIVED'".lower() in image_type_lower_str:
+        gradient_direction_list = []
+        for file in filenames:
+            ds = pydicom.dcmread(file.as_posix(), stop_before_pixels=True)
+            gradient_direction = get_diffusion_gradient_direction(ds)
+            if gradient_direction is not None:
+                gradient_direction_list.append(gradient_direction)
 
-            if np.linalg.norm(gradient_direction) > 1e-5:
-                return True
-        except KeyError:
-            continue
+        # check if all gradient directions are the same
+        unique_gradient_directions = np.unique(gradient_direction_list, axis=0)
+        if len(unique_gradient_directions) > 1:
+            return True
+
+    else:
+        for file in filenames:
+            ds = pydicom.dcmread(file.as_posix(), stop_before_pixels=True)
+            # in some cases Tracew and ADC images can have ImageType Original
+            # in this case we want to skip the image
+            image_type = ds[0x0008, 0x0008].value
+            image_type_lower_str = str(image_type).lower()
+            if (
+                "'TRACEW'".lower() in image_type_lower_str
+                or "'ADC'".lower() in image_type_lower_str
+            ):
+                return False
+
+            gradient_direction = get_diffusion_gradient_direction(ds)
+            if gradient_direction is not None:
+                if np.linalg.norm(gradient_direction) > 1e-5:
+                    return True
+
     return False
 
 
