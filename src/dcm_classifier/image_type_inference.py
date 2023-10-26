@@ -98,14 +98,18 @@ class ImageTypeClassifierBase:
             mode (str): "series" or "volume" to run inference on series or volume level (a series could have multiple subvolumes).
             min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
         """
+        assert mode in [
+            "series",
+            "volume",
+        ], f"Invalid mode: {mode}. Must be 'series' or 'volume'"
 
+        self.mode: str = mode
         self.classification_model_filename: Union[str, Path] = Path(
             classification_model_filename
         )
         self.classification_feature_list: List[str] = classification_feature_list
         self.imagetype_to_int_map: Dict[str, int] = image_type_map
         self.int_to_imagetype_map: Dict[int, str] = self.get_int_to_type_map()
-        self.mode: str = mode
         self.min_probability_threshold: float = min_probability_threshold
         self.series: Optional[DicomSingleSeries] = None
         self.series_number: Optional[int] = None
@@ -330,4 +334,4 @@ class ImageTypeClassifierBase:
                             pd.DataFrame(full_outputs, index=[0])
                         )
         else:
-            raise ValueError(f"Mode {self.mode} not supported.")
+            raise ValueError(f"Impossible State. Mode {self.mode} not supported.")

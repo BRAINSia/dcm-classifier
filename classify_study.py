@@ -53,6 +53,30 @@ for series_number, series in study.series_dictionary.items():
     print(generate_row(str(series_number), modality, plane, column_width=col_width))
 
 
+# # below is the code to run inference on volume level
+# print("\n\nInference per Volume\n\n")
+# inferer = ImageTypeClassifierBase(
+#     classification_model_filename=args.model, mode="volume"
+# )
+# study = ProcessOneDicomStudyToVolumesMappingBase(
+#     study_directory=args.session_directory, inferer=inferer
+# )
+# study.run_inference()
+#
+# print(generate_separator(col_width))
+# print(
+#     generate_row(
+#         "Series number", "Modality", "Acquisition Plane", column_width=col_width
+#     )
+# )
+# print(generate_separator(col_width))
+# for series_number, series in study.series_dictionary.items():
+#     for volume in series.get_volume_list():
+#         modality = volume.get_modality()
+#         plane = volume.get_acquisition_plane()
+#         print(generate_row(str(series_number), modality, plane, column_width=col_width))
+
+
 if __name__ == "__main__":
     # Execute the script
     pass  # The main logic is already written above, so this is just a placeholder.
