@@ -41,6 +41,16 @@
     }
 },
 {
+    "00080008": {
+    "vr": "CS",
+    "Value": [
+      "DERIVED",
+      "PRIMARY",
+      "DIFFUSION",
+      "ADC",
+      "DIS2D"
+    ]
+  },
     "00080060": {
         "Value": [
             "MR"
@@ -197,6 +207,16 @@
     }
 },
 {
+    "00080008": {
+    "vr": "CS",
+    "Value": [
+      "DERIVED",
+      "PRIMARY",
+      "DIFFUSION",
+      "ADC",
+      "DIS2D"
+    ]
+  },
     "00080060": {
         "Value": [
             "MR"
@@ -353,6 +373,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -509,6 +539,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -665,6 +705,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -821,6 +871,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -977,6 +1037,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -1133,6 +1203,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -1289,6 +1369,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -1445,6 +1535,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -1601,6 +1701,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -1757,6 +1867,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -1913,6 +2033,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -2069,6 +2199,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -2225,6 +2365,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -2381,6 +2531,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -2537,6 +2697,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -2693,6 +2863,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -2849,6 +3029,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -3005,6 +3195,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -3161,6 +3361,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -3317,6 +3527,16 @@
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -3474,6 +3694,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -3647,6 +3877,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -3820,6 +4060,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -3993,6 +4243,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -4166,6 +4426,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -4339,6 +4609,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -4512,6 +4792,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -4685,6 +4975,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -4858,6 +5158,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -5031,6 +5341,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -5204,6 +5524,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -5377,6 +5707,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -5550,6 +5890,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -5723,6 +6073,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -5896,6 +6256,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -6069,6 +6439,16 @@ ADC VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -6243,6 +6623,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -6429,6 +6819,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -6615,6 +7015,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -6801,6 +7211,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -6987,6 +7407,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -7173,6 +7603,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -7359,6 +7799,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -7545,6 +7995,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -7731,6 +8191,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -7917,6 +8387,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -8103,6 +8583,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -8289,6 +8779,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -8475,6 +8975,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -8661,6 +9171,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -8847,6 +9367,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -9033,6 +9563,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -9219,6 +9759,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -9405,6 +9955,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -9591,6 +10151,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
@@ -9777,6 +10347,16 @@ DWI VOLUME
     }
 },
 {
+    "00080008": {
+          "vr": "CS",
+              "Value": [
+                      "DERIVED",
+                    "PRIMARY",
+                          "DIFFUSION",
+                                "ADC",
+                                      "DIS2D"
+                                            ]
+                                              },
     "00080060": {
         "Value": [
             "MR"
