@@ -85,14 +85,19 @@ def test_get_one_volume_dcm_filenames():
     pass
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_set_modality():
-    pass
+def test_set_modality(mock_volumes):
+    volume_info = DicomSingleVolumeInfoBase(mock_volumes[0])
+    assert volume_info.get_modality() is None
+    volume_info.set_modality("t1w")
+    assert volume_info.get_modality() == "t1w"
 
 
 @pytest.mark.skip(reason="Not implemented yet")
-def test_get_modality():
-    pass
+def test_get_modality(mock_volumes):
+    volume_info = DicomSingleVolumeInfoBase(mock_volumes[0])
+    assert volume_info.get_modality() is None
+    volume_info.set_modality("t1w")
+    assert volume_info.get_modality() == "t1w"
 
 
 @pytest.mark.skip(reason="Not implemented yet")

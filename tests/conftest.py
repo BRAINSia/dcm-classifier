@@ -31,6 +31,17 @@ def mock_series_study():
 
 
 @pytest.fixture()
+def mock_volume_study():
+    inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path, mode="volume")
+    dicom_files_dir: Path = current_file_path.parent.parent / "dcm_files"
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=dicom_files_dir, inferer=inferer
+    )
+    study.run_inference()
+    return study
+
+
+@pytest.fixture()
 def mock_volumes():
     """A fixture function that is used to mock DICOM volumes for testing
     :returns list_of_volumes: a list containing filepaths to volume directories
