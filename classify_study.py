@@ -56,7 +56,7 @@ for series_number, series in study.series_dictionary.items():
 # # below is the code to run inference on volume level
 # print("\n\nInference per Volume\n\n")
 # inferer = ImageTypeClassifierBase(
-#     classification_model_filename=args.model, mode="volfsfsfsdume"
+#     classification_model_filename=args.model, mode="volume"
 # )
 # study = ProcessOneDicomStudyToVolumesMappingBase(
 #     study_directory=args.session_directory, inferer=inferer
