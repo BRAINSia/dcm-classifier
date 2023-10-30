@@ -1,7 +1,9 @@
 import pytest
+from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
 from dcm_classifier.example_image_processing import slugify, rglob_for_singular_result
-from dcm_classifier.namic_dicom_typing import vprint, get_coded_dictionary_elements
+from dcm_classifier.namic_dicom_typing import vprint, get_coded_dictionary_elements, check_for_diffusion_gradient
 from pathlib import Path
+
 
 relative_testing_data_path: Path = Path(__file__).parent.parent / "testing_data"
 
@@ -81,7 +83,6 @@ def test_exp_image():
     pass
 
 
-# @pytest.mark.skip(reason="Not implemented yet")
 def test_vprint():
     assert vprint("test") is None
 
@@ -93,4 +94,20 @@ def test_convert_array_to_min_max():
 
 @pytest.mark.skip(reason="Not implemented yet")
 def test_convert_array_to_index_value():
+    pass
+
+
+@pytest.mark.skip(reason="Not implemented yet")
+def test_multiple_series_UID(mock_volumes):
+    with pytest.raises(ValueError) as ex:
+        DicomSingleVolumeInfoBase(mock_volumes[2])
+    assert "Missing required echo time value" in str(ex.value)
+    print(DicomSingleVolumeInfoBase(mock_volumes[2])._make_one_study_info_mapping_from_filelist())
+
+@pytest.mark.skip(reason="Not implemented yet")
+def test_no_derived_image(mock_volumes):
+    assert check_for_diffusion_gradient(mock_volumes[2]) is False
+
+@pytest.mark.skip(reason="Not implemented yet")
+def test_missing_echo_time(mock_volumes):
     pass

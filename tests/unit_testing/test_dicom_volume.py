@@ -113,6 +113,9 @@ def test_no_files_provided():
         vol = DicomSingleVolumeInfoBase([])
     assert "No file names provided list" in str(ex.value)
 
+def test_invalid_volume_modality(mock_volumes):
+    assert DicomSingleVolumeInfoBase(mock_volumes[0]).get_modality() == "INVALID"
+
 @pytest.mark.skip(reason="Not implemented yet")
 def test_get_modality_probabilities():
     pass
