@@ -1,3 +1,4 @@
+import pandas as pd
 from dcm_classifier.dicom_volume import (
     DicomSingleVolumeInfoBase,
 )
@@ -75,7 +76,7 @@ def test_get_series_size(mock_volumes):
 
 
 @pytest.mark.skip(reason="Not implemented yet")
-def test_get_itk_image():
+def test_get_itk_image(mock_volume_study):
     # TODO - implement this test
     pass
 
@@ -92,18 +93,25 @@ def test_set_modality(mock_volumes):
     assert volume_info.get_modality() == "t1w"
 
 
-@pytest.mark.skip(reason="Not implemented yet")
 def test_get_modality(mock_volumes):
     volume_info = DicomSingleVolumeInfoBase(mock_volumes[0])
     assert volume_info.get_modality() is None
-    volume_info.set_modality("t1w")
-    assert volume_info.get_modality() == "t1w"
+    volume_info.set_modality("fa")
+    assert volume_info.get_modality() == "fa"
 
 
 @pytest.mark.skip(reason="Not implemented yet")
-def test_set_modality_probabilities():
-    pass
+def test_set_modality_probabilities(mock_volumes):
+    probabilities = pd.DataFrame(data={"case1": 0.4, "case2": 0.3, "case3": 0.75}, index=["t1w", "flair", "t2w"])
+    vol = (DicomSingleVolumeInfoBase(mock_volumes[0]))
+    vol.set_modality_probabilities(probabilities)
+    assert vol.get_modality_probabilities().aggregate == probabilities
 
+
+def test_no_files_provided():
+    with pytest.raises(ValueError) as ex:
+        vol = DicomSingleVolumeInfoBase([])
+    assert "No file names provided list" in str(ex.value)
 
 @pytest.mark.skip(reason="Not implemented yet")
 def test_get_modality_probabilities():

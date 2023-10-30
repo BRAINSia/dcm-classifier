@@ -94,45 +94,44 @@ def test_no_valid_dcms():
     assert "No DICOMs in: " in str(ex.value)
 
 
-def test_t1w_dcm_volume_modality(mock_t1_series):
-    for series in mock_t1_series:
-        for volume in series.get_volume_list():
-            assert volume.get_modality() == "t1w"
-    # for series_num, series in mock_volume_study.get_study_dictionary().items():
+def test_t1w_dcm_volume_modality(mock_t1_series, mock_volume_study):
+    # for series in mock_t1_series:
     #     for volume in series.get_volume_list():
-    #         # assert volume.get_modality() == "adc"
-    #         if 12 <= series_num <= 15:
-    #             assert volume.get_modality() == "t1w"
-
-
-def test_ax_dcm_volume_acq_plane(mock_ax_series):
-    for series in mock_ax_series:
+    #         assert volume.get_modality() == "t1w"
+    for series_num, series in mock_volume_study.get_study_dictionary().items():
         for volume in series.get_volume_list():
-            assert volume.get_acquisition_plane() == "ax"
-    # for series_num, series in mock_volume_study.get_study_dictionary().items():
+            if 12 <= series_num <= 15:
+                assert volume.get_modality() == "t1w"
+
+
+def test_ax_dcm_volume_acq_plane(mock_ax_series, mock_volume_study):
+    # for series in mock_ax_series:
     #     for volume in series.get_volume_list():
-    #         if 5 <= series_num <= 12 and series_num != 10:
-    #             assert volume.get_acquisition_plane() == "ax"
-
-
-def test_sag_dcm_volume_acq_plane(mock_sag_series):
-    for series in mock_sag_series:
+    #         assert volume.get_acquisition_plane() == "ax"
+    for series_num, series in mock_volume_study.get_study_dictionary().items():
         for volume in series.get_volume_list():
-            assert volume.get_acquisition_plane() == "sag"
-    # for series_num, series in mock_volume_study.get_study_dictionary().items():
+            if 5 <= series_num <= 12 and series_num != 10:
+                assert volume.get_acquisition_plane() == "ax"
+
+
+def test_sag_dcm_volume_acq_plane(mock_sag_series, mock_volume_study):
+    # for series in mock_sag_series:
     #     for volume in series.get_volume_list():
-    #         if series_num == 2 or series_num == 10 or series_num == 13:
-    #             assert volume.get_acquisition_plane() == "sag"
-
-
-def test_cor_dcm_volume_acq_plane(mock_cor_series):
-    for series in mock_cor_series:
+    #         assert volume.get_acquisition_plane() == "sag"
+    for series_num, series in mock_volume_study.get_study_dictionary().items():
         for volume in series.get_volume_list():
-            assert volume.get_acquisition_plane() == "cor"
-    # for series_num, series in mock_volume_study.get_study_dictionary().items():
+            if series_num == 2 or series_num == 10 or series_num == 13:
+                assert volume.get_acquisition_plane() == "sag"
+
+
+def test_cor_dcm_volume_acq_plane(mock_cor_series, mock_volume_study):
+    # for series in mock_cor_series:
     #     for volume in series.get_volume_list():
-    #         if series_num == 3 or series_num == 15:
-    #             assert volume.get_acquisition_plane() == "cor"
+    #         assert volume.get_acquisition_plane() == "cor"
+    for series_num, series in mock_volume_study.get_study_dictionary().items():
+        for volume in series.get_volume_list():
+            if series_num == 3 or series_num == 15:
+                assert volume.get_acquisition_plane() == "cor"
 
 
 def test_invalid_inference_mode():

@@ -4,19 +4,36 @@ from pathlib import Path
 import pytest
 
 
-@pytest.mark.skip(reason="Not implemented yet")
 def test_volume_validation(mock_volume_study, mock_volumes):
-    # print(type(mock_volume_study))  # <class 'dcm_classifier.study_processing.ProcessOneDicomStudyToVolumesMappingBase'>
     validator = DicomValidatorBase(DicomSingleVolumeInfoBase(mock_volumes[0]))
+    validator.append_to_validation_failure_reports("testing")
+    validator.append_to_validation_failure_reports("This is a TEST")
+
     report = validator.generate_validation_report_str(verbose_reporting=True)
-    print(report)
-    assert len(report) > 0
-    # assert validator._validation_failure_reports == [
-    #     "Series 700 has a sentinel b-value of -12345.0"
-    # ]
+    assert report is not None
+    assert "Failure Messages:" in report
+    assert "testing" in report and "This is a TEST" in report
+
 
 
 # Always going to pass, `validate()` returns True
 def test_validate(mock_volumes):
     validator = DicomValidatorBase(DicomSingleVolumeInfoBase(mock_volumes[0]))
     assert validator.validate() is not False
+
+def test_write_validation_report(mock_volumes):
+    validator = DicomValidatorBase(DicomSingleVolumeInfoBase(mock_volumes[0]))
+    validator.append_to_validation_failure_reports("testing")
+    validator.append_to_validation_failure_reports("This is a TEST")
+
+    test_report_path: Path = Path(__file__).parent.parent / "testing_data" / "test_report.txt"
+    validator.write_validation_report(test_report_path)
+    assert test_report_path.exists()
+    assert test_report_path.is_file()
+
+    with open(test_report_path, "r") as f:
+        msg = f.read()
+        assert "testing" in msg and "This is a TEST" in msg
+
+    test_report_path.unlink(missing_ok=True)
+

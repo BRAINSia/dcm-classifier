@@ -1,6 +1,6 @@
 import pytest
 from dcm_classifier.example_image_processing import slugify, rglob_for_singular_result
-
+from dcm_classifier.namic_dicom_typing import vprint, get_coded_dictionary_elements
 from pathlib import Path
 
 relative_testing_data_path: Path = Path(__file__).parent.parent / "testing_data"
@@ -75,14 +75,15 @@ def test_get_coded_dictionary_elements():
     pass
 
 
+
 @pytest.mark.skip(reason="Not implemented yet")
 def test_exp_image():
     pass
 
 
-@pytest.mark.skip(reason="Not implemented yet")
+# @pytest.mark.skip(reason="Not implemented yet")
 def test_vprint():
-    pass
+    assert vprint("test") is None
 
 
 @pytest.mark.skip(reason="Not implemented yet")
