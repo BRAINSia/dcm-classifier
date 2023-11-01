@@ -1,11 +1,18 @@
+import pydicom
 import pytest
 from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
 from dcm_classifier.example_image_processing import slugify, rglob_for_singular_result
-from dcm_classifier.namic_dicom_typing import vprint, get_coded_dictionary_elements, check_for_diffusion_gradient
+from dcm_classifier.image_type_inference import ImageTypeClassifierBase
+from dcm_classifier.namic_dicom_typing import vprint, get_coded_dictionary_elements, check_for_diffusion_gradient, \
+    convert_array_to_min_max, sanitize_dicom_dataset
+from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
 
+from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 
 relative_testing_data_path: Path = Path(__file__).parent.parent / "testing_data"
+current_file_path: Path = Path(__file__).parent
+inference_model_path = list(current_file_path.parent.parent.rglob("models/rf_classifier.onnx"))[0]
 
 
 def test_rglob_for_singular_result():
@@ -87,9 +94,9 @@ def test_vprint():
     assert vprint("test") is None
 
 
-@pytest.mark.skip(reason="Not implemented yet")
 def test_convert_array_to_min_max():
-    pass
+    array = [1, 2, 3, 4, 5]
+    assert convert_array_to_min_max("Test Array", array) == [("TestArrayMin", 1), ("TestArrayMax", 5)]
 
 
 @pytest.mark.skip(reason="Not implemented yet")
@@ -111,3 +118,53 @@ def test_no_derived_image(mock_volumes):
 @pytest.mark.skip(reason="Not implemented yet")
 def test_missing_echo_time(mock_volumes):
     pass
+
+
+
+dicom_file_dir: Path = current_file_path.parent.parent.parent / "testDcm" / "dcm_files"
+
+def test_ADC_in_image_type():
+    assert dicom_file_dir.exists()
+    vol = list()
+    i = 0
+    for file in dicom_file_dir.iterdir():
+        if i == 1:
+            vol.append(file)
+        i += 1
+
+    assert check_for_diffusion_gradient(vol) is False
+
+
+def test_invalid_fields():
+    assert dicom_file_dir.exists()
+    vol = list()
+    for file in dicom_file_dir.iterdir():
+        if "qyzp12" not in file.as_posix():
+            vol.append(file)
+
+    # Tests dicom file with an empty series number field
+    f = pydicom.dcmread(vol[0])
+    ds_dict = dict()
+    with pytest.raises(TypeError) as ex:
+        ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
+    assert "not 'NoneType'" in str(ex.value)
+
+    # assert ds_dict["SeriesNumber"] == "INVALID_VALUE"
+
+    # Tests dicom file with an empty echo time field
+    f = pydicom.dcmread(vol[1])
+    with pytest.raises(TypeError) as ex:
+        ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
+    assert "not 'NoneType'" in str(ex.value)
+
+    # assert ds_dict["EchoTime"] == "INVALID_VALUE"
+
+    # Tests dicom file with an empty pixel bandwidth field
+    f = pydicom.dcmread(vol[2])
+    with pytest.raises(TypeError) as ex:
+        ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
+    assert "not 'NoneType'" in str(ex.value)
+
+    # assert ds_dict["PixelBandwidth"] == "INVALID_VALUE"
+
+

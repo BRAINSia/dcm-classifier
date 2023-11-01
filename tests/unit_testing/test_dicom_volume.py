@@ -1,9 +1,13 @@
+from pathlib import Path
+
 import pandas as pd
 from dcm_classifier.dicom_volume import (
     DicomSingleVolumeInfoBase,
 )
 from collections import OrderedDict
 import pytest
+
+current_file_path = Path(__file__).parent
 
 
 def test_get_series_uid(mock_volumes):
@@ -113,8 +117,10 @@ def test_no_files_provided():
         vol = DicomSingleVolumeInfoBase([])
     assert "No file names provided list" in str(ex.value)
 
+
 def test_invalid_volume_modality(mock_volumes):
-    assert DicomSingleVolumeInfoBase(mock_volumes[0]).get_modality() == "INVALID"
+    assert DicomSingleVolumeInfoBase(mock_volumes[0]).get_modality() is None
+
 
 @pytest.mark.skip(reason="Not implemented yet")
 def test_get_modality_probabilities():

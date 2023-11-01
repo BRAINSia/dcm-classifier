@@ -15,33 +15,14 @@ inference_model_path = list(
 )[0]
 
 
-def test_adc_dcm_series_modality(mock_volumes, default_image_type_classifier_base):
-    inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
-    dicom_files_dir: Path = current_file_path.parent.parent.parent / "testDcm" / "dcm_files"
-    study = ProcessOneDicomStudyToVolumesMappingBase(
-        study_directory=dicom_files_dir, inferer=inferer
-    )
-    study.run_inference()
-
-    for series_number, series in study.series_dictionary.items():
+def test_adc_dcm_series_modality(mock_volumes, default_image_type_classifier_base, mock_adc_series):
+    for series in mock_adc_series:
         assert series.get_modality() == "adc"
 
 
-def test_ax_dcm_series_acq_plane(mock_series_study):
-    inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
-    dicom_files_dir: Path = current_file_path.parent.parent.parent / "testDcm" / "dcm_files"
-    study = ProcessOneDicomStudyToVolumesMappingBase(
-        study_directory=dicom_files_dir, inferer=inferer
-    )
-    study.run_inference()
-    for series_number, series in study.series_dictionary.items():
+def test_ax_dcm_series_acq_plane(mock_series_study, mock_ax_series):
+    for series in mock_ax_series:
         assert series.get_acquisition_plane() == "ax"
-
-    # mock series assertions
-    for series_number, series in mock_series_study.series_dictionary.items():
-        if 6 <= series_number <= 9:
-            assert series.get_acquisition_plane() == "ax"
-
 
 def test_sag_dcm_series_acq_plane(mock_sag_series):
     for series in mock_sag_series:
@@ -138,7 +119,7 @@ def test_invalid_inference_mode():
     invalid_mode = "invalid"
     with pytest.raises(ValueError) as ex:
         inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path, mode=invalid_mode)
-        dicom_files_dir: Path = current_file_path.parent.parent.parent / "testDcm" / "dcm_files"
+        dicom_files_dir: Path = current_file_path.parent.parent.parent / "dcm_files"
         study = ProcessOneDicomStudyToVolumesMappingBase(
             study_directory=dicom_files_dir, inferer=inferer
         )
