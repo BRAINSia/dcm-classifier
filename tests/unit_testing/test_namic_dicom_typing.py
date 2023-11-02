@@ -17,7 +17,7 @@ inference_model_path = list(current_file_path.parent.parent.rglob("models/rf_cla
 
 def test_rglob_for_singular_result():
     single_file_dir = (
-        relative_testing_data_path / "dummy_directory" / "dir_with_one_file"
+            relative_testing_data_path / "dummy_directory" / "dir_with_one_file"
     )
     single_file = rglob_for_singular_result(single_file_dir, "*.file", "f")
     assert single_file is not None
@@ -84,7 +84,6 @@ def test_get_coded_dictionary_elements():
     pass
 
 
-
 @pytest.mark.skip(reason="Not implemented yet")
 def test_exp_image():
     pass
@@ -111,17 +110,19 @@ def test_multiple_series_UID(mock_volumes):
     assert "Missing required echo time value" in str(ex.value)
     print(DicomSingleVolumeInfoBase(mock_volumes[2])._make_one_study_info_mapping_from_filelist())
 
+
 @pytest.mark.skip(reason="Not implemented yet")
 def test_no_derived_image(mock_volumes):
     assert check_for_diffusion_gradient(mock_volumes[2]) is False
+
 
 @pytest.mark.skip(reason="Not implemented yet")
 def test_missing_echo_time(mock_volumes):
     pass
 
 
-
 dicom_file_dir: Path = current_file_path.parent.parent.parent / "testDcm" / "dcm_files"
+
 
 def test_ADC_in_image_type():
     assert dicom_file_dir.exists()
@@ -135,21 +136,70 @@ def test_ADC_in_image_type():
     assert check_for_diffusion_gradient(vol) is False
 
 
+def test_unkwn_in_image_type():
+    assert dicom_file_dir.exists()
+    vol = list()
+    for file in dicom_file_dir.iterdir():
+        if "noImgType" in file.stem:
+            vol.append(file)
+
+    f = pydicom.dcmread(vol[0])
+    ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
+    assert ds_dict["ImageType"] == "UnknownImageType"
+
+
+def test_no_series_number():
+    assert dicom_file_dir.exists()
+    vol = list()
+    for file in dicom_file_dir.iterdir():
+        if "noSeriesNum" in file.stem:
+            vol.append(file)
+
+    f = pydicom.dcmread(vol[0])
+    ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
+
+    assert ds_dict["SeriesNumber"] == "INVALID_VALUE"
+
+
+def test_no_echo_time():
+    assert dicom_file_dir.exists()
+    vol = list()
+    for file in dicom_file_dir.iterdir():
+        if "noEchoTime" in file.stem:
+            vol.append(file)
+
+    f = pydicom.dcmread(vol[0])
+    ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
+
+    assert ds_dict["EchoTime"] == "INVALID_VALUE"
+
+
+def test_no_pixel_bandwidth():
+    assert dicom_file_dir.exists()
+    vol = list()
+    for file in dicom_file_dir.iterdir():
+        if "noPixelBW" in file.stem:
+            vol.append(file)
+
+    f = pydicom.dcmread(vol[0])
+    ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
+
+    assert ds_dict["PixelBandwidth"] == "INVALID_VALUE"
+
+
 def test_invalid_fields():
     assert dicom_file_dir.exists()
     vol = list()
     for file in dicom_file_dir.iterdir():
-        if "qyzp12" not in file.as_posix():
+        if "invalid" in file.stem:
             vol.append(file)
 
     # Tests dicom file with an empty series number field
     f = pydicom.dcmread(vol[0])
-    ds_dict = dict()
+    ds_dict = None
     with pytest.raises(TypeError) as ex:
         ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
     assert "not 'NoneType'" in str(ex.value)
-
-    # assert ds_dict["SeriesNumber"] == "INVALID_VALUE"
 
     # Tests dicom file with an empty echo time field
     f = pydicom.dcmread(vol[1])
@@ -157,14 +207,8 @@ def test_invalid_fields():
         ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
     assert "not 'NoneType'" in str(ex.value)
 
-    # assert ds_dict["EchoTime"] == "INVALID_VALUE"
-
     # Tests dicom file with an empty pixel bandwidth field
     f = pydicom.dcmread(vol[2])
     with pytest.raises(TypeError) as ex:
         ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
     assert "not 'NoneType'" in str(ex.value)
-
-    # assert ds_dict["PixelBandwidth"] == "INVALID_VALUE"
-
-

@@ -25,7 +25,7 @@ def test_get_list_of_primary_volume_info():
     volume_info_dictionaries = (
         study_to_volume_mapping_base.get_list_of_primary_volume_info()
     )
-    assert len(volume_info_dictionaries) == 16
+    assert len(volume_info_dictionaries) == 17
 
 
 # @pytest.mark.skip(reason="Need to add public data")
