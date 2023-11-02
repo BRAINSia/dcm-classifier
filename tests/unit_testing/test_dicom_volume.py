@@ -6,6 +6,7 @@ from dcm_classifier.dicom_volume import (
 )
 from collections import OrderedDict
 import pytest
+from dcm_classifier.namic_dicom_typing import FImageType
 
 current_file_path = Path(__file__).parent
 
@@ -79,10 +80,25 @@ def test_get_series_size(mock_volumes):
 #     # assert "Identified SeriesNumber: 702" in validation_report_str
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_get_itk_image(mock_volume_study):
+# @pytest.mark.skip(reason="Not implemented yet")
+def test_get_invalid_vol_itk_image(mock_volumes):
     # TODO - implement this test
-    pass
+    with pytest.raises(FileNotFoundError) as ex:
+        image = DicomSingleVolumeInfoBase(mock_volumes[0]).get_itk_image()
+    assert "No DICOMs in: "
+    # assert image is not None
+    # assert isinstance(image, FImageType)
+
+def test_get_itk_image():
+    dicom_file_dir = current_file_path.parent.parent.parent / "dcm_files" / "data_for_Cavan" / "1" / "DICOM"
+    assert dicom_file_dir.exists()
+    vol = list()
+    for file in dicom_file_dir.iterdir():
+        vol.append(file)
+
+    image = DicomSingleVolumeInfoBase(vol).get_itk_image()
+    assert image is not None
+    assert isinstance(image, FImageType)
 
 
 @pytest.mark.skip(reason="Not implemented yet")

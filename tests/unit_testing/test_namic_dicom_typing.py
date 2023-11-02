@@ -89,8 +89,12 @@ def test_exp_image():
     pass
 
 
-def test_vprint():
-    assert vprint("test") is None
+def test_vprint(capsys):
+    assert vprint("test", True) is None
+
+    captured = capsys.readouterr()
+    assert captured.out == "test\n"
+
 
 
 def test_convert_array_to_min_max():
@@ -136,7 +140,7 @@ def test_ADC_in_image_type():
     assert check_for_diffusion_gradient(vol) is False
 
 
-def test_unkwn_in_image_type():
+def test_unknown_in_image_type():
     assert dicom_file_dir.exists()
     vol = list()
     for file in dicom_file_dir.iterdir():
@@ -212,3 +216,12 @@ def test_invalid_fields():
     with pytest.raises(TypeError) as ex:
         ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
     assert "not 'NoneType'" in str(ex.value)
+
+
+from dcm_classifier.namic_dicom_typing import is_integer
+
+
+def test_is_integer():
+    assert is_integer("1") is True
+    assert is_integer("test") is False
+    assert is_integer("1.0") is False

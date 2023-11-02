@@ -37,3 +37,11 @@ def test_write_validation_report(mock_volumes):
 
     test_report_path.unlink(missing_ok=True)
 
+def test_write_validation_report_append(mock_volumes, capsys):
+    validator = DicomValidatorBase(DicomSingleVolumeInfoBase(mock_volumes[0]))
+    validator.append_to_validation_failure_reports("testing")
+    validator.write_validation_report(None)
+    captured = capsys.readouterr()
+    print(captured.out)
+    assert "testing" in captured.out and "Identified bvalue: -12345" in captured.out
+

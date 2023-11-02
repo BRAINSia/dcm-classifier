@@ -1,9 +1,4 @@
-import pydicom
-from pydicom.errors import InvalidDicomError
 import pytest
-from dcm_classifier.dicom_volume import (
-    DicomSingleVolumeInfoBase,
-)
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 from pathlib import Path
