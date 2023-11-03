@@ -132,6 +132,7 @@ class ImageTypeClassifierBase:
             series (DicomSingleSeries): DicomSingleSeries object representing the DICOM series.
         """
         self.series = series
+        self.series.check_if_diffusion()
         self.series_number = series.get_series_number()
         self.info_dict = self.series.get_series_info_dict()
 
