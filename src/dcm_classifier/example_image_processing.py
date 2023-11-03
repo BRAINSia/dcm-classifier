@@ -4,12 +4,66 @@ import sys
 from typing import List, Union, Optional, Dict
 import itk
 from pathlib import Path
+
+import numpy as np
 import pydicom
 from .namic_dicom_typing import get_bvalue, itk_read_from_dicomfn_list
+from .dicom_series import DicomSingleSeries
 
 
 FImageType = itk.Image[itk.F, 3]
+TracewImageType = itk.Image[itk.F, 4]
 UCImageType = itk.Image[itk.UC, 3]
+
+
+def compute_tracew_adc_from_diffusion(
+    series: DicomSingleSeries, tracew_bval: int = 1000
+) -> (FImageType, FImageType):
+    """
+    Compute the trace-weighted image from a diffusion series.
+
+    Args:
+        series (DicomSingleSeries): The diffusion series.
+        tracew_bval (int): The preferred b-value for the trace-weighted image.
+
+    Returns:
+        FImageType: The computed trace-weighted image with pixel type itk.F (float).
+    """
+    volume_list = series.get_volume_list()
+    bval_volumes_dict = {}
+    for volume in volume_list:
+        bval = volume.get_volume_bvalue()
+        dcm_files = volume.get_one_volume_dcm_filenames()
+        itk_image = itk_read_from_dicomfn_list(dcm_files)
+        if bval in bval_volumes_dict.keys():
+            bval_volumes_dict[bval].append(itk_image)
+        else:
+            bval_volumes_dict[bval] = [itk_image]
+
+    bval_list = sorted(list(bval_volumes_dict.keys()))
+    # average the volumes with the same b-value
+    bval_avg_vol_dict = {}
+    for bval in bval_list:
+        itk_im_list = bval_volumes_dict[bval]
+        arr_list = [itk.GetArrayFromImage(itk_im) for itk_im in itk_im_list]
+        avg_arr = np.average(np.array(arr_list), axis=0)
+        # TODO: If this is a mozaic image as well, it might have mutliple slices that also need to be averaged
+        # Seems to be multiple volumes per volume????
+        if avg_arr.shape[0] < 10:
+            avg_arr = np.average(avg_arr, axis=0, keepdims=True)
+            print(f"XXXXX avg_avg_arr shape: {avg_arr.shape}")
+        avg_vol = itk.GetImageFromArray(avg_arr)
+        avg_vol.CopyInformation(itk_im_list[0])
+        bval_avg_vol_dict[bval] = avg_vol
+
+    # find bval closest to tracew_bval
+    closest_bval = min(bval_list, key=lambda x: abs(x - tracew_bval))
+    tracew = bval_avg_vol_dict[closest_bval]
+
+    adc = compute_adc_from_multi_b_values(
+        list(bval_avg_vol_dict.values()), list(bval_avg_vol_dict.keys())
+    )
+    return tracew, adc
 
 
 def two_point_compute_adc(
