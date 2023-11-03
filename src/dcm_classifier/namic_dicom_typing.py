@@ -243,11 +243,6 @@ def check_for_diffusion_gradient(filenames: List[Path]) -> bool:
             if gradient_direction is not None:
                 gradient_direction_list.append(gradient_direction)
 
-        # check if all gradient directions are the same
-        unique_gradient_directions = np.unique(gradient_direction_list, axis=0)
-        if len(unique_gradient_directions) > 1:
-            return True
-    # TODO FIX NEW CHANGES
     else:
         # in some cases Tracew and ADC images can have ImageType Original
         # in this case we want to skip the image
@@ -256,17 +251,18 @@ def check_for_diffusion_gradient(filenames: List[Path]) -> bool:
             or "'ADC'".lower() in image_type_lower_str
         ):
             return False
+
         gradient_direction_list = []
         for file in filenames:
             ds = pydicom.dcmread(file.as_posix(), stop_before_pixels=True)
             gradient_direction = get_diffusion_gradient_direction(ds)
             if gradient_direction is not None:
                 gradient_direction_list.append(gradient_direction)
-                # if np.linalg.norm(gradient_direction) > 1e-5:
-                #       return True
-        unique_gradient_directions = np.unique(gradient_direction_list, axis=0)
-        if len(unique_gradient_directions) > 2:
-            return True
+
+    unique_gradient_directions = np.unique(gradient_direction_list, axis=0)
+    if len(unique_gradient_directions) > 1:
+        return True
+
     return False
 
 
