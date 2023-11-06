@@ -85,7 +85,7 @@ def test_get_invalid_vol_itk_image(mock_volumes):
     # TODO - implement this test
     with pytest.raises(FileNotFoundError) as ex:
         image = DicomSingleVolumeInfoBase(mock_volumes[0]).get_itk_image()
-    assert "No DICOMs in: "
+    assert "No DICOMs in: " in str(ex.value)
     # assert image is not None
     # assert isinstance(image, FImageType)
 
@@ -141,3 +141,10 @@ def test_invalid_volume_modality(mock_volumes):
 @pytest.mark.skip(reason="Not implemented yet")
 def test_get_modality_probabilities():
     pass
+
+
+# Test asserts false because the mock volume has a flair modality but that is an MR modality...
+def test_is_MR_modality(mock_volume_study):
+    for series_num, series in mock_volume_study.get_study_dictionary().items():
+        for volume in series.get_volume_list():
+            assert volume.is_MR_modality() is False

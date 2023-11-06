@@ -1,14 +1,11 @@
 import pydicom
 import pytest
-from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
 from dcm_classifier.example_image_processing import slugify, rglob_for_singular_result
-from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.namic_dicom_typing import vprint, get_coded_dictionary_elements, check_for_diffusion_gradient, \
     convert_array_to_min_max, sanitize_dicom_dataset
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
-
-from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+from dcm_classifier.namic_dicom_typing import itk_read_from_dicomfn_list
 
 relative_testing_data_path: Path = Path(__file__).parent.parent / "testing_data"
 current_file_path: Path = Path(__file__).parent
@@ -96,7 +93,6 @@ def test_vprint(capsys):
     assert captured.out == "test\n"
 
 
-
 def test_convert_array_to_min_max():
     array = [1, 2, 3, 4, 5]
     assert convert_array_to_min_max("Test Array", array) == [("TestArrayMin", 1), ("TestArrayMax", 5)]
@@ -105,14 +101,6 @@ def test_convert_array_to_min_max():
 @pytest.mark.skip(reason="Not implemented yet")
 def test_convert_array_to_index_value():
     pass
-
-
-@pytest.mark.skip(reason="Not implemented yet")
-def test_multiple_series_UID(mock_volumes):
-    with pytest.raises(ValueError) as ex:
-        DicomSingleVolumeInfoBase(mock_volumes[2])
-    assert "Missing required echo time value" in str(ex.value)
-    print(DicomSingleVolumeInfoBase(mock_volumes[2])._make_one_study_info_mapping_from_filelist())
 
 
 @pytest.mark.skip(reason="Not implemented yet")
@@ -126,9 +114,23 @@ def test_missing_echo_time(mock_volumes):
 
 
 dicom_file_dir: Path = current_file_path.parent.parent.parent / "testDcm" / "dcm_files"
+# dicom_file_dir: Path = current_file_path.parent / "testing_data" / "invalid_dcms" / "dcm_files"
+
+mult_series_dir: Path = current_file_path.parent.parent.parent / "testDcm" / "MultSeriesUID"
 
 
-def test_ADC_in_image_type():
+def test_multiple_series_UID(mock_volumes):
+    assert mult_series_dir.exists()
+    vol = list()
+    for file in mult_series_dir.iterdir():
+        vol.append(file)
+
+    with pytest.raises(AssertionError) as ex:
+        itk_read_from_dicomfn_list(vol)
+    assert "Too many series in DICOMs in:" in str(ex.value)
+
+
+def test_ADC_in_image_type_field():
     assert dicom_file_dir.exists()
     vol = list()
     i = 0
