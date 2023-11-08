@@ -103,16 +103,6 @@ def test_convert_array_to_index_value():
     pass
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_no_derived_image(mock_volumes):
-    assert check_for_diffusion_gradient(mock_volumes[2]) is False
-
-
-@pytest.mark.skip(reason="Not implemented yet")
-def test_missing_echo_time(mock_volumes):
-    pass
-
-
 dicom_file_dir: Path = current_file_path.parent.parent.parent / "testDcm" / "dcm_files"
 # dicom_file_dir: Path = current_file_path.parent / "testing_data" / "invalid_dcms" / "dcm_files"
 
