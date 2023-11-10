@@ -218,7 +218,7 @@ def get_diffusion_gradient_direction(
         return None
 
 
-def check_for_diffusion_gradient(filenames: List[Path]) -> bool:
+def infer_diffusion_from_gradient(filenames: List[Path]) -> str:
     """
     NAMIC Notes on DWI private fields:
     https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
@@ -235,6 +235,14 @@ def check_for_diffusion_gradient(filenames: List[Path]) -> bool:
     ds1 = pydicom.dcmread(filenames[0].as_posix(), stop_before_pixels=True)
     image_type = ds1[0x0008, 0x0008].value
     image_type_lower_str = str(image_type).lower()
+    # For now we trust image type to be correct!!!
+    # in some cases Tracew and ADC images can have ImageType Original
+    # in this case we want to skip the image
+    if "'TRACEW'".lower() in image_type_lower_str:
+        return "tracew"
+    if "'ADC'".lower() in image_type_lower_str:
+        return "adc"
+
     if "'DERIVED'".lower() in image_type_lower_str:
         gradient_direction_list = []
         for file in filenames:
@@ -244,14 +252,6 @@ def check_for_diffusion_gradient(filenames: List[Path]) -> bool:
                 gradient_direction_list.append(gradient_direction)
 
     else:
-        # in some cases Tracew and ADC images can have ImageType Original
-        # in this case we want to skip the image
-        if (
-            "'TRACEW'".lower() in image_type_lower_str
-            or "'ADC'".lower() in image_type_lower_str
-        ):
-            return False
-
         gradient_direction_list = []
         for file in filenames:
             ds = pydicom.dcmread(file.as_posix(), stop_before_pixels=True)
@@ -261,9 +261,10 @@ def check_for_diffusion_gradient(filenames: List[Path]) -> bool:
 
     unique_gradient_directions = np.unique(gradient_direction_list, axis=0)
     if len(unique_gradient_directions) > 1:
-        return True
+        return "dwig"
 
-    return False
+    # this is the default state the series is initialized with
+    return "INVALID"
 
 
 def vprint(msg: str, verbose=False):
