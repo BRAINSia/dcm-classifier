@@ -17,7 +17,6 @@
 #  =========================================================================
 
 from .dicom_volume import DicomSingleVolumeInfoBase
-
 import pandas as pd
 from typing import List, Optional, Any, Dict
 
@@ -85,20 +84,6 @@ class DicomSingleSeries:
         self.modality: str = "INVALID"
         self.modality_probability: Optional[pd.DataFrame] = None
         self.acquisition_plane: Optional[str] = None
-
-    def check_if_diffusion(self) -> None:
-        """
-        After processing and file organization into volumes and serieses is completed, this function is called to
-        check if the series is a diffusion series. If so, the series modality is overriden to dwig.
-        This function is called during inference
-        """
-        volume_list = self.get_volume_list()
-        first_dcm_per_volume = [
-            volume.get_one_volume_dcm_filenames()[0] for volume in volume_list
-        ]
-        is_diffusion = check_for_diffusion_gradient(first_dcm_per_volume)
-        if is_diffusion:
-            self.set_modality("dwig")
 
     def get_series_number(self) -> int:
         """
