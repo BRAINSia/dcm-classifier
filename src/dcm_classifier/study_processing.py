@@ -90,7 +90,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         # Private vendor: Siemens(Historical)
         "0029|1010",  # NOT SUPPORTED Siemens Historical Diffusion b-value
         "0019|000A",  # ;SIEMENS MR HEADER  ;NumberOfImagesInMosaic          ;1;US;1
-        "0019|000B"  # ;SIEMENS MR HEADER  ;SliceMeasurementDuration        ;1;DS;1
+        "0019|000B",  # ;SIEMENS MR HEADER  ;SliceMeasurementDuration        ;1;DS;1
         "0019|000C",  # ;SIEMENS MR HEADER  ;B_value                         ;1;IS;1
         "0019|000D",  # ;SIEMENS MR HEADER  ;DiffusionDirectionality         ;1;CS;1
         "0019|000E",  # "SIEMENS MR HEADER  ;DiffusionGradientDirection      ;1;FD;3
@@ -105,7 +105,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         "2005|10B2",  # FL : Diffusion Direction FH"
         # Private vendor: Toshiba
         "0029|1001",  # : Private Sequence" Gradients
-        "0029,1090",  # : Private Byte Data
+        "0029|1090",  # : Private Byte Data
         # Private vendor: UIH
         "0065|1009",  # FD 929.75018313375267  # 8, 1 B_value
         "0065|1037",  # FD 0.219573072677\0.9618\0.1632  # 24, 3 DiffusionDirectionality
