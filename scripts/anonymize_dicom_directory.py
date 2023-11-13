@@ -1,4 +1,6 @@
 from pathlib import Path
+
+import numpy as np
 from dicomanonymizer.simpledicomanonymizer import anonymize_dicom_file
 from pydicom import dcmread
 
@@ -6,9 +8,13 @@ from pydicom import dcmread
 def anonymize_data(input_dir: str, output_dir: str) -> None:
     """
     Anonymize DICOM data.
+    This function will override any fields with sensitive information with dummy values.
+    https://pypi.org/project/dicom-anonymizer/#description
+
+    Additionally, pixel data is replaced with zeros.
 
     Args:
-        input_dir (str): The input directory containing DICOM files.
+        input_dir (str): The input directory containing DICOM files from a study (patient).
         output_dir (str): The output directory where anonymized DICOM files will be saved.
     """
     if Path(output_dir).is_dir():
@@ -23,12 +29,15 @@ def anonymize_data(input_dir: str, output_dir: str) -> None:
         anonymize_dicom_file(
             dcm_file.as_posix(), new_file.as_posix(), delete_private_tags=False
         )
-        ds = dcmread(new_file.as_posix(), stop_before_pixels=True)
+        ds = dcmread(new_file.as_posix())
+        arr = ds.pixel_array
+        new_arr = np.zeros_like(arr)
+        ds.PixelData = new_arr.tobytes()
         ds.save_as(new_file.as_posix())
 
 
 if __name__ == "__main__":
-    base_dir = "/localscratch/Users/mbrzus/Stroke_Data/dcm_classifier_test_data"
-    dcm_data_dir = f"{base_dir}/3772_MRI_BRAIN_W_WO_CONTRAST__3266456428582799"
-    base_output_dir = f"{base_dir}/anonymized_data"
+    base_dir = "path_to_data_dir"
+    dcm_data_dir = f"{base_dir}/path_to_sub"
+    base_output_dir = f"{base_dir}/output_path"
     anonymize_data(dcm_data_dir, base_output_dir)
