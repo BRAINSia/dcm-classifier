@@ -321,7 +321,7 @@ def sanitize_dicom_dataset(
     # If fields are not present, or they are formatted incorrectly, add them with INVALID_VALUE
     missing_fields = []
     for field in required_info_list:
-        if field not in dataset_dictionary.keys():
+        if field not in dataset_dictionary.keys() or dataset_dictionary[field] is None:
             dataset_dictionary[field] = INVALID_VALUE
             missing_fields.append(field)
         elif field == "EchoTime":
