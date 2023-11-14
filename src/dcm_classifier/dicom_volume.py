@@ -225,7 +225,7 @@ class DicomSingleVolumeInfoBase:
         """
         return self.volume_info_dict
 
-    def get_primary_volume_info(self, vol_index: int = 0) -> Dict[str, str]:
+    def get_primary_volume_info(self, vol_index: int) -> Dict[str, str]:
         """
         Get primary volume information for the specified volume index.
 
