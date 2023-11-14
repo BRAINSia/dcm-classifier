@@ -244,7 +244,7 @@ class DicomSingleVolumeInfoBase:
             "SAR": "SAR",
         }
 
-        ref_vol_info = self.get_volume_dictionary()
+        ref_vol_info: Dict[str, Any] = self.get_volume_dictionary()
         return_dict: Dict[str, Union[str, int]] = collections.OrderedDict()
         return_dict["vol_index"] = vol_index
         for refkey, return_key in fields_to_copy.items():
