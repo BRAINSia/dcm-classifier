@@ -18,14 +18,16 @@ def test_study_with_search_series():
     assert study_to_volume_mapping_base.search_series == {"test": 7}
 
 
-def test_get_list_of_primary_volume_info():
-    study_path = relative_testing_data_path.parent.parent.parent / "dcm_files"
+def test_get_list_of_primary_volume_info(get_data_dir):
+    # study_path = relative_testing_data_path.parent.parent.parent / "dcm_files"
 
-    study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(study_path)
+    study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(get_data_dir)
     volume_info_dictionaries = (
         study_to_volume_mapping_base.get_list_of_primary_volume_info()
     )
-    assert len(volume_info_dictionaries) == 17
+    print(len(volume_info_dictionaries))
+
+    assert len(volume_info_dictionaries) == 16
 
 
 # @pytest.mark.skip(reason="Need to add public data")

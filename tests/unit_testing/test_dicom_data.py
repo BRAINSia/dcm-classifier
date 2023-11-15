@@ -100,23 +100,20 @@ def test_sag_dcm_volume_acq_plane(mock_sag_series, mock_volume_study):
                 assert volume.get_acquisition_plane() == "sag"
 
 
-def test_cor_dcm_volume_acq_plane(mock_cor_series, mock_volume_study):
-    # for series in mock_cor_series:
-    #     for volume in series.get_volume_list():
-    #         assert volume.get_acquisition_plane() == "cor"
-    for series_num, series in mock_volume_study.get_study_dictionary().items():
+def test_cor_dcm_volume_acq_plane(mock_volume_study):
+    for series_number, series in mock_volume_study.get_study_dictionary().items():
         for volume in series.get_volume_list():
-            if series_num == 3 or series_num == 15:
+            if series_number == 3 or series_number == 15:
                 assert volume.get_acquisition_plane() == "cor"
 
 
-def test_invalid_inference_mode():
+def test_invalid_inference_mode(get_data_dir):
     invalid_mode = "invalid"
-    with pytest.raises(ValueError) as ex:
+    with pytest.raises(AssertionError) as ex:
         inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path, mode=invalid_mode)
-        dicom_files_dir: Path = current_file_path.parent.parent.parent / "dcm_files"
+        # dicom_files_dir: Path = current_file_path.parent.parent.parent / "dcm_files"
         study = ProcessOneDicomStudyToVolumesMappingBase(
-            study_directory=dicom_files_dir, inferer=inferer
+            study_directory=get_data_dir, inferer=inferer
         )
         study.run_inference()
-    assert f"Mode {invalid_mode} not supported." in str(ex.value)
+    assert f"Invalid mode: {invalid_mode}. Must be 'series' or 'volume'" in str(ex.value)
