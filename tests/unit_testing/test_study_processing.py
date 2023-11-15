@@ -10,7 +10,7 @@ relative_testing_data_path: Path = Path(__file__).parent.parent / "testing_data"
 
 
 def test_study_with_search_series():
-    study_path = relative_testing_data_path.parent.parent.parent / "dcm_files"
+    study_path = relative_testing_data_path / "anonymized_data"
     study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(
         study_path, {"test": 7}
     )
@@ -59,7 +59,7 @@ def test_get_list_of_primary_volume_info_with_search_series():
 def test_get_study_dictionary_and_set_inferer():
     test_data_dicom_dir: str = "XXXX"
     # study_path = relative_testing_data_path / test_data_dicom_dir
-    study_path = relative_testing_data_path.parent.parent.parent / "dcm_files"
+    study_path = relative_testing_data_path / "anonymized_data"
 
     modality_columns = [
         "ImageTypeADC",

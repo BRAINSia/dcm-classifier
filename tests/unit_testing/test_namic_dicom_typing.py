@@ -103,13 +103,12 @@ def test_convert_array_to_index_value():
     pass
 
 
-dicom_file_dir: Path = current_file_path.parent.parent.parent / "testDcm" / "dcm_files"
-# dicom_file_dir: Path = current_file_path.parent / "testing_data" / "invalid_dcms" / "dcm_files"
+dicom_file_dir: Path = current_file_path.parent / "testing_data" / "invalid_data" / "invalid_fields"
 
-mult_series_dir: Path = current_file_path.parent.parent.parent / "testDcm" / "MultSeriesUID"
+mult_series_dir: Path = current_file_path.parent / "testing_data" / "invalid_data" / "mult_series_uid"
 
 
-def test_multiple_series_UID(mock_volumes):
+def test_multiple_series_UID():
     assert mult_series_dir.exists()
     vol = list()
     for file in mult_series_dir.iterdir():
@@ -120,8 +119,7 @@ def test_multiple_series_UID(mock_volumes):
     assert "Too many series in DICOMs in:" in str(ex.value)
 
 
-def test_ADC_in_image_type_field(get_data_dir):
-    dicom_file_dir = get_data_dir
+def test_ADC_in_image_type_field():
     assert dicom_file_dir.exists()
     vol = list()
     i = 0
@@ -133,8 +131,7 @@ def test_ADC_in_image_type_field(get_data_dir):
     assert check_for_diffusion_gradient(vol) is False
 
 
-def test_unknown_in_image_type(get_data_dir):
-    dicom_file_dir = get_data_dir
+def test_unknown_in_image_type():
     assert dicom_file_dir.exists()
     vol = list()
     for file in dicom_file_dir.iterdir():
@@ -146,8 +143,7 @@ def test_unknown_in_image_type(get_data_dir):
     assert ds_dict["ImageType"] == "UnknownImageType"
 
 
-def test_no_series_number(get_data_dir):
-    dicom_file_dir = get_data_dir
+def test_no_series_number():
     assert dicom_file_dir.exists()
     vol = list()
     for file in dicom_file_dir.iterdir():
@@ -160,8 +156,7 @@ def test_no_series_number(get_data_dir):
     assert ds_dict["SeriesNumber"] == "INVALID_VALUE"
 
 
-def test_no_echo_time(get_data_dir):
-    dicom_file_dir = get_data_dir
+def test_no_echo_time():
     assert dicom_file_dir.exists()
     vol = list()
     for file in dicom_file_dir.iterdir():
@@ -174,8 +169,7 @@ def test_no_echo_time(get_data_dir):
     assert ds_dict["EchoTime"] == -12345
 
 
-def test_no_pixel_bandwidth(get_data_dir):
-    dicom_file_dir = get_data_dir
+def test_no_pixel_bandwidth():
     assert dicom_file_dir.exists()
     vol = list()
     for file in dicom_file_dir.iterdir():
