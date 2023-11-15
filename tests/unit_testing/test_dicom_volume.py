@@ -37,7 +37,7 @@ def test_get_b_value(mock_volumes):
 
 
 def test_primary_volume_info(mock_volumes):
-    volume_info = DicomSingleVolumeInfoBase(mock_volumes[0]).get_primary_volume_info()
+    volume_info = DicomSingleVolumeInfoBase(mock_volumes[0]).get_primary_volume_info(0)
     assert isinstance(volume_info, OrderedDict)
 
 
