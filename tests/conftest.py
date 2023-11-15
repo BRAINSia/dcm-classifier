@@ -24,9 +24,7 @@ with tempfile.TemporaryDirectory(prefix="dcm-classifier_test_data_") as temp_dir
     # tar_path: Path = Path(__file__) / "testing_data" /  "unanon_testing_data.tar.gz"
     tar_path: Path = Path(__file__).parent.parent.parent / "unanon_testing_data.tar.gz"
     subprocess.run(f"tar -xf {tar_path} -C {temp_dir}", shell=True)
-    os.system(f"ls -al {temp_dir}")
 
-    # dicom_files_dir: Path = current_file_path.parent.parent / "dcm_files"
     dicom_files_dir: Path = Path(temp_dir) / "unanon_testing_data"
 
     inferer = ImageTypeClassifierBase(
