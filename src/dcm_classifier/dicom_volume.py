@@ -21,6 +21,7 @@ from pathlib import Path
 
 import pandas as pd
 import json
+from copy import deepcopy
 
 from typing import Dict, List, Any, Union, Optional
 import pydicom
@@ -224,7 +225,7 @@ class DicomSingleVolumeInfoBase:
         """
         return self.volume_info_dict
 
-    def get_primary_volume_info(self, vol_index: int = 0) -> Dict[str, str]:
+    def get_primary_volume_info(self, vol_index: int) -> Dict[str, str]:
         """
         Get primary volume information for the specified volume index.
 
@@ -243,7 +244,7 @@ class DicomSingleVolumeInfoBase:
             "SAR": "SAR",
         }
 
-        ref_vol_info = self.get_volume_dictionary()
+        ref_vol_info: Dict[str, Any] = self.get_volume_dictionary()
         return_dict: Dict[str, Union[str, int]] = collections.OrderedDict()
         return_dict["vol_index"] = vol_index
         for refkey, return_key in fields_to_copy.items():
@@ -318,7 +319,7 @@ class DicomSingleVolumeInfoBase:
         Returns:
             List[Path]: A list of file paths for the DICOM files in the single volume.
         """
-        return self.one_volume_dcm_filenames
+        return deepcopy(self.one_volume_dcm_filenames)
 
     def get_volume_dictionary(self) -> Dict[str, Any]:
         """
@@ -327,7 +328,7 @@ class DicomSingleVolumeInfoBase:
         Returns:
             Dict[str, Any]: A dictionary containing information about the DICOM volume.
         """
-        return self.volume_info_dict
+        return deepcopy(self.volume_info_dict)
 
     def get_volume_bvalue(self) -> float:
         """
@@ -347,7 +348,7 @@ class DicomSingleVolumeInfoBase:
         """
         return int(self._pydicom_info.SeriesNumber)
 
-    def is_MR_modality(self):
+    def is_MR_modality(self) -> bool:
         """
         Check if the modality of the DICOM volume is MR (Magnetic Resonance).
 
@@ -396,7 +397,7 @@ class DicomSingleVolumeInfoBase:
         # add list of dicom files for the volume
         volume_info_dict["list_of_ordered_volume_files"] = self.one_volume_dcm_filenames
 
-        return self.get_study_uid, volume_info_dict
+        return self.get_study_uid, deepcopy(volume_info_dict)
 
     def get_image_diagnostics(self) -> str:
         """
