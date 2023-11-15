@@ -89,8 +89,8 @@ def test_get_invalid_vol_itk_image(mock_volumes):
     # assert image is not None
     # assert isinstance(image, FImageType)
 
-def test_get_itk_image():
-    dicom_file_dir = current_file_path.parent.parent.parent / "dcm_files" / "data_for_Cavan" / "1" / "DICOM"
+def test_get_itk_image(get_data_dir):
+    dicom_file_dir = get_data_dir / "1" / "DICOM"
     assert dicom_file_dir.exists()
     vol = list()
     for file in dicom_file_dir.iterdir():

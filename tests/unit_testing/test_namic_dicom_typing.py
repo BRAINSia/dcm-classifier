@@ -120,7 +120,8 @@ def test_multiple_series_UID(mock_volumes):
     assert "Too many series in DICOMs in:" in str(ex.value)
 
 
-def test_ADC_in_image_type_field():
+def test_ADC_in_image_type_field(get_data_dir):
+    dicom_file_dir = get_data_dir
     assert dicom_file_dir.exists()
     vol = list()
     i = 0
@@ -132,7 +133,8 @@ def test_ADC_in_image_type_field():
     assert check_for_diffusion_gradient(vol) is False
 
 
-def test_unknown_in_image_type():
+def test_unknown_in_image_type(get_data_dir):
+    dicom_file_dir = get_data_dir
     assert dicom_file_dir.exists()
     vol = list()
     for file in dicom_file_dir.iterdir():
@@ -144,7 +146,8 @@ def test_unknown_in_image_type():
     assert ds_dict["ImageType"] == "UnknownImageType"
 
 
-def test_no_series_number():
+def test_no_series_number(get_data_dir):
+    dicom_file_dir = get_data_dir
     assert dicom_file_dir.exists()
     vol = list()
     for file in dicom_file_dir.iterdir():
@@ -157,7 +160,8 @@ def test_no_series_number():
     assert ds_dict["SeriesNumber"] == "INVALID_VALUE"
 
 
-def test_no_echo_time():
+def test_no_echo_time(get_data_dir):
+    dicom_file_dir = get_data_dir
     assert dicom_file_dir.exists()
     vol = list()
     for file in dicom_file_dir.iterdir():
@@ -170,7 +174,8 @@ def test_no_echo_time():
     assert ds_dict["EchoTime"] == -12345
 
 
-def test_no_pixel_bandwidth():
+def test_no_pixel_bandwidth(get_data_dir):
+    dicom_file_dir = get_data_dir
     assert dicom_file_dir.exists()
     vol = list()
     for file in dicom_file_dir.iterdir():

@@ -30,12 +30,6 @@ if not dicom_files_dir.exists():
 
 
 
-# dicom_files_dir: Path = temp_dir / "dcm_files/data_for_Cavan"
-# contents = os.listdir(dicom_files_dir)
-# print(contents)
-# contents2 = os.listdir(dicom_files_dir / "2/DICOM")
-# print(contents2)
-# dicom_files_dir: Path = Path("/home/cavriley/programs/dcm_files/data_for_Cavan")
 inferer = ImageTypeClassifierBase(
     classification_model_filename=inference_model_path
 )
