@@ -40,22 +40,6 @@ from .dicom_config import (
 )
 
 
-def merge_dictionaries(rw_dict_to_update, ro_dict):
-    """
-    Merges two dictionaries, updating the first dictionary with the contents of the second.
-
-    Args:
-        rw_dict_to_update: The dictionary to be updated.
-        ro_dict: The dictionary containing read-only data to be merged into the first dictionary.
-
-    Returns:
-        The updated first dictionary after merging.
-    """
-    for key in ro_dict.keys():
-        rw_dict_to_update[key] = ro_dict[key]
-    return rw_dict_to_update
-
-
 class DicomSingleVolumeInfoBase:
     """
     This class is used to store information about a single DICOM volume.
