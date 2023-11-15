@@ -202,20 +202,41 @@ def get_diffusion_gradient_direction(
     Returns:
         numpy array containing the diffusion gradient direction.
     """
-    # TODO: Adjust this for all manufacturers similarly to B-Value
-    # Currently only supporting Siemens data
-    try:
-        gradient_direction_element = dicom_header_info[0x0019, 0x100E]
-        gradient_direction_raw = gradient_direction_element.value
-        if gradient_direction_element.VR == "OB" and len(gradient_direction_raw) == 24:
-            gradient_direction = np.frombuffer(gradient_direction_raw, dtype="double")
-        else:
-            gradient_direction = np.array(gradient_direction_raw)
+    private_tags_map = collections.OrderedDict(
+        {
+            "Standard": (0x0018, 0x9076),
+            "GE": (0x0019, 0x10E0),
+            "Philips": (0x2001, 0x1004),
+            "Siemens": (0x0019, 0x100E),
+            "Siemens_historical": (0x0019, 0x000E),  # NOT SUPPORTED
+            "Siemens_old": (0x0019, 0x000E),
+            "UHI": (0x0065, 0x1037),
+            # "Toshiba" : # Uses (0x0018, 0x9087) standard
+        }
+    )
+    for k, v in private_tags_map.items():
+        if v in dicom_header_info:
+            gradient_direction_element = dicom_header_info[v]
+            if v == private_tags_map["Siemens"]:
+                gradient_direction_raw = gradient_direction_element.value
+                if (
+                    gradient_direction_element.VR == "OB"
+                    and len(gradient_direction_raw) == 24
+                ):
+                    gradient_direction = np.frombuffer(
+                        gradient_direction_raw, dtype="double"
+                    )
+                else:
+                    gradient_direction = np.array(gradient_direction_raw)
 
-        return gradient_direction
-
-    except KeyError:
-        return None
+                return gradient_direction
+            else:
+                try:
+                    gradient_direction = np.array(gradient_direction_element.value)
+                    return gradient_direction
+                except TypeError:
+                    return None
+    return None
 
 
 def infer_diffusion_from_gradient(filenames: List[Path]) -> str:
@@ -243,21 +264,12 @@ def infer_diffusion_from_gradient(filenames: List[Path]) -> str:
     if "'ADC'".lower() in image_type_lower_str:
         return "adc"
 
-    if "'DERIVED'".lower() in image_type_lower_str:
-        gradient_direction_list = []
-        for file in filenames:
-            ds = pydicom.dcmread(file.as_posix(), stop_before_pixels=True)
-            gradient_direction = get_diffusion_gradient_direction(ds)
-            if gradient_direction is not None:
-                gradient_direction_list.append(gradient_direction)
-
-    else:
-        gradient_direction_list = []
-        for file in filenames:
-            ds = pydicom.dcmread(file.as_posix(), stop_before_pixels=True)
-            gradient_direction = get_diffusion_gradient_direction(ds)
-            if gradient_direction is not None:
-                gradient_direction_list.append(gradient_direction)
+    gradient_direction_list = []
+    for file in filenames:
+        ds = pydicom.dcmread(file.as_posix(), stop_before_pixels=True)
+        gradient_direction = get_diffusion_gradient_direction(ds)
+        if gradient_direction is not None:
+            gradient_direction_list.append(gradient_direction)
 
     unique_gradient_directions = np.unique(gradient_direction_list, axis=0)
     if len(unique_gradient_directions) > 1:
