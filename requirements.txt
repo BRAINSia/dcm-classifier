@@ -5,6 +5,6 @@ itk-io==5.4rc1
 itk-numerics==5.4rc1
 itk-registration==5.4rc1
 itk-segmentation==5.4rc1
-onnxruntime==1.14.0
-pandas==1.5.3
-pydicom==2.3.1
+onnxruntime==1.16.1
+pandas==2.1.2
+pydicom==2.4.3
