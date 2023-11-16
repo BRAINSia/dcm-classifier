@@ -308,13 +308,16 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         seriesUID = namesGenerator.GetSeriesUIDs()
 
         if len(seriesUID) < 1:
-            raise FileNotFoundError(
-                f"No DICOMs in: {study_directory} (__identify_single_volumes)"
+            msg: str = f"No DICOMs in: {study_directory} (__identify_single_volumes)"
+            empty_series_UID_is_error: bool = False
+            if empty_series_UID_is_error:
+                raise FileNotFoundError(msg)
+            else:
+                print(f"No readable dicoms DICOMs in: {study_directory} (__identify_single_volumes)")
+        else:
+            print(
+                f"The directory: {study_directory} contains {len(seriesUID)} DICOM Series "
             )
-
-        print(
-            f"The directory: {study_directory} contains {len(seriesUID)} DICOM Series "
-        )
         # print(f"Contains the following {len(seriesUID)} DICOM Series: ")
         # for uid in seriesUID:
         #     print(uid)
