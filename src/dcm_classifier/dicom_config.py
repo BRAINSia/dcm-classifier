@@ -47,8 +47,8 @@ required_DICOM_fields: list[str] = [
     "PixelSpacing",
     "SliceThickness",
     "SeriesDescription",
-    "EchoNumber",
-    "ContrastBolusAgent"
+    "EchoNumbers",
+    # "ContrastBolusAgent"
 ]
 
 optional_DICOM_fields: list[str] = [
