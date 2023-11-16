@@ -427,6 +427,10 @@ def get_coded_dictionary_elements(
     """
     dataset_dictionary: Dict[str, Any] = deepcopy(dicom_sanitized_dataset)
     for name, value in dicom_sanitized_dataset.items():
+        if value == "INVALID_VALUE":
+            # Return a completely empty dictionary if any required values are missing from image
+            # This should likely be more robust in the future
+            return dict()
         if name == "PixelSpacing":
             tuple_list = convert_array_to_min_max(name, value)
             for vv in tuple_list:
