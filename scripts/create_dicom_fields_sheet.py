@@ -677,7 +677,6 @@ def generate_dicom_dataframe(
         print(f"NO MR DICOM DATA FOUND IN {session_dirs}")
 
 
-
 if __name__ == "__main__":
     # path to prostate data DICOM dir: /localscratch/Users/mbrzus/Botimageai/homerun/DATA/150_Test_Data
 
@@ -728,7 +727,6 @@ if __name__ == "__main__":
     dicom_path = args.dicom_path
     model: Path = Path(args.model)
     out = args.out
-
 
     path_dirs = sorted(list(glob(f"{dicom_path}/*/*")))
     ses_dirs = [x for x in path_dirs if Path(x).is_dir()]

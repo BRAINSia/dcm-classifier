@@ -31,7 +31,7 @@ class StudyClassification:
     @staticmethod
     def run_study(study_directory: Path) -> ProcessOneDicomStudyToVolumesMappingBase:
         inferer = ImageTypeClassifierBase(
-            classification_model_filename=inference_model_path, mode="volume"
+            classification_model_filename=inference_model_path
         )
         study = ProcessOneDicomStudyToVolumesMappingBase(
             study_directory=study_directory, inferer=inferer
