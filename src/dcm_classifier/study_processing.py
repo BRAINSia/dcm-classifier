@@ -76,6 +76,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         "0018|9605",  # FD 1 DiffusionBValueYY
         "0018|9606",  # FD 1 DiffusionBValueYZ
         "0018|9607",  # FD 1 DiffusionBValueZZ
+        "0018,0086",  # IS 1-n EchoNumber  (needed for fieldmaps, PD/T2, T2* parametric imaging, and others)
         # Private vendor: GE
         "0019|10e0",  # DTI diffusion directions (release 10.0 & above)
         "0019|10df",  # DTI diffusion directions (release 9.0 & below)
