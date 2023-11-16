@@ -1,20 +1,27 @@
 import pydicom
 import pytest
 from dcm_classifier.example_image_processing import slugify, rglob_for_singular_result
-from dcm_classifier.namic_dicom_typing import vprint, get_coded_dictionary_elements, check_for_diffusion_gradient, \
-    convert_array_to_min_max, sanitize_dicom_dataset
+from dcm_classifier.namic_dicom_typing import (
+    vprint,
+    get_coded_dictionary_elements,
+    get_diffusion_gradient_direction,
+    convert_array_to_min_max,
+    sanitize_dicom_dataset,
+)
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
 from dcm_classifier.namic_dicom_typing import itk_read_from_dicomfn_list
 
 relative_testing_data_path: Path = Path(__file__).parent.parent / "testing_data"
 current_file_path: Path = Path(__file__).parent
-inference_model_path = list(current_file_path.parent.parent.rglob("models/rf_classifier.onnx"))[0]
+inference_model_path = list(
+    current_file_path.parent.parent.rglob("models/rf_classifier.onnx")
+)[0]
 
 
 def test_rglob_for_singular_result():
     single_file_dir = (
-            relative_testing_data_path / "dummy_directory" / "dir_with_one_file"
+        relative_testing_data_path / "dummy_directory" / "dir_with_one_file"
     )
     single_file = rglob_for_singular_result(single_file_dir, "*.file", "f")
     assert single_file is not None
@@ -95,7 +102,10 @@ def test_vprint(capsys):
 
 def test_convert_array_to_min_max():
     array = [1, 2, 3, 4, 5]
-    assert convert_array_to_min_max("Test Array", array) == [("TestArrayMin", 1), ("TestArrayMax", 5)]
+    assert convert_array_to_min_max("Test Array", array) == [
+        ("TestArrayMin", 1),
+        ("TestArrayMax", 5),
+    ]
 
 
 @pytest.mark.skip(reason="Not implemented yet")
@@ -103,9 +113,13 @@ def test_convert_array_to_index_value():
     pass
 
 
-dicom_file_dir: Path = current_file_path.parent / "testing_data" / "invalid_data" / "invalid_fields"
+dicom_file_dir: Path = (
+    current_file_path.parent / "testing_data" / "invalid_data" / "invalid_fields"
+)
 
-mult_series_dir: Path = current_file_path.parent / "testing_data" / "invalid_data" / "mult_series_uid"
+mult_series_dir: Path = (
+    current_file_path.parent / "testing_data" / "invalid_data" / "mult_series_uid"
+)
 
 
 def test_multiple_series_UID():
@@ -121,14 +135,10 @@ def test_multiple_series_UID():
 
 def test_ADC_in_image_type_field():
     assert dicom_file_dir.exists()
-    vol = list()
-    i = 0
-    for file in dicom_file_dir.iterdir():
-        if i == 1:
-            vol.append(file)
-        i += 1
+    file = list(dicom_file_dir.rglob("*.dcm"))[0]
+    ds = pydicom.dcmread(file, stop_before_pixels=True)
 
-    assert check_for_diffusion_gradient(vol) is False
+    assert get_diffusion_gradient_direction(ds) is None
 
 
 def test_unknown_in_image_type():

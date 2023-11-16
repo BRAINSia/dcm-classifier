@@ -17,7 +17,10 @@
 #  =========================================================================
 
 from .dicom_series import DicomSingleSeries
-from .namic_dicom_typing import itk_read_from_dicomfn_list
+from .namic_dicom_typing import (
+    itk_read_from_dicomfn_list,
+    infer_diffusion_from_gradient,
+)
 from pathlib import Path
 import warnings
 
@@ -124,6 +127,19 @@ class ImageTypeClassifierBase:
         """
         return {v: k for k, v in self.imagetype_to_int_map.items()}
 
+    def check_if_diffusion(self) -> None:
+        """
+        After processing and file organization into volumes and serieses is completed, this function is called to
+        check if the series is a diffusion series. If so, the series modality is overriden to dwig.
+        This function is called during inference
+        """
+        volume_list = self.series.get_volume_list()
+        first_dcm_per_volume = [
+            volume.get_one_volume_dcm_filenames()[0] for volume in volume_list
+        ]
+        diff_modality = infer_diffusion_from_gradient(first_dcm_per_volume)
+        self.series.set_modality(diff_modality)
+
     def set_series(self, series: DicomSingleSeries) -> None:
         """
         Set the DICOM series for classification.
@@ -132,6 +148,7 @@ class ImageTypeClassifierBase:
             series (DicomSingleSeries): DicomSingleSeries object representing the DICOM series.
         """
         self.series = series
+        self.check_if_diffusion()
         self.series_number = series.get_series_number()
         self.info_dict = self.series.get_series_info_dict()
 
@@ -302,7 +319,7 @@ class ImageTypeClassifierBase:
                 self.series.set_acquisition_plane(acquisition_plane)
 
                 # If image already classified as diffusion gradient, simply return
-                if self.series.get_modality() == "dwig":
+                if self.series.get_modality() in ["dwig", "tracew", "adc"]:
                     self.series.set_modality_probabilities(pd.DataFrame())
                 else:
                     modality, full_outputs = self.infer_modality(

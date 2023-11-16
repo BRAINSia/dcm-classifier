@@ -32,7 +32,7 @@ from .namic_dicom_typing import (
     vprint,
     get_coded_dictionary_elements,
     sanitize_dicom_dataset,
-    check_for_diffusion_gradient,
+    get_diffusion_gradient_direction,
 )
 from .dicom_config import (
     required_DICOM_fields,
@@ -123,21 +123,14 @@ class DicomSingleVolumeInfoBase:
         )
 
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
-        if self.bvalue >= 0:
-            self.has_diffusion_gradient = check_for_diffusion_gradient(
-                self.one_volume_dcm_filenames
-            )
-            if self.has_diffusion_gradient:
-                self.modality: Optional[str] = "dwig"
-                self.modality_probability: Optional[pd.DataFrame] = pd.DataFrame()
-            else:
-                self.modality: Optional[str] = None
-                self.modality_probability: Optional[pd.DataFrame] = None
+        self.modality: Optional[str] = None
+        self.modality_probability: Optional[pd.DataFrame] = None
+        # TODO: For now set as false as it will be checked for series
+        diffusion_gradient = get_diffusion_gradient_direction(self._pydicom_info)
+        if diffusion_gradient is not None:
+            self.has_diffusion_gradient = True
         else:
             self.has_diffusion_gradient = False
-            self.modality: Optional[str] = None
-            self.modality_probability: Optional[pd.DataFrame] = None
-
         self.average_slice_spacing = -12345.0
         self.acquisition_plane: Optional[str] = None
         self.itk_image: Optional[FImageType] = None

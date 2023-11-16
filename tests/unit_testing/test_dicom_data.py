@@ -10,7 +10,9 @@ inference_model_path = list(
 )[0]
 
 
-def test_adc_dcm_series_modality(mock_volumes, default_image_type_classifier_base, mock_adc_series):
+def test_adc_dcm_series_modality(
+    mock_volumes, default_image_type_classifier_base, mock_adc_series
+):
     for series in mock_adc_series:
         assert series.get_modality() == "adc"
 
@@ -18,6 +20,7 @@ def test_adc_dcm_series_modality(mock_volumes, default_image_type_classifier_bas
 def test_ax_dcm_series_acq_plane(mock_series_study, mock_ax_series):
     for series in mock_ax_series:
         assert series.get_acquisition_plane() == "ax"
+
 
 def test_sag_dcm_series_acq_plane(mock_sag_series):
     for series in mock_sag_series:
@@ -61,8 +64,12 @@ def test_t2_dcm_series_modality(mock_t2_series):
 
 def test_no_valid_dcms():
     with pytest.raises(FileNotFoundError) as ex:
-        inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
-        dicom_files_dir: Path = current_file_path.parent / "testing_data" / "dummy_directory"
+        inferer = ImageTypeClassifierBase(
+            classification_model_filename=inference_model_path
+        )
+        dicom_files_dir: Path = (
+            current_file_path.parent / "testing_data" / "dummy_directory"
+        )
         study = ProcessOneDicomStudyToVolumesMappingBase(
             study_directory=dicom_files_dir, inferer=inferer
         )
@@ -101,10 +108,14 @@ def test_cor_dcm_volume_acq_plane(mock_volume_study):
 def test_invalid_inference_mode(get_data_dir):
     invalid_mode = "invalid"
     with pytest.raises(AssertionError) as ex:
-        inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path, mode=invalid_mode)
+        inferer = ImageTypeClassifierBase(
+            classification_model_filename=inference_model_path, mode=invalid_mode
+        )
         # dicom_files_dir: Path = current_file_path.parent.parent.parent / "dcm_files"
         study = ProcessOneDicomStudyToVolumesMappingBase(
             study_directory=get_data_dir, inferer=inferer
         )
         study.run_inference()
-    assert f"Invalid mode: {invalid_mode}. Must be 'series' or 'volume'" in str(ex.value)
+    assert f"Invalid mode: {invalid_mode}. Must be 'series' or 'volume'" in str(
+        ex.value
+    )

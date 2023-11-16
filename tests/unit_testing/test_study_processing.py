@@ -21,7 +21,9 @@ def test_study_with_search_series():
 def test_get_list_of_primary_volume_info(get_data_dir):
     # study_path = relative_testing_data_path.parent.parent.parent / "dcm_files"
 
-    study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(get_data_dir)
+    study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(
+        get_data_dir
+    )
     volume_info_dictionaries = (
         study_to_volume_mapping_base.get_list_of_primary_volume_info()
     )
@@ -126,11 +128,15 @@ def test_get_study_dictionary_and_set_inferer():
 # def test_run_inference():
 #     pass
 
+
 def test_un_pathlike_dir():
     # Raises an attribute error because the study_directory attribute is not set but is called in print statement
     with pytest.raises(AttributeError) as ex:
         ProcessOneDicomStudyToVolumesMappingBase(-12345)
-    assert "'ProcessOneDicomStudyToVolumesMappingBase' object has no attribute 'study_directory'" in str(ex.value)
+    assert (
+        "'ProcessOneDicomStudyToVolumesMappingBase' object has no attribute 'study_directory'"
+        in str(ex.value)
+    )
 
 
 # validate() is not implemented yet and only returns None

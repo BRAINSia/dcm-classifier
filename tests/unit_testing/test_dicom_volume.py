@@ -89,6 +89,7 @@ def test_get_invalid_vol_itk_image(mock_volumes):
     # assert image is not None
     # assert isinstance(image, FImageType)
 
+
 def test_get_itk_image(get_data_dir):
     dicom_file_dir = get_data_dir / "1" / "DICOM"
     assert dicom_file_dir.exists()
@@ -122,8 +123,10 @@ def test_get_modality(mock_volumes):
 
 @pytest.mark.skip(reason="Not implemented yet")
 def test_set_modality_probabilities(mock_volumes):
-    probabilities = pd.DataFrame(data={"case1": 0.4, "case2": 0.3, "case3": 0.75}, index=["t1w", "flair", "t2w"])
-    vol = (DicomSingleVolumeInfoBase(mock_volumes[0]))
+    probabilities = pd.DataFrame(
+        data={"case1": 0.4, "case2": 0.3, "case3": 0.75}, index=["t1w", "flair", "t2w"]
+    )
+    vol = DicomSingleVolumeInfoBase(mock_volumes[0])
     vol.set_modality_probabilities(probabilities)
     assert vol.get_modality_probabilities().aggregate == probabilities
 
