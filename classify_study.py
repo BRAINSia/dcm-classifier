@@ -8,7 +8,7 @@ def generate_separator(column_width):
 
 
 def generate_row(*args, column_width):
-    return "| " + " | ".join(arg.ljust(column_width) for arg in args) + " |"
+    return "| " + " | ".join(arg.ljust(column_width) if arg is not None else "NoneValue" for arg in args) + " |"
 
 
 # Set up argparse
