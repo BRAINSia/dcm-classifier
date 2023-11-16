@@ -9,16 +9,37 @@ from pathlib import Path
 relative_testing_data_path: Path = Path(__file__).parent.parent / "testing_data"
 
 
-@pytest.mark.skip(reason="Need to add public data")
-def test_get_list_of_primary_volume_info():
-    test_data_dicom_dir: str = "XXXX"
-    study_path = relative_testing_data_path / test_data_dicom_dir
+def test_study_with_search_series():
+    study_path = relative_testing_data_path / "anonymized_data"
+    study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(
+        study_path, {"test": 7}
+    )
+    assert study_to_volume_mapping_base.study_directory == study_path
+    assert study_to_volume_mapping_base.search_series == {"test": 7}
 
-    study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(study_path)
+
+def test_get_list_of_primary_volume_info(get_data_dir):
+    # study_path = relative_testing_data_path.parent.parent.parent / "dcm_files"
+
+    study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(get_data_dir)
     volume_info_dictionaries = (
         study_to_volume_mapping_base.get_list_of_primary_volume_info()
     )
-    assert len(volume_info_dictionaries) == 13
+    print(len(volume_info_dictionaries))
+
+    assert len(volume_info_dictionaries) == 16
+
+
+# @pytest.mark.skip(reason="Need to add public data")
+# def test_get_list_of_primary_volume_info():
+#     test_data_dicom_dir: str = "XXXX"
+#     study_path = relative_testing_data_path / test_data_dicom_dir
+#
+#     study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(study_path)
+#     volume_info_dictionaries = (
+#         study_to_volume_mapping_base.get_list_of_primary_volume_info()
+#     )
+#     assert len(volume_info_dictionaries) == 13
 
 
 @pytest.mark.skip(reason="Need to add public data")
@@ -34,10 +55,12 @@ def test_get_list_of_primary_volume_info_with_search_series():
     assert len(volume_info_dictionaries) == 4
 
 
-@pytest.mark.skip(reason="Need to add public data")
+# @pytest.mark.skip(reason="Need to add public data")
 def test_get_study_dictionary_and_set_inferer():
     test_data_dicom_dir: str = "XXXX"
-    study_path = relative_testing_data_path / test_data_dicom_dir
+    # study_path = relative_testing_data_path / test_data_dicom_dir
+    study_path = relative_testing_data_path / "anonymized_data"
+
     modality_columns = [
         "ImageTypeADC",
         "ImageTypeFA",
@@ -73,7 +96,7 @@ def test_get_study_dictionary_and_set_inferer():
     study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(study_path)
     study_dictionary = study_to_volume_mapping_base.get_study_dictionary()
     assert isinstance(study_dictionary, dict)
-    assert len(study_dictionary) == 8
+    assert len(study_dictionary) == 15
     study_to_volume_mapping_base.set_inferer(
         ImageTypeClassifierBase(
             classification_model_filename=default_classification_model_filename,
@@ -102,3 +125,14 @@ def test_get_study_dictionary_and_set_inferer():
 # @pytest.mark.skip(reason="Not implemented yet")
 # def test_run_inference():
 #     pass
+
+def test_un_pathlike_dir():
+    # Raises an attribute error because the study_directory attribute is not set but is called in print statement
+    with pytest.raises(AttributeError) as ex:
+        ProcessOneDicomStudyToVolumesMappingBase(-12345)
+    assert "'ProcessOneDicomStudyToVolumesMappingBase' object has no attribute 'study_directory'" in str(ex.value)
+
+
+# validate() is not implemented yet and only returns None
+def test_validate(mock_volume_study):
+    assert mock_volume_study.validate() is None

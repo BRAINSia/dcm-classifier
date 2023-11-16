@@ -12,6 +12,8 @@ pytest-coverage.txt
 
 # image files
 *.nii.gz
+# dicom files
+*.dcm
 
 # directories
 **/cnn_logs

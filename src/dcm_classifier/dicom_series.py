@@ -16,13 +16,8 @@
 #
 #  =========================================================================
 
-from .dicom_volume import (
-    DicomSingleVolumeInfoBase,
-    merge_dictionaries,
-)
-
+from .dicom_volume import DicomSingleVolumeInfoBase
 import pandas as pd
-
 from typing import List, Optional, Any, Dict
 
 
@@ -189,6 +184,7 @@ class DicomSingleSeries:
         Returns:
             Dict[str, Any]: A dictionary with information about the series.
         """
+        info_dict = self.volume_info_list[0].get_volume_dictionary()
         if len(self.volume_info_list) == 1:
             info_dict = self.volume_info_list[0].get_volume_dictionary()
             info_dict["Diffusionb-valueCount"] = 1
@@ -197,15 +193,12 @@ class DicomSingleSeries:
             ].get_volume_bvalue()
         else:
             bvals = []
-            info_dict = self.volume_info_list[0].get_volume_dictionary()
-            bvals.append(self.volume_info_list[0].get_volume_bvalue())
-            for volume in self.volume_info_list[1:]:
+            for volume in self.volume_info_list:
                 bvals.append(volume.get_volume_bvalue())
-                current_dict = volume.get_volume_dictionary()
-                info_dict = merge_dictionaries(info_dict, current_dict)
             info_dict["Diffusionb-valueSet"] = list(set(bvals))
             info_dict["Diffusionb-valueCount"] = len(list(set(bvals)))
             info_dict["Diffusionb-valueMax"] = max(bvals)
             info_dict["Diffusionb-valueMin"] = min(bvals)
         info_dict["SeriesVolumeCount"] = len(self.volume_info_list)
+
         return info_dict

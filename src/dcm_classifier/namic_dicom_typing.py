@@ -322,13 +322,24 @@ def sanitize_dicom_dataset(
     missing_fields = []
     for field in required_info_list:
         if field not in dataset_dictionary.keys():
-            dataset_dictionary[field] = INVALID_VALUE
-            missing_fields.append(field)
-        elif field == "EchoTime":
-            if not is_number(dataset_dictionary[field]):
+            # RepetitionTime and EchoTime might not be present in ADC images.
+            # Therefore, if they are missing, set them to -12345
+            if field == "RepetitionTime" or field == "EchoTime":
+                dataset_dictionary[field] = -12345
+            else:
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
-                vprint(f"Missing required echo time value {dicom_filename}")
+        elif field == "EchoTime" or field == "RepetitionTime":
+            if (
+                dataset_dictionary[field] is None
+                or str(dataset_dictionary[field]) == ""
+            ):
+                # ADC sequences may not have EchoTime
+                dataset_dictionary[field] = -12345
+            elif not is_number(dataset_dictionary[field]):
+                dataset_dictionary[field] = INVALID_VALUE
+                missing_fields.append(field)
+                vprint(f"Missing required {field} value {dicom_filename}")
         elif field == "SeriesNumber":
             if not is_integer(dataset_dictionary[field]):
                 dataset_dictionary[field] = INVALID_VALUE

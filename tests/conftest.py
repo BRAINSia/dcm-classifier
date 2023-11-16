@@ -1,26 +1,152 @@
+import os
 import re
-
+import subprocess
 import itk
 import pytest
 from pathlib import Path
+
+from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 from pydicom import Dataset
 from pydicom.dataset import FileMetaDataset
 from typing import List, Union
 import random
-
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 
+# Previous code for generating mock volumes from botimage
 adjacent_testing_data_path: Path = Path(__file__).parent / "testing_data"
+current_file_path: Path = Path(__file__).parent
+inference_model_path = list(
+    Path(__file__).parent.parent.rglob("models/rf_classifier.onnx")
+)[0]
+
+test_data_dir_path: Path = Path(__file__).parent / "testing_data"
+tar_path: Path = test_data_dir_path / "anonymized_data.tar.gz"
+
+dicom_files_dir: Path = Path(__file__).parent / "testing_data" / "anonymized_data"
+# Check to see if tar file is unpacked or not
+if not dicom_files_dir.exists():
+    dicom_files_dir.mkdir(parents=True)
+    subprocess.run(f"tar -xf {tar_path} -C {test_data_dir_path}", shell=True)
+
+inferer = ImageTypeClassifierBase(
+    classification_model_filename=inference_model_path
+)
+study = ProcessOneDicomStudyToVolumesMappingBase(
+    study_directory=dicom_files_dir, inferer=inferer
+)
+study.run_inference()
+
+s_test = study.series_dictionary.get(15)
+print(s_test.get_volume_list()[0].get_one_volume_dcm_filenames()[0])
+
+ax_series = [
+    study.series_dictionary.get(6),
+    study.series_dictionary.get(7),
+    study.series_dictionary.get(8),
+    study.series_dictionary.get(9),
+    study.series_dictionary.get(11),
+    study.series_dictionary.get(12),
+    study.series_dictionary.get(14),
+]
+sag_series = [
+    study.series_dictionary.get(2),
+    study.series_dictionary.get(10),
+    study.series_dictionary.get(13),
+]
+cor_series = [study.series_dictionary.get(3), study.series_dictionary.get(15)]
+t1_series = [
+    study.series_dictionary.get(10),
+    study.series_dictionary.get(12),
+    study.series_dictionary.get(13),
+    study.series_dictionary.get(14),
+    study.series_dictionary.get(15),
+]
+flair_series = [study.series_dictionary.get(7)]
+t2_series = [study.series_dictionary.get(11)]
+adc_series = [study.series_dictionary.get(6)]
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
+def get_data_dir():
+    return dicom_files_dir
+
+
+@pytest.fixture(scope="session")
+def mock_ax_series():
+    return ax_series
+
+
+@pytest.fixture(scope="session")
+def mock_sag_series():
+    return sag_series
+
+
+@pytest.fixture(scope="session")
+def mock_cor_series():
+    return cor_series
+
+
+@pytest.fixture(scope="session")
+def mock_t1_series():
+    return t1_series
+
+
+@pytest.fixture(scope="session")
+def mock_flair_series():
+    return flair_series
+
+
+@pytest.fixture(scope="session")
+def mock_t2_series():
+    return t2_series
+
+
+@pytest.fixture(scope="session")
+def mock_adc_series():
+    return adc_series
+
+
+invalid_data_tar_path: Path = test_data_dir_path / "invalid_data.tar.gz"
+
+invalid_dicom_files_dir: Path = Path(__file__).parent / "testing_data" / "invalid_data"
+# Check to see if tar file is unpacked or not
+if not invalid_dicom_files_dir.exists():
+    invalid_dicom_files_dir.mkdir(parents=True)
+    subprocess.run(f"tar -xf {invalid_data_tar_path} -C {test_data_dir_path}", shell=True)
+
+
+@pytest.fixture(scope="session")
+def mock_series_study():
+    inferer = ImageTypeClassifierBase(
+        classification_model_filename=inference_model_path
+    )
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=dicom_files_dir, inferer=inferer
+    )
+    study.run_inference()
+    return study
+
+
+@pytest.fixture(scope="session")
+def mock_volume_study():
+    inferer = ImageTypeClassifierBase(
+        classification_model_filename=inference_model_path, mode="volume"
+    )
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=dicom_files_dir, inferer=inferer
+    )
+    study.run_inference()
+    return study
+
+
+@pytest.fixture(scope="session")
 def mock_volumes():
     """A fixture function that is used to mock DICOM volumes for testing
     :returns list_of_volumes: a list containing filepaths to volume directories
     """
 
     def generate_dcm_volumes(
-        volumes: List[Union[str, Path]], output_path: Union[str, Path]
+            volumes: List[Union[str, Path]], output_path: Union[str, Path]
     ):
         """A function that creates a directory and DICOM files for each volume in the list of provided volumes.
         The directory and files are written to the specified output path.
@@ -40,7 +166,7 @@ def mock_volumes():
                 ds.is_little_endian = True
                 ds.is_implicit_VR = False
                 ds.save_as(
-                    f"{output_path}/volume_{i}/test_dcm_{(j-1)/2}.dcm",
+                    f"{output_path}/volume_{i}/test_dcm_{(j - 1) / 2}.dcm",
                     write_like_original=False,
                 )
 
@@ -53,10 +179,10 @@ def mock_volumes():
 
     # checks if volume paths exist, if not mock volumes are created from the file generated by 'generate_mock_volume_json.py'
     if not (
-        adc_volume_dir_path.exists()
-        and dwi_volume_dir_path.exists()
-        and t2w_volume_dir_path.exists()
-        and other_volume_dir_path.exists()
+            adc_volume_dir_path.exists()
+            and dwi_volume_dir_path.exists()
+            and t2w_volume_dir_path.exists()
+            and other_volume_dir_path.exists()
     ):
         adc_volumes = list()
         dwi_volumes = list()
@@ -92,7 +218,9 @@ def mock_volumes():
     # reads in volumes from mock data path
     list_of_volumes = []
     all_volumes_list = [
-        x for x in list(adjacent_testing_data_path.rglob("**/*volumes/*")) if x.is_dir()
+        x
+        for x in list(adjacent_testing_data_path.rglob("**/*volumes/*"))
+        if x.is_dir()
     ]
     for volume in all_volumes_list:
         volume_files_list = list(volume.rglob("*.dcm"))
@@ -134,7 +262,7 @@ def default_image_type_classifier_base():
     }
 
     default_classification_model_filename: Path = (
-        Path(__file__).parents[2] / "models" / "rf_classifier.onnx"
+            Path(__file__).parents[2] / "models" / "rf_classifier.onnx"
     )
 
     image_type_classifier_base = ImageTypeClassifierBase(

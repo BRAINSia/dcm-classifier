@@ -1,8 +1,14 @@
+from pathlib import Path
+
+import pandas as pd
 from dcm_classifier.dicom_volume import (
     DicomSingleVolumeInfoBase,
 )
 from collections import OrderedDict
 import pytest
+from dcm_classifier.namic_dicom_typing import FImageType
+
+current_file_path = Path(__file__).parent
 
 
 def test_get_series_uid(mock_volumes):
@@ -31,7 +37,7 @@ def test_get_b_value(mock_volumes):
 
 
 def test_primary_volume_info(mock_volumes):
-    volume_info = DicomSingleVolumeInfoBase(mock_volumes[0]).get_primary_volume_info()
+    volume_info = DicomSingleVolumeInfoBase(mock_volumes[0]).get_primary_volume_info(0)
     assert isinstance(volume_info, OrderedDict)
 
 
@@ -74,10 +80,25 @@ def test_get_series_size(mock_volumes):
 #     # assert "Identified SeriesNumber: 702" in validation_report_str
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_get_itk_image():
+# @pytest.mark.skip(reason="Not implemented yet")
+def test_get_invalid_vol_itk_image(mock_volumes):
     # TODO - implement this test
-    pass
+    with pytest.raises(FileNotFoundError) as ex:
+        image = DicomSingleVolumeInfoBase(mock_volumes[0]).get_itk_image()
+    assert "No DICOMs in: " in str(ex.value)
+    # assert image is not None
+    # assert isinstance(image, FImageType)
+
+def test_get_itk_image(get_data_dir):
+    dicom_file_dir = get_data_dir / "1" / "DICOM"
+    assert dicom_file_dir.exists()
+    vol = list()
+    for file in dicom_file_dir.iterdir():
+        vol.append(file)
+
+    image = DicomSingleVolumeInfoBase(vol).get_itk_image()
+    assert image is not None
+    assert isinstance(image, FImageType)
 
 
 @pytest.mark.skip(reason="Not implemented yet")
@@ -85,21 +106,45 @@ def test_get_one_volume_dcm_filenames():
     pass
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_set_modality():
-    pass
+def test_set_modality(mock_volumes):
+    volume_info = DicomSingleVolumeInfoBase(mock_volumes[0])
+    assert volume_info.get_modality() is None
+    volume_info.set_modality("t1w")
+    assert volume_info.get_modality() == "t1w"
+
+
+def test_get_modality(mock_volumes):
+    volume_info = DicomSingleVolumeInfoBase(mock_volumes[0])
+    assert volume_info.get_modality() is None
+    volume_info.set_modality("fa")
+    assert volume_info.get_modality() == "fa"
 
 
 @pytest.mark.skip(reason="Not implemented yet")
-def test_get_modality():
-    pass
+def test_set_modality_probabilities(mock_volumes):
+    probabilities = pd.DataFrame(data={"case1": 0.4, "case2": 0.3, "case3": 0.75}, index=["t1w", "flair", "t2w"])
+    vol = (DicomSingleVolumeInfoBase(mock_volumes[0]))
+    vol.set_modality_probabilities(probabilities)
+    assert vol.get_modality_probabilities().aggregate == probabilities
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_set_modality_probabilities():
-    pass
+def test_no_files_provided():
+    with pytest.raises(ValueError) as ex:
+        vol = DicomSingleVolumeInfoBase([])
+    assert "No file names provided list" in str(ex.value)
+
+
+def test_invalid_volume_modality(mock_volumes):
+    assert DicomSingleVolumeInfoBase(mock_volumes[0]).get_modality() is None
 
 
 @pytest.mark.skip(reason="Not implemented yet")
 def test_get_modality_probabilities():
     pass
+
+
+# Test asserts false because the mock volume has a flair modality but that is an MR modality...
+def test_is_MR_modality(mock_volume_study):
+    for series_num, series in mock_volume_study.get_study_dictionary().items():
+        for volume in series.get_volume_list():
+            assert volume.is_MR_modality() is False

@@ -8,3 +8,4 @@ skl2onnx==1.13
 tomli==2.0.1
 coverage[toml]==7.2.7
 pytest==7.4.2
+dicom-anonymizer==1.0.11
