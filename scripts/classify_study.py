@@ -1,5 +1,15 @@
-from src.dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
-from src.dcm_classifier.image_type_inference import ImageTypeClassifierBase
+import sys
+
+try:
+    from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+    from dcm_classifier.image_type_inference import ImageTypeClassifierBase
+except Exception as e:
+    from pathlib import Path
+    print(f"Missing module import {e}")
+    print(f"Try setting export PYTHONPATH={Path(__file__).parent.parent.as_posix()}/src")
+    sys.exit(255)
+
+
 import argparse
 
 
@@ -8,7 +18,7 @@ def generate_separator(column_width):
 
 
 def generate_row(*args, column_width):
-    return "| " + " | ".join(arg.ljust(column_width) for arg in args) + " |"
+    return "| " + " | ".join(arg.ljust(column_width) if arg is not None else "NoneValue" for arg in args) + " |"
 
 
 # Set up argparse

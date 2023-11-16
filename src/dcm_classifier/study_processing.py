@@ -76,6 +76,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         "0018|9605",  # FD 1 DiffusionBValueYY
         "0018|9606",  # FD 1 DiffusionBValueYZ
         "0018|9607",  # FD 1 DiffusionBValueZZ
+        "0018,0086",  # IS 1-n EchoNumber  (needed for fieldmaps, PD/T2, T2* parametric imaging, and others)
         # Private vendor: GE
         "0019|10e0",  # DTI diffusion directions (release 10.0 & above)
         "0019|10df",  # DTI diffusion directions (release 9.0 & below)
@@ -134,6 +135,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         study_directory: Union[str, Path],
         search_series: Optional[Dict[str, int]] = None,
         inferer: Optional[ImageTypeClassifierBase] = None,
+        raise_error_on_failure: bool = False,
     ):
         """
         Initialize an instance of ProcessOneDicomStudyToVolumesMappingBase.
@@ -162,6 +164,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             del study_directory
         else:
             print(f"ERROR:  {self.study_directory} is not pathlike")
+        self.raise_error_on_failure: bool = raise_error_on_failure
         self.search_series: Optional[Dict[str, int]] = search_series
         self.series_dictionary: Dict[
             int, DicomSingleSeries
@@ -307,13 +310,17 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         seriesUID = namesGenerator.GetSeriesUIDs()
 
         if len(seriesUID) < 1:
-            raise FileNotFoundError(
-                f"No DICOMs in: {study_directory} (__identify_single_volumes)"
+            msg: str = f"No DICOMs in: {study_directory} (__identify_single_volumes)"
+            if self.raise_error_on_failure:
+                raise FileNotFoundError(msg)
+            else:
+                print(
+                    f"No readable dicoms DICOMs in: {study_directory} (__identify_single_volumes)"
+                )
+        else:
+            print(
+                f"The directory: {study_directory} contains {len(seriesUID)} DICOM Series "
             )
-
-        print(
-            f"The directory: {study_directory} contains {len(seriesUID)} DICOM Series "
-        )
         # print(f"Contains the following {len(seriesUID)} DICOM Series: ")
         # for uid in seriesUID:
         #     print(uid)
