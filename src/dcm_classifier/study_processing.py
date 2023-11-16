@@ -135,6 +135,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         study_directory: Union[str, Path],
         search_series: Optional[Dict[str, int]] = None,
         inferer: Optional[ImageTypeClassifierBase] = None,
+        raise_error_on_failure: bool = False,
     ):
         """
         Initialize an instance of ProcessOneDicomStudyToVolumesMappingBase.
@@ -163,6 +164,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             del study_directory
         else:
             print(f"ERROR:  {self.study_directory} is not pathlike")
+        self.raise_error_on_failure: bool = raise_error_on_failure
         self.search_series: Optional[Dict[str, int]] = search_series
         self.series_dictionary: Dict[
             int, DicomSingleSeries
@@ -309,11 +311,12 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         if len(seriesUID) < 1:
             msg: str = f"No DICOMs in: {study_directory} (__identify_single_volumes)"
-            empty_series_UID_is_error: bool = False
-            if empty_series_UID_is_error:
+            if self.raise_error_on_failure:
                 raise FileNotFoundError(msg)
             else:
-                print(f"No readable dicoms DICOMs in: {study_directory} (__identify_single_volumes)")
+                print(
+                    f"No readable dicoms DICOMs in: {study_directory} (__identify_single_volumes)"
+                )
         else:
             print(
                 f"The directory: {study_directory} contains {len(seriesUID)} DICOM Series "
