@@ -88,7 +88,6 @@ class ImageTypeClassifierBase:
         classification_model_filename: Union[str, Path],
         classification_feature_list: List[str] = modality_columns,
         image_type_map: Dict[str, int] = imagetype_to_integer_mapping,
-        mode: str = "series",
         min_probability_threshold: float = 0.4,
     ):
         """
@@ -101,12 +100,6 @@ class ImageTypeClassifierBase:
             mode (str): "series" or "volume" to run inference on series or volume level (a series could have multiple subvolumes).
             min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
         """
-        assert mode in [
-            "series",
-            "volume",
-        ], f"Invalid mode: {mode}. Must be 'series' or 'volume'"
-
-        self.mode: str = mode
         self.classification_model_filename: Union[str, Path] = Path(
             classification_model_filename
         )
@@ -148,7 +141,6 @@ class ImageTypeClassifierBase:
             series (DicomSingleSeries): DicomSingleSeries object representing the DICOM series.
         """
         self.series = series
-        self.check_if_diffusion()
         self.series_number = series.get_series_number()
         self.info_dict = self.series.get_series_info_dict()
 
@@ -326,48 +318,40 @@ class ImageTypeClassifierBase:
                 return False
             return True
 
-        if self.mode == "series":
-            if validate_features(self.info_dict):
-                acquisition_plane = self.infer_acquisition_plane(
-                    feature_dict=self.info_dict
+        # classify volumes
+        for volume in self.series.get_volume_list():
+            features_validated: bool = validate_features(volume.get_volume_info_dict())
+            if features_validated:
+                acquisition_plane: str = self.infer_acquisition_plane(
+                    feature_dict=volume.get_volume_info_dict()
                 )
-                self.series.set_acquisition_plane(acquisition_plane)
+                volume.set_acquisition_plane(acquisition_plane)
                 isotropic = self.infer_isotropic(feature_dict=self.info_dict)
                 self.series.set_is_isotropic(isotropic)
 
-                # If image already classified as diffusion gradient, simply return
-                if self.series.get_modality() in ["dwig", "tracew", "adc"]:
-                    self.series.set_modality_probabilities(pd.DataFrame())
+                if volume.get_modality() == "dwig":
+                    volume.set_modality_probabilities(pd.DataFrame())
                 else:
                     modality, full_outputs = self.infer_modality(
-                        feature_dict=self.info_dict
-                    )
-                    self.series.set_modality(modality)
-                    self.series.set_modality_probabilities(
-                        pd.DataFrame(full_outputs, index=[0])
-                    )
-        elif self.mode == "volume":
-            for volume in self.series.get_volume_list():
-                features_validated: bool = validate_features(
-                    volume.get_volume_info_dict()
-                )
-                if features_validated:
-                    acquisition_plane: str = self.infer_acquisition_plane(
                         feature_dict=volume.get_volume_info_dict()
                     )
-                    volume.set_acquisition_plane(acquisition_plane)
-                    isotropic = self.infer_isotropic(feature_dict=self.info_dict)
-                    self.series.set_is_isotropic(isotropic)
+                    volume.set_modality(modality)
+                    volume.set_modality_probabilities(
+                        pd.DataFrame(full_outputs, index=[0])
+                    )
 
-                    if volume.get_modality() == "dwig":
-                        volume.set_modality_probabilities(pd.DataFrame())
-                    else:
-                        modality, full_outputs = self.infer_modality(
-                            feature_dict=volume.get_volume_info_dict()
-                        )
-                        volume.set_modality(modality)
-                        volume.set_modality_probabilities(
-                            pd.DataFrame(full_outputs, index=[0])
-                        )
+        # classify series
+        if len(self.series.get_volume_list()) == 1:
+            volume = self.series.get_volume_list()[0]
+            self.series.set_modality(volume.get_modality())
+            self.series.set_modality_probabilities(volume.get_modality_probabilities())
+            self.series.set_acquisition_plane(volume.get_acquisition_plane())
+            self.series.set_is_isotropic(self.series.get_is_isotropic())
         else:
-            raise ValueError(f"Impossible State. Mode {self.mode} not supported.")
+            self.check_if_diffusion()
+            self.series.set_acquisition_plane(
+                self.series.get_volume_list()[0].get_acquisition_plane()
+            )
+            self.series.set_is_isotropic(
+                self.series.get_volume_list()[0].get_is_isotropic()
+            )

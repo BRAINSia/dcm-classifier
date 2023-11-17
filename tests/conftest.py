@@ -134,7 +134,7 @@ def mock_series_study():
 @pytest.fixture(scope="session")
 def mock_volume_study():
     inferer = ImageTypeClassifierBase(
-        classification_model_filename=inference_model_path, mode="volume"
+        classification_model_filename=inference_model_path
     )
     study = ProcessOneDicomStudyToVolumesMappingBase(
         study_directory=dicom_files_dir, inferer=inferer
@@ -271,7 +271,6 @@ def default_image_type_classifier_base():
         classification_model_filename=default_classification_model_filename,
         classification_feature_list=modality_columns,
         image_type_map=imagetype_to_integer_mapping,
-        mode="volume",
         min_probability_threshold=0.4,
     )
 

@@ -104,7 +104,6 @@ def test_get_study_dictionary_and_set_inferer():
             classification_model_filename=default_classification_model_filename,
             classification_feature_list=modality_columns,
             image_type_map=imagetype_to_integer_mapping,
-            mode="volume",
             min_probability_threshold=0.4,
         )
     )
@@ -120,7 +119,6 @@ def test_get_study_dictionary_and_set_inferer():
         study_to_volume_mapping_base.inferer.imagetype_to_int_map
         == imagetype_to_integer_mapping
     )
-    assert study_to_volume_mapping_base.inferer.mode == "volume"
     assert study_to_volume_mapping_base.inferer.min_probability_threshold == 0.4
 
 
