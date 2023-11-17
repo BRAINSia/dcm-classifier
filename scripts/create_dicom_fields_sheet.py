@@ -636,6 +636,7 @@ def generate_dicom_dataframe(
             study_directory=ses_dir, inferer=inferer
         )
         study.run_inference()
+
         print(f"Processing {ses_dir}: {study.series_dictionary}")
         for series_number, series in study.series_dictionary.items():
             modality = series.get_modality()
@@ -650,7 +651,7 @@ def generate_dicom_dataframe(
                 img_dict["_vol_index"] = index
                 img_dict["_dcm_image_type"] = modality
                 img_dict["_dcm_image_orientation_patient"] = plane
-                img_dict["FileName"] = series_vol.one_volume_dcm_filenames[0]
+                img_dict["FileName"] = series_vol.one_volume_dcm_filenames[0].as_posix()
                 for k, v in series.get_series_info_dict().items():
                     img_dict[k] = v
             series_df = pd.DataFrame.from_dict(data=img_dict, orient="index").T
@@ -674,6 +675,7 @@ def generate_dicom_dataframe(
         df.to_excel(output_file, index=False)
     else:
         print(f"NO MR DICOM DATA FOUND IN {session_dirs}")
+
 
 
 if __name__ == "__main__":
@@ -726,6 +728,7 @@ if __name__ == "__main__":
     dicom_path = args.dicom_path
     model: Path = Path(args.model)
     out = args.out
+
 
     path_dirs = sorted(list(glob(f"{dicom_path}/*/*")))
     ses_dirs = [x for x in path_dirs if Path(x).is_dir()]
