@@ -39,12 +39,13 @@ required_DICOM_fields: List[str] = [
     "StudyInstanceUID",
     "SeriesInstanceUID",
     "SeriesNumber",
-    "PixelSpacing",
     "ImageOrientationPatient",
     "PixelBandwidth",
     "EchoTime",
     "RepetitionTime",
     "FlipAngle",
+    "PixelSpacing",
+    "SliceThickness",
 ]
 
 optional_DICOM_fields: List[str] = [
