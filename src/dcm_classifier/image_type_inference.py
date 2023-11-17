@@ -169,20 +169,19 @@ class ImageTypeClassifierBase:
             str: A string representing the inferred acquisition plane ("iso" for isotropic, "ax" for axial, "sag" for sagittal and "cor" for coronal).
         """
         # check if the volume was invalidated
-        for volume in self.series.get_volume_list():
-            if volume.get_acquisition_plane() == "INVALID":
+        for field in [
+            "ImageOrientationPatient_0",
+            "ImageOrientationPatient_5",
+            "PixelSpacing",
+            "SliceThickness",
+        ]:
+            if field == "INVALID_VALUE":
                 return "INVALID"
 
-        volume = self.series.get_volume_list()[0]
-        itk_im = itk_read_from_dicomfn_list(volume.get_one_volume_dcm_filenames())
-        spacing = list(itk_im.GetSpacing())
-        voxel_volume = spacing[0] * spacing[1] * spacing[2]
-        cube_root = voxel_volume ** (1 / 3)
-        is_iso = True
-        for s in spacing:
-            if abs(s - cube_root) / cube_root > 0.10:
-                is_iso = False
-        if is_iso:
+        # check if the volume is isotropic
+        spacing = np.array(feature_dict["PixelSpacing"])
+        thickness = float(feature_dict["SliceThickness"])
+        if np.allclose(spacing, thickness, rtol=0.05):
             return "iso"
 
         if float(feature_dict["ImageOrientationPatient_5"]) <= 0.5:
