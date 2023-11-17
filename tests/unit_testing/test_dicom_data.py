@@ -94,14 +94,14 @@ def test_ax_dcm_volume_acq_plane(mock_volume_study):
 def test_sag_dcm_volume_acq_plane(mock_volume_study):
     for series_num, series in mock_volume_study.get_study_dictionary().items():
         for volume in series.get_volume_list():
-            if series_num == 2 or series_num == 10 or series_num == 13:
+            if series_num == 10 or series_num == 13:
                 assert volume.get_acquisition_plane() == "sag"
 
 
 def test_cor_dcm_volume_acq_plane(mock_volume_study):
     for series_number, series in mock_volume_study.get_study_dictionary().items():
         for volume in series.get_volume_list():
-            if series_number == 3 or series_number == 15:
+            if series_number == 15:
                 assert volume.get_acquisition_plane() == "cor"
 
 

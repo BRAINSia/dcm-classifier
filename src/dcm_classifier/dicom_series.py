@@ -84,6 +84,7 @@ class DicomSingleSeries:
         self.modality: str = "INVALID"
         self.modality_probability: Optional[pd.DataFrame] = None
         self.acquisition_plane: Optional[str] = None
+        self.is_isotropic: Optional[bool] = None
 
     def get_series_number(self) -> int:
         """
@@ -129,6 +130,24 @@ class DicomSingleSeries:
             pd.DataFrame: A DataFrame containing modality probabilities.
         """
         return self.modality_probability
+
+    def set_is_isotropic(self, isotropic: bool) -> None:
+        """
+        Sets the isotropic flag of the DICOM data.
+
+        Args:
+            isotropic (bool): The isotropic flag to be set.
+        """
+        self.is_isotropic = isotropic
+
+    def get_is_isotropic(self) -> bool:
+        """
+        Retrieves the isotropic flag of the DICOM data.
+
+        Returns:
+            bool: The isotropic flag.
+        """
+        return self.is_isotropic
 
     def set_acquisition_plane(self, acquisition_plane: str) -> None:
         """

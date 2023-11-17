@@ -169,21 +169,12 @@ class ImageTypeClassifierBase:
             str: A string representing the inferred acquisition plane ("iso" for isotropic, "ax" for axial, "sag" for sagittal and "cor" for coronal).
         """
         # check if the volume was invalidated
-        for volume in self.series.get_volume_list():
-            if volume.get_acquisition_plane() == "INVALID":
+        for field in [
+            "ImageOrientationPatient_0",
+            "ImageOrientationPatient_5",
+        ]:
+            if field == "INVALID_VALUE":
                 return "INVALID"
-
-        volume = self.series.get_volume_list()[0]
-        itk_im = itk_read_from_dicomfn_list(volume.get_one_volume_dcm_filenames())
-        spacing = list(itk_im.GetSpacing())
-        voxel_volume = spacing[0] * spacing[1] * spacing[2]
-        cube_root = voxel_volume ** (1 / 3)
-        is_iso = True
-        for s in spacing:
-            if abs(s - cube_root) / cube_root > 0.10:
-                is_iso = False
-        if is_iso:
-            return "iso"
 
         if float(feature_dict["ImageOrientationPatient_5"]) <= 0.5:
             return "ax"
@@ -192,6 +183,30 @@ class ImageTypeClassifierBase:
                 return "sag"
             else:
                 return "cor"
+
+    def infer_isotropic(self, feature_dict: dict = None) -> Optional[bool]:
+        """
+        Infer the acquisition plane based on DICOM information and image properties.
+        Args:
+            feature_dict: A dictionary containing features used for classification.
+
+        Returns:
+            bool: True if the image is isotropic, False otherwise.
+        """
+        # check if the volume was invalidated
+        for field in [
+            "PixelSpacing",
+            "SliceThickness",
+        ]:
+            if field == "INVALID_VALUE":
+                return None
+
+        # check if the volume is isotropic
+        spacing = np.array(feature_dict["PixelSpacing"])
+        thickness = float(feature_dict["SliceThickness"])
+        if np.allclose(spacing, thickness, rtol=0.1):
+            return True
+        return False
 
     def infer_modality(self, feature_dict: dict = None) -> (str, pd.DataFrame):
         """
@@ -317,6 +332,8 @@ class ImageTypeClassifierBase:
                     feature_dict=self.info_dict
                 )
                 self.series.set_acquisition_plane(acquisition_plane)
+                isotropic = self.infer_isotropic(feature_dict=self.info_dict)
+                self.series.set_is_isotropic(isotropic)
 
                 # If image already classified as diffusion gradient, simply return
                 if self.series.get_modality() in ["dwig", "tracew", "adc"]:
@@ -339,6 +356,8 @@ class ImageTypeClassifierBase:
                         feature_dict=volume.get_volume_info_dict()
                     )
                     volume.set_acquisition_plane(acquisition_plane)
+                    isotropic = self.infer_isotropic(feature_dict=self.info_dict)
+                    self.series.set_is_isotropic(isotropic)
 
                     if volume.get_modality() == "dwig":
                         volume.set_modality_probabilities(pd.DataFrame())
