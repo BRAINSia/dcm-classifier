@@ -109,14 +109,14 @@ def test_get_one_volume_dcm_filenames():
 
 def test_set_modality(mock_volumes):
     volume_info = DicomSingleVolumeInfoBase(mock_volumes[0])
-    assert volume_info.get_modality() is None
+    assert volume_info.get_modality() is "INVALID"
     volume_info.set_modality("t1w")
     assert volume_info.get_modality() == "t1w"
 
 
 def test_get_modality(mock_volumes):
     volume_info = DicomSingleVolumeInfoBase(mock_volumes[0])
-    assert volume_info.get_modality() is None
+    assert volume_info.get_modality() is "INVALID"
     volume_info.set_modality("fa")
     assert volume_info.get_modality() == "fa"
 
@@ -138,7 +138,7 @@ def test_no_files_provided():
 
 
 def test_invalid_volume_modality(mock_volumes):
-    assert DicomSingleVolumeInfoBase(mock_volumes[0]).get_modality() is None
+    assert DicomSingleVolumeInfoBase(mock_volumes[0]).get_modality() is "INVALID"
 
 
 @pytest.mark.skip(reason="Not implemented yet")
