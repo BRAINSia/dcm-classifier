@@ -133,6 +133,7 @@ class DicomSingleVolumeInfoBase:
             self.has_diffusion_gradient = False
         self.average_slice_spacing = -12345.0
         self.acquisition_plane: Optional[str] = None
+        self.is_isotropic: Optional[bool] = None
         self.itk_image: Optional[FImageType] = None
         (
             _one_study_found,
@@ -156,6 +157,24 @@ class DicomSingleVolumeInfoBase:
             str: The modality information.
         """
         return self.modality
+
+    def set_is_isotropic(self, isotropic: bool) -> None:
+        """
+        Sets the isotropic flag of the DICOM data.
+
+        Args:
+            isotropic (bool): The isotropic flag to be set.
+        """
+        self.is_isotropic = isotropic
+
+    def get_is_isotropic(self) -> bool:
+        """
+        Retrieves the isotropic flag of the DICOM data.
+
+        Returns:
+            bool: The isotropic flag.
+        """
+        return self.is_isotropic
 
     def set_modality_probabilities(self, modality_probability: pd.DataFrame) -> None:
         """
