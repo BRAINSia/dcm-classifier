@@ -40,18 +40,22 @@ print(s_test.get_volume_list()[0].get_one_volume_dcm_filenames()[0])
 ax_series = [
     study.series_dictionary.get(6),
     study.series_dictionary.get(7),
-    study.series_dictionary.get(8),
-    study.series_dictionary.get(9),
+    # study.series_dictionary.get(8),
+    # study.series_dictionary.get(9),
     study.series_dictionary.get(11),
     study.series_dictionary.get(12),
     study.series_dictionary.get(14),
 ]
 sag_series = [
-    study.series_dictionary.get(2),
+    # study.series_dictionary.get(2),
     study.series_dictionary.get(10),
     study.series_dictionary.get(13),
 ]
-cor_series = [study.series_dictionary.get(3), study.series_dictionary.get(15)]
+cor_series = [
+    # study.series_dictionary.get(3),
+    study.series_dictionary.get(15)
+]
+
 t1_series = [
     study.series_dictionary.get(10),
     study.series_dictionary.get(12),
