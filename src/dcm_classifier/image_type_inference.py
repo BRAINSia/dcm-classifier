@@ -181,7 +181,7 @@ class ImageTypeClassifierBase:
         # check if the volume is isotropic
         spacing = np.array(feature_dict["PixelSpacing"])
         thickness = float(feature_dict["SliceThickness"])
-        if np.allclose(spacing, thickness, rtol=0.05):
+        if np.allclose(spacing, thickness, rtol=0.1):
             return "iso"
 
         if float(feature_dict["ImageOrientationPatient_5"]) <= 0.5:
