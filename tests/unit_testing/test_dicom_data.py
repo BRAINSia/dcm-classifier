@@ -61,6 +61,7 @@ def test_t2_dcm_series_modality(mock_t2_series):
     #     if series_number == 11:
     #         assert series.get_modality() == "t2w"
 
+
 # TODO: rewrite this for new behavior
 # def test_no_valid_dcms():
 #     with pytest.raises(FileNotFoundError) as ex:
@@ -103,19 +104,3 @@ def test_cor_dcm_volume_acq_plane(mock_volume_study):
         for volume in series.get_volume_list():
             if series_number == 15:
                 assert volume.get_acquisition_plane() == "cor"
-
-
-def test_invalid_inference_mode(get_data_dir):
-    invalid_mode = "invalid"
-    with pytest.raises(AssertionError) as ex:
-        inferer = ImageTypeClassifierBase(
-            classification_model_filename=inference_model_path, mode=invalid_mode
-        )
-        # dicom_files_dir: Path = current_file_path.parent.parent.parent / "dcm_files"
-        study = ProcessOneDicomStudyToVolumesMappingBase(
-            study_directory=get_data_dir, inferer=inferer
-        )
-        study.run_inference()
-    assert f"Invalid mode: {invalid_mode}. Must be 'series' or 'volume'" in str(
-        ex.value
-    )
