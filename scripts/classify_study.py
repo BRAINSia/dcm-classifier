@@ -5,8 +5,11 @@ try:
     from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 except Exception as e:
     from pathlib import Path
+
     print(f"Missing module import {e}")
-    print(f"Try setting export PYTHONPATH={Path(__file__).parent.parent.as_posix()}/src")
+    print(
+        f"Try setting export PYTHONPATH={Path(__file__).parent.parent.as_posix()}/src"
+    )
     sys.exit(255)
 
 
@@ -14,11 +17,11 @@ import argparse
 
 
 def generate_separator(column_width):
-    return "|" + ("-" * (column_width + 2) + "|") * 3
+    return "|" + ("-" * (column_width + 2) + "|") * 4
 
 
 def generate_row(*args, column_width):
-    return "| " + " | ".join(arg.ljust(column_width) if arg is not None else "NoneValue" for arg in args) + " |"
+    return "| " + " | ".join(arg.ljust(column_width) for arg in args) + " |"
 
 
 # Set up argparse
@@ -49,18 +52,25 @@ study = ProcessOneDicomStudyToVolumesMappingBase(
 )
 study.run_inference()
 
-col_width = 17
+col_width = 25
 print(generate_separator(col_width))
 print(
     generate_row(
-        "Series number", "Modality", "Acquisition Plane", column_width=col_width
+        "Series number",
+        "Modality",
+        "Acquisition Plane",
+        "Isotropic",
+        column_width=col_width,
     )
 )
 print(generate_separator(col_width))
 for series_number, series in study.series_dictionary.items():
-    modality = series.get_modality()
-    plane = series.get_acquisition_plane()
-    print(generate_row(str(series_number), modality, plane, column_width=col_width))
+    modality = str(series.get_modality())
+    plane = str(series.get_acquisition_plane())
+    iso = str(series.get_is_isotropic())
+    print(
+        generate_row(str(series_number), modality, plane, iso, column_width=col_width)
+    )
 
 
 # # below is the code to run inference on volume level
@@ -76,7 +86,7 @@ for series_number, series in study.series_dictionary.items():
 # print(generate_separator(col_width))
 # print(
 #     generate_row(
-#         "Series number", "Modality", "Acquisition Plane", column_width=col_width
+#         "Series number", "Modality", "Acquisition Plane", "Isotropic", column_width=col_width
 #     )
 # )
 # print(generate_separator(col_width))
@@ -84,7 +94,7 @@ for series_number, series in study.series_dictionary.items():
 #     for volume in series.get_volume_list():
 #         modality = volume.get_modality()
 #         plane = volume.get_acquisition_plane()
-#         print(generate_row(str(series_number), modality, plane, column_width=col_width))
+#         print(generate_row(str(series_number), modality, plane, iso, column_width=col_width))
 
 
 if __name__ == "__main__":
