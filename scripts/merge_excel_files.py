@@ -109,6 +109,9 @@ def one_hot_encoding_from_array(
     return out_put_frame
 
 
+    merged_frame.concat(res)
+    # merged_frame = pd.concat(res)
+
 def one_hot_encoding_from_col_str(frame: pd.DataFrame, col_name: str) -> pd.DataFrame:
     pass
 
