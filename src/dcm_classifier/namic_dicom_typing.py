@@ -365,6 +365,13 @@ def sanitize_dicom_dataset(
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
                 vprint(f"Missing required {field} value {dicom_filename}")
+        elif field == "PixelSpacing":
+            try:
+                dataset_dictionary[field] = np.array(dataset_dictionary[field])
+            except:
+                dataset_dictionary[field] = INVALID_VALUE
+                missing_fields.append(field)
+                vprint(f"Missing required {field} value {dicom_filename}")
         else:
             # check that the field is not empty or None
             if (
@@ -432,14 +439,15 @@ def get_coded_dictionary_elements(
     """
     dataset_dictionary: Dict[str, Any] = deepcopy(dicom_sanitized_dataset)
     for name, value in dicom_sanitized_dataset.items():
-        if value == "INVALID_VALUE":
+        if name == "PixelSpacing":
+            if isinstance(value, np.ndarray):
+                tuple_list = convert_array_to_index_value(name, value)
+                for vv in tuple_list:
+                    dataset_dictionary[vv[0]] = float(vv[1])
+        elif value == "INVALID_VALUE":
             # Return a completely empty dictionary if any required values are missing from image
             # This should likely be more robust in the future
             return dict()
-        if name == "PixelSpacing":
-            tuple_list = convert_array_to_min_max(name, value)
-            for vv in tuple_list:
-                dataset_dictionary[vv[0]] = str(vv[1])
         elif name == "ImageType":
             lower_value_str: str = str(value).lower()
             dataset_dictionary["ImageType"] = str(value)
@@ -469,7 +477,7 @@ def get_coded_dictionary_elements(
         elif name == "ImageOrientationPatient":
             tuple_list = convert_array_to_index_value(name, value)
             for vv in tuple_list:
-                dataset_dictionary[vv[0]] = str(vv[1])
+                dataset_dictionary[vv[0]] = float(vv[1])
         elif name == "Manufacturer":
             """
             GE MEDICAL SYSTEMS

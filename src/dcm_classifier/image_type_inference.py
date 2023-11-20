@@ -185,12 +185,14 @@ class ImageTypeClassifierBase:
         Returns:
             bool: True if the image is isotropic, False otherwise.
         """
+        # TODO: this might need to be changed if acquisition is 3d and spacing has more than 2 values
         # check if the volume was invalidated
         for field in [
-            "PixelSpacing",
+            "PixelSpacing_0",
+            "PixelSpacing_1",
             "SliceThickness",
         ]:
-            if field == "INVALID_VALUE":
+            if field not in feature_dict.keys():
                 return None
 
         # check if the volume is isotropic
@@ -215,8 +217,8 @@ class ImageTypeClassifierBase:
                 - A Pandas DataFrame containing classification results, including class probabilities.
         """
         # check if the volume was invalidated
-        for value in feature_dict.values():
-            if value == "INVALID":
+        for field in self.classification_feature_list:
+            if feature_dict[field] == "INVALID":
                 return "INVALID", None
 
         import onnxruntime as rt
