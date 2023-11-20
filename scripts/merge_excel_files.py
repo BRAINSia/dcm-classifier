@@ -75,7 +75,6 @@ def combine_directory_excel_files(directory: str, output_file: str):
 #         if len(row) == 3:
 #             print("here")
 #     print("done")
-
 dropped_cols = []
 
 
@@ -116,6 +115,7 @@ def one_hot_encoding_from_col_str(frame: pd.DataFrame, col_name: str) -> pd.Data
     pass
 
 
+
 def parse_columns(file: str):
     frame = pd.read_excel(file)
 
@@ -128,6 +128,7 @@ def parse_columns(file: str):
     # )
     frame = identify_and_drop_unusable_cols(frame)
     frame = one_hot_encoding_from_array(frame, "ImageType")
+
     frame.to_excel(
         "~/programs/dcm_files/combined_encoded_data.xls",
         sheet_name="results",
@@ -250,3 +251,4 @@ if __name__ == "__main__":
     output_data_frame.to_excel(
         "~/programs/dcm_files/merged_output_file.xlsx", engine="openpyxl"
     )
+
