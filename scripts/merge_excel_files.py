@@ -107,13 +107,12 @@ def one_hot_encoding_from_array(
     # drop the image type column from the dataframe
     return out_put_frame
 
-
     merged_frame.concat(res)
     # merged_frame = pd.concat(res)
 
+
 def one_hot_encoding_from_col_str(frame: pd.DataFrame, col_name: str) -> pd.DataFrame:
     pass
-
 
 
 def parse_columns(file: str):
@@ -251,4 +250,3 @@ if __name__ == "__main__":
     output_data_frame.to_excel(
         "~/programs/dcm_files/merged_output_file.xlsx", engine="openpyxl"
     )
-
