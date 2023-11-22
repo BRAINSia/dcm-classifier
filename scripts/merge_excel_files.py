@@ -1,11 +1,13 @@
 import argparse
 import re
 
+# from dcm_classifier.
 import pandas as pd
 from pathlib import Path
 import xlrd
+from dcm_classifier.namic_dicom_typing import convert_array_to_index_value
 
-max_heder_length: int = 24
+max_header_length: int = 24
 
 
 def get_session_id_from_filename(filename: str):
@@ -59,12 +61,14 @@ def merge_excel_files(bids_data: str, all_data: str, output_file: str):
 
 
 def combine_directory_excel_files(directory: str, output_file: str):
-    frames = []
-    for file in Path(directory).rglob("*.xlsx"):
+    combined_frame = pd.DataFrame()
+    for file in Path(directory).glob("*.xlsx"):
         print(file)
-        frames.append(pd.read_excel(file))
+        current_frame = pd.read_excel(file)
+        combined_frame = pd.concat([combined_frame, current_frame])
 
-    combined_frame = pd.concat(frames)
+    print("Excel Files Read")
+
     combined_frame.to_excel(output_file, sheet_name="results", engine="openpyxl")
 
 
@@ -78,14 +82,15 @@ def combine_directory_excel_files(directory: str, output_file: str):
 dropped_cols = []
 
 
+
 def one_hot_encoding_from_array(
     frame: pd.DataFrame, col_name: str, index_field: str
 ) -> pd.DataFrame:
     df = frame
-    out_put_frame = frame[[index_field]]
+    output_frame = frame[[index_field]]
     image_type_col = df[[col_name]]
     header_list = []
-    # get all the unique image types
+    # get all the unique column
     unique_image_types = image_type_col[col_name].unique()
     for image_type in unique_image_types:
         if type(image_type) is not str:
@@ -102,61 +107,19 @@ def one_hot_encoding_from_array(
             (df[col_name].str.contains(header)).fillna(0).astype(int),
             name=f"{col_name}_{header}",
         )
-        out_put_frame = out_put_frame.merge(series, left_index=True, right_index=True)
+        output_frame = output_frame.merge(series, left_index=True, right_index=True)
 
     # drop the image type column from the dataframe
-    return out_put_frame
+    return output_frame
 
     merged_frame.concat(res)
     # merged_frame = pd.concat(res)
 
-
-def one_hot_encoding_from_col_str(frame: pd.DataFrame, col_name: str) -> pd.DataFrame:
-    pass
-
-
-def parse_columns(file: str):
-    frame = pd.read_excel(file)
-
-    # headers: pd.DataFrame = pd.DataFrame(
-    #     {
-    #         "Header Name": drop_cols,
-    #         "Action": ["Dropped"] * len(drop_cols),
-    #         "Reasons": ["Less than 5% of values unique"] * len(drop_cols),
-    #     }
-    # )
-    frame = identify_and_drop_unusable_cols(frame)
-    frame = one_hot_encoding_from_array(frame, "ImageType")
-
-    frame.to_excel(
-        "~/programs/dcm_files/combined_encoded_data.xls",
-        sheet_name="results",
-        engine="openpyxl",
-    )
-    new_frame = pd.DataFrame()
-    # for i, col in enumerate(frame.columns):
-    #     frame[col].name != "FileName":
-    #         if frame[col].name == "ImageType":
-    #             col_dict = get_col_dict_from_Image_Type(frame[col])
-    #             new_frame = pd.concat([new_frame, pd.DataFrame(col_dict)], axis=1)
-    #         first_val = frame[col].iloc[1]
-    #         header_info: dict = {
-    #             "Header Name": frame[col].name,
-    #             "Action": "Kept",
-    #             "Reasons": "",
-    #         }
-    # if the first value of the column is a string then break it up into multiple columns
-    # if type(first_val) is str:
-    #     encoding = pd.get_dummies(frame[col], dtype=int)
-    #     new_frame = pd.concat([new_frame, encoding], axis=1)
-
-    # new_frame.drop_duplicates(inplace=True)
-    # print(new_frame)
-    # new_frame.to_excel(
-    #     "~/programs/dcm_files/combined_encoded_data.xls",
-    #     sheet_name="results",
-    #     engine="openpyxl",
-    # )
+def one_hot_encoding_from_str_col(frame: pd.DataFrame, col_name: str) -> pd.DataFrame:
+    df = frame
+    encoding = pd.get_dummies(df[col_name], dtype=int)
+    output_frame = pd.concat([df, encoding], axis=1)
+    return output_frame
 
 
 # drops columns that have less than 5% of values NaN and less than 4 unique values
@@ -167,7 +130,6 @@ def identify_and_drop_unusable_cols(frame: pd.DataFrame) -> pd.DataFrame:
     for col in df.columns:
         if (df[col].count() / length) <= 0.05 or df[col].nunique() < 2:
             droppable_cols.append(col)
-            dropped_cols.append(col)
     # droppable_cols.append("list_of_ordered_volume_files")
     # droppable_cols.append("Image Type")
     print(f"dropping {len(droppable_cols)} cols")
@@ -177,7 +139,7 @@ def identify_and_drop_unusable_cols(frame: pd.DataFrame) -> pd.DataFrame:
 
 def truncate_column_names(df: pd.DataFrame, max_length: int) -> pd.DataFrame:
     for col in df.columns:
-        df[col].name = col.replace(col, col[:24])
+        df[col].name = col.replace(col, col[:max_length])
     return df
 
 
@@ -212,26 +174,31 @@ if __name__ == "__main__":
     #     "~/programs/dcm_files/combined.xls",
     #     "~/programs/dcm_files/combined_merged.xls",
     # )
-    # parse_columns("~/programs/dcm_files/all_dicom_combined_data.xlsx")
+
+    # combine_directory_excel_files(
+    #     "/home/cavriley/files/source_excel_files",
+    #     "/home/cavriley/files/output_excel_files/combined_excel_file.xlsx",
+    # )
+
     input_data_frame = pd.read_excel(
         "~/programs/dcm_files/all_dicom_combined_data.xlsx"
     )
-    input_data_frame = truncate_column_names(input_data_frame, max_heder_length)
+    input_data_frame = truncate_column_names(input_data_frame, max_header_length)
     identify_and_drop_unusable_cols(input_data_frame)
     data_dictionary_frame = pd.read_excel(
         "~/programs/dcm_files/header_data_dictionary.xlsx"
     )
     data_dictionary_frame = truncate_column_names(
-        data_dictionary_frame, max_heder_length
+        data_dictionary_frame, max_header_length
     )
     index_field = "FileName"
     output_data_frame = input_data_frame[[index_field]]
 
     for index, row in data_dictionary_frame.iterrows():
-        current_header = row["header_name"][:max_heder_length]
+        current_header = row["header_name"][:max_header_length]
         if current_header == index_field:
             pass
-        elif row["action"] == "keep":
+        elif "keep" in row["action"]:
             output_data_frame[current_header] = pd.Series(
                 input_data_frame[current_header]
             )
@@ -245,8 +212,16 @@ if __name__ == "__main__":
                 left=output_data_frame, right=encoded_frame, on=index_field
             )
         elif row["action"] == "one_hot_encoding_from_col_str":
+            # encoded_frame = one_hot_encoding_from_col_str(
+            #     input_data_frame, current_header
+            # )
+            # output_data_frame = pd.merge(
+            #     left=output_data_frame, right=encoded_frame, on=index_field
+            # )
+            pass
+        elif row["action"] == "convert_array_to_index_value":
             pass
 
     output_data_frame.to_excel(
-        "~/programs/dcm_files/merged_output_file.xlsx", engine="openpyxl"
+        "~/files/output_excel_files/testing_data_file.xlsx", engine="openpyxl"
     )
