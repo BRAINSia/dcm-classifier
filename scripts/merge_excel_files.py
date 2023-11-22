@@ -82,7 +82,6 @@ def combine_directory_excel_files(directory: str, output_file: str):
 dropped_cols = []
 
 
-
 def one_hot_encoding_from_array(
     frame: pd.DataFrame, col_name: str, index_field: str
 ) -> pd.DataFrame:
@@ -114,6 +113,7 @@ def one_hot_encoding_from_array(
 
     merged_frame.concat(res)
     # merged_frame = pd.concat(res)
+
 
 def one_hot_encoding_from_str_col(frame: pd.DataFrame, col_name: str) -> pd.DataFrame:
     df = frame
