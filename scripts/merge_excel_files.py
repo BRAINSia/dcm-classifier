@@ -123,8 +123,15 @@ def one_hot_encoding_from_str_col(frame: pd.DataFrame, col_name: str) -> pd.Data
     return output_frame
 
 
-# drops columns that have less than 5% of values NaN and less than 4 unique values
-def identify_and_drop_unusable_cols(frame: pd.DataFrame) -> pd.DataFrame:
+
+def one_hot_encoding_from_array_floats(
+    frame: pd.DataFrame, col_name: str
+) -> pd.DataFrame:
+    convert_array_to_index_value()
+
+
+# drops columns that have less than 5% of values NaN and less than 2 unique values
+def identify_unusable_cols(frame: pd.DataFrame) -> list:
     df = frame
     droppable_cols = []
     length = len(df)
