@@ -342,7 +342,12 @@ class DicomSingleVolumeInfoBase:
         Returns:
             int: The Series Number as an integer.
         """
-        return int(self._pydicom_info.SeriesNumber)
+        try:
+            series_number_int: int = int(self._pydicom_info.SeriesNumber)
+            return series_number_int
+        except:
+            print(f"Can not convert to int {self._pydicom_info.SeriesNumber}")
+        return -12345
 
     def is_MR_modality(self) -> bool:
         """
