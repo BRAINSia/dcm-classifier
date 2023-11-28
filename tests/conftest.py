@@ -195,7 +195,7 @@ def mock_volumes():
 
         mock_data_file: Path = adjacent_testing_data_path / "mock_data.txt"
 
-        with open(mock_data_file, "r") as file:
+        with open(mock_data_file) as file:
             mock_volumes_json_str = file.read()
         # uses regex to find all the volume delimiters within mock_data.txt file
         volume_type_list = re.findall(r"\w{3} VOLUME", mock_volumes_json_str)

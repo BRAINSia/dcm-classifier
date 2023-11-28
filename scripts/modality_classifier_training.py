@@ -14,7 +14,7 @@ from sklearn.tree import export_graphviz
 from sklearn.model_selection import KFold
 
 import time
-from six import StringIO
+from io import StringIO
 
 # from IPython.display import Image
 import pydotplus
