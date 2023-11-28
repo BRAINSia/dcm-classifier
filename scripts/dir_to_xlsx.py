@@ -4,7 +4,9 @@ import argparse
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 
-inference_model_path = list(Path(__file__).parent.parent.rglob("models/rf_classifier.onnx"))[0]
+inference_model_path = list(
+    Path(__file__).parent.parent.rglob("models/rf_classifier.onnx")
+)[0]
 
 current_file_path: Path = Path(__file__).resolve()
 
@@ -22,11 +24,15 @@ Instructions:
 class StudyClassification:
     def __init__(self, study_directory: Path):
         self.study_directory: Path = study_directory
-        self.study: ProcessOneDicomStudyToVolumesMappingBase = self.run_study(study_directory)
+        self.study: ProcessOneDicomStudyToVolumesMappingBase = self.run_study(
+            study_directory
+        )
 
     @staticmethod
     def run_study(study_directory: Path) -> ProcessOneDicomStudyToVolumesMappingBase:
-        inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path, mode="volume")
+        inferer = ImageTypeClassifierBase(
+            classification_model_filename=inference_model_path, mode="volume"
+        )
         study = ProcessOneDicomStudyToVolumesMappingBase(
             study_directory=study_directory, inferer=inferer
         )
@@ -47,19 +53,20 @@ def output_data(directory: str, output_file: str):
     # Fields that are not needed in the output file, can be changed if needed
     not_needed_fields = ["FileName", "ManufacturerCode", "list_of_ordered_volume_files"]
 
-    field_mapping: dict[str: int] = {"SeriesNumber": 3,
-                                     "SeriesDescription": 4,
-                                     "StudyInstanceUID": 5,
-                                     "SeriesInstanceUID": 6,
-                                     "PixelSpacing": 7,
-                                     "ImageOrientationPatient": 8,
-                                     "PixelBandwidth": 9,
-                                     "EchoTime": 10,
-                                     "RepetitionTime": 11,
-                                     "FlipAngle": 12,
-                                     "EchoNumbers": 13,
-                                     "ContrastBolusAgent": 14,
-                                     }
+    field_mapping: dict[str:int] = {
+        "SeriesNumber": 3,
+        "SeriesDescription": 4,
+        "StudyInstanceUID": 5,
+        "SeriesInstanceUID": 6,
+        "PixelSpacing": 7,
+        "ImageOrientationPatient": 8,
+        "PixelBandwidth": 9,
+        "EchoTime": 10,
+        "RepetitionTime": 11,
+        "FlipAngle": 12,
+        "EchoNumbers": 13,
+        "ContrastBolusAgent": 14,
+    }
 
     bold_style = xlwt.easyxf("font: bold 1")
     sheet.write(0, 0, "Directory Path", bold_style)
