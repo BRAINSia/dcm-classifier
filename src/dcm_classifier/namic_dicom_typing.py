@@ -33,7 +33,7 @@ UCImageType = itk.Image[itk.UC, 3]
 
 
 def itk_read_from_dicomfn_list(
-    single_volume_dcm_files_list: List[Union[str, Path]]
+    single_volume_dcm_files_list: list[Union[str, Path]]
 ) -> FImageType:
     """
     Read DICOM files from a list and return an ITK image.
@@ -250,7 +250,7 @@ def get_diffusion_gradient_direction(
     return None
 
 
-def infer_diffusion_from_gradient(filenames: List[Path]) -> str:
+def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
     """
     NAMIC Notes on DWI private fields:
     https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
@@ -304,8 +304,8 @@ def vprint(msg: str, verbose=False):
 
 def sanitize_dicom_dataset(
     ro_dataset: pydicom.Dataset,
-    required_info_list: List[str],
-    optional_info_list: List[str],
+    required_info_list: list[str],
+    optional_info_list: list[str],
 ) -> tuple[dict, bool]:
     """
     Validates the DICOM fields in the DICOM header to ensure all required fields are present.
@@ -313,7 +313,7 @@ def sanitize_dicom_dataset(
     Raises an exception if any required fields are missing.
 
     """
-    dataset_dictionary: Dict[str, Any] = dict()
+    dataset_dictionary: dict[str, Any] = dict()
     dataset = deepcopy(ro_dataset)  # DO NOT MODIFY THE INPUT DATASET!
     dicom_filename: Path = dataset.filename
     dataset_dictionary["FileName"]: str = dicom_filename
@@ -321,7 +321,7 @@ def sanitize_dicom_dataset(
     dataset.remove_private_tags()
     values = dataset.values()
     INVALID_VALUE = "INVALID_VALUE"
-    all_candidate_info_fields: List[str] = required_info_list + optional_info_list
+    all_candidate_info_fields: list[str] = required_info_list + optional_info_list
 
     for v in values:
         if isinstance(v, pydicom.dataelem.RawDataElement):
@@ -438,7 +438,7 @@ def sanitize_dicom_dataset(
 
 def get_coded_dictionary_elements(
     dicom_sanitized_dataset: dict,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Extract specific information from a DICOM fields dataset and create a coded dictionary with extracted features.
 
@@ -448,7 +448,7 @@ def get_coded_dictionary_elements(
     Returns:
         Dict[str, Any]: A dictionary containing extracted information in a coded format.
     """
-    dataset_dictionary: Dict[str, Any] = deepcopy(dicom_sanitized_dataset)
+    dataset_dictionary: dict[str, Any] = deepcopy(dicom_sanitized_dataset)
     for name, value in dicom_sanitized_dataset.items():
         if name == "PixelSpacing":
             if isinstance(value, np.ndarray):

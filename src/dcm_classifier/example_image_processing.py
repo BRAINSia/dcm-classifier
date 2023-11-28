@@ -69,7 +69,7 @@ def compute_tracew_adc_from_diffusion(
 
 
 def two_point_compute_adc(
-    list_of_raw_bimages: List[FImageType], list_of_bvalues: List[float]
+    list_of_raw_bimages: list[FImageType], list_of_bvalues: list[float]
 ) -> FImageType:
     """
     Compute ADC from the min and max b-value images (assumes list_of_images is sorted by ascending b-value).
@@ -101,7 +101,7 @@ def two_point_compute_adc(
 
 
 def compute_adc_from_multi_b_values(
-    list_of_raw_bimages: List[FImageType], list_of_bvalues: List[float]
+    list_of_raw_bimages: list[FImageType], list_of_bvalues: list[float]
 ) -> FImageType:
     """
     Compute ADC from multiple b-value images.
@@ -116,7 +116,7 @@ def compute_adc_from_multi_b_values(
         FImageType: The computed itk ADC image with pixel type itk.F (float).
     """
 
-    list_of_log_images: List[FImageType] = list()
+    list_of_log_images: list[FImageType] = list()
     small_offset_for_ln_computation: float = 1e-6
     for curr_raw_image in list_of_raw_bimages:
         non_zero_positive_shift: FImageType = add_const_to_itk_images(
@@ -127,14 +127,14 @@ def compute_adc_from_multi_b_values(
     del list_of_raw_bimages
     N: float = float(len(list_of_log_images))
     # Numerator computations
-    scaled_by_bvalue: List[FImageType] = scaled_by_bvalue_images(
+    scaled_by_bvalue: list[FImageType] = scaled_by_bvalue_images(
         list_of_log_images, list_of_bvalues
     )
     sum_of_scaled_images: FImageType = add_list_of_images(scaled_by_bvalue)
     n_time_sum_scaled_images: FImageType = multiply_itk_images(sum_of_scaled_images, N)
 
     sum_of_images: FImageType = add_list_of_images(list_of_log_images)
-    scaled_sums: List[FImageType] = list()
+    scaled_sums: list[FImageType] = list()
     for current_bvalue in list_of_bvalues:
         scaled_sum = multiply_itk_images(sum_of_images, current_bvalue)
         scaled_sums.append(scaled_sum)
@@ -166,7 +166,7 @@ def read_dwi_series_itk(dicom_directory: Path) -> (float, FImageType):
     Returns:
         Tuple[float, FImageType]: A tuple containing the extracted b-value and the ITK image with pixel type itk.F (float).
     """
-    all_files: List[str] = [x.as_posix() for x in dicom_directory.glob("*.dcm")]
+    all_files: list[str] = [x.as_posix() for x in dicom_directory.glob("*.dcm")]
     bvalue_image = itk_read_from_dicomfn_list(all_files)
 
     dataset = pydicom.dcmread(all_files[0], stop_before_pixels=True)
@@ -193,7 +193,7 @@ def rglob_for_singular_result(
     """
 
     glob_obj = base_dir.rglob(pattern) if recursive_search else base_dir.glob(pattern)
-    list_results: List[Path] = list(glob_obj)
+    list_results: list[Path] = list(glob_obj)
     if (len(list_results)) != 1:
         return None
     singular_result = list_results[0]
@@ -206,7 +206,7 @@ def rglob_for_singular_result(
 
 def rglob_for_singular_result_from_pattern_list(
     base_dir: Path,
-    patterns: List[str],
+    patterns: list[str],
     require_result_type: Optional[str] = None,
     recursive_search: bool = True,
 ) -> Optional[Path]:
@@ -258,7 +258,7 @@ def compare_RGB_slices(refr_slice_fn: Path, test_slice_fn: Path) -> (int, dict):
         and a dictionary containing the reference, test, and difference images.
     """
 
-    images_dict: Dict[FImageType] = dict()
+    images_dict: dict[FImageType] = dict()
     refr_slice = itk.imread(filename=refr_slice_fn, pixel_type=itk.F)
     test_slice = itk.imread(filename=test_slice_fn, pixel_type=itk.F)
     cif = itk.ComparisonImageFilter[FImageType, FImageType].New(
@@ -303,7 +303,7 @@ def compare_3d_float_images(
         if the images are in the same space.
     """
 
-    images_dict: Dict[FImageType] = dict()
+    images_dict: dict[FImageType] = dict()
     images_dict["refr"] = itk.imread(filename=refr_fn, pixel_type=itk.F)
     images_dict["test"] = itk.imread(filename=test_fn, pixel_type=itk.F)
 
@@ -570,7 +570,7 @@ def multiply_itk_images(im1: FImageType, scale: float) -> FImageType:
     return mult_image_filter.GetOutput()
 
 
-def add_list_of_images(list_of_images: List[FImageType]) -> FImageType:
+def add_list_of_images(list_of_images: list[FImageType]) -> FImageType:
     """
     Sum the pixel values of a list of images element-wise.
 
@@ -611,8 +611,8 @@ def itk_clamp_image_filter(
 
 
 def scaled_by_bvalue_images(
-    list_of_images: List[FImageType], list_of_bvalues: List[float]
-) -> List[FImageType]:
+    list_of_images: list[FImageType], list_of_bvalues: list[float]
+) -> list[FImageType]:
     """
     Multiply a list of images by their corresponding b-values element-wise.
 
@@ -624,7 +624,7 @@ def scaled_by_bvalue_images(
         List[FImageType]: A list of images with pixel values scaled by their respective b-values.
     """
 
-    scaled_by_bvalue_list: List[FImageType] = list()
+    scaled_by_bvalue_list: list[FImageType] = list()
     for index, image in enumerate(list_of_images):
         scaled_im: FImageType = multiply_itk_images(image, list_of_bvalues[index])
         scaled_by_bvalue_list.append(scaled_im)

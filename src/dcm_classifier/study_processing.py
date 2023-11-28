@@ -61,7 +61,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         series_inference(self):
     """
 
-    series_restrictions_list_dwi_subvolumes: List[str] = [
+    series_restrictions_list_dwi_subvolumes: list[str] = [
         # https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
         # STANDARD
         "0018|9075",  # S 1 Diffusion Directionality
@@ -133,7 +133,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
     def __init__(
         self,
         study_directory: Union[str, Path],
-        search_series: Optional[Dict[str, int]] = None,
+        search_series: Optional[dict[str, int]] = None,
         inferer: Optional[ImageTypeClassifierBase] = None,
         raise_error_on_failure: bool = False,
     ):
@@ -165,13 +165,13 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         else:
             print(f"ERROR:  {self.study_directory} is not pathlike")
         self.raise_error_on_failure: bool = raise_error_on_failure
-        self.search_series: Optional[Dict[str, int]] = search_series
-        self.series_dictionary: Dict[
+        self.search_series: Optional[dict[str, int]] = search_series
+        self.series_dictionary: dict[
             int, DicomSingleSeries
         ] = self.__identify_single_volumes(self.study_directory)
         self.inferer: Optional[ImageTypeClassifierBase] = inferer
 
-    def get_list_of_primary_volume_info(self) -> List[Dict[str, str]]:
+    def get_list_of_primary_volume_info(self) -> list[dict[str, str]]:
         """
         Retrieve a list of dictionaries containing primary volume information from all series.
 
@@ -185,7 +185,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 Each dictionary includes keys and values for primary volume attributes. See get_primary_volume_info function in dicom_volume.py
 
         """
-        list_of_volume_info_dictionaries: List[Dict[str, str]] = list()
+        list_of_volume_info_dictionaries: list[dict[str, str]] = list()
         for (
             series_number,
             series_object,
@@ -193,7 +193,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             for vol_index, subseries_vol_info in enumerate(
                 series_object.volume_info_list
             ):
-                primary_volume_info: Dict[
+                primary_volume_info: dict[
                     str, str
                 ] = subseries_vol_info.get_primary_volume_info(vol_index)
                 list_of_volume_info_dictionaries.append(primary_volume_info)
@@ -265,7 +265,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
     def __identify_single_volumes(
         self,
         study_directory: Path,
-    ) -> Dict[int, DicomSingleSeries]:
+    ) -> dict[int, DicomSingleSeries]:
         """
         Identify and map single volumes within the DICOM study directory.
 
@@ -325,11 +325,11 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         # for uid in seriesUID:
         #     print(uid)
 
-        volumes_dictionary: Dict[int, DicomSingleSeries] = dict()
+        volumes_dictionary: dict[int, DicomSingleSeries] = dict()
 
         for seriesIdentifier in seriesUID:
             # print("Reading: " + seriesIdentifier)
-            subseries_filenames: List[str] = namesGenerator.GetFileNames(
+            subseries_filenames: list[str] = namesGenerator.GetFileNames(
                 seriesIdentifier
             )
             subseries_info: DicomSingleVolumeInfoBase = DicomSingleVolumeInfoBase(
@@ -364,11 +364,11 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         #         volumes_dictionary[index].append(slice_list[index])
 
         if self.search_series is not None:
-            cadidate_series_numbers: List[int] = [
+            cadidate_series_numbers: list[int] = [
                 int(x) for x in self.search_series.values()
             ]
 
-            series_numbers_to_remove: List[int] = list()
+            series_numbers_to_remove: list[int] = list()
             for series_number in volumes_dictionary.keys():
                 if series_number not in cadidate_series_numbers:
                     series_numbers_to_remove.append(series_number)

@@ -99,14 +99,14 @@ class DicomSingleVolumeInfoBase:
         get_image_diagnostics(self) -> str:
     """
 
-    def __init__(self, one_volume_dcm_filenames: List[Union[Path, str]]) -> None:
+    def __init__(self, one_volume_dcm_filenames: list[Union[Path, str]]) -> None:
         """
         Initializes a DicomSingleVolumeInfoBase instance with a list of DICOM file paths.
 
         Args:
             one_volume_dcm_filenames (List[Union[Path, str]]): A list of DICOM file paths representing a single volume.
         """
-        self.one_volume_dcm_filenames: List[Path] = [
+        self.one_volume_dcm_filenames: list[Path] = [
             Path(x).resolve() for x in one_volume_dcm_filenames
         ]
         if len(self.one_volume_dcm_filenames) == 0:
@@ -212,7 +212,7 @@ class DicomSingleVolumeInfoBase:
         """
         return self.acquisition_plane
 
-    def get_volume_info_dict(self) -> Dict[str, Any]:
+    def get_volume_info_dict(self) -> dict[str, Any]:
         """
         Retrieves a dictionary containing volume information for the DICOM data.
 
@@ -221,7 +221,7 @@ class DicomSingleVolumeInfoBase:
         """
         return self.volume_info_dict
 
-    def get_primary_volume_info(self, vol_index: int) -> Dict[str, str]:
+    def get_primary_volume_info(self, vol_index: int) -> dict[str, str]:
         """
         Get primary volume information for the specified volume index.
 
@@ -231,7 +231,7 @@ class DicomSingleVolumeInfoBase:
         Returns:
             Dict[str, str]: A dictionary containing primary volume information.
         """
-        fields_to_copy: Dict[str, str] = {
+        fields_to_copy: dict[str, str] = {
             "SeriesNumber": "SeriesNum",
             "Diffusionb-value": "Bval",
             "RepetitionTime": "TR",
@@ -240,8 +240,8 @@ class DicomSingleVolumeInfoBase:
             "SAR": "SAR",
         }
 
-        ref_vol_info: Dict[str, Any] = self.get_volume_dictionary()
-        return_dict: Dict[str, Union[str, int]] = collections.OrderedDict()
+        ref_vol_info: dict[str, Any] = self.get_volume_dictionary()
+        return_dict: dict[str, Union[str, int]] = collections.OrderedDict()
         return_dict["vol_index"] = vol_index
         for refkey, return_key in fields_to_copy.items():
             value = ref_vol_info.get(refkey, "")
@@ -301,14 +301,14 @@ class DicomSingleVolumeInfoBase:
         Returns:
             str: The size of the DICOM series as a string.
         """
-        size_list: List[int] = [
+        size_list: list[int] = [
             self._pydicom_info.Rows,
             self._pydicom_info.Columns,
             len(self.one_volume_dcm_filenames),
         ]
         return str(size_list)
 
-    def get_one_volume_dcm_filenames(self) -> List[Path]:
+    def get_one_volume_dcm_filenames(self) -> list[Path]:
         """
         Get the list of DICOM file paths for the single DICOM volume.
 
@@ -317,7 +317,7 @@ class DicomSingleVolumeInfoBase:
         """
         return deepcopy(self.one_volume_dcm_filenames)
 
-    def get_volume_dictionary(self) -> Dict[str, Any]:
+    def get_volume_dictionary(self) -> dict[str, Any]:
         """
         Get the dictionary containing information about the DICOM volume.
 
@@ -379,7 +379,7 @@ class DicomSingleVolumeInfoBase:
             self.set_modality("INVALID")
             self.set_acquisition_plane("INVALID")
 
-        volume_info_dict: Dict[str, Any] = get_coded_dictionary_elements(
+        volume_info_dict: dict[str, Any] = get_coded_dictionary_elements(
             sanitized_dicom_dict
         )
         del sanitized_dicom_dict
