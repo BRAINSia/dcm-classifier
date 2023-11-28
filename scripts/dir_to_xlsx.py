@@ -26,7 +26,7 @@ class StudyClassification:
 
     @staticmethod
     def run_study(study_directory: Path) -> ProcessOneDicomStudyToVolumesMappingBase:
-        inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
+        inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path, mode="volume")
         study = ProcessOneDicomStudyToVolumesMappingBase(
             study_directory=study_directory, inferer=inferer
         )
@@ -45,8 +45,7 @@ def output_data(directory: str, output_file: str):
     sheet = wb.add_sheet("Dicom Classifications")
 
     # Fields that are not needed in the output file, can be changed if needed
-    not_needed_fields = ["FileName", "IsDerivedImageType", "ImageTypeADC", "ImageTypeFA",
-                         "ImageTypeTrace", "ManufacturerCode", "list_of_ordered_volume_files"]
+    not_needed_fields = ["FileName", "ManufacturerCode", "list_of_ordered_volume_files"]
 
     field_mapping: dict[str: int] = {"SeriesNumber": 3,
                                      "SeriesDescription": 4,
@@ -58,6 +57,8 @@ def output_data(directory: str, output_file: str):
                                      "EchoTime": 10,
                                      "RepetitionTime": 11,
                                      "FlipAngle": 12,
+                                     "EchoNumbers": 13,
+                                     "ContrastBolusAgent": 14,
                                      }
 
     bold_style = xlwt.easyxf("font: bold 1")
@@ -125,4 +126,4 @@ if __name__ == "__main__":
 
     output_data(args.dir, args.output)
 
-    print(f"Files classified in {args.output}.xls in {Path.cwd()}")
+    print(f"Files classified in {args.output}.xls")
