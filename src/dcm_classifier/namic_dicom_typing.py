@@ -33,7 +33,7 @@ UCImageType = itk.Image[itk.UC, 3]
 
 
 def itk_read_from_dicomfn_list(
-    single_volume_dcm_files_list: list[Union[str, Path]]
+    single_volume_dcm_files_list: list[str | Path],
 ) -> FImageType:
     """
     Read DICOM files from a list and return an ITK image.
@@ -204,7 +204,7 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
 
 def get_diffusion_gradient_direction(
     dicom_header_info: pydicom.Dataset,
-) -> Optional[np.ndarray]:
+) -> np.ndarray | None:
     """
     Extract the diffusion gradient direction from DICOM header information.
     Args:

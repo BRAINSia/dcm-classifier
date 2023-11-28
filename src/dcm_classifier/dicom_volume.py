@@ -99,7 +99,7 @@ class DicomSingleVolumeInfoBase:
         get_image_diagnostics(self) -> str:
     """
 
-    def __init__(self, one_volume_dcm_filenames: list[Union[Path, str]]) -> None:
+    def __init__(self, one_volume_dcm_filenames: list[Path | str]) -> None:
         """
         Initializes a DicomSingleVolumeInfoBase instance with a list of DICOM file paths.
 
@@ -123,8 +123,8 @@ class DicomSingleVolumeInfoBase:
         )
 
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
-        self.modality: Optional[str] = None
-        self.modality_probability: Optional[pd.DataFrame] = None
+        self.modality: str | None = None
+        self.modality_probability: pd.DataFrame | None = None
         # TODO: For now set as false as it will be checked for series
         diffusion_gradient = get_diffusion_gradient_direction(self._pydicom_info)
         if diffusion_gradient is not None:
@@ -132,9 +132,9 @@ class DicomSingleVolumeInfoBase:
         else:
             self.has_diffusion_gradient = False
         self.average_slice_spacing = -12345.0
-        self.acquisition_plane: Optional[str] = None
-        self.is_isotropic: Optional[bool] = None
-        self.itk_image: Optional[FImageType] = None
+        self.acquisition_plane: str | None = None
+        self.is_isotropic: bool | None = None
+        self.itk_image: FImageType | None = None
         (
             _one_study_found,
             self.volume_info_dict,
@@ -241,7 +241,7 @@ class DicomSingleVolumeInfoBase:
         }
 
         ref_vol_info: dict[str, Any] = self.get_volume_dictionary()
-        return_dict: dict[str, Union[str, int]] = collections.OrderedDict()
+        return_dict: dict[str, str | int] = collections.OrderedDict()
         return_dict["vol_index"] = vol_index
         for refkey, return_key in fields_to_copy.items():
             value = ref_vol_info.get(refkey, "")

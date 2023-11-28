@@ -6,7 +6,7 @@ pydicom_read_cache_static_filename_dict: dict[str, pydicom.Dataset] = dict()
 
 
 def pydicom_read_cache(
-    filename: Union[Path, str], stop_before_pixels=True
+    filename: Path | str, stop_before_pixels=True
 ) -> pydicom.Dataset:
     """
     Reads a DICOM file header and caches the result to improve performance on subsequent reads.

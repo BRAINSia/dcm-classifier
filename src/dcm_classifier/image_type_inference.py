@@ -85,7 +85,7 @@ class ImageTypeClassifierBase:
 
     def __init__(
         self,
-        classification_model_filename: Union[str, Path],
+        classification_model_filename: str | Path,
         classification_feature_list: list[str] = modality_columns,
         image_type_map: dict[str, int] = imagetype_to_integer_mapping,
         min_probability_threshold: float = 0.4,
@@ -100,16 +100,16 @@ class ImageTypeClassifierBase:
             mode (str): "series" or "volume" to run inference on series or volume level (a series could have multiple subvolumes).
             min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
         """
-        self.classification_model_filename: Union[str, Path] = Path(
+        self.classification_model_filename: str | Path = Path(
             classification_model_filename
         )
         self.classification_feature_list: list[str] = classification_feature_list
         self.imagetype_to_int_map: dict[str, int] = image_type_map
         self.int_to_imagetype_map: dict[int, str] = self.get_int_to_type_map()
         self.min_probability_threshold: float = min_probability_threshold
-        self.series: Optional[DicomSingleSeries] = None
-        self.series_number: Optional[int] = None
-        self.info_dict: Optional[dict[str, Any]] = None
+        self.series: DicomSingleSeries | None = None
+        self.series_number: int | None = None
+        self.info_dict: dict[str, Any] | None = None
 
     def get_int_to_type_map(self) -> dict:
         """
@@ -176,7 +176,7 @@ class ImageTypeClassifierBase:
             else:
                 return "cor"
 
-    def infer_isotropic(self, feature_dict: dict = None) -> Optional[bool]:
+    def infer_isotropic(self, feature_dict: dict = None) -> bool | None:
         """
         Infer the acquisition plane based on DICOM information and image properties.
         Args:

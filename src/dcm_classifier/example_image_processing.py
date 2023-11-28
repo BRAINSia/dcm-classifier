@@ -177,9 +177,9 @@ def read_dwi_series_itk(dicom_directory: Path) -> (float, FImageType):
 def rglob_for_singular_result(
     base_dir: Path,
     pattern: str,
-    require_result_type: Optional[str] = None,
+    require_result_type: str | None = None,
     recursive_search=True,
-) -> Optional[Path]:
+) -> Path | None:
     """
     Recursively search for files or directories matching a pattern in a base directory.
 
@@ -207,9 +207,9 @@ def rglob_for_singular_result(
 def rglob_for_singular_result_from_pattern_list(
     base_dir: Path,
     patterns: list[str],
-    require_result_type: Optional[str] = None,
+    require_result_type: str | None = None,
     recursive_search: bool = True,
-) -> Optional[Path]:
+) -> Path | None:
     """
     Recursively search for files or directories matching patterns from a list in a base directory.
 

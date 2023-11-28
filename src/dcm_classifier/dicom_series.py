@@ -82,9 +82,9 @@ class DicomSingleSeries:
         self.series_number: int = series_number
         self.volume_info_list: list[DicomSingleVolumeInfoBase] = list()
         self.modality: str = "INVALID"
-        self.modality_probability: Optional[pd.DataFrame] = None
-        self.acquisition_plane: Optional[str] = None
-        self.is_isotropic: Optional[bool] = None
+        self.modality_probability: pd.DataFrame | None = None
+        self.acquisition_plane: str | None = None
+        self.is_isotropic: bool | None = None
 
     def get_series_number(self) -> int:
         """

@@ -108,9 +108,7 @@ class DicomValidatorBase:
     """
         return msg
 
-    def write_validation_report(
-        self, report_filename_to_append: Optional[Path]
-    ) -> None:
+    def write_validation_report(self, report_filename_to_append: Path | None) -> None:
         """
         Write the validation report to a file or print it.
 

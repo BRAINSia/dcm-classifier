@@ -113,7 +113,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
     ]
 
     @staticmethod
-    def _is_pathlike_object(path_rep: Union[str, Path, PurePath]) -> bool:
+    def _is_pathlike_object(path_rep: str | Path | PurePath) -> bool:
         """
         Check if the given object represents a valid path or path-like object.
 
@@ -132,9 +132,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
     def __init__(
         self,
-        study_directory: Union[str, Path],
-        search_series: Optional[dict[str, int]] = None,
-        inferer: Optional[ImageTypeClassifierBase] = None,
+        study_directory: str | Path,
+        search_series: dict[str, int] | None = None,
+        inferer: ImageTypeClassifierBase | None = None,
         raise_error_on_failure: bool = False,
     ):
         """
@@ -165,11 +165,11 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         else:
             print(f"ERROR:  {self.study_directory} is not pathlike")
         self.raise_error_on_failure: bool = raise_error_on_failure
-        self.search_series: Optional[dict[str, int]] = search_series
+        self.search_series: dict[str, int] | None = search_series
         self.series_dictionary: dict[
             int, DicomSingleSeries
         ] = self.__identify_single_volumes(self.study_directory)
-        self.inferer: Optional[ImageTypeClassifierBase] = inferer
+        self.inferer: ImageTypeClassifierBase | None = inferer
 
     def get_list_of_primary_volume_info(self) -> list[dict[str, str]]:
         """

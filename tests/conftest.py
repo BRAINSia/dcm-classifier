@@ -149,9 +149,7 @@ def mock_volumes():
     :returns list_of_volumes: a list containing filepaths to volume directories
     """
 
-    def generate_dcm_volumes(
-        volumes: list[Union[str, Path]], output_path: Union[str, Path]
-    ):
+    def generate_dcm_volumes(volumes: list[str | Path], output_path: str | Path):
         """A function that creates a directory and DICOM files for each volume in the list of provided volumes.
         The directory and files are written to the specified output path.
            :param volumes: a list of DICOM volume file paths
