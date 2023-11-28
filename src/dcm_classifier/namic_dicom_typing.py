@@ -25,6 +25,7 @@ import itk
 import warnings
 import tempfile
 import numpy as np
+import numbers
 
 
 FImageType = itk.Image[itk.F, 3]
@@ -97,7 +98,7 @@ def is_number(s: Any) -> bool:
     try:
         float(s)
         return True
-    except ValueError:
+    except Exception:
         return False
 
 
@@ -115,7 +116,7 @@ def is_integer(s: Any) -> bool:
     try:
         int(s)
         return True
-    except ValueError:
+    except Exception:
         return False
 
 
@@ -178,12 +179,18 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
             else:
                 value = dicom_element.value
             if dicom_element.VR == "OB":
-                value = value.decode("utf-8")
+                if isinstance(value, bytes):
+                    value = value.decode("utf-8", "backslashreplace")
+                elif isinstance(value, numbers.Number):
+                    pass
+                else:
+                    print(f"UNKNOWN CONVERSION OF VR={dicom_element.VR}: {type(dicom_element.value)} len={len(dicom_element.value)} ==> {value}")
+                    return -12345
             # print(f"Found BValue at {v} for {k}, {value} of type {dicom_element.VR}")
             try:
                 result = float(value)
             except ValueError:
-                print(f"Could not convert {value} to float")
+                print(f"UNKNOWN CONVERSION OF VR={dicom_element.VR}: {type(dicom_element.value)} len={len(dicom_element.value)} ==> {dicom_element.value} to float")
                 return -12345
             if round_to_nearst_10:
                 result = round(result / 10.0) * 10
