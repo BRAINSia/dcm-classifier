@@ -24,6 +24,8 @@ import itk
 from .dicom_volume import DicomSingleVolumeInfoBase
 from .dicom_series import DicomSingleSeries
 from .image_type_inference import ImageTypeClassifierBase
+import dcm_classifier.image_type_inference
+from dcm_classifier.dicom_series import DicomSingleSeries
 
 
 class ProcessOneDicomStudyToVolumesMappingBase:
@@ -136,7 +138,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         search_series: dict[str, int] | None = None,
         inferer: ImageTypeClassifierBase | None = None,
         raise_error_on_failure: bool = False,
-    ):
+    ) -> None:
         """
         Initialize an instance of ProcessOneDicomStudyToVolumesMappingBase.
 
@@ -199,7 +201,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 list_of_volume_info_dictionaries.append(primary_volume_info)
         return list_of_volume_info_dictionaries
 
-    def get_study_dictionary(self):
+    def get_study_dictionary(self) -> dict[int, DicomSingleSeries]:
         """
         Get the dictionary mapping series numbers to DicomSingleSeries objects.
 
@@ -219,7 +221,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         """
         return self.series_dictionary
 
-    def set_inferer(self, inferer: ImageTypeClassifierBase):
+    def set_inferer(self, inferer: ImageTypeClassifierBase) -> None:
         """
         Set the image type classifier for inference.
 
@@ -238,7 +240,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         """
         self.inferer = inferer
 
-    def run_inference(self):
+    def run_inference(self) -> None:
         """
         Run inference on each DICOM series using the specified image type classifier.
 
@@ -259,7 +261,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             self.inferer.set_series(series_object)
             self.inferer.run_inference()
 
-    def validate(self):
+    def validate(self) -> None:
         pass
 
     def __identify_single_volumes(

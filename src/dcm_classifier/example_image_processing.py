@@ -178,7 +178,7 @@ def rglob_for_singular_result(
     base_dir: Path,
     pattern: str,
     require_result_type: str | None = None,
-    recursive_search=True,
+    recursive_search: bool = True,
 ) -> Path | None:
     """
     Recursively search for files or directories matching a pattern in a base directory.
@@ -337,7 +337,9 @@ def compare_3d_float_images(
     return num_pixels_in_error, images_dict, images_in_same_space
 
 
-def slugify(value, allow_uppercase=False, allow_unicode=False):
+def slugify(
+    value: str, allow_uppercase: bool = False, allow_unicode: bool = False
+) -> str:
     """
     Convert a string to a slug format.
 

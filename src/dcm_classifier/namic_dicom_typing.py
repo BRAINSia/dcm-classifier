@@ -26,6 +26,10 @@ import warnings
 import tempfile
 import numpy as np
 import numbers
+from itk.itkImagePython import itkImageF3
+from numpy import ndarray
+from pydicom.dataset import Dataset, FileDataset
+from pydicom.multival import MultiValue
 
 
 FImageType = itk.Image[itk.F, 3]
@@ -120,7 +124,9 @@ def is_integer(s: Any) -> bool:
         return False
 
 
-def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
+def get_bvalue(
+    dicom_header_info: FileDataset, round_to_nearst_10: bool = True
+) -> float:
     """
     Extract and compute the b-value from DICOM header information.
 
@@ -290,7 +296,7 @@ def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
     return "INVALID"
 
 
-def vprint(msg: str, verbose=False):
+def vprint(msg: str, verbose: bool = False) -> None:
     """
     Conditionally print a message if the 'verbose' flag is set.
 
@@ -512,7 +518,7 @@ def get_coded_dictionary_elements(
     return dataset_dictionary
 
 
-def convert_array_to_min_max(name, value_list) -> list:
+def convert_array_to_min_max(name: str, value_list: list[int]) -> list:
     """
     Compute the minimum and maximum values of a DICOM array field.
 
@@ -531,7 +537,7 @@ def convert_array_to_min_max(name, value_list) -> list:
     return [(name + "Min", list_min), (name + "Max", list_max)]
 
 
-def convert_array_to_index_value(name, value_list) -> list:
+def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) -> list:
     """
     Takes a DICOM array and expands it to an indexed list of values.
 

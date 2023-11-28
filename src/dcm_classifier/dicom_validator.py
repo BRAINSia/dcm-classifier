@@ -23,6 +23,7 @@ from pathlib import Path
 import json
 
 from typing import List, Optional
+from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
 
 
 class DicomValidatorBase:
@@ -45,7 +46,7 @@ class DicomValidatorBase:
         validate(self) -> bool:
     """
 
-    def __init__(self, single_volume_info: DicomSingleVolumeInfoBase):
+    def __init__(self, single_volume_info: DicomSingleVolumeInfoBase) -> None:
         """
         Initialize the DicomValidatorBase.
 
