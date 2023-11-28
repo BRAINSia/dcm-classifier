@@ -26,6 +26,10 @@ import warnings
 import tempfile
 import numpy as np
 import numbers
+from itk.itkImagePython import itkImageF3
+from numpy import ndarray
+from pydicom.dataset import Dataset, FileDataset
+from pydicom.multival import MultiValue
 
 
 FImageType = itk.Image[itk.F, 3]
@@ -33,7 +37,7 @@ UCImageType = itk.Image[itk.UC, 3]
 
 
 def itk_read_from_dicomfn_list(
-    single_volume_dcm_files_list: List[Union[str, Path]]
+    single_volume_dcm_files_list: list[str | Path],
 ) -> FImageType:
     """
     Read DICOM files from a list and return an ITK image.
@@ -120,7 +124,9 @@ def is_integer(s: Any) -> bool:
         return False
 
 
-def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
+def get_bvalue(
+    dicom_header_info: FileDataset, round_to_nearst_10: bool = True
+) -> float:
     """
     Extract and compute the b-value from DICOM header information.
 
@@ -184,13 +190,17 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
                 elif isinstance(value, numbers.Number):
                     pass
                 else:
-                    print(f"UNKNOWN CONVERSION OF VR={dicom_element.VR}: {type(dicom_element.value)} len={len(dicom_element.value)} ==> {value}")
+                    print(
+                        f"UNKNOWN CONVERSION OF VR={dicom_element.VR}: {type(dicom_element.value)} len={len(dicom_element.value)} ==> {value}"
+                    )
                     return -12345
             # print(f"Found BValue at {v} for {k}, {value} of type {dicom_element.VR}")
             try:
                 result = float(value)
             except ValueError:
-                print(f"UNKNOWN CONVERSION OF VR={dicom_element.VR}: {type(dicom_element.value)} len={len(dicom_element.value)} ==> {dicom_element.value} to float")
+                print(
+                    f"UNKNOWN CONVERSION OF VR={dicom_element.VR}: {type(dicom_element.value)} len={len(dicom_element.value)} ==> {dicom_element.value} to float"
+                )
                 return -12345
             if round_to_nearst_10:
                 result = round(result / 10.0) * 10
@@ -200,7 +210,7 @@ def get_bvalue(dicom_header_info, round_to_nearst_10=True) -> float:
 
 def get_diffusion_gradient_direction(
     dicom_header_info: pydicom.Dataset,
-) -> Optional[np.ndarray]:
+) -> np.ndarray | None:
     """
     Extract the diffusion gradient direction from DICOM header information.
     Args:
@@ -246,7 +256,7 @@ def get_diffusion_gradient_direction(
     return None
 
 
-def infer_diffusion_from_gradient(filenames: List[Path]) -> str:
+def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
     """
     NAMIC Notes on DWI private fields:
     https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
@@ -286,7 +296,7 @@ def infer_diffusion_from_gradient(filenames: List[Path]) -> str:
     return "INVALID"
 
 
-def vprint(msg: str, verbose=False):
+def vprint(msg: str, verbose: bool = False) -> None:
     """
     Conditionally print a message if the 'verbose' flag is set.
 
@@ -300,8 +310,8 @@ def vprint(msg: str, verbose=False):
 
 def sanitize_dicom_dataset(
     ro_dataset: pydicom.Dataset,
-    required_info_list: List[str],
-    optional_info_list: List[str],
+    required_info_list: list[str],
+    optional_info_list: list[str],
 ) -> tuple[dict, bool]:
     """
     Validates the DICOM fields in the DICOM header to ensure all required fields are present.
@@ -309,7 +319,7 @@ def sanitize_dicom_dataset(
     Raises an exception if any required fields are missing.
 
     """
-    dataset_dictionary: Dict[str, Any] = dict()
+    dataset_dictionary: dict[str, Any] = dict()
     dataset = deepcopy(ro_dataset)  # DO NOT MODIFY THE INPUT DATASET!
     dicom_filename: Path = dataset.filename
     dataset_dictionary["FileName"]: str = dicom_filename
@@ -317,7 +327,7 @@ def sanitize_dicom_dataset(
     dataset.remove_private_tags()
     values = dataset.values()
     INVALID_VALUE = "INVALID_VALUE"
-    all_candidate_info_fields: List[str] = required_info_list + optional_info_list
+    all_candidate_info_fields: list[str] = required_info_list + optional_info_list
 
     for v in values:
         if isinstance(v, pydicom.dataelem.RawDataElement):
@@ -434,7 +444,7 @@ def sanitize_dicom_dataset(
 
 def get_coded_dictionary_elements(
     dicom_sanitized_dataset: dict,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Extract specific information from a DICOM fields dataset and create a coded dictionary with extracted features.
 
@@ -444,7 +454,7 @@ def get_coded_dictionary_elements(
     Returns:
         Dict[str, Any]: A dictionary containing extracted information in a coded format.
     """
-    dataset_dictionary: Dict[str, Any] = deepcopy(dicom_sanitized_dataset)
+    dataset_dictionary: dict[str, Any] = deepcopy(dicom_sanitized_dataset)
     for name, value in dicom_sanitized_dataset.items():
         if name == "PixelSpacing":
             if isinstance(value, np.ndarray):
@@ -508,7 +518,7 @@ def get_coded_dictionary_elements(
     return dataset_dictionary
 
 
-def convert_array_to_min_max(name, value_list) -> list:
+def convert_array_to_min_max(name: str, value_list: list[int]) -> list:
     """
     Compute the minimum and maximum values of a DICOM array field.
 
@@ -527,7 +537,7 @@ def convert_array_to_min_max(name, value_list) -> list:
     return [(name + "Min", list_min), (name + "Max", list_max)]
 
 
-def convert_array_to_index_value(name, value_list) -> list:
+def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) -> list:
     """
     Takes a DICOM array and expands it to an indexed list of values.
 

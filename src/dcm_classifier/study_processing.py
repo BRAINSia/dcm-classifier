@@ -24,6 +24,8 @@ import itk
 from .dicom_volume import DicomSingleVolumeInfoBase
 from .dicom_series import DicomSingleSeries
 from .image_type_inference import ImageTypeClassifierBase
+import dcm_classifier.image_type_inference
+from dcm_classifier.dicom_series import DicomSingleSeries
 
 
 class ProcessOneDicomStudyToVolumesMappingBase:
@@ -61,7 +63,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         series_inference(self):
     """
 
-    series_restrictions_list_dwi_subvolumes: List[str] = [
+    series_restrictions_list_dwi_subvolumes: list[str] = [
         # https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
         # STANDARD
         "0018|9075",  # S 1 Diffusion Directionality
@@ -113,7 +115,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
     ]
 
     @staticmethod
-    def _is_pathlike_object(path_rep: Union[str, Path, PurePath]) -> bool:
+    def _is_pathlike_object(path_rep: str | Path | PurePath) -> bool:
         """
         Check if the given object represents a valid path or path-like object.
 
@@ -132,11 +134,11 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
     def __init__(
         self,
-        study_directory: Union[str, Path],
-        search_series: Optional[Dict[str, int]] = None,
-        inferer: Optional[ImageTypeClassifierBase] = None,
+        study_directory: str | Path,
+        search_series: dict[str, int] | None = None,
+        inferer: ImageTypeClassifierBase | None = None,
         raise_error_on_failure: bool = False,
-    ):
+    ) -> None:
         """
         Initialize an instance of ProcessOneDicomStudyToVolumesMappingBase.
 
@@ -165,13 +167,13 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         else:
             print(f"ERROR:  {self.study_directory} is not pathlike")
         self.raise_error_on_failure: bool = raise_error_on_failure
-        self.search_series: Optional[Dict[str, int]] = search_series
-        self.series_dictionary: Dict[
+        self.search_series: dict[str, int] | None = search_series
+        self.series_dictionary: dict[
             int, DicomSingleSeries
         ] = self.__identify_single_volumes(self.study_directory)
-        self.inferer: Optional[ImageTypeClassifierBase] = inferer
+        self.inferer: ImageTypeClassifierBase | None = inferer
 
-    def get_list_of_primary_volume_info(self) -> List[Dict[str, str]]:
+    def get_list_of_primary_volume_info(self) -> list[dict[str, str]]:
         """
         Retrieve a list of dictionaries containing primary volume information from all series.
 
@@ -185,7 +187,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 Each dictionary includes keys and values for primary volume attributes. See get_primary_volume_info function in dicom_volume.py
 
         """
-        list_of_volume_info_dictionaries: List[Dict[str, str]] = list()
+        list_of_volume_info_dictionaries: list[dict[str, str]] = list()
         for (
             series_number,
             series_object,
@@ -193,13 +195,13 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             for vol_index, subseries_vol_info in enumerate(
                 series_object.volume_info_list
             ):
-                primary_volume_info: Dict[
+                primary_volume_info: dict[
                     str, str
                 ] = subseries_vol_info.get_primary_volume_info(vol_index)
                 list_of_volume_info_dictionaries.append(primary_volume_info)
         return list_of_volume_info_dictionaries
 
-    def get_study_dictionary(self):
+    def get_study_dictionary(self) -> dict[int, DicomSingleSeries]:
         """
         Get the dictionary mapping series numbers to DicomSingleSeries objects.
 
@@ -219,7 +221,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         """
         return self.series_dictionary
 
-    def set_inferer(self, inferer: ImageTypeClassifierBase):
+    def set_inferer(self, inferer: ImageTypeClassifierBase) -> None:
         """
         Set the image type classifier for inference.
 
@@ -238,7 +240,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         """
         self.inferer = inferer
 
-    def run_inference(self):
+    def run_inference(self) -> None:
         """
         Run inference on each DICOM series using the specified image type classifier.
 
@@ -259,13 +261,13 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             self.inferer.set_series(series_object)
             self.inferer.run_inference()
 
-    def validate(self):
+    def validate(self) -> None:
         pass
 
     def __identify_single_volumes(
         self,
         study_directory: Path,
-    ) -> Dict[int, DicomSingleSeries]:
+    ) -> dict[int, DicomSingleSeries]:
         """
         Identify and map single volumes within the DICOM study directory.
 
@@ -325,11 +327,11 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         # for uid in seriesUID:
         #     print(uid)
 
-        volumes_dictionary: Dict[int, DicomSingleSeries] = dict()
+        volumes_dictionary: dict[int, DicomSingleSeries] = dict()
 
         for seriesIdentifier in seriesUID:
             # print("Reading: " + seriesIdentifier)
-            subseries_filenames: List[str] = namesGenerator.GetFileNames(
+            subseries_filenames: list[str] = namesGenerator.GetFileNames(
                 seriesIdentifier
             )
             subseries_info: DicomSingleVolumeInfoBase = DicomSingleVolumeInfoBase(
@@ -364,11 +366,11 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         #         volumes_dictionary[index].append(slice_list[index])
 
         if self.search_series is not None:
-            cadidate_series_numbers: List[int] = [
+            cadidate_series_numbers: list[int] = [
                 int(x) for x in self.search_series.values()
             ]
 
-            series_numbers_to_remove: List[int] = list()
+            series_numbers_to_remove: list[int] = list()
             for series_number in volumes_dictionary.keys():
                 if series_number not in cadidate_series_numbers:
                     series_numbers_to_remove.append(series_number)

@@ -35,7 +35,7 @@ Example:
     df.drop(columns=required_DICOM_fields, inplace=True)
 """
 
-required_DICOM_fields: List[str] = [
+required_DICOM_fields: list[str] = [
     "StudyInstanceUID",
     "SeriesInstanceUID",
     "SeriesNumber",
@@ -48,7 +48,7 @@ required_DICOM_fields: List[str] = [
     "SliceThickness",
 ]
 
-optional_DICOM_fields: List[str] = [
+optional_DICOM_fields: list[str] = [
     "SAR",  # Not present in all derived image types
     "ImageType",  # Not required
     "Manufacturer",  # Not required

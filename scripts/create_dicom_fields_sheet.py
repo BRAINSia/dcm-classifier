@@ -617,7 +617,7 @@ def data_set_to_dict(ds):
         key: str = elem.name
         if key in phi_tags:
             continue
-        value: Optional[str] = None
+        value: str | None = None
         try:
             value = str(elem.value).strip()
         except:

@@ -23,6 +23,7 @@ from pathlib import Path
 import json
 
 from typing import List, Optional
+from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
 
 
 class DicomValidatorBase:
@@ -45,7 +46,7 @@ class DicomValidatorBase:
         validate(self) -> bool:
     """
 
-    def __init__(self, single_volume_info: DicomSingleVolumeInfoBase):
+    def __init__(self, single_volume_info: DicomSingleVolumeInfoBase) -> None:
         """
         Initialize the DicomValidatorBase.
 
@@ -54,7 +55,7 @@ class DicomValidatorBase:
                 containing information about a single DICOM volume.
         """
         self.single_volume_info: DicomSingleVolumeInfoBase = single_volume_info
-        self._validation_failure_reports: List[str] = list()
+        self._validation_failure_reports: list[str] = list()
 
     def append_to_validation_failure_reports(self, msg: str) -> None:
         """
@@ -108,9 +109,7 @@ class DicomValidatorBase:
     """
         return msg
 
-    def write_validation_report(
-        self, report_filename_to_append: Optional[Path]
-    ) -> None:
+    def write_validation_report(self, report_filename_to_append: Path | None) -> None:
         """
         Write the validation report to a file or print it.
 

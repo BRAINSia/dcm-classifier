@@ -12,7 +12,7 @@ from sklearn.metrics import ConfusionMatrixDisplay, classification_report
 from sklearn.tree import export_graphviz
 
 import time
-from six import StringIO
+from io import StringIO
 
 # from IPython.display import Image
 import pydotplus

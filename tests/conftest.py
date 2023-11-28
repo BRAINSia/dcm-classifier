@@ -149,9 +149,7 @@ def mock_volumes():
     :returns list_of_volumes: a list containing filepaths to volume directories
     """
 
-    def generate_dcm_volumes(
-        volumes: List[Union[str, Path]], output_path: Union[str, Path]
-    ):
+    def generate_dcm_volumes(volumes: list[str | Path], output_path: str | Path):
         """A function that creates a directory and DICOM files for each volume in the list of provided volumes.
         The directory and files are written to the specified output path.
            :param volumes: a list of DICOM volume file paths
@@ -195,7 +193,7 @@ def mock_volumes():
 
         mock_data_file: Path = adjacent_testing_data_path / "mock_data.txt"
 
-        with open(mock_data_file, "r") as file:
+        with open(mock_data_file) as file:
             mock_volumes_json_str = file.read()
         # uses regex to find all the volume delimiters within mock_data.txt file
         volume_type_list = re.findall(r"\w{3} VOLUME", mock_volumes_json_str)
