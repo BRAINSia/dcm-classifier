@@ -116,10 +116,27 @@ def one_hot_encoding_from_array(
     # merged_frame = pd.concat(res)
 
 
-def one_hot_encoding_from_str_col(frame: pd.DataFrame, col_name: str) -> pd.DataFrame:
-    df = frame
-    encoding = pd.get_dummies(df[col_name], dtype=int)
-    output_frame = pd.concat([df, encoding], axis=1)
+
+def one_hot_encoding_from_str_col(
+    frame: pd.DataFrame, col_name: str, index_field: str
+) -> pd.DataFrame:
+    output_frame = frame[[index_field]]
+    possible_values = frame[col_name].unique()
+    if col_name == "Manufacturer":
+        manufacturers = ["siemens", "ge", "philips", "toshiba"]
+
+    for value in possible_values:
+        if type(value) is not str:
+            continue
+        series = pd.Series(
+            (frame[col_name].str.contains(value)).fillna(0).astype(int),
+            name=f"{col_name}_{value.replace(' ', '_')}",
+        )
+        # output_frame[f"{col_name}_{value.replace(' ', '_')}"] = frame[col_name].str.contains(value).astype(int)
+        output_frame = output_frame.merge(series, left_index=True, right_index=True)
+    # encoding = pd.get_dummies(frame[col_name], dtype=int)
+    # for name in encoding.columns:
+    #     encoding.rename(columns={name: f"{col_name}_{name}"}, inplace=True)
     return output_frame
 
 
@@ -672,9 +689,9 @@ if __name__ == "__main__":
             and used_in_training_flag == 1
         ):
             encoded_frame = one_hot_encoding_from_str_col(
-                input_data_frame, current_header
+                input_data_frame, current_header, index_field
             )
-            encoded_frame[index_field] = input_data_frame[[index_field]]
+            # encoded_frame[index_field] = input_data_frame[[index_field]]
             output_data_frame = pd.merge(
                 left=output_data_frame, right=encoded_frame, on=index_field
             )
