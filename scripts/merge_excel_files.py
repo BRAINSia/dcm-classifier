@@ -123,7 +123,6 @@ def one_hot_encoding_from_str_col(frame: pd.DataFrame, col_name: str) -> pd.Data
     return output_frame
 
 
-
 def one_hot_encoding_from_array_floats(
     frame: pd.DataFrame, col_name: str
 ) -> pd.DataFrame:
