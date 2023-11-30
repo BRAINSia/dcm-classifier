@@ -648,66 +648,101 @@ if __name__ == "__main__":
     #     droppable_cols,
     # )
 
+    # TODO read in data dictionary and use it to filter out columns
     input_data_frame = pd.read_excel(
-        "/home/cavriley/files/output_excel_files/combined_excel_file_raw.xlsx"
+        "/home/cavriley/files/all_excel_files_combined/combined_excel_file_raw.xlsx"
     )
-    data_dictionary_frame = pd.read_excel(
-        "~/files/dcm_files/header_data_dictionary.xlsx"
-    )
-    data_dictionary_frame = truncate_column_names(
-        data_dictionary_frame, max_header_length
-    )
-    index_field = "FileName"
-    output_data_frame = input_data_frame[[index_field]]
 
-    for index, row in data_dictionary_frame.iterrows():
-        current_header = row["header_name"][:max_header_length]
-        used_in_training_flag = row["used_for_training"]
+    # No duplicate scan models
+    # scan_models = get_scan_models_from_excel(input_data_frame)
 
-        if current_header == index_field:
-            pass
-        elif "drop" in row["action"]:
-            print(current_header)
-            pass
-        elif "keep" in row["action"] and used_in_training_flag == 1:
-            output_data_frame[current_header] = pd.Series(
-                input_data_frame[current_header]
-            )
-        elif (
-            row["action"] == "one_hot_encoding_from_array"
-            and used_in_training_flag == 1
-        ):
-            encoded_frame = one_hot_encoding_from_array(
-                input_data_frame, current_header, index_field
-            )
-            output_data_frame = pd.merge(
-                left=output_data_frame, right=encoded_frame, on=index_field
-            )
-        elif (
-            row["action"] == "one_hot_encoding_from_str_col"
-            and used_in_training_flag == 1
-        ):
-            encoded_frame = one_hot_encoding_from_str_col(
-                input_data_frame, current_header, index_field
-            )
-            # encoded_frame[index_field] = input_data_frame[[index_field]]
-            output_data_frame = pd.merge(
-                left=output_data_frame, right=encoded_frame, on=index_field
-            )
-            # pass
-        elif row["action"] == "convert_array_to_index_value":
-            pass
-        encoded_frame = None
-    corr_matrix = output_data_frame[output_data_frame.columns[1:]].corr().abs()
-    # Select upper triangle of correlation matrix
-    upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+    # print(scan_models)
+    # print(len(scan_models))
+    # print(set(scan_models))
+    # print(len(set(scan_models)))
 
-    # Find features with correlation greater than 0.95
-    to_drop = [column for column in upper.columns if any(upper[column] > 0.95)]
-    print(len(to_drop))
-    # Drop features
-    output_data_frame.drop(to_drop, axis=1, inplace=True)
-    print(output_data_frame)
-    output_data_frame.to_excel(
-        "~/files/output_excel_files/testing_data2.xlsx", engine="openpyxl"
-    )
+    # data_dictionary_frame = pd.read_excel(
+    #     "~/files/dcm_files/header_data_dictionary.xlsx"
+    # )
+    # data_dictionary_frame = truncate_column_names(
+    #     data_dictionary_frame, max_header_length
+    # )
+    # index_field = "FileName"
+    # combined_frame = pd.DataFrame()
+    #
+    # # for file in Path("/home/cavriley/files/source_excel_files_raw").glob("*.xlsx"):
+    # input_data_frame = pd.read_excel(file)
+    # output_data_frame = input_data_frame[[index_field]]
+    #
+    # for index, row in data_dictionary_frame.iterrows():
+    #     current_header = row["header_name"][:max_header_length]
+    #     used_in_training_flag = row["used_for_training"]
+    #
+    #     if current_header == index_field:
+    #         pass
+    #     elif "drop" in row["action"]:
+    #         pass
+    #     elif "keep" in row["action"] and used_in_training_flag == 1:
+    #         try:
+    #             output_data_frame[current_header] = pd.Series(
+    #                 input_data_frame[current_header]
+    #             )
+    #         except KeyError:
+    #             print(f"KeyError: {current_header}, in {file}")
+    #     elif (
+    #         row["action"] == "one_hot_encoding_from_array"
+    #         and used_in_training_flag == 1
+    #     ):
+    #         try:
+    #             encoded_frame = one_hot_encoding_from_array(
+    #                 input_data_frame, current_header, index_field
+    #             )
+    #         except KeyError:
+    #             print(f"KeyError: {current_header}, in {file}")
+    #             continue
+    #         output_data_frame = pd.merge(
+    #             left=output_data_frame, right=encoded_frame, on=index_field
+    #         )
+    #     elif (
+    #         row["action"] == "one_hot_encoding_from_str_col"
+    #         and used_in_training_flag == 1
+    #     ):
+    #         try:
+    #             encoded_frame = one_hot_encoding_from_str_col(
+    #                 input_data_frame, current_header, index_field
+    #             )
+    #         except KeyError:
+    #             print(f"KeyError: {current_header}, in {file}")
+    #             continue
+    #         # encoded_frame[index_field] = input_data_frame[[index_field]]
+    #         output_data_frame = pd.merge(
+    #             left=output_data_frame, right=encoded_frame, on=index_field
+    #         )
+    #     # elif row["action"] == "one_hot_encoding_from_array_floats":
+    #     #     encoded_frame = one_hot_encoding_from_array_floats(
+    #     #         input_data_frame, current_header, index_field
+    #     #     )
+    #     #     # encoded_frame[index_field] = input_data_frame[[index_field]]
+    #     #     output_data_frame = pd.merge(
+    #     #         left=output_data_frame, right=encoded_frame, on=index_field
+    #     #     )
+    #     encoded_frame = None
+    #     # combined_frame = pd.concat([combined_frame, output_data_frame])
+    #
+    # # TODO remove correlated cols
+    # # input_data_frame = pd.read_excel("~/files/output_excel_files/testing_data2.xlsx")
+    # # corr_matrix = input_data_frame[input_data_frame.columns[2:]].corr().abs()
+    # # # Select upper triangle of correlation matrix
+    # # upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+    # #
+    # # # Find features with correlation greater than 0.95
+    # # to_drop = [column for column in upper.columns if any(upper[column] > 0.95)]
+    # # print(len(to_drop))
+    # # print(to_drop)
+    # # # Drop features
+    # # input_data_frame.drop(to_drop, axis=1, inplace=True)
+    # # print(output_data_frame)
+    # combined_frame.to_excel(
+    #     "~/files/output_excel_files/testing_dataNov30.xlsx",
+    #     engine="openpyxl",
+    # )
