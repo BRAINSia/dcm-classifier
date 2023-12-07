@@ -292,8 +292,7 @@ def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
     if len(unique_gradient_directions) > 1:
         return "dwig"
 
-    # this is the default state the series is initialized with
-    return "INVALID"
+    return "tracew"
 
 
 def vprint(msg: str, verbose: bool = False) -> None:
