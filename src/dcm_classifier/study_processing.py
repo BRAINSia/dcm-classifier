@@ -321,7 +321,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 )
         else:
             print(
-                f"The directory: {study_directory} contains {len(seriesUID)} DICOM Series "
+                f"The directory: {study_directory} contains {len(seriesUID)} DICOM sub-volumes"
             )
         # print(f"Contains the following {len(seriesUID)} DICOM Series: ")
         # for uid in seriesUID:
