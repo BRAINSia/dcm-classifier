@@ -18,7 +18,6 @@
 
 from .dicom_series import DicomSingleSeries
 from .namic_dicom_typing import (
-    itk_read_from_dicomfn_list,
     infer_diffusion_from_gradient,
 )
 from pathlib import Path
