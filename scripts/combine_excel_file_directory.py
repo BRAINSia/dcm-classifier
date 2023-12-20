@@ -445,7 +445,7 @@ def combine_directory_excel_files(directory: str, output_file: str):
     for file in Path(directory).glob("*.xlsx"):
         print(file)
         current_frame = pd.read_excel(file)
-        current_frame = current_frame.drop(columns=droppable_cols)
+        current_frame = current_frame.drop(columns=droppable_cols, errors="ignore")
         combined_frame = pd.concat([combined_frame, current_frame])
 
     print("Excel Files Read")
