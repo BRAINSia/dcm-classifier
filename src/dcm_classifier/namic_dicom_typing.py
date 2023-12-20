@@ -271,6 +271,8 @@ def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
     # check for derived data with constant diffusion gradient direction
     # this could happen when the header information is created based on one of the DWI files
     ds1 = pydicom.dcmread(filenames[0].as_posix(), stop_before_pixels=True)
+    if not (0x0008, 0x0008) in ds1:
+        return "MISSING_IMAGE_TYPE"
     image_type = ds1[0x0008, 0x0008].value
     image_type_lower_str = str(image_type).lower()
     # For now we trust image type to be correct!!!
