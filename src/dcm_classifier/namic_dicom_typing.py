@@ -271,6 +271,8 @@ def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
     # check for derived data with constant diffusion gradient direction
     # this could happen when the header information is created based on one of the DWI files
     ds1 = pydicom.dcmread(filenames[0].as_posix(), stop_before_pixels=True)
+    if not (0x0008, 0x0008) in ds1:
+        return "MISSING_IMAGE_TYPE"
     image_type = ds1[0x0008, 0x0008].value
     image_type_lower_str = str(image_type).lower()
     # For now we trust image type to be correct!!!
@@ -547,10 +549,26 @@ def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) ->
     Returns:
         A list of (name, value) pairs, where each value in the original list is indexed with a unique name.
     """
+    # If value is a multi-value field, then break it apart
+    multi_value_list = value_list
+    if isinstance(value_list, pydicom.multival.MultiValue):
+        multi_value_list = tuple(value_list)
+    else:
+        # Some dicom have a string representation of the arrays
+        if "/" in value_list:
+            multi_value_list = value_list.split("/")
+    del value_list
 
     name = name.replace(" ", "").replace("(", "").replace(")", "")
     # Note Absolute value as only the magnitude can have importance
-    number_list = [abs(float(x)) for x in value_list]
+    try:
+        number_list = [abs(float(x)) for x in multi_value_list]
+    except Exception as e:
+        print(
+            f"Failed conversion of {name} : {type(multi_value_list)} to float list {multi_value_list} "
+        )
+        raise e
+
     named_list = list()
     for index in range(0, len(number_list)):
         named_list.append((name + "_" + str(index), number_list[index]))
