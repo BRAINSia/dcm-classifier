@@ -1,5 +1,6 @@
 import re
 import pandas as pd
+from pathlib import Path
 from dcm_classifier.namic_dicom_typing import convert_array_to_index_value
 
 
@@ -179,11 +180,28 @@ def parse_column_headers(
 
 
 if __name__ == "__main__":
-    header_data_dictionary_frame = "~/files/dcm_files/header_data_dictionary.xlsx"
-    input_file = (
-        "/home/cavriley/files/all_excel_files_combined/combined_excel_file_raw.xlsx"
-    )
-    output_file = (
-        "/home/cavriley/files/all_excel_files_combined/testing_data_Dec18.xlsx"
-    )
-    parse_column_headers(header_data_dictionary_frame, input_file, output_file)
+    base_data_dir = "/home/mbrzus/programming/dcm_train_data"
+    processed_data_dir = f"{base_data_dir}/processed_site_data"
+    raw_data_dir = f"{base_data_dir}/raw_site_data"
+    header_data_dictionary_frame = f"{base_data_dir}/header_data_dictionary_Dec18.xlsx"
+    #
+    # site_file_names = []
+    # for site_data in Path(raw_data_dir).glob("*.xlsx"):
+    #     site_file_names.append(site_data.name)
+    #
+    # sites_to_process = []
+    # for site_file_name in site_file_names:
+    #     if Path(f"{processed_data_dir}/{site_file_name}").exists():
+    #         continue
+    #     else:
+    #         sites_to_process.append(site_file_name)
+    #
+    # for site_file_name in sites_to_process:
+    #     print(site_file_name)
+    #     input_file = f"{raw_data_dir}/{site_file_name}"
+    #     output_file = f"{processed_data_dir}/{site_file_name}"
+    #     parse_column_headers(header_data_dictionary_frame, input_file, output_file)
+    #
+    df = pd.read_excel(f"{raw_data_dir}/PHD_024.xlsx")
+    print(df.shape)
+    # print(df.head())
