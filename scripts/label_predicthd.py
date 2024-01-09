@@ -91,7 +91,7 @@ series_descriptions_list = df["Series Description"].tolist()
 # print(len(fmri_series_descriptions))
 # update_labels_and_series_desc(fmri_series_descriptions, "fmri")
 
-# # adc
+# adc
 # adc_series_descriptions = []
 # for series_description_raw in series_descriptions_list:
 #     series_description = str(series_description_raw).lower()
@@ -101,21 +101,32 @@ series_descriptions_list = df["Series Description"].tolist()
 # [print(i) for i in adc_series_descriptions]
 # print(adc_series_descriptions)
 # print(len(adc_series_descriptions))
-# # # check if all adc series descriptions in data file have voluume index 0 - they should
-# # df = pd.read_excel(
-# #     "/home/mbrzus/programming/dcm_train_data/labeling/combined_data_without_iowa_labeling_remaining.xlsx"
-# # )
-# # for series_description in adc_series_descriptions:
-# #     df = df[df["Series Description"] == series_description]
-# #     df = df[df["_vol_index"] != 0]  # should be empty
-# #     # print rows if not empty
-# #     if not df.empty:
-# #         print(df)
-# #         # print number of rows
-# #         print(len(df))
-#
-# ####### SUCCESS - all adc series descriptions have volume index 0 ########
+# # check if all adc series descriptions in data file have voluume index 0 - they should
+# df = pd.read_excel(
+#     "/home/mbrzus/programming/dcm_train_data/labeling/combined_data_without_iowa_labeling_remaining.xlsx"
+# )
+# for series_description in adc_series_descriptions:
+#     df = df[df["Series Description"] == series_description]
+#     df = df[df["_vol_index"] != 0]  # should be empty
+#     # print rows if not empty
+#     if not df.empty:
+#         print(df)
+#         # print number of rows
+#         print(len(df))
+
+####### SUCCESS - all adc series descriptions have volume index 0 ########
 # update_labels_and_series_desc(adc_series_descriptions, "adc")
+# # ROUND 2: I found additional ADC images where seires description uses full name instead of abbreviation
+# adc_series_descriptions = []
+# for series_description_raw in series_descriptions_list:
+#     series_description = str(series_description_raw).lower()
+#     if "apparent" in series_description:
+#         adc_series_descriptions.append(series_description_raw)
+# [print(i) for i in adc_series_descriptions]
+# print(adc_series_descriptions)
+# print(len(adc_series_descriptions))
+# update_labels_and_series_desc(adc_series_descriptions, "adc")
+
 
 # # fa
 # fa_series_descriptions = []
@@ -154,6 +165,29 @@ series_descriptions_list = df["Series Description"].tolist()
 #         print(len(df))
 #
 # ####### SUCCESS - all fa series descriptions have volume index 0 ########
+# update_labels_and_series_desc(fa_series_descriptions, "fa")
+# # ROUND 2: I found additional FA images where seires description uses full name instead of abbreviation
+# fa_series_descriptions = []
+# for series_description_raw in series_descriptions_list:
+#     series_description = str(series_description_raw).lower()
+#     if "fractional" in series_description:
+#         fa_series_descriptions.append(series_description_raw)
+#
+# [print(i) for i in fa_series_descriptions]
+# print(fa_series_descriptions)
+# print(len(fa_series_descriptions))
+# update_labels_and_series_desc(fa_series_descriptions, "fa")
+# # ROUND 3: Seems that faReg and facRef DTI images are also FA.
+# # some have bvalue, some have 'FA' in the image type
+# fa_series_descriptions = []
+# for series_description_raw in series_descriptions_list:
+#     series_description = str(series_description_raw).lower()
+#     if "fa" in series_description and "reg - dti" in series_description:
+#         fa_series_descriptions.append(series_description_raw)
+#
+# [print(i) for i in fa_series_descriptions]
+# print(fa_series_descriptions)
+# print(len(fa_series_descriptions))
 # update_labels_and_series_desc(fa_series_descriptions, "fa")
 
 # # dwig
@@ -380,3 +414,39 @@ series_descriptions_list = df["Series Description"].tolist()
 # print(fieldmap_series_descriptions)
 # print(len(fieldmap_series_descriptions))
 # update_labels_and_series_desc(fieldmap_series_descriptions, "field_map")
+
+
+# tracew
+"""
+The tracew serieses also comprise of bvalue images.
+We investigate all images with non zero bvalue that were not classified as part of the DWI labeling above.
+"""
+remaining_df = pd.read_excel(
+    "/home/mbrzus/programming/dcm_train_data/labeling/combined_data_without_iowa_labeling_remaining.xlsx"
+)
+bval_series_desc_raw = (
+    remaining_df[remaining_df["Diffusionb-valueMax"] >= 0]["Series Description"]
+    .unique()
+    .tolist()
+)
+bval_series_desc = []
+for series_desc in bval_series_desc_raw:
+    for i in ["dti", "dwi", "diff", "b0", "b500", "b600", "b1000", "b1200", "b1500"]:
+        if i in str(series_desc).lower():
+            bval_series_desc.append(series_desc)
+            break
+
+bval_series_desc_failed = [i for i in bval_series_desc_raw if i not in bval_series_desc]
+
+[print(i) for i in bval_series_desc]
+print("\n\n=====================================\n\n")
+[print(i) for i in bval_series_desc_failed]
+print(len(bval_series_desc))
+print(len(bval_series_desc_failed))
+update_labels_and_series_desc(bval_series_desc, "bval_img")
+
+# bval_series_desc_dti = [i for i in bval_series_desc if "dti" in str(i).lower()]
+# [print(i) for i in bval_series_desc_no_dti]
+# print(bval_series_desc)
+# [print(i) for i in bval_series_desc_dti]
+# print(len(bval_series_desc))
