@@ -75,7 +75,7 @@ def one_hot_encoding_from_str_col(
 
         for manufacturer in manufacturers + ["other"]:
             series = pd.Series(
-                (frame[col_name].str.contains(manufacturer)).fillna(0).astype(int),
+                (frame[col_name].str.contains(manufacturer)).fillna(0).astype("int16"),
                 name=f"{col_name}_{manufacturer}",
             )
             output_frame = output_frame.merge(series, left_index=True, right_index=True)
@@ -83,7 +83,7 @@ def one_hot_encoding_from_str_col(
         for value in possible_values:
             if type(value) is str:
                 series = pd.Series(
-                    (frame[col_name].str.contains(value)).fillna(0).astype(int),
+                    (frame[col_name].str.contains(value)).fillna(0).astype("int16"),
                     name=f"{col_name}_{value.replace(' ', '_')}",
                 )
                 # output_frame[f"{col_name}_{value.replace(' ', '_')}"] = frame[col_name].str.contains(value).astype(int)
@@ -117,7 +117,7 @@ def parse_column_headers(
     )
     index_field = "FileName"
 
-    input_data_frame = pd.read_excel(input_path)
+    input_data_frame = pd.read_csv(input_path)
     output_data_frame = input_data_frame[[index_field]]
 
     for index, row in data_dictionary_frame.iterrows():
@@ -176,7 +176,7 @@ def parse_column_headers(
         #     )
         # combined_frame = pd.concat([combined_frame, output_data_frame])
 
-    output_data_frame.to_excel(output_path, sheet_name="results", engine="openpyxl")
+    output_data_frame.to_csv(output_path, index=False)
 
 
 if __name__ == "__main__":
@@ -202,6 +202,10 @@ if __name__ == "__main__":
     #     output_file = f"{processed_data_dir}/{site_file_name}"
     #     parse_column_headers(header_data_dictionary_frame, input_file, output_file)
     #
-    df = pd.read_excel(f"{raw_data_dir}/PHD_024.xlsx")
-    print(df.shape)
-    # print(df.head())
+    # df = pd.read_excel(f"{raw_data_dir}/PHD_024.xlsx")
+    # print(df.shape)
+    # # print(df.head())
+
+    input_file = f"/home/mbrzus/programming/dcm_train_data/processed/processed_iowa_stroke_data_Jan12.csv"
+    output_file = f"/home/mbrzus/programming/dcm_train_data/training/training_iowa_stroke_data_Jan12.csv"
+    parse_column_headers(header_data_dictionary_frame, input_file, output_file)

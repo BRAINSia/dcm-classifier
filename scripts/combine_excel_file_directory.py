@@ -12,7 +12,10 @@ def identify_and_drop_unusable_cols(frame: pd.DataFrame) -> pd.DataFrame:
 
     # print(f"dropping {len(droppable_cols)} cols")
     # [print(x) for x in sorted(droppable_cols)]
-    return df.drop(columns=droppable_cols)
+    # return df.drop(columns=droppable_cols)
+    processed_file: str = "/home/mbrzus/programming/dcm_train_data/processed/processed_iowa_stroke_data_Jan12.csv"
+    df = df.drop(columns=droppable_cols)
+    df.to_csv(processed_file, index=False)
 
 
 droppable_cols = [
@@ -454,6 +457,20 @@ def combine_directory_excel_files(directory: str, output_file: str):
 
 
 if __name__ == "__main__":
-    excel_files_directory: str = ""
-    output_file: str = ""
-    combine_directory_excel_files(excel_files_directory, output_file)
+    # excel_files_directory: str = (
+    #     "/home/mbrzus/programming/dcm_train_data/raw_site_data/"
+    # )
+    # output_file: str = "/home/mbrzus/programming/dcm_train_data/combined/combined_predicthd_data_Jan9.xlsx"
+    # combine_directory_excel_files(excel_files_directory, output_file)
+
+    combined_file: str = "/home/mbrzus/programming/dcm_train_data/combined/combined_iowa_stroke_data_Jan9.csv"
+    # processed_file: str = "/home/mbrzus/programming/dcm_train_data/processed/processed_iowa_stroke_data_Jan12.xlsx"
+    # combined_df = pd.read_excel(combined_file)
+    # df = identify_and_drop_unusable_cols(df)
+    # df.to_excel(processed_file, sheet_name="results", engine="openpyxl")
+
+    reader = pd.read_csv(
+        combined_file, chunksize=1000
+    )  # chunksize depends with you colsize
+
+    [identify_and_drop_unusable_cols(chunk) for chunk in reader]
