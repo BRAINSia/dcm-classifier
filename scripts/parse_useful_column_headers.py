@@ -107,60 +107,71 @@ def truncate_column_names(df: pd.DataFrame, max_length: int) -> pd.DataFrame:
         df[col].name = col.replace(col, col[:max_length])
     return df
 
+    # def parse_column_headers(
+    #     header_dictionary_path: str, input_path: str, output_path: str
+    # ):
+    #     data_dictionary_frame = pd.read_excel(header_dictionary_path)
+    #     data_dictionary_frame = truncate_column_names(
+    #         data_dictionary_frame, max_header_length
+    #     )
+    #     index_field = "FileName"
+    #
+    #     input_data_frame = pd.read_csv(input_path)
+    #     output_data_frame = input_data_frame[[index_field]]
+    #
+    #     for index, row in data_dictionary_frame.iterrows():
+    #         current_header = row["header_name"][:max_header_length]
+    #         used_in_training_flag = row["used_for_training"]
+
 
 def parse_column_headers(
-    header_dictionary_path: str, input_path: str, output_path: str
+    header_dictionary_df: pd.DataFrame,
+    input_df: pd.DataFrame,
+    output_path: str,
+    header: bool,
 ):
-    data_dictionary_frame = pd.read_excel(header_dictionary_path)
-    data_dictionary_frame = truncate_column_names(
-        data_dictionary_frame, max_header_length
-    )
+    training_data_frame_path = "/tmp/dcm_classifier_training_data/dcm_train_data/training/training_iowa_stroke_data_Jan14.xlsx"
+    try:
+        training_data_frame = pd.read_excel(training_data_frame_path)
+    except FileNotFoundError:
+        training_data_frame = pd.DataFrame()
+
     index_field = "FileName"
 
-    input_data_frame = pd.read_csv(input_path)
-    output_data_frame = input_data_frame[[index_field]]
+    new_data_frame = input_df[[index_field]]
 
-    for index, row in data_dictionary_frame.iterrows():
+    for index, row in header_dictionary_df.iterrows():
         current_header = row["header_name"][:max_header_length]
-        used_in_training_flag = row["used_for_training"]
 
-        if current_header == index_field:
-            pass
-        elif "drop" in row["action"]:
-            pass
-        elif "keep" in row["action"] and used_in_training_flag == 1:
+        # if current_header == index_field:
+        #     pass
+        # elif "drop" in row["action"]:
+        #     pass
+        if "keep" in row["action"]:
             try:
-                output_data_frame[current_header] = pd.Series(
-                    input_data_frame[current_header]
-                )
+                new_data_frame[current_header] = pd.Series(input_df[current_header])
             except KeyError:
                 pass
                 # print(f"KeyError: {current_header}, in {file}")
-        elif (
-            row["action"] == "one_hot_encoding_from_array"
-            and used_in_training_flag == 1
-        ):
+        elif row["action"] == "one_hot_encoding_from_array":
             try:
                 encoded_frame = one_hot_encoding_from_array(
-                    input_data_frame, current_header, index_field
+                    input_df, current_header, index_field
                 )
-                output_data_frame = pd.merge(
-                    left=output_data_frame, right=encoded_frame, on=index_field
+                new_data_frame = pd.merge(
+                    left=new_data_frame, right=encoded_frame, on=index_field
                 )
             except KeyError:
                 # print(f"KeyError: {current_header}, in {file}")
                 pass
 
-        elif (
-            row["action"] == "one_hot_encoding_from_str_col"
-            and used_in_training_flag == 1
-        ):
+        elif row["action"] == "one_hot_encoding_from_str_col":
             try:
                 encoded_frame = one_hot_encoding_from_str_col(
-                    input_data_frame, current_header, index_field
+                    input_df, current_header, index_field
                 )
-                output_data_frame = pd.merge(
-                    left=output_data_frame, right=encoded_frame, on=index_field
+                new_data_frame = pd.merge(
+                    left=new_data_frame, right=encoded_frame, on=index_field
                 )
             except KeyError:
                 # print(f"KeyError: {current_header}, in {file}")
@@ -175,15 +186,44 @@ def parse_column_headers(
         #         left=output_data_frame, right=encoded_frame, on=index_field
         #     )
         # combined_frame = pd.concat([combined_frame, output_data_frame])
-
-    output_data_frame.to_csv(output_path, index=False)
+    training_data_frame = pd.concat([training_data_frame, new_data_frame])
+    del new_data_frame
+    training_data_frame.to_excel(training_data_frame_path, index=False)
 
 
 if __name__ == "__main__":
-    base_data_dir = "/home/mbrzus/programming/dcm_train_data"
+    # base_data_dir = "/tmp/dcm_classifier_training_data/dcm_train_data"
+    # processed_data_dir = f"{base_data_dir}/processed_site_data"
+    # raw_data_dir = f"{base_data_dir}/raw_site_data"
+    # header_data_dictionary_frame = f"{base_data_dir}/header_data_dictionary_Dec18.xlsx"
+
+    base_data_dir = "/tmp/dcm_classifier_training_data/dcm_train_data"
     processed_data_dir = f"{base_data_dir}/processed_site_data"
     raw_data_dir = f"{base_data_dir}/raw_site_data"
     header_data_dictionary_frame = f"{base_data_dir}/header_data_dictionary_Dec18.xlsx"
+    header_df = pd.read_excel(header_data_dictionary_frame)
+
+    # process header df
+    clean_header_df = header_df[header_df["used_for_training"] == 1]
+    clean_header_df = clean_header_df[clean_header_df["action"] != "drop"]
+    clean_header_df = truncate_column_names(clean_header_df, max_header_length)
+
+    # delete orig df
+    del header_df
+
+    output_file = f"{base_data_dir}/training/training_iowa_stroke_data_Jan14.xlsx"
+
+    input_file = f"{base_data_dir}/processed/processed_iowa_stroke_data_Jan14_cav.xlsx"
+    input_frame = pd.read_excel(input_file)
+
+    size = input_frame.shape[0]
+    # create 30 chunks
+    chunk_size = size // 30
+    for chunk in range(0, size, chunk_size):
+        df = input_frame.iloc[chunk : chunk + chunk_size]
+        parse_column_headers(clean_header_df, df, output_file, header=True)
+        del df
+
     #
     # site_file_names = []
     # for site_data in Path(raw_data_dir).glob("*.xlsx"):
@@ -206,6 +246,6 @@ if __name__ == "__main__":
     # print(df.shape)
     # # print(df.head())
 
-    input_file = f"/home/mbrzus/programming/dcm_train_data/processed/processed_iowa_stroke_data_Jan12.csv"
-    output_file = f"/home/mbrzus/programming/dcm_train_data/training/training_iowa_stroke_data_Jan12.csv"
-    parse_column_headers(header_data_dictionary_frame, input_file, output_file)
+    # input_file = f"/home/mbrzus/programming/dcm_train_data/processed/processed_iowa_stroke_data_Jan12.csv"
+    # output_file = f"/home/mbrzus/programming/dcm_train_data/training/training_iowa_stroke_data_Jan12.csv"
+    # parse_column_headers(header_data_dictionary_frame, input_file, output_file)
