@@ -1,24 +1,36 @@
 import pandas as pd
 from pathlib import Path
+import numpy as np
 
 
 def identify_and_drop_unusable_cols(frame: pd.DataFrame) -> pd.DataFrame:
-    df = frame
-    droppable_cols = []
-    length = len(df)
-    for col in df.columns:
-        if (df[col].count() / length) <= 0.05 or df[col].nunique() < 2:
-            droppable_cols.append(col)
+    input_frame = frame
+    # droppable_cols = []
+    # length = len(df)
+    # for col in df.columns:
+    #     if (df[col].count() / length) <= 0.05 or df[col].nunique() < 2:
+    #         droppable_cols.append(col)
 
     # print(f"dropping {len(droppable_cols)} cols")
     # [print(x) for x in sorted(droppable_cols)]
     # return df.drop(columns=droppable_cols)
-    processed_file: str = "/home/mbrzus/programming/dcm_train_data/processed/processed_iowa_stroke_data_Jan12.csv"
-    df = df.drop(columns=droppable_cols)
-    df.to_csv(processed_file, index=False)
+    processed_file: str = "/tmp/dcm_classifier_training_data/dcm_train_data/processed/processed_iowa_stroke_data_Jan14_cav.xlsx"
+    try:
+        processed_frame = pd.read_excel(processed_file)
+    except FileNotFoundError:
+        print("No processed file found")
+        processed_frame = pd.DataFrame()
+
+    input_frame = input_frame.drop(columns=droppable_cols, errors="ignore")
+    processed_frame = pd.concat([processed_frame, input_frame])
+    # df.to_csv(processed_file, index=False)
+    processed_frame.to_excel(
+        processed_file, sheet_name="results", engine="openpyxl", index=False
+    )
 
 
 droppable_cols = [
+    "Unnamed: 0",
     "Collimator Type",
     "Actual Frame Duration",
     "Position Reference Indicator",
@@ -463,14 +475,21 @@ if __name__ == "__main__":
     # output_file: str = "/home/mbrzus/programming/dcm_train_data/combined/combined_predicthd_data_Jan9.xlsx"
     # combine_directory_excel_files(excel_files_directory, output_file)
 
-    combined_file: str = "/home/mbrzus/programming/dcm_train_data/combined/combined_iowa_stroke_data_Jan9.csv"
+    combined_file: str = "/tmp/dcm_classifier_training_data/dcm_train_data/combined/combined_iowa_stroke_data_Jan9.xlsx"
     # processed_file: str = "/home/mbrzus/programming/dcm_train_data/processed/processed_iowa_stroke_data_Jan12.xlsx"
     # combined_df = pd.read_excel(combined_file)
     # df = identify_and_drop_unusable_cols(df)
     # df.to_excel(processed_file, sheet_name="results", engine="openpyxl")
 
-    reader = pd.read_csv(
-        combined_file, chunksize=1000
-    )  # chunksize depends with you colsize
+    combined_frame = pd.read_excel(combined_file)
+    size = 30000
+    chunk_size = 1500
+    for chunk in range(0, size, chunk_size):
+        df = combined_frame.iloc[chunk : chunk + chunk_size]
+        identify_and_drop_unusable_cols(df)
 
-    [identify_and_drop_unusable_cols(chunk) for chunk in reader]
+    # reader = pd.read_csv(
+    #     combined_file, chunksize=1000
+    # )  # chunksize depends with you colsize
+
+    # [identify_and_drop_unusable_cols(chunk) for chunk in reader]
