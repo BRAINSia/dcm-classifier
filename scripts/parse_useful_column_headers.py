@@ -126,23 +126,26 @@ def truncate_column_names(df: pd.DataFrame, max_length: int) -> pd.DataFrame:
 
 def parse_column_headers(
     header_dictionary_df: pd.DataFrame,
-    input_df: pd.DataFrame,
+    input_file,
     output_path: str,
     header: bool,
 ):
-    training_data_frame_path = "/tmp/dcm_classifier_training_data/dcm_train_data/training/training_iowa_stroke_data_Jan14.xlsx"
-    try:
-        training_data_frame = pd.read_excel(training_data_frame_path)
-    except FileNotFoundError:
-        training_data_frame = pd.DataFrame()
+    # training_data_frame_path = "/tmp/dcm_classifier_training_data/dcm_train_data/training/training_iowa_stroke_data_Jan14.xlsx"
+    # try:
+    #     training_data_frame = pd.read_excel(training_data_frame_path)
+    # except FileNotFoundError:
+    #     training_data_frame = pd.DataFrame()
 
     index_field = "FileName"
-
+    print(f"Input: {input_file}")
+    input_df = pd.read_excel(input_file)
+    # input_df = input_df.iloc[:2]
+    input_df = input_df[input_df["FileName"].notna()]
     new_data_frame = input_df[[index_field]]
 
     for index, row in header_dictionary_df.iterrows():
         current_header = row["header_name"][:max_header_length]
-
+        print(current_header)
         # if current_header == index_field:
         #     pass
         # elif "drop" in row["action"]:
@@ -186,9 +189,12 @@ def parse_column_headers(
         #         left=output_data_frame, right=encoded_frame, on=index_field
         #     )
         # combined_frame = pd.concat([combined_frame, output_data_frame])
-    training_data_frame = pd.concat([training_data_frame, new_data_frame])
-    del new_data_frame
-    training_data_frame.to_excel(training_data_frame_path, index=False)
+    print(new_data_frame.shape)
+    new_data_frame.to_excel(output_path, index=False)
+    print(f"Output: {output_path}")
+    # training_data_frame = pd.concat([training_data_frame, new_data_frame])
+    # del new_data_frame
+    # training_data_frame.to_excel(training_data_frame_path, index=False)
 
 
 if __name__ == "__main__":
@@ -211,18 +217,29 @@ if __name__ == "__main__":
     # delete orig df
     del header_df
 
-    output_file = f"{base_data_dir}/training/training_iowa_stroke_data_Jan14.xlsx"
+    output_dir = f"{base_data_dir}/training/training_"
 
-    input_file = f"{base_data_dir}/processed/processed_iowa_stroke_data_Jan14_cav.xlsx"
-    input_frame = pd.read_excel(input_file)
+    input_dir = f"{base_data_dir}/combined/split_combined_file"
+    for file in Path(input_dir).glob("*.xlsx"):
+        file_name = file.name
+        print(f"Input: {file}")
+        parse_column_headers(clean_header_df, file, output_dir + file_name, header=True)
+    # input_file = "/tmp/dcm_classifier_training_data/dcm_train_data/combined/combined_iowa_stroke_data_Jan9.xlsx"
+    # # input_frame = pd.read_excel(input_file)
+    # parse_column_headers(
+    #     clean_header_df,
+    #     input_file,
+    #     output_dir + "combined_iowa_stroke.xlsx",
+    #     header=True,
+    # )
 
-    size = input_frame.shape[0]
-    # create 30 chunks
-    chunk_size = size // 30
-    for chunk in range(0, size, chunk_size):
-        df = input_frame.iloc[chunk : chunk + chunk_size]
-        parse_column_headers(clean_header_df, df, output_file, header=True)
-        del df
+    # size = input_frame.shape[0]
+    # # create 30 chunks
+    # chunk_size = size // 30
+    # for chunk in range(0, size, chunk_size):
+    #     df = input_frame.iloc[chunk : chunk + chunk_size]
+    #     parse_column_headers(clean_header_df, df, output_file, header=True)
+    #     del df
 
     #
     # site_file_names = []
