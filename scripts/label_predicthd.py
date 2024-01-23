@@ -443,7 +443,7 @@ print("\n\n=====================================\n\n")
 [print(i) for i in bval_series_desc_failed]
 print(len(bval_series_desc))
 print(len(bval_series_desc_failed))
-update_labels_and_series_desc(bval_series_desc, "bval_img")
+update_labels_and_series_desc(bval_series_desc, "bval_vol")
 
 # bval_series_desc_dti = [i for i in bval_series_desc if "dti" in str(i).lower()]
 # [print(i) for i in bval_series_desc_no_dti]
