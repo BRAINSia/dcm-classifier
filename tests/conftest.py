@@ -1,4 +1,3 @@
-print("\n\n\n\nin conftest.py\n\n\n\n")
 import os
 import re
 import subprocess
@@ -17,12 +16,11 @@ from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 adjacent_testing_data_path: Path = Path(__file__).parent / "testing_data"
 current_file_path: Path = Path(__file__).parent
 inference_model_path = list(
-    Path(__file__).parent.parent.parent.rglob("models/rf_classifier.onnx")
+    Path(__file__).parent.parent.rglob("models/rf_classifier.onnx")
 )[0]
 
 # path to the testing data directory
-test_data_dir_path: Path = Path(__file__).parent.parent / "testing_data"
-print(f"test_data_dir_path: {test_data_dir_path}")
+test_data_dir_path: Path = Path(__file__).parent / "testing_data"
 tar_path: Path = test_data_dir_path / "anonymized_testing_data.tar.gz"
 
 # path to the anonymized testing data directory
@@ -39,7 +37,6 @@ study = ProcessOneDicomStudyToVolumesMappingBase(
     study_directory=(testing_dicom_dir / "anonymized_data"), inferer=inferer
 )
 study.run_inference()
-print("\nINFERENCE RAN\n")
 
 s_test = study.series_dictionary.get(15)
 print(s_test.get_volume_list()[0].get_one_volume_dcm_filenames()[0])
