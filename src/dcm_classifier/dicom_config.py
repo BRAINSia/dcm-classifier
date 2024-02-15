@@ -53,4 +53,17 @@ optional_DICOM_fields: list[str] = [
     "ImageType",  # Not required
     "Manufacturer",  # Not required
     "Contrast/BolusAgent",  # "(0x0018, 0x0010)"
+    "Diffusionb-value",  # Not required
+    "Diffusionb-valueMax",  # Not required
+    "Echo Number(s)",
+    "Echo Train Length",
+    "Scanning Sequence",
+    "Sequence Variant",
+    "In-plane Phase Encoding Direction",
+    "dB/dt",
+    "Imaging Frequency",
+    "MR Acquisition Type",
+    "Number of Averages",
+    "Inversion Time",
+    "Variable Flip Angle Flag",
 ]
