@@ -148,9 +148,6 @@ class ImageTypeClassifierBase:
             str: A string representing the inferred acquisition plane ("iso" for isotropic, "ax" for axial, "sag" for sagittal and "cor" for coronal).
         """
         # check if the volume was invalidated
-        print("\n\nIn acquisition inference\n")
-        print(feature_dict.keys())
-        print("DONE")
         for field in [
             "ImageOrientationPatient_0",
             "ImageOrientationPatient_5",
@@ -254,7 +251,6 @@ class ImageTypeClassifierBase:
         full_outputs: pd.DataFrame = pd.DataFrame()
         full_outputs["SeriesNumber"] = [self.series_number]
         model_inputs: pd.DataFrame = e_inputs.reindex(columns=inference_features)
-        print(model_inputs.shape)
         try:
             numeric_inputs: np.array = model_inputs.astype(np.float32).to_numpy()
         except ValueError:
