@@ -16,6 +16,7 @@
 #
 #  =========================================================================
 
+from .dicom_config import inference_features
 from .dicom_series import DicomSingleSeries
 from .namic_dicom_typing import (
     infer_diffusion_from_gradient,
@@ -27,8 +28,6 @@ import numpy as np
 import pandas as pd
 
 from typing import Dict, List, Union, Optional, Any
-
-from dicom_config import inference_features
 
 
 imagetype_to_integer_mapping = {

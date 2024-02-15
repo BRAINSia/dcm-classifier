@@ -24,8 +24,6 @@ import itk
 from .dicom_volume import DicomSingleVolumeInfoBase
 from .dicom_series import DicomSingleSeries
 from .image_type_inference import ImageTypeClassifierBase
-import dcm_classifier.image_type_inference
-from dcm_classifier.dicom_series import DicomSingleSeries
 
 
 class ProcessOneDicomStudyToVolumesMappingBase:

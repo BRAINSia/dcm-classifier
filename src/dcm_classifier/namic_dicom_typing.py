@@ -30,7 +30,7 @@ from itk.itkImagePython import itkImageF3
 from numpy import ndarray
 from pydicom.dataset import Dataset, FileDataset
 from pydicom.multival import MultiValue
-from dicom_config import inference_features as features
+from .dicom_config import inference_features as features
 
 
 FImageType = itk.Image[itk.F, 3]
