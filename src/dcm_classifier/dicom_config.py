@@ -52,4 +52,5 @@ optional_DICOM_fields: list[str] = [
     "SAR",  # Not present in all derived image types
     "ImageType",  # Not required
     "Manufacturer",  # Not required
+    "Contrast/BolusAgent",  # "(0x0018, 0x0010)"
 ]

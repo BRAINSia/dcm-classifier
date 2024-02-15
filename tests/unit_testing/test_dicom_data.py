@@ -10,9 +10,7 @@ inference_model_path = list(
 )[0]
 
 
-def test_adc_dcm_series_modality(
-    mock_volumes, default_image_type_classifier_base, mock_adc_series
-):
+def test_adc_dcm_series_modality(mock_adc_series):
     for series in mock_adc_series:
         assert series.get_modality() == "adc"
 
@@ -76,6 +74,32 @@ def test_t2_dcm_series_modality(mock_t2_series):
 #         )
 #         study.run_inference()
 #     assert "No DICOMs in: " in str(ex.value)
+
+inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
+
+
+def test_dcm_vol_has_contrast(contrast_file_path):
+    assert contrast_file_path.exists()
+
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=contrast_file_path, inferer=inferer
+    )
+    study.run_inference()
+
+    for series_number, series in study.series_dictionary.items():
+        assert series.get_volume_list()[0].get_has_contrast() is True
+
+
+def test_dcm_vol_no_contrast(no_contrast_file_path):
+    assert no_contrast_file_path.exists()
+
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=no_contrast_file_path, inferer=inferer
+    )
+    study.run_inference()
+
+    for series_number, series in study.series_dictionary.items():
+        assert series.get_volume_list()[0].get_has_contrast() is False
 
 
 def test_t1w_dcm_volume_modality(mock_volume_study):

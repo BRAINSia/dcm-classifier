@@ -114,11 +114,19 @@ def test_convert_array_to_index_value():
 
 
 dicom_file_dir: Path = (
-    current_file_path.parent / "testing_data" / "invalid_data" / "invalid_fields"
+    current_file_path.parent
+    / "testing_data"
+    / "anonymized_testing_data"
+    / "invalid_data"
+    / "invalid_fields"
 )
 
 mult_series_dir: Path = (
-    current_file_path.parent / "testing_data" / "invalid_data" / "mult_series_uid"
+    current_file_path.parent
+    / "testing_data"
+    / "anonymized_testing_data"
+    / "invalid_data"
+    / "mult_series_uid"
 )
 
 

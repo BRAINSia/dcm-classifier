@@ -201,6 +201,26 @@ class ImageTypeClassifierBase:
             return True
         return False
 
+    def infer_contrast(self, feature_dict: dict = None) -> bool | None:
+        """
+        Infer whether the image has contrast based on DICOM information and image properties.
+        Args:
+            feature_dict: A dictionary containing features used for classification.
+
+        Returns:
+            bool: True if the image has contrast, False otherwise.
+        """
+        # check if the volume was invalidated
+
+        field = "Contrast/BolusAgent"
+        if field not in feature_dict.keys():
+            return None
+
+        # check if the volume has contrast
+        if "none" not in feature_dict[field].lower():
+            return True
+        return False
+
     def infer_modality(self, feature_dict: dict = None) -> (str, pd.DataFrame):
         """
         Infer the modality (image type) of the DICOM series based on a feature dictionary.
@@ -328,7 +348,10 @@ class ImageTypeClassifierBase:
                 )
                 volume.set_acquisition_plane(acquisition_plane)
                 isotropic = self.infer_isotropic(feature_dict=self.info_dict)
-                self.series.set_is_isotropic(isotropic)
+                volume.set_is_isotropic(isotropic)
+
+                contrast = self.infer_contrast(feature_dict=self.info_dict)
+                volume.set_has_contrast(contrast)
 
                 if volume.get_modality() == "dwig":
                     volume.set_modality_probabilities(pd.DataFrame())
@@ -347,7 +370,8 @@ class ImageTypeClassifierBase:
             self.series.set_modality(volume.get_modality())
             self.series.set_modality_probabilities(volume.get_modality_probabilities())
             self.series.set_acquisition_plane(volume.get_acquisition_plane())
-            self.series.set_is_isotropic(self.series.get_is_isotropic())
+            self.series.set_is_isotropic(volume.get_is_isotropic())
+            self.series.set_has_contrast(volume.get_has_contrast())
         else:
             self.check_if_diffusion()
             self.series.set_acquisition_plane(
@@ -355,4 +379,7 @@ class ImageTypeClassifierBase:
             )
             self.series.set_is_isotropic(
                 self.series.get_volume_list()[0].get_is_isotropic()
+            )
+            self.series.set_has_contrast(
+                self.series.get_volume_list()[0].get_has_contrast()
             )

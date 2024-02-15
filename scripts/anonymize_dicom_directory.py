@@ -43,6 +43,7 @@ custom_private_tags = [
     (0x0029, 0x1090),
     (0x0065, 0x1009),
     (0x0065, 0x1037),
+    (0x0018, 0x0010),  # Contrast/BolusAgent
 ]
 
 

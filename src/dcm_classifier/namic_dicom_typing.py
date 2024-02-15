@@ -343,6 +343,7 @@ def sanitize_dicom_dataset(
         if name in all_candidate_info_fields:
             value = e.value
             dataset_dictionary[name] = value
+
     del all_candidate_info_fields
 
     # check if all fields in the required_info_list are present in dataset dictionary.
@@ -432,6 +433,14 @@ def sanitize_dicom_dataset(
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
                 )
+        elif field == "Contrast/BolusAgent":
+            if field not in dataset_dictionary.keys():
+                # if (
+                #     dataset_dictionary[field] is None
+                #     or str(dataset_dictionary[field]) == ""
+                # ):
+                # The contrast is required but is empty if unknown but also may not be in every dataset
+                dataset_dictionary[field] = "None"
 
     # Warn the user if there are INVALID_VALUE fields
     if len(missing_fields) > 0:
@@ -514,6 +523,15 @@ def get_coded_dictionary_elements(
             else:
                 manufacturer_code = 0
             dataset_dictionary["ManufacturerCode"] = manufacturer_code
+        elif name == "Contrast/BolusAgent":
+            no_contrast_list = ["none", "no", "no contrast", "no_contrast", "n"]
+            if str(value).lower() in no_contrast_list:
+                dataset_dictionary["Contrast/BolusAgent"] = "None"
+            else:
+                try:
+                    dataset_dictionary["Contrast/BolusAgent"] = str(value)
+                except TypeError:
+                    dataset_dictionary["Contrast/BolusAgent"] = "INVALID_VALUE"
         else:
             dataset_dictionary[name] = str(value)
     return dataset_dictionary
