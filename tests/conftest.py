@@ -19,18 +19,22 @@ inference_model_path = list(
     Path(__file__).parent.parent.rglob("models/rf_classifier.onnx")
 )[0]
 
+# path to the testing data directory
 test_data_dir_path: Path = Path(__file__).parent / "testing_data"
-tar_path: Path = test_data_dir_path / "anonymized_data.tar.gz"
+tar_path: Path = test_data_dir_path / "anonymized_testing_data.tar.gz"
 
-dicom_files_dir: Path = Path(__file__).parent / "testing_data" / "anonymized_data"
+# path to the anonymized testing data directory
+testing_dicom_dir: Path = test_data_dir_path / "anonymized_testing_data"
+
 # Check to see if tar file is unpacked or not
-if not dicom_files_dir.exists():
-    dicom_files_dir.mkdir(parents=True)
+if not testing_dicom_dir.exists():
+    testing_dicom_dir.mkdir(parents=True)
     subprocess.run(f"tar -xf {tar_path} -C {test_data_dir_path}", shell=True)
 
+# run study on anonymized data
 inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
 study = ProcessOneDicomStudyToVolumesMappingBase(
-    study_directory=dicom_files_dir, inferer=inferer
+    study_directory=(testing_dicom_dir / "anonymized_data"), inferer=inferer
 )
 study.run_inference()
 
@@ -70,7 +74,7 @@ adc_series = [study.series_dictionary.get(6)]
 
 @pytest.fixture(scope="session")
 def get_data_dir():
-    return dicom_files_dir
+    return testing_dicom_dir / "anonymized_data"
 
 
 @pytest.fixture(scope="session")
@@ -108,38 +112,23 @@ def mock_adc_series():
     return adc_series
 
 
-invalid_data_tar_path: Path = test_data_dir_path / "invalid_data.tar.gz"
+@pytest.fixture(scope="session")
+def contrast_file_path():
+    return testing_dicom_dir / "contrast_data" / "with_contrast"
 
-invalid_dicom_files_dir: Path = Path(__file__).parent / "testing_data" / "invalid_data"
-# Check to see if tar file is unpacked or not
-if not invalid_dicom_files_dir.exists():
-    invalid_dicom_files_dir.mkdir(parents=True)
-    subprocess.run(
-        f"tar -xf {invalid_data_tar_path} -C {test_data_dir_path}", shell=True
-    )
+
+@pytest.fixture(scope="session")
+def no_contrast_file_path():
+    return testing_dicom_dir / "contrast_data" / "without_contrast"
 
 
 @pytest.fixture(scope="session")
 def mock_series_study():
-    inferer = ImageTypeClassifierBase(
-        classification_model_filename=inference_model_path
-    )
-    study = ProcessOneDicomStudyToVolumesMappingBase(
-        study_directory=dicom_files_dir, inferer=inferer
-    )
-    study.run_inference()
     return study
 
 
 @pytest.fixture(scope="session")
 def mock_volume_study():
-    inferer = ImageTypeClassifierBase(
-        classification_model_filename=inference_model_path
-    )
-    study = ProcessOneDicomStudyToVolumesMappingBase(
-        study_directory=dicom_files_dir, inferer=inferer
-    )
-    study.run_inference()
     return study
 
 

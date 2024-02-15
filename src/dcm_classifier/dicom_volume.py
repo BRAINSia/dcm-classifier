@@ -134,6 +134,7 @@ class DicomSingleVolumeInfoBase:
         self.average_slice_spacing = -12345.0
         self.acquisition_plane: str | None = None
         self.is_isotropic: bool | None = None
+        self.has_contrast: bool | None = None
         self.itk_image: FImageType | None = None
         (
             _one_study_found,
@@ -175,6 +176,37 @@ class DicomSingleVolumeInfoBase:
             bool: The isotropic flag.
         """
         return self.is_isotropic
+
+    def set_has_contrast(self, contrast: bool) -> None:
+        """
+        Sets the contrast flag of the DICOM data.
+
+        Args:
+            contrast (bool): The contrast flag to be set.
+        """
+        self.has_contrast = contrast
+
+    def get_has_contrast(self) -> bool:
+        """
+        Retrieves the contrast flag of the DICOM data.
+
+        Returns:
+            bool: The contrast flag.
+        """
+        return self.has_contrast
+
+    # TODO change
+    def get_contrast_agent(self) -> str:
+        """
+        Retrieves the contrast agent of the DICOM data.
+
+        Returns:
+            str: The contrast agent.
+        """
+        if self.get_has_contrast():
+            return self._pydicom_info.ContrastBolusAgent
+        else:
+            return "None"
 
     def set_modality_probabilities(self, modality_probability: pd.DataFrame) -> None:
         """

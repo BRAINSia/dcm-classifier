@@ -85,6 +85,7 @@ class DicomSingleSeries:
         self.modality_probability: pd.DataFrame | None = None
         self.acquisition_plane: str | None = None
         self.is_isotropic: bool | None = None
+        self.has_contrast: bool | None = None
 
     def get_series_number(self) -> int:
         """
@@ -148,6 +149,24 @@ class DicomSingleSeries:
             bool: The isotropic flag.
         """
         return self.is_isotropic
+
+    def set_has_contrast(self, contrast: bool) -> None:
+        """
+        Sets the contrast flag of the DICOM data.
+
+        Args:
+            contrast (bool): The contrast flag to be set.
+        """
+        self.has_contrast = contrast
+
+    def get_has_contrast(self) -> bool:
+        """
+        Retrieves the contrast flag of the DICOM data.
+
+        Returns:
+            bool: The contrast flag.
+        """
+        return self.has_contrast
 
     def set_acquisition_plane(self, acquisition_plane: str) -> None:
         """
