@@ -30,65 +30,11 @@ from itk.itkImagePython import itkImageF3
 from numpy import ndarray
 from pydicom.dataset import Dataset, FileDataset
 from pydicom.multival import MultiValue
+from dicom_config import inference_features as features
 
 
 FImageType = itk.Image[itk.F, 3]
 UCImageType = itk.Image[itk.UC, 3]
-
-features: list[str] = [
-    "Image Type_ORIGINAL",
-    "Image Type_M",
-    "Image Type_SE",
-    "Image Type_ADC",
-    "Image Type_UNSPECIFIED",
-    "Manufacturer_siemens",
-    "Manufacturer_ge",
-    "Manufacturer_philips",
-    "Manufacturer_toshiba",
-    "Diffusionb-value",
-    "Diffusionb-valueMax",
-    "Echo Number(s)",
-    "Echo Time",
-    "Echo Train Length",
-    "Flip Angle",
-    "Pixel Bandwidth",
-    "Repetition Time",
-    "SAR",
-    "Scanning Sequence_SE",
-    "Scanning Sequence_RM",
-    "Sequence Variant_SK",
-    "In-plane Phase Encoding Direction_COL",
-    "In-plane Phase Encoding Direction_ROW",
-    "dB/dt",
-    "Imaging Frequency",
-    "MR Acquisition Type_2D",
-    "Number of Averages",
-    "Image Type_DERIVED",
-    "Inversion Time",
-    "Sequence Variant_SP",
-    "Sequence Variant_OSP",
-    "Image Type_NORM",
-    "Image Type_DIS2D",
-    "Image Type_DIFFUSION",
-    "Scanning Sequence_GR",
-    "Scanning Sequence_EP",
-    "MR Acquisition Type_3D",
-    "Variable Flip Angle Flag_N",
-    "Image Type_OTHER",
-    "Sequence Variant_NONE",
-    "Image Type_NONE",
-    "Image Type_ND",
-    "Image Type_2",
-    "Image Type_EADC",
-    "Scanning Sequence_IR",
-    "Sequence Variant_SS",
-    "Sequence Variant_MP",
-    "Image Type_FFE",
-    "Image Type_P",
-    "Image Type_MOSAIC",
-    "Image Type_FA",
-    "Variable Flip Angle Flag_Y",
-]
 
 
 def itk_read_from_dicomfn_list(
@@ -658,6 +604,10 @@ def get_coded_dictionary_elements(
                     dataset_dictionary[feature] = 1
                 else:
                     dataset_dictionary[feature] = 0
+        elif name == "ImageOrientationPatient":
+            tuple_list = convert_array_to_index_value(name, value)
+            for vv in tuple_list:
+                dataset_dictionary[vv[0]] = float(vv[1])
         elif name == "Manufacturer":
             lower_manufacturer_string: str = str(value).lower()
             throw_away: int = len("Manufacturer_")
