@@ -558,16 +558,14 @@ def sanitize_dicom_dataset(
     return dataset_dictionary, True
 
 
+# organize required features
 image_type_features: list[str] = [field for field in features if "Image Type_" in field]
-
 manufacturer_features: list[str] = [
     field for field in features if "Manufacturer_" in field
 ]
-
 scanning_sequence_features: list[str] = [
     field for field in features if "Scanning Sequence_" in field
 ]
-
 scanning_variant_features: list[str] = [
     field for field in features if "Sequence Variant_" in field
 ]
