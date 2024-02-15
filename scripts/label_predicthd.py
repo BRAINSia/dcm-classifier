@@ -40,50 +40,64 @@ import pandas as pd
 def update_labels_and_series_desc(series_desc_list: list, label: str):
     # update labels in label final file
     final_df = pd.read_excel(
-        "/home/mbrzus/programming/dcm_train_data/labeling/combined_data_without_iowa_labeling_final.xlsx"
+        "/home/mbrzus/programming/dcm_train_data/labeling/predicthd/combined_data_without_iowa_labeling_final.xlsx"
     )
     for series_desc in series_desc_list:
         final_df.loc[final_df["Series Description"] == series_desc, "label"] = label
     final_df.to_excel(
-        "/home/mbrzus/programming/dcm_train_data/labeling/combined_data_without_iowa_labeling_final.xlsx",
+        "/home/mbrzus/programming/dcm_train_data/labeling/predicthd/combined_data_without_iowa_labeling_final.xlsx",
         index=False,
     )
 
     # remove rows from remaining file that have label set in the final file
     remaining_df = pd.read_excel(
-        "/home/mbrzus/programming/dcm_train_data/labeling/combined_data_without_iowa_labeling_remaining.xlsx"
+        "/home/mbrzus/programming/dcm_train_data/labeling/predicthd/combined_data_without_iowa_labeling_remaining.xlsx"
     )
     for series_desc in series_desc_list:
         remaining_df = remaining_df[remaining_df["Series Description"] != series_desc]
     remaining_df.to_excel(
-        "/home/mbrzus/programming/dcm_train_data/labeling/combined_data_without_iowa_labeling_remaining.xlsx",
+        "/home/mbrzus/programming/dcm_train_data/labeling/predicthd/combined_data_without_iowa_labeling_remaining.xlsx",
         index=False,
     )
 
     # remove series descriptions from remaining series descriptions file
     series_desc_df = pd.read_excel(
-        "/home/mbrzus/programming/dcm_train_data/labeling/unique_series_descriptions_remaining.xlsx"
+        "/home/mbrzus/programming/dcm_train_data/labeling/predicthd/unique_series_descriptions_remaining.xlsx"
     )
     for series_desc in series_desc_list:
         series_desc_df = series_desc_df[
             series_desc_df["Series Description"] != series_desc
         ]
     series_desc_df.to_excel(
-        "/home/mbrzus/programming/dcm_train_data/labeling/unique_series_descriptions_remaining.xlsx",
+        "/home/mbrzus/programming/dcm_train_data/labeling/predicthd/unique_series_descriptions_remaining.xlsx",
         index=False,
     )
 
 
 df = pd.read_excel(
-    "/home/mbrzus/programming/dcm_train_data/labeling/unique_series_descriptions_remaining.xlsx"
+    "/home/mbrzus/programming/dcm_train_data/labeling/predicthd/unique_series_descriptions_remaining.xlsx"
 )
 series_descriptions_list = df["Series Description"].tolist()
 
-# fmri
+
+# # localizer
+# loc_series_descriptions = []
+# for series_description_raw in series_descriptions_list:
+#     series_description = str(series_description_raw).lower()
+#     if "loc" in series_description or "scout" in series_description:
+#         loc_series_descriptions.append(series_description_raw)
+#
+# [print(i) for i in loc_series_descriptions]
+# print(loc_series_descriptions)
+# print(len(loc_series_descriptions))
+# update_labels_and_series_desc(loc_series_descriptions, "loc")
+
+
+# # fmri
 # fmri_series_descriptions = []
 # for series_description_raw in series_descriptions_list:
 #     series_description = str(series_description_raw).lower()
-#     if "fmri" in series_description:
+#     if "fmri" in series_description or "func" in series_description:
 #         fmri_series_descriptions.append(series_description_raw)
 #
 # [print(i) for i in fmri_series_descriptions]
@@ -416,34 +430,34 @@ series_descriptions_list = df["Series Description"].tolist()
 # update_labels_and_series_desc(fieldmap_series_descriptions, "field_map")
 
 
-# tracew
-"""
-The tracew serieses also comprise of bvalue images.
-We investigate all images with non zero bvalue that were not classified as part of the DWI labeling above.
-"""
-remaining_df = pd.read_excel(
-    "/home/mbrzus/programming/dcm_train_data/labeling/combined_data_without_iowa_labeling_remaining.xlsx"
-)
-bval_series_desc_raw = (
-    remaining_df[remaining_df["Diffusionb-valueMax"] >= 0]["Series Description"]
-    .unique()
-    .tolist()
-)
-bval_series_desc = []
-for series_desc in bval_series_desc_raw:
-    for i in ["dti", "dwi", "diff", "b0", "b500", "b600", "b1000", "b1200", "b1500"]:
-        if i in str(series_desc).lower():
-            bval_series_desc.append(series_desc)
-            break
-
-bval_series_desc_failed = [i for i in bval_series_desc_raw if i not in bval_series_desc]
-
-[print(i) for i in bval_series_desc]
-print("\n\n=====================================\n\n")
-[print(i) for i in bval_series_desc_failed]
-print(len(bval_series_desc))
-print(len(bval_series_desc_failed))
-update_labels_and_series_desc(bval_series_desc, "bval_vol")
+# # tracew
+# """
+# The tracew serieses also comprise of bvalue images.
+# We investigate all images with non zero bvalue that were not classified as part of the DWI labeling above.
+# """
+# remaining_df = pd.read_excel(
+#     "/home/mbrzus/programming/dcm_train_data/labeling/combined_data_without_iowa_labeling_remaining.xlsx"
+# )
+# bval_series_desc_raw = (
+#     remaining_df[remaining_df["Diffusionb-valueMax"] >= 0]["Series Description"]
+#     .unique()
+#     .tolist()
+# )
+# bval_series_desc = []
+# for series_desc in bval_series_desc_raw:
+#     for i in ["dti", "dwi", "diff", "b0", "b500", "b600", "b1000", "b1200", "b1500"]:
+#         if i in str(series_desc).lower():
+#             bval_series_desc.append(series_desc)
+#             break
+#
+# bval_series_desc_failed = [i for i in bval_series_desc_raw if i not in bval_series_desc]
+#
+# [print(i) for i in bval_series_desc]
+# print("\n\n=====================================\n\n")
+# [print(i) for i in bval_series_desc_failed]
+# print(len(bval_series_desc))
+# print(len(bval_series_desc_failed))
+# update_labels_and_series_desc(bval_series_desc, "bval_vol")
 
 # bval_series_desc_dti = [i for i in bval_series_desc if "dti" in str(i).lower()]
 # [print(i) for i in bval_series_desc_no_dti]

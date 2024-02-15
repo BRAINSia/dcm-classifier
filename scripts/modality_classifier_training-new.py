@@ -1,31 +1,88 @@
-import sys
+import argparse
+import time
+from io import StringIO
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-import pandas as pd
+import pydotplus
+import onnxruntime as rt
+from skl2onnx import convert_sklearn
+from skl2onnx.common.data_types import FloatTensorType
 
-# from sklearn import metrics
-# from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
-# from sklearn.model_selection import train_test_split  # Import train_test_split function
-# from sklearn.tree import DecisionTreeClassifier  # Import Decision Tree Classifier
-# from sklearn.metrics import ConfusionMatrixDisplay
-# from sklearn.tree import export_graphviz
-# from sklearn.model_selection import KFold
-#
-# import time
-# from io import StringIO
-#
-# # from IPython.display import Image
-# # import pydotplus
-# from skl2onnx import convert_sklearn
-# from skl2onnx.common.data_types import FloatTensorType
-# import onnxruntime as rt
-# import argparse
+from sklearn import metrics
+from sklearn.model_selection import GridSearchCV
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.model_selection import train_test_split, StratifiedKFold, KFold
+from sklearn.metrics import (
+    confusion_matrix,
+    accuracy_score,
+    ConfusionMatrixDisplay,
+    classification_report,
+)
 
 
 rcParams.update({"figure.autolayout": True})
+plt.rcParams.update({"font.size": 7})
+
+# features currently used
+feautures = [
+    "Image Type_ORIGINAL",
+    "Image Type_M",
+    "Image Type_SE",
+    "Image Type_ADC",
+    "Image Type_UNSPECIFIED",
+    "Manufacturer_siemens",
+    "Manufacturer_ge",
+    "Manufacturer_philips",
+    "Manufacturer_toshiba",
+    "Diffusionb-value",
+    "Diffusionb-valueMax",
+    "Echo Number(s)",
+    "Echo Time",
+    "Echo Train Length",
+    "Flip Angle",
+    "Pixel Bandwidth",
+    "Repetition Time",
+    "SAR",
+    "Scanning Sequence_SE",
+    "Scanning Sequence_RM",
+    "Sequence Variant_SK",
+    "In-plane Phase Encoding Direction_COL",
+    "In-plane Phase Encoding Direction_ROW",
+    "dB/dt",
+    "Imaging Frequency",
+    "MR Acquisition Type_2D",
+    "Number of Averages",
+    "Image Type_DERIVED",
+    "Inversion Time",
+    "Sequence Variant_SP",
+    "Sequence Variant_OSP",
+    "Image Type_NORM",
+    "Image Type_DIS2D",
+    "Image Type_DIFFUSION",
+    "Scanning Sequence_GR",
+    "Scanning Sequence_EP",
+    "MR Acquisition Type_3D",
+    "Variable Flip Angle Flag_N",
+    "Image Type_OTHER",
+    "Sequence Variant_NONE",
+    "Image Type_NONE",
+    "Image Type_ND",
+    "Image Type_2",
+    "Image Type_EADC",
+    "Scanning Sequence_IR",
+    "Sequence Variant_SS",
+    "Sequence Variant_MP",
+    "Image Type_FFE",
+    "Image Type_P",
+    "Image Type_MOSAIC",
+    "Image Type_FA",
+    "Variable Flip Angle Flag_Y",
+]
 
 # overwrite objects for new data modalities
 imagetype_to_integer_mapping = {
@@ -35,12 +92,174 @@ imagetype_to_integer_mapping = {
     "t2w": 3,
     "field_map": 4,
     "pd": 5,
-    "tracew": 6,
-    "flair": 7,
-    "adc": 8,
-    "fa": 9,
-    "fmri": 10,
+    "flair": 6,
+    "adc": 7,
+    "fa": 8,
+    "fmri": 9,
+    "stir": 10,
+    "eadc": 11,
 }
+
+integer_to_imagetype_mapping = {v: k for k, v in imagetype_to_integer_mapping.items()}
+
+
+features_to_remove = [
+    "Image Type_ASL",
+    "Image Type_MAP",
+    "Image Type_PCA",
+    "Image Type_RELCBF",
+    "Image Type_VELOCITY",
+    "Image Type_TTP",
+    "Image Type_PBP",
+    "Image Type_COLLAPSE",
+    "Image Type_RD",
+    "Image Type_FILTERED",
+    "Image Type_MSUM",
+    "Image Type_SAVE",
+    "Image Type_SCREEN",
+    "Image Type_MEAN",
+    "Image Type_MOCO",
+    "Image Type_TTEST",
+    "Image Type_MOTIONCORRECTION",
+    "Image Type_DIS3D",
+    "Image Type_OUT",
+    "Image Type_BVALUE",
+    "Image Type_VASCULAR",
+    "Image Type_AVERAGE",
+    "Image Type_GSP",
+    "Image Type_CALC",
+    "Image Type_IMAGE",
+    "MR Acquisition Type_UNKNOWN",
+    "Image Type_FAT",
+    "Image Type_DRG",
+    "Image Type_CDWI",
+    "Image Type_COMPRESSED",
+    "Image Type_FM4",
+    "In-plane Phase Encoding Direction_OTHER",
+    "Image Type_COMPOSED",
+    "Image Type_DIF",
+    "Image Type_COMP",
+    "Image Type_REG",
+    "Image Type_B0",
+    "Image Type_TENSOR",
+    "Image Type_4",
+    "Image Type_THICK",
+    "Image Type_COR",
+    "Image Type_PERFUSION",
+    "Image Type_PROC",
+    # "Image Type_SECODNARY",
+    "Image Type_MIXED",
+    "Image Type_MIN",
+    "Image Type_CSAPARALLEL",
+    "Image Type_MIP",
+    "Image Type_RRISDOC",
+    "Image Type_COMBINED",
+    "Image Type_SUBTRACT",
+    "In-plane Phase Encoding Direction_COLUMN",
+    "Image Type_SH4",
+    "Image Type_PROJECTION",
+    "Image Type_WATER",
+    "Image Type_DIXON",
+    "Image Type_SAG",
+    "Image Type_1",
+    "Image Type_6",
+    "Image Type_SH",
+    "Image Type_LOSSY",
+    "Image Type_JP2K",
+    "Image Type_BOUND",
+    "Manufacturer_other",
+    "Image Type_UNKNOWN",
+    "Image Type_DECOMPRESSED",
+    "Image Type_FS",
+    "Image Type_BS",
+    "Image Type_SH2",
+    # "Image Type_Secondary",
+    # "Image Type_Derived",
+    "Image Type_AXIAL",
+    # "Image Type_DWI",
+    "Image Type_W",
+    "Image Type_PHASE",
+    "Image Type_FM2",
+    "Image Type_FM1",
+    "Image Type_0040",
+    "Image Type_ENDORECTAL",
+    "Image Type_DYNACAD2",
+    "Image Type_RX",
+    "Image Type_11",
+    "Image Type_DRB",
+    "Image Type_DRS",
+    "Image Type_RESAMPLED",
+    "Image Type_20159358",
+    "Image Type_12",
+    "Image Type_9",
+    "Image Type_13",
+    "Image Type_SH5",
+    "Sequence Variant_TOF",
+    "Sequence Variant_MTC",
+    "Image Type_ISODWI",
+    # 88 features
+    "Image Type_REFORMATTED",
+    "Image Type_EXP",
+    "Image Type_FM",
+    "Image Type_IP",
+    "Image Type_3",
+    "Image Type_SWI",
+    "Image Type_MNIP",
+    "Image Type_Derived",
+    "Image Type_Secondary",
+    "Image Type_ENHANCED",
+    "Image Type_DWI",
+    "Image Type_SUB",
+    "Image Type_SECODNARY",
+    # 74 features
+    "Image Type_POSDISP",
+    "Image Type_IN",
+    "Image Type_MPR",
+    "Image Type_T1",
+    "Image Type_TRA",
+    "Image Type_DFC",
+    "Image Type_T2",
+    "Image Type_FIL",
+    "Image Type_MFSPLIT",
+    "Image Type_FM3",
+    "Image Type_GDC",
+    "Image Type_MIX",
+    "Image Type_CSA",
+    # 61 features
+    "Image Type_UNSPECIFIE",
+    "Samples per Pixel",
+    "Image Type_TRACEW",
+    "Image Type_PRIMARY",
+    "Image Type_IR",
+    "SeriesVolumeCount",
+    "Image Type_SECONDARY",
+    "Image Type_PROCESSED",
+    "Image Type_PROPELLER",
+    # "Manufacturer_toshiba",
+    # 51 features without toshiba
+    # "Image Type_P",
+    # "Scanning Sequence_RM",
+    # "Echo Number(s)",
+    # "MR Acquisition Type_3D",
+    # "Image Type_DIFFUSION",
+    # "Variable Flip Angle Flag_Y",
+    # "Image Type_SE",
+    # "Sequence Variant_NONE",
+    # "Variable Flip Angle Flag_N",
+    # "Image Type_NORM",
+    # "Manufacturer_ge",
+    # "Manufacturer_siemens",
+    # "Sequence Variant_SS",
+    # "Sequence Variant_OSP",
+    # "Image Type_DIS2D",
+    # "Image Type_OTHER",
+    # "Manufacturer_philips",
+    # "Image Type_M",
+    # "Image Type_NONE",
+    # "Image Type_FFE",
+    # "Image Type_2",
+    # 34 features without toshiba, ge, siemens, philips
+]
 
 
 def generate_training_data(input_dataframe: str):
@@ -51,243 +270,624 @@ def generate_training_data(input_dataframe: str):
     :return:
         x - training data
         y - labels
+        columns - list of feature columns
     """
+    # Load and clean the DataFrame
     df = pd.read_excel(input_dataframe)
-    # drop columns with 'Unnamed' in the name
+
+    # Consolidate DataFrame operations
     df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
-    # drop the FileName column
-    df = df.drop(columns=["FileName"])
+    df.drop(columns=["FileName"] + features_to_remove, inplace=True)
+
+    # Keep only rows where 'label' matches keys in imagetype_to_integer_mapping
+    df = df[df["label"].isin(imagetype_to_integer_mapping.keys())]
 
     # Normalize the data
-    # drop rows for which there is no label
-    df = df.dropna(subset=["label"])
-    # for columns with 'Type' in the name, replace NaN with 0
-    for col in df.columns:
-        if "Type" in col:
-            df[col].fillna(0, inplace=True)
-        else:
-            df[col].fillna(-12345, inplace=True)
+    df["label_encoded"] = df["label"].map(imagetype_to_integer_mapping)
+    df.fillna({col: 0 if "Type" in col else -12345 for col in df.columns}, inplace=True)
 
-    # save the training data
-    df.to_excel(
-        input_dataframe.replace(
-            Path(input_dataframe).name, "all_model_generation_df.xlsx"
+    # # Strip whitespace from string columns
+    # str_cols = df.select_dtypes(include=["object"])
+    # df[str_cols.columns] = str_cols.apply(lambda x: x.str.strip())
+
+    # Replace infinite values with NaN and drop rows with NaN values
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df.dropna(inplace=True)
+
+    # Extract features and labels
+    y = df["label_encoded"].astype("int32").to_numpy()
+    x = df.drop(columns=["label", "label_encoded"]).astype("float32").to_numpy()
+
+    [print(f'"{col}",') for col in df.columns]
+
+    rows_with_inf = np.any(np.isinf(x), axis=1)
+    # Check if there are any such rows
+    if np.any(rows_with_inf):
+        # Drop these rows
+        x_clean = x[~rows_with_inf]
+        y_clean = y[~rows_with_inf]
+    else:
+        x_clean = x
+        y_clean = y
+
+    return x_clean, y_clean, df.columns.drop(["label", "label_encoded"]).tolist()
+
+
+def train(
+    x: np.array, y: np.array, columns, samples_per_class=5000, use_dt: bool = False
+):
+    # make x_train and y_train unique
+    # Find indices of unique rows
+    _, unique_indices = np.unique(x, axis=0, return_index=True)
+    # print("X Train shape:", x_train.shape)
+    # Select only unique rows in both x and y
+    x_unique = x[unique_indices]
+    print("X Unique shape:", x_unique.shape)
+    y_unique = y[unique_indices]
+    print("X Unique shape:", y_unique.shape)
+
+    # split data into 80% training and 20% test
+    x_train, x_test, y_train, y_test = train_test_split(
+        x_unique, y_unique, test_size=0.2, random_state=99, stratify=y_unique
+    )
+    print(np.unique(y_test, return_counts=True))
+
+    x_train_balanced, y_train_balanced = [], []
+    for class_label in range(12):
+        print(f"Class {class_label}")
+        x_train_class = x_train[y_train == class_label]
+        y_train_class = y_train[y_train == class_label]
+
+        # Determine if sampling should be with or without replacement
+        replace = len(x_train_class) < samples_per_class
+        # Sample the data
+
+        x_train_balanced.append(
+            pd.DataFrame(x_train_class).sample(
+                n=samples_per_class, replace=replace, random_state=99
+            )
+        )
+        y_train_balanced.append(
+            pd.Series(y_train_class).sample(
+                n=samples_per_class, replace=replace, random_state=99
+            )
+        )
+
+    x_train_balanced = pd.concat(x_train_balanced, ignore_index=True).to_numpy()
+    y_train_balanced = pd.concat(y_train_balanced, ignore_index=True).to_numpy()
+    print(x_train_balanced.shape, y_train_balanced.shape)
+    clf = RandomForestClassifier(n_estimators=50, max_depth=20, random_state=99)
+    clf.fit(x_train_balanced, y_train_balanced)
+
+    # if use_dt:
+    #     print("Using Decision Tree Classifier")
+    #     clf = DecisionTreeClassifier(max_depth=5)
+    # else:
+    #     print("Using Random Forest Classifier")
+    #     clf = RandomForestClassifier(n_estimators=150, max_depth=9, random_state=99)
+    #
+    # clf = clf.fit(x_train, y_train)
+    # import graphviz
+    # for i in range(3):
+    #     tree = clf.estimators_[i]
+    #     dot_data = export_graphviz(tree,
+    #                                feature_names=modality_columns,
+    #                                filled=True,
+    #                                max_depth=7,
+    #                                impurity=False,
+    #                                proportion=True)
+    #     # graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+    #     # graph.write_png(f"../training_outputs/rf_estimator_{i}.png")
+    #     graph = graphviz.Source(dot_data, format="png")
+    #     graph.render(filename=f"../training_outputs/rf_estimator_{i}")
+
+    # Predict the response for test dataset
+    y_pred = clf.predict(x_test)
+    print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
+
+    mask_test = y_test != 10
+    y_masked = y_test[mask_test]
+    y_pred_masked = y_pred[mask_test]
+    print("Accuracy without loc:", metrics.accuracy_score(y_masked, y_pred_masked))
+
+    cm = confusion_matrix(y_test, y_pred)
+
+    # Calculating accuracy for each class
+    class_accuracies = cm.diagonal() / cm.sum(axis=1)
+
+    # Print accuracy for each class
+    for i, accuracy in enumerate(class_accuracies):
+        print(f"Accuracy for class {i}: {accuracy:.2f}")
+
+    # # Generate figures to analyze the trained model
+    # # https://scikit-learn.org/stable/auto_examples/text/plot_document_classification_20newsgroups.html#sphx-glr-auto-examples-text-plot-document-classification-20newsgroups-py
+    # # Generate normalized confusion matrix figure
+    # fig, ax = plt.subplots(figsize=(10, 5))
+    # ConfusionMatrixDisplay.from_predictions(y_test, y_pred, ax=ax, normalize="true")
+    # classes = [x for x in imagetype_to_integer_mapping.keys()]
+    # ax.xaxis.set_ticklabels(classes)
+    # ax.yaxis.set_ticklabels(classes)
+    # _ = ax.set_title(
+    #     f"Normalized Confusion Matrix for {clf.__class__.__name__}\non the test data"
+    # )
+    # ax.tick_params(axis="x", colors="red")
+    # plt.xticks(rotation=90)
+    # plt.savefig("./confusion_matrix_normalized.png", dpi=400)
+
+    # Compute the normalized confusion matrix
+    cm = confusion_matrix(y_test, y_pred, normalize="true")
+
+    # Limit the decimal points to 3
+    cm = np.around(cm, decimals=2)
+
+    # Display the confusion matrix
+    fig, ax = plt.subplots(figsize=(10, 5))
+    disp = ConfusionMatrixDisplay(
+        confusion_matrix=cm, display_labels=imagetype_to_integer_mapping.keys()
+    )
+    disp.plot(ax=ax, cmap=plt.cm.Blues, values_format=".2f")
+
+    _ = ax.set_title(
+        f"Normalized Confusion Matrix for {clf.__class__.__name__}\non the test data"
+    )
+    ax.tick_params(axis="x", colors="red")
+    plt.xticks(rotation=90)
+    plt.savefig("./confusion_matrix_normalized.png", dpi=400)
+    input_vector_size: int = len(columns)
+
+    if use_dt:
+        dot_data = StringIO()
+        export_graphviz(
+            clf,
+            out_file=dot_data,
+            filled=True,
+            rounded=True,
+            special_characters=True,
+            feature_names=columns,
+            class_names=[x for x in imagetype_to_integer_mapping.keys()],
+        )
+        graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+        graph.write_png("./test.png")
+        # Image(graph.create_png())
+    else:
+        start_time = time.time()
+        importances = clf.feature_importances_
+        std = np.std([tree.feature_importances_ for tree in clf.estimators_], axis=0)
+        elapsed_time = time.time() - start_time
+
+        print(f"Elapsed time to compute the importances: {elapsed_time:.3f} seconds")
+
+        feature_names = columns
+        forest_importances = pd.Series(importances, index=feature_names)
+        forest_importances = forest_importances.sort_values(ascending=False)
+        # print the feature importances vertically
+        print("\nFeature importances sorted:")
+        print(forest_importances)
+
+        fig, ax = plt.subplots()
+        forest_importances.plot.bar(yerr=std, ax=ax)
+        ax.set_title("Feature importances using MDI")
+        ax.set_ylabel("Mean decrease in impurity")
+        fig.tight_layout()
+        plt.savefig("./rf_importance_norm_all.pdf")
+
+    # save the model file
+    model_filename: str = "retrain_models/rf_classifier.onnx"
+    # Convert into ONNX format
+    initial_type = [("float_input", FloatTensorType([None, input_vector_size]))]
+    onx = convert_sklearn(
+        clf, name="RandomForestImageTypeClassifier", initial_types=initial_type
+    )
+    with open(model_filename, "wb") as f:
+        f.write(onx.SerializeToString())
+    return forest_importances
+
+
+def k_fold_cross_validation(
+    x, y, input_vector_size, n_splits=2, samples_per_class=3000
+):
+    print(x.shape, y.shape)
+
+    kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=1)
+    overall_accuracies = []
+    class_accuracies = {i: [] for i in range(12)}
+    best_accuracy = 0
+    best_model = None
+    all_y_true = []
+    all_y_pred = []
+    cumulative_accuracies = []
+
+    # make x_train and y_train unique
+    # Find indices of unique rows
+    _, unique_indices = np.unique(x, axis=0, return_index=True)
+    # print("X Train shape:", x_train.shape)
+    # Select only unique rows in both x and y
+    x_unique = x[unique_indices]
+    print("X Unique shape:", x_unique.shape)
+    y_unique = y[unique_indices]
+    print(np.unique(y_unique, return_counts=True))
+
+    for fold, (train_index, test_index) in enumerate(kf.split(x_unique, y_unique)):
+        x_train, x_test = x_unique[train_index], x_unique[test_index]
+        y_train, y_test = y_unique[train_index], y_unique[test_index]
+
+        x_train_balanced, y_train_balanced = [], []
+        for class_label in range(12):
+            print(f"Class {class_label}")
+            x_train_class = x_train[y_train == class_label]
+            y_train_class = y_train[y_train == class_label]
+
+            # Determine if sampling should be with or without replacement
+            replace = len(x_train_class) < samples_per_class
+
+            # Sample the data
+            x_train_balanced.append(
+                pd.DataFrame(x_train_class).sample(
+                    n=samples_per_class, replace=replace, random_state=99
+                )
+            )
+            y_train_balanced.append(
+                pd.Series(y_train_class).sample(
+                    n=samples_per_class, replace=replace, random_state=99
+                )
+            )
+            # Combine the balanced data
+        x_train_balanced = pd.concat(x_train_balanced, ignore_index=True).to_numpy()
+        y_train_balanced = pd.concat(y_train_balanced, ignore_index=True).to_numpy()
+
+        print(x_train_balanced.shape, y_train_balanced.shape)
+        clf = RandomForestClassifier(n_estimators=50, max_depth=20, random_state=99)
+        clf.fit(x_train_balanced, y_train_balanced)
+
+        y_pred = clf.predict(x_test)
+        cm = confusion_matrix(y_test, y_pred)
+        overall_accuracy = accuracy_score(y_test, y_pred)
+        overall_accuracies.append(overall_accuracy)
+        cumulative_accuracies.append(overall_accuracies.copy())
+
+        if overall_accuracy > best_accuracy:
+            best_accuracy = overall_accuracy
+            best_model = clf
+
+        # Append true and predicted labels for this fold
+        all_y_true.extend(y_test)
+        all_y_pred.extend(y_pred)
+
+        print(f"Fold {fold + 1} Metrics:")
+        print(f"Accuracy: {overall_accuracy:.2f}")
+        print(
+            classification_report(
+                y_test, y_pred, target_names=integer_to_imagetype_mapping.values()
+            )
+        )
+
+        for i in range(12):
+            class_accuracy = cm[i, i] / cm[i, :].sum() if cm[i, :].sum() > 0 else 0
+            class_accuracies[i].append(class_accuracy)
+
+    # Print average results
+    print(f"Average Overall Accuracy: {np.mean(overall_accuracies):.2f}")
+    for i in range(12):
+        class_name = integer_to_imagetype_mapping.get(i, "Unknown")
+        print(
+            f"Average Accuracy for Class {class_name}: {np.mean(class_accuracies[i]):.2f}"
+        )
+
+    # Calculate and print classification report for all folds
+    print("Classification Report for all folds:")
+    print(
+        classification_report(
+            all_y_true, all_y_pred, target_names=integer_to_imagetype_mapping.values()
         )
     )
 
-    df["label"].replace(imagetype_to_integer_mapping, inplace=True)
-    df["label"] = df["label"].astype(int)
-    df["label"] = df["label"].astype("category")
+    # Calculate and print standard deviation progression
+    print("Standard Deviation Progression:")
+    for i, accs in enumerate(cumulative_accuracies, start=2):
+        std_dev = np.std(accs)
+        print(f"Std Dev up to fold {i}: {std_dev:.2f}")
 
-    # drop rows with missing values
-    df = df.dropna()
+    # Save the best model
+    model_filename = "retrain_models/rf_classifier-kfold.onnx"
+    initial_type = [("float_input", FloatTensorType([None, input_vector_size]))]
+    onx = convert_sklearn(
+        best_model, name="RandomForestImageTypeClassifier", initial_types=initial_type
+    )
+    with open(model_filename, "wb") as f:
+        f.write(onx.SerializeToString())
 
-    # return label column as Y and the rest as X
-    y = df["label"]
-    x = df.drop(columns=["label"])
-
-    return x, y
+    return best_model
+    # return 0
 
 
-#
-# # def train_model(x1, x2, x3, y1, y2, y3, use_dt):
-# def train_model(use_dt):
-#     """
-#     Function to train modality classification model. By default uses Random Forrest classifier unless user specifies
-#     the use of Decision Tree classifier. This function also produces figures to analyze trained model and saves
-#     the model using skl2onnx library.
-#     :param x: train data
-#     :param y: labels
-#     :param use_dt: if true use Decision Tree over Random Forrest
-#     """
-#
-#     # # split data into 70% training and 30% test
-#     # x1_train, x1_test, y1_train, y1_test = train_test_split(
-#     #     x1, y1, test_size=0.3, random_state=1
-#     # )
-#     # x2_train, x2_test, y2_train, y2_test = train_test_split(
-#     #     x2, y2, test_size=0.3, random_state=1
-#     # )
-#     # x3_train, x3_test, y3_train, y3_test = train_test_split(
-#     #     x3, y3, test_size=0.3, random_state=1
-#     # )
-#     # x_train = pd.concat([x1_train, x2_train, x3_train], axis=0)
-#     # y_train = pd.concat([y1_train, y2_train, y3_train], axis=0)
-#     # x_test = pd.concat([x1_test, x2_test, x3_test], axis=0)
-#     # y_test = pd.concat([y1_test, y2_test, y3_test], axis=0)
-#     # print(f"SHAPE train: {y_train.shape}")
-#     # print(f"SHAPE test: {y_test.shape}")
-#
-#     unique_df = pd.read_excel(
-#         "../training_outputs/all_model_generation_df_normalized_unique.xlsx"
-#     )
-#     norm_df = pd.read_excel(
-#         "../training_outputs/all_model_generation_df_normalized.xlsx"
-#     )
-#     all_df = pd.read_excel("../training_outputs/all_model_generation_df.xlsx")
-#
-#     uX = unique_df[modality_columns].values
-#     uy = unique_df["Modality"].values
-#
-#     allX = all_df[modality_columns].values
-#     ally = all_df["Modality"].values
-#
-#     # kf = KFold(n_splits=4, random_state=20, shuffle=True)
-#     kf = KFold(n_splits=4, random_state=5, shuffle=True)
-#
-#     ti = None
-#     tt = None
-#     for unique_train_index, unique_test_index in kf.split(uX):
-#         ti = unique_train_index
-#         tt = unique_test_index
-#         break
-#     uX_train, uX_test = uX[ti], uX[tt]
-#
-#     train_indexes = []
-#     test_indexes = []
-#     for index, row in norm_df.iterrows():
-#         if any((uX_train[:] == row[modality_columns].values).all(1)):
-#             # if row[modality_columns].values in uX_train:
-#             train_indexes.append(index)
-#         else:
-#             test_indexes.append(index)
-#
-#     x_train, x_test = allX[train_indexes], allX[test_indexes]
-#     y_train, y_test = ally[train_indexes], ally[test_indexes]
-#     print(np.unique(y_train, return_counts=True))
-#     print(np.unique(y_test, return_counts=True))
-#
-#     # x_fi = []
-#     # y_fi = []
-#     # for i in range(11):
-#     #     yi = np.where(y_test == i)[0][:8]
-#     #     x_fi.append(x_test[yi])
-#     #     y_fi.append(y_test[yi])
-#     #
-#     # # print(x_fi)
-#     # x_test = np.array(x_fi).reshape(11*8, 11)
-#     # y_test = np.array(y_fi).flatten()
-#
-#     # TODO: Experiment with test set of same number of examples per modality to get better Feature importance
-#
-#     if use_dt:
-#         print("Using Decision Tree Classifier")
-#         clf = DecisionTreeClassifier(max_depth=5)
-#     else:
-#         print("Using Random Forest Classifier")
-#         clf = RandomForestClassifier(n_estimators=100, max_depth=7, random_state=99)
-#         # clf = AdaBoostClassifier(n_estimators=100, random_state=99, learning_rate=0.2)
-#     # Train Decision Tree Classifer
-#     clf = clf.fit(x_train, y_train)
-#     # import graphviz
-#     # for i in range(3):
-#     #     tree = clf.estimators_[i]
-#     #     dot_data = export_graphviz(tree,
-#     #                                feature_names=modality_columns,
-#     #                                filled=True,
-#     #                                max_depth=7,
-#     #                                impurity=False,
-#     #                                proportion=True)
-#     #     # graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
-#     #     # graph.write_png(f"../training_outputs/rf_estimator_{i}.png")
-#     #     graph = graphviz.Source(dot_data, format="png")
-#     #     graph.render(filename=f"../training_outputs/rf_estimator_{i}")
-#
-#     # Predict the response for test dataset
-#     y_pred = clf.predict(x_test)
-#     print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
-#
-#     # Generate figures to analyze the trained model
-#     # https://scikit-learn.org/stable/auto_examples/text/plot_document_classification_20newsgroups.html#sphx-glr-auto-examples-text-plot-document-classification-20newsgroups-py
-#     fig, ax = plt.subplots(figsize=(10, 5))
-#     ConfusionMatrixDisplay.from_predictions(y_test, y_pred, ax=ax)
-#     ax.xaxis.set_ticklabels(c)
-#     ax.yaxis.set_ticklabels(c)
-#     # _ = ax.set_title(
-#     #     f"Confusion Matrix for {clf.__class__.__name__}\non the test data"
-#     # )
-#     ax.tick_params(axis="x", colors="red")
-#     plt.xticks(rotation=90)
-#     plt.savefig("../training_outputs/confusion_matrix.png", dpi=400)
-#
-#     input_vector_size: int = len(modality_columns)
-#
-#     if use_dt:
-#         dot_data = StringIO()
-#         export_graphviz(
-#             clf,
-#             out_file=dot_data,
-#             filled=True,
-#             rounded=True,
-#             special_characters=True,
-#             feature_names=modality_columns,
-#             class_names=[x for x in imagetype_to_integer_mapping.keys()],
-#         )
-#         graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
-#         graph.write_png("../training_outputs/test.png")
-#         # Image(graph.create_png())
-#     else:
-#         start_time = time.time()
-#         importances = clf.feature_importances_
-#         std = np.std([tree.feature_importances_ for tree in clf.estimators_], axis=0)
-#         elapsed_time = time.time() - start_time
-#
-#         print(f"Elapsed time to compute the importances: {elapsed_time:.3f} seconds")
-#
-#         feature_names = modality_columns
-#         forest_importances = pd.Series(importances, index=feature_names)
-#
-#         fig, ax = plt.subplots()
-#         forest_importances.plot.bar(yerr=std, ax=ax)
-#         ax.set_title("Feature importances using MDI")
-#         ax.set_ylabel("Mean decrease in impurity")
-#         fig.tight_layout()
-#         plt.savefig("../training_outputs/rf_importance_norm.pdf")
-#
-#     # save the model file
-#     model_filename: str = "../models/rf_classifier.onnx"
-#     # Convert into ONNX format
-#     initial_type = [("float_input", FloatTensorType([None, input_vector_size]))]
-#     onx = convert_sklearn(
-#         clf, name="RandomForestImageTypeClassifier", initial_types=initial_type
-#     )
-#     with open(model_filename, "wb") as f:
-#         f.write(onx.SerializeToString())
-#
-#
-# def inference_on_all_data(model_filename: str, model_df: str, out_file: str):
-#     """
-#     This function runs inference on all data and produces figures dataframe containing class specific prediction.
-#     :param model_filename: filepath to the onnx model file.
-#     """
-#     print("\nInference on all.\n")
-#
-#     df = pd.read_excel(model_df)
-#     e_inputs = pd.DataFrame(df[modality_columns])
-#     e_inputs.fillna(-1000000, inplace=True)
-#     e_inputs.replace(np.nan, -1000000, inplace=True)
-#     e_inputs.replace("nan", -1000000, inplace=True)
-#
-#     sess = rt.InferenceSession(model_filename)
-#     input_name = sess.get_inputs()[0].name
-#     label_name = sess.get_outputs()[0].name
-#     prob_name = sess.get_outputs()[1].name
-#
-#     tester = e_inputs.astype(np.float32).to_numpy()
-#     pred_onx_run_output = sess.run([label_name, prob_name], {input_name: tester})
-#     pred_onx = pred_onx_run_output[0]
-#     probability_onx = pred_onx_run_output[1]
-#     prob_df = pd.DataFrame(probability_onx)
-#
-#     outputs = df
-#     outputs["GUESS_ONNX_CODE"] = pred_onx
-#     for col in prob_df.columns:
-#         outputs[f"GUESS_ONNX_idx{col}"] = prob_df[col]
-#     outputs.to_excel(out_file)
+def inference_on_all_data(model_filename: str, model_df: str, out_file: str):
+    """
+    This function runs inference on all data and produces figures dataframe containing class specific prediction.
+    :param model_filename: filepath to the onnx model file.
+    """
+    print("\nInference on all.\n")
+
+    df = pd.read_excel(model_df)
+    # drop columns with 'Unnamed' in the name
+    e_inputs = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+    # drop the FileName column
+    e_inputs = e_inputs.drop(columns=["FileName", "label"])
+    existing_columns_to_drop = [
+        col for col in features_to_remove if col in e_inputs.columns
+    ]
+    e_inputs = e_inputs.drop(columns=existing_columns_to_drop)
+    print(e_inputs.shape)
+    # for columns with 'Type' in the name, replace NaN with 0
+    for col in e_inputs.columns:
+        if "Type" in col:
+            e_inputs[col].fillna(0, inplace=True)
+        else:
+            e_inputs[col].fillna(-12345, inplace=True)
+
+    x = e_inputs.to_numpy().astype("float32")
+    # Find rows with infinite values
+    rows_with_inf = np.any(np.isinf(x), axis=1)
+    # Check if there are any such rows
+    e_inputs = e_inputs[~rows_with_inf].reset_index(drop=True)
+    df = df[~rows_with_inf].reset_index(drop=True)
+
+    # e_inputs.fillna(-1000000, inplace=True)
+    # e_inputs.replace(np.nan, -1000000, inplace=True)
+    # e_inputs.replace("nan", -1000000, inplace=True)
+
+    sess = rt.InferenceSession(model_filename)
+    input_name = sess.get_inputs()[0].name
+    label_name = sess.get_outputs()[0].name
+    prob_name = sess.get_outputs()[1].name
+
+    tester = e_inputs.astype(np.float32).to_numpy()
+    pred_onx_run_output = sess.run([label_name, prob_name], {input_name: tester})
+    pred_onx = pred_onx_run_output[0]
+    # pred_onnx_str = [list(imagetype_to_integer_mapping.keys())[x] for x in pred_onx]
+    probability_onx = pred_onx_run_output[1]
+    prob_df = pd.DataFrame(probability_onx)
+
+    outputs = df
+    outputs["GUESS_ONNX_CODE"] = pred_onx
+    outputs["GUESS_ONNX"] = df["GUESS_ONNX_CODE"].map(integer_to_imagetype_mapping)
+    for col in prob_df.columns:
+        outputs[f"GUESS_ONNX_idx{col}"] = prob_df[col]
+    outputs.to_excel(out_file)
+
+
+def inference_metrcis_test(model_filename: str, model_df: str, out_file: str, features):
+    """
+    This function runs inference on all data and produces figures dataframe containing class specific prediction.
+    :param model_filename: filepath to the onnx model file.
+    """
+    print("\nInference on all.\n")
+
+    df = pd.read_excel(model_df)
+    df = df[df["label"].isin(imagetype_to_integer_mapping.keys())]
+    # Filter rows based on available classes
+
+    # df = df[df["label"].isin(filtered_mapping.keys())]
+    print(df.shape)
+    available_classes = df["label"].unique()
+    filtered_mapping = {
+        k: v for k, v in imagetype_to_integer_mapping.items() if k in available_classes
+    }
+    print(filtered_mapping)
+    # Normalize the data
+    df["label_encoded"] = df["label"].map(imagetype_to_integer_mapping)
+    df.fillna({col: 0 if "Type" in col else -12345 for col in df.columns}, inplace=True)
+
+    # Assuming 'label' column contains the true labels
+    true_labels_encoded = df["label_encoded"].values
+
+    # drop columns with 'Unnamed' in the name
+    e_inputs = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+
+    print(e_inputs.shape)
+    # drop the FileName column
+    e_inputs = e_inputs.drop(columns=["FileName", "label", "label_encoded"])
+    existing_columns_to_drop = [
+        col for col in features_to_remove if col in e_inputs.columns
+    ]
+    e_inputs = e_inputs.drop(columns=existing_columns_to_drop)
+
+    # Add missing features
+    for feature in features:
+        if feature not in e_inputs.columns:
+            e_inputs[feature] = 0 if "Type" in feature else -12345
+    print(e_inputs.columns)
+    print(e_inputs.shape)
+    # for columns with 'Type' in the name, replace NaN with 0
+    for col in e_inputs.columns:
+        if "Type" in col:
+            e_inputs[col].fillna(0, inplace=True)
+        else:
+            e_inputs[col].fillna(-12345, inplace=True)
+
+    e_inputs = e_inputs[features]
+    x = e_inputs.to_numpy().astype("float32")
+    # Find rows with infinite values
+    rows_with_inf = np.any(np.isinf(x), axis=1)
+    # Check if there are any such rows
+    e_inputs = e_inputs[~rows_with_inf].reset_index(drop=True)
+    df = df[~rows_with_inf].reset_index(drop=True)
+
+    # e_inputs.fillna(-1000000, inplace=True)
+    # e_inputs.replace(np.nan, -1000000, inplace=True)
+    # e_inputs.replace("nan", -1000000, inplace=True)
+
+    sess = rt.InferenceSession(model_filename)
+    input_name = sess.get_inputs()[0].name
+    label_name = sess.get_outputs()[0].name
+    prob_name = sess.get_outputs()[1].name
+
+    # tester = e_inputs.astype(np.float32).to_numpy()
+    # pred_onx_run_output = sess.run([label_name, prob_name], {input_name: tester})
+    # pred_onx = pred_onx_run_output[0]
+    # # pred_onnx_str = [list(imagetype_to_integer_mapping.keys())[x] for x in pred_onx]
+    # probability_onx = pred_onx_run_output[1]
+    # prob_df = pd.DataFrame(probability_onx)
+
+    tester = e_inputs.astype(np.float32).to_numpy()
+    pred_onx_run_output = sess.run([label_name, prob_name], {input_name: tester})
+    pred_onx = pred_onx_run_output[0].flatten()
+    probability_onx = pred_onx_run_output[1]
+    prob_df = pd.DataFrame(probability_onx)
+
+    lbs = list(np.unique(pred_onx))
+    # Compute metrics (adjusted for available classes)
+    accuracy = accuracy_score(true_labels_encoded, pred_onx)
+    print(f"Accuracy: {accuracy}")
+    cls_report = classification_report(
+        true_labels_encoded,
+        pred_onx,
+        labels=lbs,
+        target_names=[integer_to_imagetype_mapping[i] for i in lbs],
+    )
+
+    print(f"Accuracy: {accuracy}")
+    print("Classification Report:")
+    print(cls_report)
+
+    outputs = df
+    outputs["GUESS_ONNX_CODE"] = pred_onx
+    outputs["GUESS_ONNX"] = df["GUESS_ONNX_CODE"].map(integer_to_imagetype_mapping)
+    for col in prob_df.columns:
+        outputs[f"GUESS_ONNX_idx{col}"] = prob_df[col]
+    outputs.to_excel(out_file)
+
+
+def perform_grid_search(
+    x, y, output_excel_file, samples_per_class=5000, n_splits=5, n_jobs=-1
+):
+    """
+    Perform grid search to find the best parameters for RandomForestClassifier.
+
+    Parameters:
+    X_train (array-like): Training features.
+    y_train (array-like): Training labels.
+    output_excel_file (str): File path to save the grid search results as Excel.
+    n_splits (int): Number of folds for cross-validation.
+    n_jobs (int): Number of jobs to run in parallel (-1 means using all processors).
+
+    Returns:
+    best_model (RandomForestClassifier): The best model from grid search.
+    """
+
+    # Define the parameter grid
+    param_grid = {
+        "n_estimators": [1, 10, 25, 50, 75, 100, 150, 200],
+        "max_depth": [1, 2, 4, 6, 8, 10, 12, 15, 20, 25, 30]
+        # Add more parameters if needed
+    }
+    # make x_train and y_train unique
+    # Find indices of unique rows
+    _, unique_indices = np.unique(x, axis=0, return_index=True)
+    # print("X Train shape:", x_train.shape)
+    # Select only unique rows in both x and y
+    x_unique = x[unique_indices]
+    print("X Unique shape:", x_unique.shape)
+    y_unique = y[unique_indices]
+    print("X Unique shape:", y_unique.shape)
+
+    x_train_balanced, y_train_balanced = [], []
+    for class_label in range(12):
+        x_train_class = x_unique[y_unique == class_label]
+        y_train_class = y_unique[y_unique == class_label]
+
+        # Determine if sampling should be with or without replacement
+        replace = len(x_train_class) < samples_per_class
+
+        # Sample the data
+        x_train_balanced.append(
+            pd.DataFrame(x_train_class).sample(
+                n=samples_per_class, replace=replace, random_state=99
+            )
+        )
+        y_train_balanced.append(
+            pd.Series(y_train_class).sample(
+                n=samples_per_class, replace=replace, random_state=99
+            )
+        )
+        # Combine the balanced data
+    x_train_balanced = pd.concat(x_train_balanced, ignore_index=True).to_numpy()
+    y_train_balanced = pd.concat(y_train_balanced, ignore_index=True).to_numpy()
+
+    # Initialize GridSearchCV
+    grid_search = GridSearchCV(
+        estimator=RandomForestClassifier(random_state=99),
+        param_grid=param_grid,
+        cv=n_splits,
+        verbose=2,
+        scoring="accuracy",
+        return_train_score=True,
+        n_jobs=n_jobs,
+    )
+
+    # Fit GridSearchCV
+    grid_search.fit(x_train_balanced, y_train_balanced)
+
+    # Extract the best model
+    best_model = grid_search.best_estimator_
+
+    # Save the results to a pandas DataFrame and then to an Excel file
+    results = pd.DataFrame(grid_search.cv_results_)
+    results.to_excel(output_excel_file, index=False)
+
+    return best_model
 
 
 if __name__ == "__main__":
-    data_file = "/home/mbrzus/programming/dcm_train_data/training/labeled/combined_all_Jan22_small_balanced.xlsx"
-    x, y = generate_training_data(data_file)
-    print(x.shape)
-    print(y.shape)
+    # get all feature names needed for training
+    # data_file = "/home/mbrzus/programming/dcm_train_data/training/labeled/no_IR/combined_all_Jan30_NO_IR_LOC.xlsx"
+
+    # # K-fold test
+    # data_file = "/home/mbrzus/programming/dcm_train_data/training/labeled/no_IR/combined_all_Jan30_NO_IR_LOC.xlsx"
+    # # data_file = "/home/mbrzus/programming/dcm_train_data/training/labeled/no_IR/combined_all_Jan30_NO_IR_small_balanced_500.xlsx"
+    # x, y, cols = generate_training_data(data_file)
+    # best_model = k_fold_cross_validation(
+    #     x, y, len(cols), n_splits=10, samples_per_class=5000
+    # )
+
+    # Feature importance analysis
+    data_file = "/home/mbrzus/programming/dcm_train_data/training/labeled/no_IR/combined_all_Jan30_NO_IR_LOC.xlsx"
+    x, y, cols = generate_training_data(data_file)
+    importances_all = train(x, y, cols, use_dt=False)
+
+    # zero_values_names = importances_all[importances_all == 0].index
+    # print("\nNames with 0 values in importances_all:")
+    # for name in zero_values_names:
+    #     print(f'"{name}",')
+    #
+    # small_values_names = importances_all[importances_all <= 1.0e-01].index
+    # print("\nNames with small values in importances_all:")
+    # for name in small_values_names:
+    #     print(f'"{name}",')
+
+    # # INFERENCE
+    # data_file = "/home/mbrzus/programming/dcm_train_data/training/labeled/no_IR/combined_all_Jan30_NO_IR_LOC.xlsx"
+    # inference_on_all_data(
+    #     "retrain_models/rf_classifier.onnx",
+    #     data_file,
+    #     "/home/mbrzus/programming/dcm_train_data/training/labeled/no_IR/combined_all_Jan30_NO_IR_LOC_INFERENCE.xlsx",
+    # )
+
+    # # Minipig inference
+    # data_file = "/home/mbrzus/programming/dcm_train_data/training/minipig/training_minipig_labeled.xlsx"
+    # inference_metrcis_test(
+    #     "retrain_models/rf_classifier-kfold.onnx",
+    #     data_file,
+    #     "/home/mbrzus/programming/dcm_train_data/training/minipig/training_minipig_INFERENCE.xlsx",
+    #     features=feautures,
+    # )
+
+    # # GRID SEARCH
+    # data_file = "/home/mbrzus/programming/dcm_train_data/training/labeled/no_IR/combined_all_Jan30_NO_IR_LOC.xlsx"
+    # x, y, cols = generate_training_data(data_file)
+    # best_model = perform_grid_search(
+    #     x,
+    #     y,
+    #     "/home/mbrzus/programming/dcm_train_data/training/labeled/no_IR/grid_search_results.xlsx",
+    #     n_splits=5,
+    #     n_jobs=-1,
+    # )

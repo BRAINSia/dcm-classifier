@@ -1,7 +1,7 @@
 import pandas as pd
 
 df = pd.read_excel(
-    "/home/mbrzus/programming/dcm_train_data/training/labeled/combined_all_Jan22.xlsx",
+    "/home/mbrzus/programming/dcm_train_data/training/labeled/no_IR/combined_all_Jan30_NO_IR.xlsx",
 )
 print(df.shape)
 
@@ -17,11 +17,11 @@ print(df["label"].value_counts())
 # the number is equal to the number of the smallest label
 out_df = (
     df.groupby("label")
-    .apply(lambda x: x.sample(df["label"].value_counts().min(), random_state=42))
+    .apply(lambda x: x.sample(min(len(x), 500), random_state=42))
     .reset_index(drop=True)
 )
 print(out_df.shape)
 out_df.to_excel(
-    "/home/mbrzus/programming/dcm_train_data/training/labeled/combined_all_Jan22_small_balanced.xlsx",
+    "/home/mbrzus/programming/dcm_train_data/training/labeled/no_IR/combined_all_Jan30_NO_IR_small_balanced_500.xlsx",
     index=False,
 )
