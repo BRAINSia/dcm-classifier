@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 import pydicom
-from .namic_dicom_typing import get_bvalue, itk_read_from_dicomfn_list
+from .utility_functions import get_bvalue, itk_read_from_dicomfn_list
 from .dicom_series import DicomSingleSeries
 
 
