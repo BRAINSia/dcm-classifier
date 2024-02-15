@@ -612,15 +612,19 @@ def sanitize_dicom_dataset(
     return dataset_dictionary, True
 
 
-# features currently used
+image_type_features: list[str] = [field for field in features if "Image Type_" in field]
 
-
-# throw_away: int = len("Image Type_")
-image_type_features: list[str] = [
-    field for field in features if "Image Type_" in field
+manufacturer_features: list[str] = [
+    field for field in features if "Manufacturer_" in field
 ]
-# throw_away: int = len("Manufacturer_")
-manufacturer_features: list[str] = [field for field in features if "Manufacturer_" in field]
+
+scanning_sequence_features: list[str] = [
+    field for field in features if "Scanning Sequence_" in field
+]
+
+scanning_variant_features: list[str] = [
+    field for field in features if "Sequence Variant_" in field
+]
 
 
 def get_coded_dictionary_elements(
@@ -654,15 +658,48 @@ def get_coded_dictionary_elements(
                     dataset_dictionary[feature] = 1
                 else:
                     dataset_dictionary[feature] = 0
-        # elif name == "ImageOrientationPatient":
-        #     tuple_list = convert_array_to_index_value(name, value)
-        #     for vv in tuple_list:
-        #         dataset_dictionary[vv[0]] = float(vv[1])
         elif name == "Manufacturer":
             lower_manufacturer_string: str = str(value).lower()
             throw_away: int = len("Manufacturer_")
             for feature in manufacturer_features:
                 if feature[throw_away:].lower() in lower_manufacturer_string:
+                    dataset_dictionary[feature] = 1
+                else:
+                    dataset_dictionary[feature] = 0
+        elif name == "Scanning Sequence":
+            lower_scanning_sequence_string: str = str(value).lower()
+            throw_away: int = len("Scanning Sequence_")
+            for feature in scanning_sequence_features:
+                if feature[throw_away:].lower() in lower_scanning_sequence_string:
+                    dataset_dictionary[feature] = 1
+                else:
+                    dataset_dictionary[feature] = 0
+        elif name == "In-plane Phase Encoding Direction":
+            if "COL" in str(value).upper():
+                dataset_dictionary["In-plane Phase Encoding Direction_COL"] = 1
+                dataset_dictionary["In-plane Phase Encoding Direction_ROW"] = 0
+            else:
+                dataset_dictionary["In-plane Phase Encoding Direction_COL"] = 0
+                dataset_dictionary["In-plane Phase Encoding Direction_ROW"] = 1
+        elif name == "MR Acquisition Type":
+            if "2D" in str(value).upper():
+                dataset_dictionary["MR Acquisition Type_2D"] = 1
+                dataset_dictionary["MR Acquisition Type_3D"] = 0
+            else:
+                dataset_dictionary["MR Acquisition Type_2D"] = 0
+                dataset_dictionary["MR Acquisition Type_3D"] = 1
+        elif name == "Variable Flip Angle Flag":
+            if "N" in str(value).upper():
+                dataset_dictionary["Variable Flip Angle Flag_N"] = 1
+                dataset_dictionary["Variable Flip Angle Flag_Y"] = 0
+            else:
+                dataset_dictionary["Variable Flip Angle Flag_N"] = 0
+                dataset_dictionary["Variable Flip Angle Flag_Y"] = 1
+        elif name == "Sequence Variant":
+            lower_sequence_variant_string: str = str(value).lower()
+            throw_away: int = len("Sequence Variant_")
+            for feature in scanning_variant_features:
+                if feature[throw_away:].lower() in lower_sequence_variant_string:
                     dataset_dictionary[feature] = 1
                 else:
                     dataset_dictionary[feature] = 0
@@ -675,7 +712,6 @@ def get_coded_dictionary_elements(
                     dataset_dictionary["Contrast/BolusAgent"] = str(value)
                 except TypeError:
                     dataset_dictionary["Contrast/BolusAgent"] = "INVALID_VALUE"
-
 
         else:
             dataset_dictionary[name] = str(value)
