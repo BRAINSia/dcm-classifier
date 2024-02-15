@@ -18,7 +18,7 @@
 
 from .dicom_config import inference_features
 from .dicom_series import DicomSingleSeries
-from .namic_dicom_typing import (
+from .utility_functions import (
     infer_diffusion_from_gradient,
 )
 from pathlib import Path

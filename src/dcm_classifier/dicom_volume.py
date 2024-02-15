@@ -25,7 +25,7 @@ from copy import deepcopy
 
 from typing import Dict, List, Any, Union, Optional
 import pydicom
-from .namic_dicom_typing import (
+from .utility_functions import (
     get_bvalue,
     FImageType,
     itk_read_from_dicomfn_list,
