@@ -28,33 +28,22 @@ import pandas as pd
 
 from typing import Dict, List, Union, Optional, Any
 
+from dicom_config import inference_features
 
-modality_columns = [
-    "ImageTypeADC",
-    "ImageTypeFA",
-    "ImageTypeTrace",
-    "SeriesVolumeCount",
-    "EchoTime",
-    "RepetitionTime",
-    "FlipAngle",
-    "PixelBandwidth",
-    "SAR",
-    "Diffusionb-valueCount",
-    "Diffusionb-valueMax",
-]
 
 imagetype_to_integer_mapping = {
-    "adc": 0,
-    "fa": 1,
-    "tracew": 2,
+    "bval_vol": 0,
+    "t1w": 1,
+    "t2star": 2,
     "t2w": 3,
-    "t2starw": 4,
-    "t1w": 5,
+    "field_map": 4,
+    "pd": 5,
     "flair": 6,
-    "field_map": 7,
-    "dwig": 8,
-    "dwi_multishell": 9,
-    "fmri": 10,
+    "adc": 7,
+    "fa": 8,
+    "fmri": 9,
+    "stir": 10,
+    "eadc": 11,
 }
 
 
@@ -85,7 +74,7 @@ class ImageTypeClassifierBase:
     def __init__(
         self,
         classification_model_filename: str | Path,
-        classification_feature_list: list[str] = modality_columns,
+        classification_feature_list: list[str] = inference_features,
         image_type_map: dict[str, int] = imagetype_to_integer_mapping,
         min_probability_threshold: float = 0.4,
     ):
@@ -160,6 +149,9 @@ class ImageTypeClassifierBase:
             str: A string representing the inferred acquisition plane ("iso" for isotropic, "ax" for axial, "sag" for sagittal and "cor" for coronal).
         """
         # check if the volume was invalidated
+        print("\n\nIn acquisition inference\n")
+        print(feature_dict.keys())
+        print("DONE")
         for field in [
             "ImageOrientationPatient_0",
             "ImageOrientationPatient_5",
@@ -235,16 +227,21 @@ class ImageTypeClassifierBase:
                 - A string representing the inferred modality (image type).
                 - A Pandas DataFrame containing classification results, including class probabilities.
         """
+        # check if all features are present for inference
+        # if len(self.classification_feature_list) < len(inference_features):
+        #     return "INVALID", None
+
         # check if the volume was invalidated
         for field in self.classification_feature_list:
             if feature_dict[field] == "INVALID":
                 return "INVALID", None
 
+        # TODO: ensure the ordering of features is correct
         import onnxruntime as rt
 
         e_inputs: pd.DataFrame = pd.DataFrame([feature_dict])
         # Drop all dicom images without a SeriesNumber
-        e_inputs = e_inputs[e_inputs["SeriesNumber"].notna()]
+        # e_inputs = e_inputs[e_inputs["SeriesNumber"].notna()]
 
         # Load the ONNX model
         sess: rt.InferenceSession = rt.InferenceSession(
@@ -257,7 +254,8 @@ class ImageTypeClassifierBase:
 
         full_outputs: pd.DataFrame = pd.DataFrame()
         full_outputs["SeriesNumber"] = [self.series_number]
-        model_inputs: pd.DataFrame = e_inputs[self.classification_feature_list]
+        model_inputs: pd.DataFrame = e_inputs.reindex(columns=inference_features)
+        print(model_inputs.shape)
         try:
             numeric_inputs: np.array = model_inputs.astype(np.float32).to_numpy()
         except ValueError:
