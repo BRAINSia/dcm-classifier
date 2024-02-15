@@ -35,6 +35,61 @@ from pydicom.multival import MultiValue
 FImageType = itk.Image[itk.F, 3]
 UCImageType = itk.Image[itk.UC, 3]
 
+features: list[str] = [
+    "Image Type_ORIGINAL",
+    "Image Type_M",
+    "Image Type_SE",
+    "Image Type_ADC",
+    "Image Type_UNSPECIFIED",
+    "Manufacturer_siemens",
+    "Manufacturer_ge",
+    "Manufacturer_philips",
+    "Manufacturer_toshiba",
+    "Diffusionb-value",
+    "Diffusionb-valueMax",
+    "Echo Number(s)",
+    "Echo Time",
+    "Echo Train Length",
+    "Flip Angle",
+    "Pixel Bandwidth",
+    "Repetition Time",
+    "SAR",
+    "Scanning Sequence_SE",
+    "Scanning Sequence_RM",
+    "Sequence Variant_SK",
+    "In-plane Phase Encoding Direction_COL",
+    "In-plane Phase Encoding Direction_ROW",
+    "dB/dt",
+    "Imaging Frequency",
+    "MR Acquisition Type_2D",
+    "Number of Averages",
+    "Image Type_DERIVED",
+    "Inversion Time",
+    "Sequence Variant_SP",
+    "Sequence Variant_OSP",
+    "Image Type_NORM",
+    "Image Type_DIS2D",
+    "Image Type_DIFFUSION",
+    "Scanning Sequence_GR",
+    "Scanning Sequence_EP",
+    "MR Acquisition Type_3D",
+    "Variable Flip Angle Flag_N",
+    "Image Type_OTHER",
+    "Sequence Variant_NONE",
+    "Image Type_NONE",
+    "Image Type_ND",
+    "Image Type_2",
+    "Image Type_EADC",
+    "Scanning Sequence_IR",
+    "Sequence Variant_SS",
+    "Sequence Variant_MP",
+    "Image Type_FFE",
+    "Image Type_P",
+    "Image Type_MOSAIC",
+    "Image Type_FA",
+    "Variable Flip Angle Flag_Y",
+]
+
 
 def itk_read_from_dicomfn_list(
     single_volume_dcm_files_list: list[str | Path],
@@ -442,6 +497,111 @@ def sanitize_dicom_dataset(
                 # The contrast is required but is empty if unknown but also may not be in every dataset
                 dataset_dictionary[field] = "None"
 
+        elif field == "Diffusionb-value":
+            if field not in dataset_dictionary.keys():
+                # Diffusionb-value is not a required field, it can be unknown
+                _default_inferred_value = -12345
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "Diffusionb-valueMax":
+            if field not in dataset_dictionary.keys():
+                # Diffusionb-valueMax is not a required field, it can be unknown
+                _default_inferred_value = -12345
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "Echo Number(s)":
+            if field not in dataset_dictionary.keys():
+                # EchoNumber(s) is not a required field, it can be unknown
+                _default_inferred_value = -12345
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "Echo Train Length":
+            if field not in dataset_dictionary.keys():
+                # EchoTrainLength is not a required field, it can be unknown
+                _default_inferred_value = -12345
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "Scanning Sequence":
+            if field not in dataset_dictionary.keys():
+                # ScanningSequence is not a required field, it can be unknown
+                _default_inferred_value = "UnknownScanningSequence"
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "Sequence Variant":
+            if field not in dataset_dictionary.keys():
+                # SequenceVariant is not a required field, it can be unknown
+                _default_inferred_value = "UnknownSequenceVariant"
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "In-plane Phase Encoding Direction":
+            if field not in dataset_dictionary.keys():
+                # InplanePhaseEncodingDirection is not a required field, it can be unknown
+                _default_inferred_value = "UnknownInplanePhaseEncodingDirection"
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "dB/dt":
+            if field not in dataset_dictionary.keys():
+                # dBdt is not a required field, it can be unknown
+                _default_inferred_value = -12345
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "Imaging Frequency":
+            if field not in dataset_dictionary.keys():
+                # ImagingFrequency is not a required field, it can be unknown
+                _default_inferred_value = -12345
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "MR Acquisition Type":
+            if field not in dataset_dictionary.keys():
+                # MRAcquisitionType is not a required field, it can be unknown
+                _default_inferred_value = "UnknownMRAcquisitionType"
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "Number of Averages":
+            if field not in dataset_dictionary.keys():
+                # NumberOfAverages is not a required field, it can be unknown
+                _default_inferred_value = -12345
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "Inversion Time":
+            if field not in dataset_dictionary.keys():
+                # InversionTime is not a required field, it can be unknown
+                _default_inferred_value = -12345
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+        elif field == "Variable Flip Angle Flag":
+            if field not in dataset_dictionary.keys():
+                # VariableFlipAngleFlag is not a required field, it can be unknown
+                _default_inferred_value = "UnknownVariableFlipAngleFlag"
+                dataset_dictionary[field] = _default_inferred_value
+                vprint(
+                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                )
+
     # Warn the user if there are INVALID_VALUE fields
     if len(missing_fields) > 0:
         warnings.warn(
@@ -450,6 +610,17 @@ def sanitize_dicom_dataset(
         return dataset_dictionary, False
 
     return dataset_dictionary, True
+
+
+# features currently used
+
+
+# throw_away: int = len("Image Type_")
+image_type_features: list[str] = [
+    field for field in features if "Image Type_" in field
+]
+# throw_away: int = len("Manufacturer_")
+manufacturer_features: list[str] = [field for field in features if "Manufacturer_" in field]
 
 
 def get_coded_dictionary_elements(
@@ -477,52 +648,24 @@ def get_coded_dictionary_elements(
             return dict()
         elif name == "ImageType":
             lower_value_str: str = str(value).lower()
-            dataset_dictionary["ImageType"] = str(value)
-            if "'DERIVED'".lower() in lower_value_str:
-                dataset_dictionary["IsDerivedImageType"] = 1
-            else:
-                dataset_dictionary["IsDerivedImageType"] = 0
-
-            if ("'ADC'".lower() in lower_value_str) or (
-                ("'SECONDARY'".lower() in lower_value_str)
-                and ("'PROCESSED'".lower() in lower_value_str)
-            ):
-                dataset_dictionary["ImageTypeADC"] = 1
-            else:
-                dataset_dictionary["ImageTypeADC"] = 0
-            if ("'FA'".lower() in lower_value_str) or (
-                ("'SECONDARY'".lower() in lower_value_str)
-                and ("'PROCESSED'".lower() in lower_value_str)
-            ):
-                dataset_dictionary["ImageTypeFA"] = 1
-            else:
-                dataset_dictionary["ImageTypeFA"] = 0
-            if "'TRACEW'".lower() in lower_value_str:
-                dataset_dictionary["ImageTypeTrace"] = 1
-            else:
-                dataset_dictionary["ImageTypeTrace"] = 0
-        elif name == "ImageOrientationPatient":
-            tuple_list = convert_array_to_index_value(name, value)
-            for vv in tuple_list:
-                dataset_dictionary[vv[0]] = float(vv[1])
+            throw_away: int = len("Image Type_")
+            for feature in image_type_features:
+                if feature[throw_away:].lower() in lower_value_str:
+                    dataset_dictionary[feature] = 1
+                else:
+                    dataset_dictionary[feature] = 0
+        # elif name == "ImageOrientationPatient":
+        #     tuple_list = convert_array_to_index_value(name, value)
+        #     for vv in tuple_list:
+        #         dataset_dictionary[vv[0]] = float(vv[1])
         elif name == "Manufacturer":
-            """
-            GE MEDICAL SYSTEMS
-            Philips Healthcare
-            Philips Medical Systems
-            SIEMENS
-            """
-            lower_manufactureer_string: str = str(value).lower()
-
-            if "ge" in lower_manufactureer_string:
-                manufacturer_code = 1
-            elif "philips" in lower_manufactureer_string:
-                manufacturer_code = 2
-            elif "siemens" in lower_manufactureer_string:
-                manufacturer_code = 3
-            else:
-                manufacturer_code = 0
-            dataset_dictionary["ManufacturerCode"] = manufacturer_code
+            lower_manufacturer_string: str = str(value).lower()
+            throw_away: int = len("Manufacturer_")
+            for feature in manufacturer_features:
+                if feature[throw_away:].lower() in lower_manufacturer_string:
+                    dataset_dictionary[feature] = 1
+                else:
+                    dataset_dictionary[feature] = 0
         elif name == "Contrast/BolusAgent":
             no_contrast_list = ["none", "no", "no contrast", "no_contrast", "n"]
             if str(value).lower() in no_contrast_list:
@@ -532,6 +675,8 @@ def get_coded_dictionary_elements(
                     dataset_dictionary["Contrast/BolusAgent"] = str(value)
                 except TypeError:
                     dataset_dictionary["Contrast/BolusAgent"] = "INVALID_VALUE"
+
+
         else:
             dataset_dictionary[name] = str(value)
     return dataset_dictionary
