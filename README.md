@@ -13,7 +13,7 @@ Below are useful commands to start using the tool.
 
 Clone git repo
 
-`$ git clone https://research-git.uiowa.edu/SINAPSE/dicomimageclassification.git`
+`$ git clone https://github.com/BRAINSia/dcm-classifier.git`
 
 Navigate to the cloned repo
 
@@ -26,7 +26,7 @@ Setup virtual environment
 
 Install required packages
 
-`$ pip install -r REQUIREMENTS.txt`
+`$ pip install -r requirements_dev.txt`
 
 Run the script!
 
@@ -35,6 +35,8 @@ Run the script!
 # Testing
 ```bash
   pytest
+# or to fail on warnings
+  python3 -Werror::FutureWarning -m pytest
 ```
 # Coverage Analysis
 ```bash
