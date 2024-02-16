@@ -1,7 +1,6 @@
 # Introduction
 
-In this work, we developed a robust, easily extensible classification framework that extracts key features from well-characterized DICOM header fields to identify image modality and acquisition plane. 
-Utilizing classical machine learning paradigms and a heterogeneous dataset of 9121 scans collected at 12 sites, using 23 scanners from 6 manufacturers, we achieved 99.4% accuracy during the K-Fold Cross-Validation for classifying 11 image modalities and 99.96% accuracy on image acquisition plane classification. Furthermore, we demonstrated model generalizability by achieving 98.6% accuracy on out-of-sample animal data. Our proposed framework can be crucial in eliminating error-prone human interaction, allowing automatization, and increasing imaging applications' reliability and efficiency.
+In this work, we developed a robust, easily extensible classification framework that extracts key features from well-characterized DICOM header fields for identifying image modality and acquisition plane. Our tool is crucial for eliminating error-prone human interaction and allowing automatization, increasing imaging applications' reliability and efficiency. We used Random Forrest and Decision Tree algorithms to determine the image modality and orientation. We trained on header meta-data of over 49000 scan volumes from multiple studies and achieved over 99% prediction accuracy on image modality and acquisition plane classification. The proposed framework will be available as an open-source python pip module for easy and fast adaptation.
 
 This work was submitted for publication at the 2024 [SPIE Medical Imaging](https://spie.org/conferences-and-exhibitions/medical-imaging?SSO=1) conference.
 
@@ -26,7 +25,7 @@ Setup virtual environment
 
 Install required packages
 
-`$ pip install -r requirements_dev.txt`
+`$ pip install -r requirements.txt`
 
 Run the script!
 
