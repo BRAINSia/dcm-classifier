@@ -1,11 +1,11 @@
 -r requirements.txt
-black[d]==23.1.0
-matplotlib==3.7.0
-openpyxl==3.1.1
-scikit-learn==1.1.1
-scipy==1.10.0
-skl2onnx==1.13
-tomli==2.0.1
-coverage[toml]==7.2.7
-pytest==7.4.2
+black[d]==24.1.1
+coverage[toml]==7.3.2
 dicom-anonymizer==1.0.11
+matplotlib==3.8.2
+openpyxl==3.1.2
+pytest==7.4.3
+scikit-learn==1.4.0
+scipy==1.12.0
+skl2onnx==1.16.0
+tomli==2.0.1

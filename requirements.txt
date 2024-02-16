@@ -1,10 +1,12 @@
-itk==5.4rc1
-itk-core==5.4rc1
-itk-filtering==5.4rc1
-itk-io==5.4rc1
-itk-numerics==5.4rc1
-itk-registration==5.4rc1
-itk-segmentation==5.4rc1
+itk==5.4rc2
+itk-core==5.4rc2
+itk-filtering==5.4rc2
+itk-io==5.4rc2
+itk-numerics==5.4rc2
+itk-registration==5.4rc2
+itk-segmentation==5.4rc2
 onnxruntime==1.16.1
-pandas==2.1.2
-pydicom==2.4.3
+pandas==2.2.0
+pyarrow==15.0.0
+pydicom==2.4.4
+python-gdcm==3.0.23 # NOTE: python-gdcm replaces pylibjpeg for plugin support for pydicom
