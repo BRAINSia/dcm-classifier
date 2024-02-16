@@ -357,7 +357,11 @@ class ImageTypeClassifierBase:
                         pd.DataFrame(full_outputs, index=[0])
                     )
 
-        # classify series
+        """
+        Aggregates the modality and acquisition plane information from the volumes to the series level.
+        """
+        # if there is only a single volume in the series, the series modality and acquisition plane are set to the
+        # volume's modality and acquisition plane
         if len(self.series.get_volume_list()) == 1:
             volume = self.series.get_volume_list()[0]
             self.series.set_modality(volume.get_modality())
@@ -366,6 +370,8 @@ class ImageTypeClassifierBase:
             self.series.set_is_isotropic(volume.get_is_isotropic())
             self.series.set_has_contrast(volume.get_has_contrast())
         else:
+            # TODO: Add logic to aggregate modality and acquisition plane information from multiple volumes
+            # TODO: this would include, DWI, multishell DWI, TraceW, PD/T2w
             self.check_if_diffusion()
             self.series.set_acquisition_plane(
                 self.series.get_volume_list()[0].get_acquisition_plane()
