@@ -1,16 +1,16 @@
 import pydicom
 import pytest
 from dcm_classifier.example_image_processing import slugify, rglob_for_singular_result
-from dcm_classifier.namic_dicom_typing import (
+from dcm_classifier.utility_functions import (
     vprint,
     get_coded_dictionary_elements,
     get_diffusion_gradient_direction,
     convert_array_to_min_max,
     sanitize_dicom_dataset,
+    itk_read_from_dicomfn_list,
 )
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
-from dcm_classifier.namic_dicom_typing import itk_read_from_dicomfn_list
 
 relative_testing_data_path: Path = Path(__file__).parent.parent / "testing_data"
 current_file_path: Path = Path(__file__).parent
@@ -227,7 +227,7 @@ def test_no_pixel_bandwidth():
 #     assert "not 'NoneType'" in str(ex.value)
 
 
-from dcm_classifier.namic_dicom_typing import is_integer
+from dcm_classifier.utility_functions import is_integer
 
 
 def test_is_integer():
