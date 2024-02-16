@@ -399,8 +399,9 @@ class ImageTypeClassifierBase:
             ]
             unique_modalities = list(set(modalities))
             if len(unique_modalities) == 1:
-                if unique_modalities[0] == "bval_vol":
-                    self.check_if_diffusion()
+                # if unique_modalities[0] == "bval_vol":
+                #     self.check_if_diffusion()
+                self.check_if_diffusion()
             else:
                 if "pd" in unique_modalities and "t2w" in unique_modalities:
                     self.series.set_modality("PDT2")
