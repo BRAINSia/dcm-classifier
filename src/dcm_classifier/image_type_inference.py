@@ -364,7 +364,14 @@ class ImageTypeClassifierBase:
         # volume's modality and acquisition plane
         if len(self.series.get_volume_list()) == 1:
             volume = self.series.get_volume_list()[0]
-            self.series.set_modality(volume.get_modality())
+            modality = volume.get_modality().replace("LOW_PROBABILITY_", "")
+            if modality == "bval_vol":
+                bval = volume.get_volume_bvalue()
+                if bval == 0:
+                    modality = "B0"
+                else:
+                    modality = "tracew"
+            self.series.set_modality(modality)
             self.series.set_modality_probabilities(volume.get_modality_probabilities())
             self.series.set_acquisition_plane(volume.get_acquisition_plane())
             self.series.set_is_isotropic(volume.get_is_isotropic())
@@ -372,7 +379,9 @@ class ImageTypeClassifierBase:
         else:
             # TODO: Add logic to aggregate modality and acquisition plane information from multiple volumes
             # TODO: this would include, DWI, multishell DWI, TraceW, PD/T2w
-            self.check_if_diffusion()
+
+            # for acquisition plane we assume as volumes in series have the same acquisition plane
+            # similarly we propagate the isotropic and contrast
             self.series.set_acquisition_plane(
                 self.series.get_volume_list()[0].get_acquisition_plane()
             )
@@ -382,3 +391,21 @@ class ImageTypeClassifierBase:
             self.series.set_has_contrast(
                 self.series.get_volume_list()[0].get_has_contrast()
             )
+
+            # get all modalities from the series
+            modalities = [
+                volume.get_modality().replace("LOW_PROBABILITY_", "")
+                for volume in self.series.get_volume_list()
+            ]
+            unique_modalities = list(set(modalities))
+            if len(unique_modalities) == 1:
+                if unique_modalities[0] == "bval_vol":
+                    self.check_if_diffusion()
+            else:
+                if "pd" in unique_modalities and "t2w" in unique_modalities:
+                    self.series.set_modality("PDT2")
+                else:
+                    # if other scenarios are not met, we set the modality to the first volume's modality
+                    self.series.set_modality(
+                        self.series.get_volume_list()[0].get_modality()
+                    )
