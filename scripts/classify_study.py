@@ -70,7 +70,8 @@ for series_number, series in study.series_dictionary.items():
         current_dict: dict[str, str] = {}
         current_dict["Series#"] = str(series_number)
         current_dict["Vol.#"] = str(index)
-        current_dict["Modality"] = str(volume.get_modality())
+        current_dict["Volume Modality"] = str(volume.get_modality())
+        current_dict["Series Modality"] = str(series.get_modality())
         current_dict["Acq.Plane"] = str(volume.get_acquisition_plane())
         current_dict["Isotropic"] = str(volume.get_is_isotropic())
         # info_dict = series.get_series_info_dict()
@@ -95,41 +96,17 @@ df: pd.DataFrame = pd.DataFrame(list_of_dictionaries)
 table_msg: str = tabulate.tabulate(df, headers="keys", tablefmt="psql", showindex=False)
 print(table_msg)
 
-all_inputs_df: pd.DataFrame = pd.DataFrame(list_of_inputs)
-inputs_msg: str = tabulate.tabulate(
-    all_inputs_df, headers="keys", tablefmt="psql", showindex=False
-)
-print(inputs_msg)
-
-all_prob_df: pd.DataFrame = pd.concat(list_of_probabilities, axis=0, ignore_index=True)
-prob_msg: str = tabulate.tabulate(
-    all_prob_df, headers="keys", tablefmt="psql", showindex=False
-)
-print(prob_msg)
-
-
-# # below is the code to run inference on volume level
-# print("\n\nInference per Volume\n\n")
-# inferer = ImageTypeClassifierBase(
-#     classification_model_filename=args.model, mode="volume"
+# all_inputs_df: pd.DataFrame = pd.DataFrame(list_of_inputs)
+# inputs_msg: str = tabulate.tabulate(
+#     all_inputs_df, headers="keys", tablefmt="psql", showindex=False
 # )
-# study = ProcessOneDicomStudyToVolumesMappingBase(
-#     study_directory=args.session_directory, inferer=inferer
-# )
-# study.run_inference()
+# print(inputs_msg)
 #
-# print(generate_separator(col_width))
-# print(
-#     generate_row(
-#         "Series number", "Modality", "Acquisition Plane", "Isotropic", column_width=col_width
-#     )
+# all_prob_df: pd.DataFrame = pd.concat(list_of_probabilities, axis=0, ignore_index=True)
+# prob_msg: str = tabulate.tabulate(
+#     all_prob_df, headers="keys", tablefmt="psql", showindex=False
 # )
-# print(generate_separator(col_width))
-# for series_number, series in study.series_dictionary.items():
-#     for volume in series.get_volume_list():
-#         modality = volume.get_modality()
-#         plane = volume.get_acquisition_plane()
-#         print(generate_row(str(series_number), modality, plane, iso, column_width=col_width))
+# print(prob_msg)
 
 
 if __name__ == "__main__":
