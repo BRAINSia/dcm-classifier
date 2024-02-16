@@ -346,16 +346,23 @@ class ImageTypeClassifierBase:
                 contrast = self.infer_contrast(feature_dict=self.info_dict)
                 volume.set_has_contrast(contrast)
 
-                if volume.get_modality() == "dwig":
-                    volume.set_modality_probabilities(pd.DataFrame())
-                else:
-                    modality, full_outputs = self.infer_modality(
-                        feature_dict=volume.get_volume_info_dict()
-                    )
-                    volume.set_modality(modality)
-                    volume.set_modality_probabilities(
-                        pd.DataFrame(full_outputs, index=[0])
-                    )
+                modality, full_outputs = self.infer_modality(
+                    feature_dict=volume.get_volume_info_dict()
+                )
+                # POSSIBLE CATCH of classifier mistake
+                # if there is a B0 value, the modality should be bval_vol, or in some cases ADC, eADC or FA
+                # if the classifier predicts something else, we could catch it and manuall write most probable bval_vol
+                # TODO: verify this
+                if volume.get_volume_bvalue() >= 0:
+                    if modality.replace("LOW_PROBABILITY_", "") not in [
+                        "bval_vol",
+                        "adc",
+                        "eadc",
+                        "fa",
+                    ]:
+                        modality = "bval_vol"
+                volume.set_modality(modality)
+                volume.set_modality_probabilities(pd.DataFrame(full_outputs, index=[0]))
 
         """
         Aggregates the modality and acquisition plane information from the volumes to the series level.
