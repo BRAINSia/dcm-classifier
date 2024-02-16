@@ -6,7 +6,7 @@ from dcm_classifier.dicom_volume import (
 )
 from collections import OrderedDict
 import pytest
-from dcm_classifier.namic_dicom_typing import FImageType
+from dcm_classifier.utility_functions import FImageType
 
 current_file_path = Path(__file__).parent
 
