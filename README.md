@@ -3,13 +3,13 @@
 TODO: 
 Please reference the manuscript: 2024 [SPIE Medical Imaging](https://spie.org/conferences-and-exhibitions/medical-imaging?SSO=1) conference.
 
-In this work, we developed a robust, easily extensible classification framework that extracts key features from well-characterized DICOM header fields for identifying image modality and acquisition plane. Our tool is crucial for eliminating error-prone human interaction and allowing automatization, increasing imaging applications' reliability and efficiency. We used Random Forrest and Decision Tree algorithms to determine the image modality and orientation. We trained on header meta-data of over 49000 scan volumes from multiple studies and achieved over 99% prediction accuracy on image modality and acquisition plane classification. The proposed framework will be available as an open-source python pip module for easy and fast adaptation.
+In this work, we developed a robust, easily extensible classification framework that extracts key features from well-characterized DICOM header fields for identifying image modality and acquisition plane. Our tool is crucial for eliminating error-prone human interaction and allowing automatization, increasing imaging applications' reliability and efficiency. We used Random Forrest and Decision Tree algorithms to determine the image modality and orientation. We trained on header meta-data of over 49000 scan volumes from multiple studies and achieved over 99% prediction accuracy on image modality and acquisition plane classification.
 
 
 This project was supported by several funding sources including:
 
- - TODO: NIH grants from Aaron
- - TODO: NSF ICorp funding
+ - UCSF SCOUTS RO1
+ - NIH-NINDS R01NS114405 and NINDS R01 NS119896
  - [Botimageai](https://www.botimageai.com/).
 
 # Instructions
