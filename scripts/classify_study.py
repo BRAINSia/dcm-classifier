@@ -1,6 +1,7 @@
 import sys
 from typing import Any
-
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 import pandas as pd
 import tabulate
 
@@ -74,6 +75,8 @@ for series_number, series in study.series_dictionary.items():
         current_dict["Series Modality"] = str(series.get_modality())
         current_dict["Acq.Plane"] = str(volume.get_acquisition_plane())
         current_dict["Isotropic"] = str(volume.get_is_isotropic())
+        print(volume.get_modality_probabilities().to_string(index=False))
+        current_dict["Bvalue"] = str(volume.get_volume_bvalue())
         # info_dict = series.get_series_info_dict()
         inputs_df: dict[str, Any] = volume.get_volume_info_dict()
         for unwanted in [
