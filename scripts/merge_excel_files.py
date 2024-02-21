@@ -87,7 +87,7 @@ def one_hot_encoding_from_array(
     # get all the unique image types
     unique_image_types = image_type_col[col_name].unique()
     for image_type in unique_image_types:
-        if type(image_type) is not str:
+        if not isinstance(image_type, str):
             continue
         row_contents = re.findall(r"\b\w+\b", image_type)
         if len(row_contents) > 0:
@@ -128,7 +128,7 @@ def parse_columns(file: str):
         sheet_name="results",
         engine="openpyxl",
     )
-    new_frame = pd.DataFrame()
+    # new_frame = pd.DataFrame()
     # for i, col in enumerate(frame.columns):
     #     frame[col].name != "FileName":
     #         if frame[col].name == "ImageType":

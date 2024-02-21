@@ -377,8 +377,8 @@ class DicomSingleVolumeInfoBase:
         try:
             series_number_int: int = int(self._pydicom_info.SeriesNumber)
             return series_number_int
-        except:
-            print(f"Can not convert to int {self._pydicom_info.SeriesNumber}")
+        except Exception as e:
+            print(f"Can not convert to int {self._pydicom_info.SeriesNumber}: {e}")
         return -12345
 
     def is_MR_modality(self) -> bool:

@@ -387,10 +387,10 @@ def sanitize_dicom_dataset(
         elif field == "PixelSpacing":
             try:
                 dataset_dictionary[field] = np.array(dataset_dictionary[field])
-            except:
+            except Exception as e:
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
-                vprint(f"Missing required {field} value {dicom_filename}")
+                vprint(f"Missing required {field} value {dicom_filename}:\n{e}")
         else:
             # check that the field is not empty or None
             if (

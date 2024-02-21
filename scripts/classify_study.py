@@ -1,10 +1,11 @@
+import argparse
 import sys
 from typing import Any
+import pandas as pd
+import tabulate
 import warnings
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
-import pandas as pd
-import tabulate
 
 # from tabulate import tabulate
 
@@ -19,9 +20,6 @@ except Exception as e:
         f"Try setting export PYTHONPATH={Path(__file__).parent.parent.as_posix()}/src"
     )
     sys.exit(255)
-
-
-import argparse
 
 
 def generate_separator(column_width):

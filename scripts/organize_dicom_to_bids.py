@@ -47,11 +47,11 @@ def organize_data_to_bids(df_path: str, output_dir: str):
         try:
             ses = int(row["InstanceCreationDate"])
         # if there is no sessions, there should be only one randomly created one
-        except:
+        except Exception as e:
             if len(sess) == 1:
                 ses = int(sess[0])
             else:
-                print("Impossible to determine session number.")
+                print(f"Impossible to determine session number.: {e}")
                 continue
 
         # this is the final session dir

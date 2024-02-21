@@ -619,7 +619,7 @@ def data_set_to_dict(ds):
         value: str | None = None
         try:
             value = str(elem.value).strip()
-        except:
+        except Exception as _:
             pass
         if value is not None or value == "":
             information[key] = value

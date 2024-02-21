@@ -16,6 +16,9 @@ from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
 import onnxruntime as rt
 
+from .create_dicom_fields_sheet.py import make_unique_ordered_list
+
+
 # overwrite objects for new data modalities
 plane_to_integer_mapping = {
     "ax": 0,
