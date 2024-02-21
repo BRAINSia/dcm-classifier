@@ -27,7 +27,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from typing import Dict, List, Union, Optional, Any
+from typing import Any
 
 
 imagetype_to_integer_mapping = {

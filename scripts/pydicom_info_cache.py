@@ -1,6 +1,5 @@
 import pydicom
 from pathlib import Path
-from typing import Dict, Union
 
 pydicom_read_cache_static_filename_dict: dict[str, pydicom.Dataset] = dict()
 

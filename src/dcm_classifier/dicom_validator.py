@@ -22,9 +22,6 @@ from pathlib import Path
 
 import json
 
-from typing import List, Optional
-from .dicom_volume import DicomSingleVolumeInfoBase
-
 
 class DicomValidatorBase:
     """

@@ -18,7 +18,7 @@
 
 from .dicom_volume import DicomSingleVolumeInfoBase
 import pandas as pd
-from typing import List, Optional, Any, Dict
+from typing import Any
 
 
 class DicomSingleSeries:

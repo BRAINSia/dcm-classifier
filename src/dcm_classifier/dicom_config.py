@@ -16,7 +16,6 @@
 #
 #  =========================================================================
 
-from typing import List
 
 """
 List of DICOM header columns that are required for this tool. In the future, the list can be expanded

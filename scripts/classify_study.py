@@ -34,8 +34,8 @@ def generate_row(*args, column_width):
 
 # Set up argparse
 description = (
-    f"Authors: Michal Brzus, Hans J. Johnson\n"
-    f"Classify image modality and acquisition plane of DICOM MR data by series and volumes.\n"
+    "Authors: Michal Brzus, Hans J. Johnson\n"
+    "Classify image modality and acquisition plane of DICOM MR data by series and volumes.\n"
 )
 parser = argparse.ArgumentParser(description=description)
 parser.add_argument(

@@ -1,13 +1,9 @@
-import sys
-from pathlib import Path
-
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import pandas as pd
 from sklearn import metrics
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
-from sklearn.model_selection import train_test_split  # Import train_test_split function
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier  # Import Decision Tree Classifier
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.tree import export_graphviz
@@ -21,12 +17,7 @@ import pydotplus
 from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
 import onnxruntime as rt
-import argparse
 
-from dcm_classify.dicom_config import (
-    # make_unique_ordered_list,
-    required_DICOM_fields,
-)
 
 rcParams.update({"figure.autolayout": True})
 

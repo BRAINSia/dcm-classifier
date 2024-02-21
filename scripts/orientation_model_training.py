@@ -1,6 +1,3 @@
-import sys
-from pathlib import Path
-
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -11,7 +8,6 @@ from sklearn.tree import DecisionTreeClassifier  # Import Decision Tree Classifi
 from sklearn.metrics import ConfusionMatrixDisplay, classification_report
 from sklearn.tree import export_graphviz
 
-import time
 from io import StringIO
 
 # from IPython.display import Image
@@ -202,7 +198,7 @@ def train_model(x1, x2, y1, y2, use_dt):
 
     # Genereta Classification Reports and save them as CSV files
     rf_df = pd.concat(rf_dfs, axis=0)
-    rf_df.to_excel(f"../training_outputs/orientation_class_report.xlsx")
+    rf_df.to_excel("../training_outputs/orientation_class_report.xlsx")
 
     # Generate figures to analyze the trained model
     # https://scikit-learn.org/stable/auto_examples/text/plot_document_classification_20newsgroups.html#sphx-glr-auto-examples-text-plot-document-classification-20newsgroups-py

@@ -1,9 +1,7 @@
-import argparse
 import re
 
 import pandas as pd
 from pathlib import Path
-import xlrd
 
 max_heder_length: int = 24
 
