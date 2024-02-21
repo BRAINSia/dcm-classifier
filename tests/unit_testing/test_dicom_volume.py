@@ -45,7 +45,7 @@ def test_get_series_pixel_spacing(mock_volumes):
     pixel_spacing = DicomSingleVolumeInfoBase(
         mock_volumes[0]
     ).get_series_pixel_spacing()
-    assert type(pixel_spacing) is str
+    assert isinstance(pixel_spacing, str)
     assert pixel_spacing == "[0.9375, 0.9375]"
 
 
@@ -60,12 +60,12 @@ def test_get_series_pixel_spacing(mock_volumes):
 
 def test_image_diagnostics(mock_volumes):
     volume_info = DicomSingleVolumeInfoBase(mock_volumes[0])
-    message = volume_info.get_image_diagnostics()
+    _ = volume_info.get_image_diagnostics()
 
 
 def test_get_series_size(mock_volumes):
     series_size = DicomSingleVolumeInfoBase(mock_volumes[0]).get_series_size()
-    assert type(series_size) == str
+    assert isinstance(series_size, str)
     assert series_size == "[256, 256, 22]"
 
 
@@ -84,7 +84,7 @@ def test_get_series_size(mock_volumes):
 def test_get_invalid_vol_itk_image(mock_volumes):
     # TODO - implement this test
     with pytest.raises(FileNotFoundError) as ex:
-        image = DicomSingleVolumeInfoBase(mock_volumes[0]).get_itk_image()
+        _ = DicomSingleVolumeInfoBase(mock_volumes[0]).get_itk_image()
     assert "No DICOMs in: " in str(ex.value)
     # assert image is not None
     # assert isinstance(image, FImageType)
@@ -133,7 +133,7 @@ def test_set_modality_probabilities(mock_volumes):
 
 def test_no_files_provided():
     with pytest.raises(ValueError) as ex:
-        vol = DicomSingleVolumeInfoBase([])
+        _ = DicomSingleVolumeInfoBase([])
     assert "No file names provided list" in str(ex.value)
 
 

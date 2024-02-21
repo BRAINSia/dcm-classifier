@@ -18,6 +18,8 @@ from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
 import onnxruntime as rt
 
+from .create_dicom_fields_sheet import make_unique_ordered_list
+
 
 rcParams.update({"figure.autolayout": True})
 

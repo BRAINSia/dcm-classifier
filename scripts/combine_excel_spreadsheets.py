@@ -8,7 +8,7 @@ import pandas as pd
 def get_all_column_names(excel_files: list[Path]) -> set[str]:
     # Get all column names from all excel files
 
-    available_columns = set()
+    # available_columns = set()
     all_dataframes = []
     for excel_file in excel_files:
         if "~$" in excel_file.as_posix():

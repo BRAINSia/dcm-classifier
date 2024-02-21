@@ -7,6 +7,7 @@ from dcm_classifier.utility_functions import (
     convert_array_to_min_max,
     sanitize_dicom_dataset,
     itk_read_from_dicomfn_list,
+    is_integer,
 )
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
@@ -224,9 +225,6 @@ def test_no_pixel_bandwidth():
 #     with pytest.raises(TypeError) as ex:
 #         ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
 #     assert "not 'NoneType'" in str(ex.value)
-
-
-from dcm_classifier.utility_functions import is_integer
 
 
 def test_is_integer():

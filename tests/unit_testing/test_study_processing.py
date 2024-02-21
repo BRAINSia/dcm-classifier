@@ -59,7 +59,7 @@ def test_get_list_of_primary_volume_info_with_search_series():
 
 # @pytest.mark.skip(reason="Need to add public data")
 def test_get_study_dictionary_and_set_inferer():
-    test_data_dicom_dir: str = "XXXX"
+    # test_data_dicom_dir: str = "XXXX"
     # study_path = relative_testing_data_path / test_data_dicom_dir
     study_path = (
         relative_testing_data_path / "anonymized_testing_data" / "anonymized_data"
