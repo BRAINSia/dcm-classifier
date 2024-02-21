@@ -132,9 +132,9 @@ class DicomSingleVolumeInfoBase:
         else:
             self.has_diffusion_gradient = False
         self.average_slice_spacing = -12345.0
-        self.acquisition_plane: str | None = None
-        self.is_isotropic: bool | None = None
-        self.has_contrast: bool | None = None
+        self.acquisition_plane: str = "UNKNOWN"
+        self.is_isotropic: bool = False
+        self.has_contrast: bool = False
         self.itk_image: FImageType | None = None
         (
             _one_study_found,
