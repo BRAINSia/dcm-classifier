@@ -1,6 +1,10 @@
 import pytest
 
-from dcm_classifier.image_type_inference import ImageTypeClassifierBase
+from dcm_classifier.image_type_inference import (
+    ImageTypeClassifierBase,
+    imagetype_to_integer_mapping,
+)
+from dcm_classifier.dicom_config import inference_features
 from dcm_classifier.study_processing import (
     ProcessOneDicomStudyToVolumesMappingBase,
 )
@@ -65,34 +69,6 @@ def test_get_study_dictionary_and_set_inferer():
         relative_testing_data_path / "anonymized_testing_data" / "anonymized_data"
     )
 
-    modality_columns = [
-        "ImageTypeADC",
-        "ImageTypeFA",
-        "ImageTypeTrace",
-        "SeriesVolumeCount",
-        "EchoTime",
-        "RepetitionTime",
-        "FlipAngle",
-        "PixelBandwidth",
-        "SAR",
-        "Diffusionb-valueCount",
-        "Diffusionb-valueMax",
-    ]
-
-    imagetype_to_integer_mapping = {
-        "adc": 0,
-        "fa": 1,
-        "tracew": 2,
-        "t2w": 3,
-        "t2starw": 4,
-        "t1w": 5,
-        "flair": 6,
-        "field_map": 7,
-        "dwig": 8,
-        "dwi_multishell": 9,
-        "fmri": 10,
-    }
-
     default_classification_model_filename: Path = (
         Path(__file__).parents[2] / "models" / "rf_classifier.onnx"
     )
@@ -104,7 +80,7 @@ def test_get_study_dictionary_and_set_inferer():
     study_to_volume_mapping_base.set_inferer(
         ImageTypeClassifierBase(
             classification_model_filename=default_classification_model_filename,
-            classification_feature_list=modality_columns,
+            classification_feature_list=inference_features,
             image_type_map=imagetype_to_integer_mapping,
             min_probability_threshold=0.4,
         )
@@ -115,7 +91,7 @@ def test_get_study_dictionary_and_set_inferer():
     )
     assert (
         study_to_volume_mapping_base.inferer.classification_feature_list
-        == modality_columns
+        == inference_features
     )
     assert (
         study_to_volume_mapping_base.inferer.imagetype_to_int_map
