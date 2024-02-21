@@ -65,26 +65,22 @@ SYM_024
 EOF
 
 
-if [ 1 -eq 1 ]; then
-
-for proj in $(cat todo_list); do
+while IFS= read -r proj; do
   data_table_file=${HOME}/dicom_data_tables/${proj}.xlsx
-  mkdir -p $(dirname ${data_table_file})
-  if [ -f ${data_table_file} ]; then
+  # shellcheck disable=SC2086
+  mkdir -p "$(dirname ${data_table_file})"
+  if [ -f "${data_table_file}" ]; then
     echo "Skipping ${proj}"
   else
-    echo ${proj} starting
-    python3 create_dicom_fields_sheet.py --dicom_path /johnsonhj_archive_00/predict_hd_dicoms/data/archive/${proj} --out ${data_table_file}
-    if [ $? -ne 0 ]; then
+    echo "${proj} starting"
+    if python3 create_dicom_fields_sheet.py --dicom_path "/johnsonhj_archive_00/predict_hd_dicoms/data/archive/${proj}" --out "${data_table_file}" ; then
+	    echo "SUCCESS PROCESSING"
 	    echo "FAILED PROCESSING"
-            echo python3 create_dicom_fields_sheet.py --dicom_path /johnsonhj_archive_00/predict_hd_dicoms/data/archive/${proj} --out ${data_table_file}
+            echo "python3 create_dicom_fields_sheet.py --dicom_path /johnsonhj_archive_00/predict_hd_dicoms/data/archive/${proj} --out ${data_table_file}"
 	    break
     fi
-    echo ${proj} stopping
+    echo "${proj} stopping"
   fi
-done
-
-fi
-
+done < todo_list
 
 #parallel -j 2 python3 create_dicom_fields_sheet.py --dicom_path /johnsonhj_archive_00/predict_hd_dicoms/data/archive/{} --out ${HOME}/dicom_data_tables/{}.xlsx :::: todo_list
