@@ -127,7 +127,7 @@ class ImageTypeClassifierBase:
             volume.get_one_volume_dcm_filenames()[0] for volume in volume_list
         ]
         diff_modality = infer_diffusion_from_gradient(first_dcm_per_volume)
-        self.series.set_modality(diff_modality)
+        self.series.set_series_modality(diff_modality)
 
     def check_if_diffusion(self) -> None:  # pragma: no cover
         raise NotImplementedError(
@@ -375,7 +375,7 @@ class ImageTypeClassifierBase:
                         "fa",
                     ]:
                         modality = "bval_vol"
-                volume.set_modality(modality)
+                volume.set_volume_modality(modality)
                 volume.set_modality_probabilities(pd.DataFrame(full_outputs, index=[0]))
 
         """
@@ -385,14 +385,14 @@ class ImageTypeClassifierBase:
         # volume's modality and acquisition plane
         if len(self.series.get_volume_list()) == 1:
             volume = self.series.get_volume_list()[0]
-            modality = volume.get_modality().replace("LOW_PROBABILITY_", "")
+            modality = volume.get_volume_modality().replace("LOW_PROBABILITY_", "")
             if modality == "bval_vol":
                 bval = volume.get_volume_bvalue()
                 if bval == 0:
                     modality = "B0"
                 else:
                     modality = "tracew"
-            self.series.set_modality(modality)
+            self.series.set_series_modality(modality)
             self.series.set_modality_probabilities(volume.get_modality_probabilities())
             self.series.set_acquisition_plane(volume.get_acquisition_plane())
             self.series.set_is_isotropic(volume.get_is_isotropic())
@@ -415,19 +415,20 @@ class ImageTypeClassifierBase:
 
             # get all modalities from the series
             modalities = [
-                volume.get_modality().replace("LOW_PROBABILITY_", "")
+                volume.get_volume_modality().replace("LOW_PROBABILITY_", "")
                 for volume in self.series.get_volume_list()
             ]
             unique_modalities = list(set(modalities))
             if len(unique_modalities) == 1:
-                # if unique_modalities[0] == "bval_vol":
-                #     self.check_if_diffusion()
                 self._update_diffusion_series_modality()
             else:
                 if "pd" in unique_modalities and "t2w" in unique_modalities:
-                    self.series.set_modality("PDT2")
+                    self.series.set_series_modality("PDT2")
                 else:
                     # if other scenarios are not met, we set the modality to the first volume's modality
-                    self.series.set_modality(
-                        self.series.get_volume_list()[0].get_modality()
+                    self.series.set_series_modality(
+                        self.series.get_volume_list()[0].get_volume_modality()
                     )
+        # reclassify volumes with more specific information
+        for volume in self.series.get_volume_list():
+            volume.set_series_modality(self.series.get_series_modality())

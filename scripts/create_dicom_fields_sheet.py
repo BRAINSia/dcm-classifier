@@ -639,7 +639,7 @@ def generate_dicom_dataframe(
         study.run_inference()
         print(f"Processing {ses_dir}: {study.series_dictionary}")
         for series_number, series in study.series_dictionary.items():
-            modality = series.get_modality()
+            modality = series.get_series_modality()
             plane = series.get_acquisition_plane()
             print(f"         {series_number} {modality} {plane}")
             img_dict = {}

@@ -93,7 +93,7 @@ class DicomValidatorBase:
             msg = f"""
     {"!" * 60}
     {"!" * 60}
-    Identified image type: {self.single_volume_info.get_modality()}-{self.single_volume_info.get_acquisition_plane()}
+    Identified image type: {self.single_volume_info.get_volume_modality()}-{self.single_volume_info.get_acquisition_plane()}
     Identified bvalue: {self.single_volume_info.get_volume_bvalue()}
     Identified SeriesNumber: {self.single_volume_info.get_series_number()}
 

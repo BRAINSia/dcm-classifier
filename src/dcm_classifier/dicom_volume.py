@@ -51,7 +51,7 @@ class DicomSingleVolumeInfoBase:
         bvalue (float): The b-value of the DICOM volume.
         volume_info_dict (Dict[str, Any]): A dictionary containing information about the DICOM volume.
         itk_image (Optional[FImageType]): The ITK image of the DICOM volume.
-        modality (Optional[str]): The modality of the DICOM volume (e.g., "CT", "MRI").
+        volume_modality (Optional[str]): The modality of the DICOM volume (e.g., "CT", "MRI").
         modality_probability (Optional[pd.DataFrame]): A DataFrame containing modality probabilities.
         acquisition_plane (Optional[str]): The acquisition plane of the DICOM volume (e.g., "Sagittal", "Axial").
 
@@ -123,7 +123,8 @@ class DicomSingleVolumeInfoBase:
         )
 
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
-        self.modality: str = "INVALID"
+        self.volume_modality: str = "INVALID"
+        self.series_modality: str = "INVALID"
         self.modality_probability: pd.DataFrame | None = None
         # TODO: For now set as false as it will be checked for series
         diffusion_gradient = get_diffusion_gradient_direction(self._pydicom_info)
@@ -141,7 +142,7 @@ class DicomSingleVolumeInfoBase:
             self.volume_info_dict,
         ) = self._make_one_study_info_mapping_from_filelist()
 
-    def set_modality(self, modality: str) -> None:
+    def set_volume_modality(self, modality: str) -> None:
         """
         Sets the modality of the DICOM data.
 
@@ -152,16 +153,38 @@ class DicomSingleVolumeInfoBase:
             raise ValueError(
                 f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."
             )
-        self.modality = modality
+        self.volume_modality = modality
 
-    def get_modality(self) -> str:
+    def get_volume_modality(self) -> str:
         """
         Retrieves the modality of the DICOM data.
 
         Returns:
             str: The modality information.
         """
-        return self.modality
+        return self.volume_modality
+
+    def set_series_modality(self, modality: str) -> None:
+        """
+        Sets the modality of the DICOM data.
+
+        Args:
+            modality (str): The modality information to be set.
+        """
+        if not isinstance(modality, str):
+            raise ValueError(
+                f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."
+            )
+        self.series_modality = modality
+
+    def get_series_modality(self) -> str:
+        """
+        Retrieves the modality of the DICOM data.
+
+        Returns:
+            str: The modality information.
+        """
+        return self.series_modality
 
     def set_is_isotropic(self, isotropic: bool) -> None:
         """
@@ -414,7 +437,7 @@ class DicomSingleVolumeInfoBase:
             optional_info_list=optional_DICOM_fields,
         )
         if not valid:
-            self.set_modality("INVALID")
+            self.set_volume_modality("INVALID")
             self.set_acquisition_plane("INVALID")
 
         volume_info_dict: dict[str, Any] = get_coded_dictionary_elements(

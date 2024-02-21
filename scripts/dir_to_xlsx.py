@@ -90,7 +90,7 @@ def output_data(directory: str, output_file: str):
             for series_num, series in study_dict.items():
                 # Write the path, modality, and acquisition plane for each series
                 sheet.write(i, 0, str(item.absolute()))
-                sheet.write(i, 1, series.get_modality())
+                sheet.write(i, 1, series.get_series_modality())
                 sheet.write(i, 2, series.get_acquisition_plane())
 
                 # Write the series info for each series
