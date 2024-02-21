@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from create_dicom_fields_sheet import generate_dicom_dataframe
 from glob import glob
 import random
