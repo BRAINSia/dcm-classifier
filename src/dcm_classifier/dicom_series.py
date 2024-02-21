@@ -103,6 +103,10 @@ class DicomSingleSeries:
         Args:
             modality (str): The modality of the series (e.g., "t1w", "flair").
         """
+        if not isinstance(modality, str):
+            raise ValueError(
+                f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."
+            )
         self.modality = modality
 
     def get_modality(self) -> str:
@@ -112,9 +116,13 @@ class DicomSingleSeries:
         Returns:
             str: The modality.
         """
+        if self.modality is None:
+            return "INVALID"
         return self.modality
 
-    def set_modality_probabilities(self, modality_probability: pd.DataFrame) -> None:
+    def set_modality_probabilities(
+        self, modality_probability: pd.DataFrame | None
+    ) -> None:
         """
         Set the modality probabilities DataFrame.
 
@@ -123,8 +131,8 @@ class DicomSingleSeries:
         """
         self.modality_probability = modality_probability
 
-    def get_modality_probabilities(self) -> pd.DataFrame:
-        """
+    def get_modality_probabilities(self) -> pd.DataFrame | None:
+        """s
         Get the modality probabilities DataFrame that returns probability per modality class.
 
         Returns:

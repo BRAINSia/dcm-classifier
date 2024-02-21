@@ -123,7 +123,7 @@ class DicomSingleVolumeInfoBase:
         )
 
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
-        self.modality: str | None = None
+        self.modality: str = "INVALID"
         self.modality_probability: pd.DataFrame | None = None
         # TODO: For now set as false as it will be checked for series
         diffusion_gradient = get_diffusion_gradient_direction(self._pydicom_info)
@@ -148,6 +148,10 @@ class DicomSingleVolumeInfoBase:
         Args:
             modality (str): The modality information to be set.
         """
+        if not isinstance(modality, str):
+            raise ValueError(
+                f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."
+            )
         self.modality = modality
 
     def get_modality(self) -> str:
@@ -208,7 +212,9 @@ class DicomSingleVolumeInfoBase:
         else:
             return "None"
 
-    def set_modality_probabilities(self, modality_probability: pd.DataFrame) -> None:
+    def set_modality_probabilities(
+        self, modality_probability: pd.DataFrame | None
+    ) -> None:
         """
         Sets the modality probabilities for the DICOM data.
 
@@ -217,7 +223,7 @@ class DicomSingleVolumeInfoBase:
         """
         self.modality_probability = modality_probability
 
-    def get_modality_probabilities(self) -> pd.DataFrame:
+    def get_modality_probabilities(self) -> pd.DataFrame | None:
         """
         Get the modality probabilities DataFrame that returns probability per modality class.
 
