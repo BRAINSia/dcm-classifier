@@ -3,7 +3,6 @@ import pytest
 from dcm_classifier.example_image_processing import slugify, rglob_for_singular_result
 from dcm_classifier.utility_functions import (
     vprint,
-    get_coded_dictionary_elements,
     get_diffusion_gradient_direction,
     convert_array_to_min_max,
     sanitize_dicom_dataset,

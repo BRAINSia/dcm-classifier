@@ -1,6 +1,5 @@
 from dcm_classify.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 import pydicom
-import pydicom.uid as uid
 
 
 def override_study_UIDs(session_dir: str):

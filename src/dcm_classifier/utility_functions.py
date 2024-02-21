@@ -17,7 +17,7 @@
 #  =========================================================================
 
 from pathlib import Path
-from typing import List, Dict, Any, Union, Optional
+from typing import Any
 import collections
 import pydicom
 from copy import deepcopy
@@ -26,9 +26,8 @@ import warnings
 import tempfile
 import numpy as np
 import numbers
-from itk.itkImagePython import itkImageF3
 from numpy import ndarray
-from pydicom.dataset import Dataset, FileDataset
+from pydicom.dataset import FileDataset
 from pydicom.multival import MultiValue
 from .dicom_config import inference_features as features
 
@@ -272,7 +271,7 @@ def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
     # check for derived data with constant diffusion gradient direction
     # this could happen when the header information is created based on one of the DWI files
     ds1 = pydicom.dcmread(filenames[0].as_posix(), stop_before_pixels=True)
-    if not (0x0008, 0x0008) in ds1:
+    if (0x0008, 0x0008) not in ds1:
         return "MISSING_IMAGE_TYPE"
     image_type = ds1[0x0008, 0x0008].value
     image_type_lower_str = str(image_type).lower()

@@ -1,14 +1,11 @@
-import os
 import re
 import subprocess
-import itk
 import pytest
 from pathlib import Path
 
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 from pydicom import Dataset
 from pydicom.dataset import FileMetaDataset
-from typing import List, Union
 import random
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 

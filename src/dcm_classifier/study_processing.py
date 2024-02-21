@@ -16,9 +16,7 @@
 #
 #  =========================================================================
 
-import sys
 from pathlib import Path, PurePath
-from typing import List, Union, Optional, Dict
 import itk
 
 from .dicom_volume import DicomSingleVolumeInfoBase

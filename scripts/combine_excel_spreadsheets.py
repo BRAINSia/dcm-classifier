@@ -1,16 +1,8 @@
-import sys
 from pathlib import Path
 import pandas
 
-from typing import Optional
 
 import pandas as pd
-from glob import glob
-from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
-from dcm_classifier.image_type_inference import ImageTypeClassifierBase
-
-import pydicom
-import openpyxl
 
 
 def get_all_column_names(excel_files: list[Path]) -> set[str]:
@@ -50,7 +42,6 @@ def get_all_column_names(excel_files: list[Path]) -> set[str]:
 
 
 if __name__ == "__main__":
-    import argparse
 
     home_dir = Path.home()
     excel_files: list[Path] = [

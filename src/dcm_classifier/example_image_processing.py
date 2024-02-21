@@ -1,7 +1,5 @@
 import re
 import unicodedata
-import sys
-from typing import List, Union, Optional, Dict
 import itk
 from pathlib import Path
 
@@ -322,7 +320,7 @@ def compare_3d_float_images(
         cif.Update()
         images_dict["diff"] = cif.GetOutput()
         num_pixels_in_error = cif.GetNumberOfPixelsWithDifferences()
-    except Exception as e:
+    except Exception:
         images_in_same_space = False
         # If images are not in the same space, do resampling
         rif = itk.ResampleImageFilter[FImageType, FImageType].New()

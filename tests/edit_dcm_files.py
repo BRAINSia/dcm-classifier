@@ -1,14 +1,3 @@
-import datetime
-import os
-
-from scripts import anonymize_dicom_directory
-
-import pydicom
-from pydicom.dataset import FileMetaDataset, FileDataset
-from pydicom.uid import UID
-from pydicom.filewriter import dcmwrite
-
-
 # file_meta = FileMetaDataset()
 # file_meta.MediaStorageSOPClassUID = UID('1.2.840.10008.5.1.4.1.1.2')
 # file_meta.MediaStorageSOPInstanceUID = UID("1.2.3")

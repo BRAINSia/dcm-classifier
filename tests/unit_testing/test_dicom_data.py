@@ -1,4 +1,3 @@
-import pytest
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 from pathlib import Path
