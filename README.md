@@ -9,7 +9,7 @@ This project was supported by several funding sources including:
  - [Botimageai](https://www.botimageai.com/).
 
 # Citing
-Please reference the manuscript: 
+Please reference the manuscript:
 
 `Michal Brzus, Cavan J. Riley, Joel Bruss, Aaron Boes, Randall Jones, Hans J. Johnson, "DICOM sequence selection for medical imaging applications," Proc. SPIE 12931, Medical Imaging 2024: Imaging Informatics for Healthcare, Research, and Applications, 12931 (2024)`
 

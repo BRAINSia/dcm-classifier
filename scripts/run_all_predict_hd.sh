@@ -67,7 +67,7 @@ EOF
 
 if [ 1 -eq 1 ]; then
 
-for proj in $(cat todo_list); do 
+for proj in $(cat todo_list); do
   data_table_file=${HOME}/dicom_data_tables/${proj}.xlsx
   mkdir -p $(dirname ${data_table_file})
   if [ -f ${data_table_file} ]; then
