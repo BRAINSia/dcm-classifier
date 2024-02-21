@@ -116,9 +116,9 @@ class ImageTypeClassifierBase:
         """
         return {v: k for k, v in self.imagetype_to_int_map.items()}
 
-    def check_if_diffusion(self) -> None:
+    def _update_diffusion_series_modality(self) -> None:
         """
-        After processing and file organization into volumes and serieses is completed, this function is called to
+        After processing and file organization into volumes and series is completed, this function is called to
         check if the series is a diffusion series. If so, the series modality is overriden to dwig.
         This function is called during inference
         """
@@ -128,6 +128,11 @@ class ImageTypeClassifierBase:
         ]
         diff_modality = infer_diffusion_from_gradient(first_dcm_per_volume)
         self.series.set_modality(diff_modality)
+
+    def check_if_diffusion(self) -> None:  # pragma: no cover
+        raise NotImplementedError(
+            "This method check_if_diffusion is deprecated, use  update_diffusion_series_modality instead."
+        )
 
     def set_series(self, series: DicomSingleSeries) -> None:
         """
@@ -417,7 +422,7 @@ class ImageTypeClassifierBase:
             if len(unique_modalities) == 1:
                 # if unique_modalities[0] == "bval_vol":
                 #     self.check_if_diffusion()
-                self.check_if_diffusion()
+                self._update_diffusion_series_modality()
             else:
                 if "pd" in unique_modalities and "t2w" in unique_modalities:
                     self.series.set_modality("PDT2")
