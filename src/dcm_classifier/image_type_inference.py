@@ -98,6 +98,15 @@ class ImageTypeClassifierBase:
         self.series_number: int | None = None
         self.info_dict: dict[str, Any] | None = None
 
+    def get_min_probability_threshold(self) -> float:
+        """
+        Get the minimum probability threshold for classification.
+
+        Returns:
+            float: Minimum probability threshold for classification.
+        """
+        return self.min_probability_threshold
+
     def get_int_to_type_map(self) -> dict:
         """
         Get the integer to image type mapping.
