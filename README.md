@@ -34,17 +34,23 @@ Install required packages
 
 `$ pip install -r requirements.txt`
 
+# Development
+`$ pip install -r requirements_dev.txt`
+
+`$ pre-commit install`
+`$ pre-commit run -a`
+
 Run the script!
 
 `python3 classify_study.py -m models/rf_classifier.onnx -d <path_to_dicom_session>`
 
-# Testing
+## Testing
 ```bash
   pytest
 # or to fail on warnings
   python3 -Werror::FutureWarning -m pytest
 ```
-# Coverage Analysis
+## Coverage Analysis
 ```bash
  coverage run --concurrency=multiprocessing --parallel-mode -m pytest tests --junitxml=tests/pytest.xml
  coverage combine
