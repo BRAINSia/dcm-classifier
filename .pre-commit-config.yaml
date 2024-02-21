@@ -1,0 +1,40 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-toml
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: name-tests-test
+        args: ['--pytest-test-first']
+      - id: trailing-whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.2.1
+
+    hooks:
+      # Run the linter.
+      - id: ruff
+        args: [ --fix ]
+      # exclude: ^noexcluded_dirs/
+  - repo: https://github.com/psf/black
+    # need to keep version for black in .pre-commit-config.yaml, requirements_dev.txt, and .github/workflows/*.yml
+    rev: 24.2.0
+    hooks:
+      - id: black
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        args: ["--exclude=SC1090"]
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.15.0
+    hooks:
+    -   id: pyupgrade
+        args: [--py310-plus]
