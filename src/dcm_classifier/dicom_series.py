@@ -30,7 +30,7 @@ class DicomSingleSeries:
         series_number (int): The series number.
         volume_info_list (List[DicomSingleVolumeInfoBase]): A list to store
             DicomSingleVolumeInfoBase objects for this series.
-        modality (Optional[str]): The modality of the series (e.g., "CT", "MRI").
+        series_modality (Optional[str]): The modality of the series (e.g., "CT", "MRI").
         modality_probability (Optional[pd.DataFrame]): A DataFrame containing modality
             probabilities.
         acquisition_plane (Optional[str]): The acquisition plane of the series (e.g.,
@@ -81,7 +81,7 @@ class DicomSingleSeries:
         """
         self.series_number: int = series_number
         self.volume_info_list: list[DicomSingleVolumeInfoBase] = list()
-        self.modality: str = "INVALID"
+        self.series_modality: str = "INVALID"
         self.modality_probability: pd.DataFrame | None = None
         self.acquisition_plane: str = "UNKNOWN"
         self.is_isotropic: bool = False
@@ -96,7 +96,7 @@ class DicomSingleSeries:
         """
         return self.series_number
 
-    def set_modality(self, modality: str) -> None:
+    def set_series_modality(self, modality: str) -> None:
         """
         Set the modality of the DICOM series.
 
@@ -107,18 +107,18 @@ class DicomSingleSeries:
             raise ValueError(
                 f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."
             )
-        self.modality = modality
+        self.series_modality = modality
 
-    def get_modality(self) -> str:
+    def get_series_modality(self) -> str:
         """
         Get the modality of the DICOM series.
 
         Returns:
             str: The modality.
         """
-        if self.modality is None:
+        if self.series_modality is None:
             return "INVALID"
-        return self.modality
+        return self.series_modality
 
     def set_modality_probabilities(
         self, modality_probability: pd.DataFrame | None
@@ -237,8 +237,8 @@ class DicomSingleSeries:
         sorted(self.volume_info_list, key=lambda x: x.get_volume_bvalue())
 
         # if subvolume already classified as dwig, set series modality to dwig
-        if new_volume_info.get_modality() == "dwig":
-            self.set_modality(new_volume_info.get_modality())
+        if new_volume_info.get_volume_modality() == "dwig":
+            self.set_series_modality(new_volume_info.get_volume_modality())
 
     def get_series_info_dict(self) -> dict[str, Any]:
         """

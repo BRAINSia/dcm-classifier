@@ -72,8 +72,8 @@ for series_number, series in study.series_dictionary.items():
         current_dict: dict[str, str] = {}
         current_dict["Series#"] = str(series_number)
         current_dict["Vol.#"] = str(index)
-        current_dict["Volume Modality"] = str(volume.get_modality())
-        current_dict["Series Modality"] = str(series.get_modality())
+        current_dict["Volume Modality"] = str(volume.get_volume_modality())
+        current_dict["Series Modality"] = str(series.get_series_modality())
         current_dict["Acq.Plane"] = str(volume.get_acquisition_plane())
         current_dict["Isotropic"] = str(volume.get_is_isotropic())
         print(volume.get_modality_probabilities().to_string(index=False))
