@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # file_meta = FileMetaDataset()
 # file_meta.MediaStorageSOPClassUID = UID('1.2.840.10008.5.1.4.1.1.2')
 # file_meta.MediaStorageSOPInstanceUID = UID("1.2.3")

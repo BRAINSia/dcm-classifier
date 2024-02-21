@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from dcm_classify.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 import pydicom
 
