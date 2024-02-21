@@ -255,7 +255,7 @@ class ImageTypeClassifierBase:
             numeric_inputs: np.array = model_inputs.astype(np.float32).to_numpy()
         except ValueError:
             # Short circuit if the inputs are not sufficient for inference
-            full_outputs["GUESS_ONNX"] = "InvalidDicomInputs"
+            full_outputs["GUESS_ONNX"] = ["InvalidDicomInputs"]
             return "INVALID", full_outputs
 
         pred_onx_run_output = sess.run(
@@ -263,18 +263,18 @@ class ImageTypeClassifierBase:
         )
         pred_onx = pred_onx_run_output[0]
         probability_onx = pred_onx_run_output[1]
-        full_outputs["GUESS_ONNX_CODE"] = pred_onx
-        full_outputs["GUESS_ONNX"] = pred_onx
+        full_outputs["GUESS_ONNX_CODE"] = [pred_onx]
+        full_outputs["GUESS_ONNX"] = [pred_onx]
 
         for type_name, type_integer_code in self.imagetype_to_int_map.items():
-            full_outputs["GUESS_ONNX"].replace(
-                to_replace=type_integer_code, value=type_name, inplace=True
+            full_outputs["GUESS_ONNX"] = full_outputs["GUESS_ONNX"].replace(
+                to_replace=type_integer_code, value=type_name
             )
 
         for col_index, class_probability in probability_onx[0].items():
             col_name = self.int_to_imagetype_map[int(col_index)]
             class_name: str = f"GUESS_ONNX_{col_name}"
-            full_outputs[class_name] = class_probability
+            full_outputs[class_name] = [class_probability]
 
         del col_index, class_probability, col_name, class_name
         image_type: str = full_outputs.iloc[
