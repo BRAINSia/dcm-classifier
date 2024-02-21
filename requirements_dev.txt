@@ -1,5 +1,6 @@
 -r requirements.txt
-black[d]==24.1.1
+# need to keep version for black in .pre-commit-config.yaml, requirements_dev.txt, and .github/workflows/*.yml
+black[d]==24.2.0
 coverage[toml]==7.3.2
 dicom-anonymizer==1.0.11
 matplotlib==3.8.2

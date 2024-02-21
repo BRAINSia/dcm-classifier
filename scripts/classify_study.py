@@ -1,7 +1,8 @@
 import sys
 from typing import Any
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
+
+warnings.simplefilter(action="ignore", category=FutureWarning)
 import pandas as pd
 import tabulate
 

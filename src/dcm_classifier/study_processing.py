@@ -166,9 +166,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             print(f"ERROR:  {self.study_directory} is not pathlike")
         self.raise_error_on_failure: bool = raise_error_on_failure
         self.search_series: dict[str, int] | None = search_series
-        self.series_dictionary: dict[
-            int, DicomSingleSeries
-        ] = self.__identify_single_volumes(self.study_directory)
+        self.series_dictionary: dict[int, DicomSingleSeries] = (
+            self.__identify_single_volumes(self.study_directory)
+        )
         self.inferer: ImageTypeClassifierBase | None = inferer
 
     def get_list_of_primary_volume_info(self) -> list[dict[str, str]]:
@@ -193,9 +193,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             for vol_index, subseries_vol_info in enumerate(
                 series_object.volume_info_list
             ):
-                primary_volume_info: dict[
-                    str, str
-                ] = subseries_vol_info.get_primary_volume_info(vol_index)
+                primary_volume_info: dict[str, str] = (
+                    subseries_vol_info.get_primary_volume_info(vol_index)
+                )
                 list_of_volume_info_dictionaries.append(primary_volume_info)
         return list_of_volume_info_dictionaries
 
