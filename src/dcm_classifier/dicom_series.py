@@ -83,9 +83,9 @@ class DicomSingleSeries:
         self.volume_info_list: list[DicomSingleVolumeInfoBase] = list()
         self.modality: str = "INVALID"
         self.modality_probability: pd.DataFrame | None = None
-        self.acquisition_plane: str | None = None
-        self.is_isotropic: bool | None = None
-        self.has_contrast: bool | None = None
+        self.acquisition_plane: str = "UNKNOWN"
+        self.is_isotropic: bool = False
+        self.has_contrast: bool = False
 
     def get_series_number(self) -> int:
         """
@@ -129,6 +129,11 @@ class DicomSingleSeries:
         Args:
             modality_probability (pd.DataFrame): A DataFrame containing modality probabilities.
         """
+        if not isinstance(modality_probability, pd.DataFrame):
+            raise ValueError(
+                "ERROR: Can only set_modality_probabilities with a pd.DataFrame."
+                f"Got type(modality_probability) = {type(modality_probability)}."
+            )
         self.modality_probability = modality_probability
 
     def get_modality_probabilities(self) -> pd.DataFrame | None:
@@ -147,6 +152,11 @@ class DicomSingleSeries:
         Args:
             isotropic (bool): The isotropic flag to be set.
         """
+        if not isinstance(isotropic, bool):
+            raise ValueError(
+                "ERROR: Can only set_is_isotropic with a pd.DataFrame."
+                f"Got type(isotropic) = {type(isotropic)}."
+            )
         self.is_isotropic = isotropic
 
     def get_is_isotropic(self) -> bool:
@@ -165,6 +175,11 @@ class DicomSingleSeries:
         Args:
             contrast (bool): The contrast flag to be set.
         """
+        if not isinstance(contrast, bool):
+            raise ValueError(
+                "ERROR: Can only set_has_contrast with a pd.DataFrame."
+                f"Got type(contrast) = {type(contrast)}."
+            )
         self.has_contrast = contrast
 
     def get_has_contrast(self) -> bool:
@@ -184,6 +199,11 @@ class DicomSingleSeries:
             acquisition_plane (str): The acquisition plane (e.g., "Sagittal", "Axial").
 
         """
+        if not isinstance(acquisition_plane, str):
+            raise ValueError(
+                "ERROR: Can only set_acquisition_plane with a str."
+                f"Got type(acquisition_plane) = {type(acquisition_plane)}."
+            )
         self.acquisition_plane = acquisition_plane
 
     def get_acquisition_plane(self) -> str:
