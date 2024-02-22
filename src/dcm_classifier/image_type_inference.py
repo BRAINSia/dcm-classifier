@@ -348,10 +348,10 @@ class ImageTypeClassifierBase:
 
         # classify volumes
         for volume in self.series.get_volume_list():
-            features_validated: bool = validate_features(volume.get_volume_info_dict())
+            features_validated: bool = validate_features(volume.get_volume_dictionary())
             if features_validated:
                 acquisition_plane: str = self.infer_acquisition_plane(
-                    feature_dict=volume.get_volume_info_dict()
+                    feature_dict=volume.get_volume_dictionary()
                 )
                 volume.set_acquisition_plane(acquisition_plane)
                 isotropic = self.infer_isotropic(feature_dict=self.info_dict)
@@ -361,7 +361,7 @@ class ImageTypeClassifierBase:
                 volume.set_has_contrast(contrast)
 
                 modality, full_outputs = self.infer_modality(
-                    feature_dict=volume.get_volume_info_dict()
+                    feature_dict=volume.get_volume_dictionary()
                 )
                 # POSSIBLE CATCH of classifier mistake
                 # if there is a B0 value, the modality should be bval_vol, or in some cases ADC, eADC or FA

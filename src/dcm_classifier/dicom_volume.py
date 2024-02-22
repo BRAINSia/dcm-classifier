@@ -68,7 +68,7 @@ class DicomSingleVolumeInfoBase:
 
         get_acquisition_plane(self) -> str:
 
-        get_volume_info_dict(self) -> Dict[str, Any]:
+        get_volume_dictionary(self) -> Dict[str, Any]:
 
         get_primary_volume_info(self, vol_index: int = 0) -> Dict[str, str]:
 
@@ -273,15 +273,6 @@ class DicomSingleVolumeInfoBase:
         """
         return self.acquisition_plane
 
-    def get_volume_info_dict(self) -> dict[str, Any]:
-        """
-        Retrieves a dictionary containing volume information for the DICOM data.
-
-        Returns:
-            Dict[str, Any]: A dictionary containing volume information.
-        """
-        return self.volume_info_dict
-
     def get_primary_volume_info(self, vol_index: int) -> dict[str, str]:
         """
         Get primary volume information for the specified volume index.
@@ -386,6 +377,10 @@ class DicomSingleVolumeInfoBase:
             Dict[str, Any]: A dictionary containing information about the DICOM volume.
         """
         return deepcopy(self.volume_info_dict)
+
+    def get_volume_info_dict(self) -> dict[str, Any]:
+        # This function should be deprecated  Use get_volume_dictionary instead
+        return self.get_volume_dictionary()
 
     def get_volume_bvalue(self) -> float:
         """

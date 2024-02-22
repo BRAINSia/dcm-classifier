@@ -79,7 +79,7 @@ for series_number, series in study.series_dictionary.items():
         print(volume.get_modality_probabilities().to_string(index=False))
         current_dict["Bvalue"] = str(volume.get_volume_bvalue())
         # info_dict = series.get_series_info_dict()
-        inputs_df: dict[str, Any] = volume.get_volume_info_dict()
+        inputs_df: dict[str, Any] = volume.get_volume_dictionary()
         for unwanted in [
             "FileName",
             "StudyInstanceUID",
