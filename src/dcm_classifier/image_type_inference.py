@@ -388,24 +388,26 @@ class ImageTypeClassifierBase:
             modality = volume.get_volume_modality().replace("LOW_PROBABILITY_", "")
             if modality == "bval_vol":
                 bval = volume.get_volume_bvalue()
-                if bval == 0:
-                    # Some TSE T2 images report bvalue of 0, so we need to check the probabilities
-                    modality_probabilities = volume.get_modality_probabilities()
-                    t2w_probability = modality_probabilities["GUESS_ONNX_t2w"][0]
-                    adc_probability = modality_probabilities["GUESS_ONNX_adc"][0]
-                    # tracew_probability = modality_probabilities["GUESS_ONNX_tracew"][0]
-                    dwi_probability = modality_probabilities["GUESS_ONNX_bval_vol"][0]
-                    if t2w_probability > dwi_probability:
-                        modality = "t2w"
-                    elif adc_probability > dwi_probability or adc_probability > 0.25:
-                        modality = "adc"
-                        # elif (
-                        #     tracew_probability > adc_probability
-                        #     and tracew_probability > 0.20
-                        # ):
-                        # modality = "tracew"
-                    else:
-                        modality = "B0"
+
+                modality_probabilities = volume.get_modality_probabilities()
+                volume_dictionary = volume.get_volume_dictionary()
+                t2w_probability = modality_probabilities["GUESS_ONNX_t2w"][0]
+                adc_probability = modality_probabilities["GUESS_ONNX_adc"][0]
+                dwi_probability = modality_probabilities["GUESS_ONNX_bval_vol"][0]
+                is_image_type_adc = volume_dictionary["Image Type_ADC"] == 1
+                is_diffusion_weighted = volume_dictionary["Image Type_DIFFUSION"] == 1
+                bval = volume.get_volume_bvalue()
+
+                if (
+                    t2w_probability > dwi_probability
+                    and not is_image_type_adc
+                    and not is_diffusion_weighted
+                ):
+                    modality = "t2w"
+                elif adc_probability > dwi_probability or is_image_type_adc:
+                    modality = "adc"
+                elif bval == 0:
+                    modality = "B0"
                 else:
                     modality = "tracew"
             self.series.set_series_modality(modality)
