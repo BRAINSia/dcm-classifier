@@ -389,7 +389,23 @@ class ImageTypeClassifierBase:
             if modality == "bval_vol":
                 bval = volume.get_volume_bvalue()
                 if bval == 0:
-                    modality = "B0"
+                    # Some TSE T2 images report bvalue of 0, so we need to check the probabilities
+                    modality_probabilities = volume.get_modality_probabilities()
+                    t2w_probability = modality_probabilities["GUESS_ONNX_t2w"][0]
+                    adc_probability = modality_probabilities["GUESS_ONNX_adc"][0]
+                    # tracew_probability = modality_probabilities["GUESS_ONNX_tracew"][0]
+                    dwi_probability = modality_probabilities["GUESS_ONNX_bval_vol"][0]
+                    if t2w_probability > dwi_probability:
+                        modality = "t2w"
+                    elif adc_probability > dwi_probability or adc_probability > 0.25:
+                        modality = "adc"
+                        # elif (
+                        #     tracew_probability > adc_probability
+                        #     and tracew_probability > 0.20
+                        # ):
+                        # modality = "tracew"
+                    else:
+                        modality = "B0"
                 else:
                     modality = "tracew"
             self.series.set_series_modality(modality)
