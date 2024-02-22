@@ -244,6 +244,14 @@ class DicomSingleVolumeInfoBase:
         Args:
             modality_probability (pd.DataFrame): A pandas DataFrame containing modality probabilities.
         """
+        if (
+            not isinstance(modality_probability, pd.DataFrame)
+            and modality_probability is not None
+        ):
+            raise ValueError(
+                "ERROR: Can only set_modality_probabilities with a pd.DataFrame."
+                f"Got type(modality_probability) = {type(modality_probability)}."
+            )
         self.modality_probability = modality_probability
 
     def get_modality_probabilities(self) -> pd.DataFrame | None:

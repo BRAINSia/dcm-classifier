@@ -129,7 +129,10 @@ class DicomSingleSeries:
         Args:
             modality_probability (pd.DataFrame): A DataFrame containing modality probabilities.
         """
-        if not isinstance(modality_probability, pd.DataFrame):
+        if (
+            not isinstance(modality_probability, pd.DataFrame)
+            and modality_probability is not None
+        ):
             raise ValueError(
                 "ERROR: Can only set_modality_probabilities with a pd.DataFrame."
                 f"Got type(modality_probability) = {type(modality_probability)}."
