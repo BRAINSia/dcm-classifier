@@ -196,6 +196,14 @@ def parse_column_headers(
     # del new_data_frame
     # training_data_frame.to_excel(training_data_frame_path, index=False)
 
+# rename and normalize diffusion bval col
+def set_diffusion_bval_bool(frame: pd.DataFrame) -> pd.DataFrame:
+    diffusion_bval_col = "Diffusionb-valueMax"
+    diffusion_bval_bool = "Diffusionb-valueCount"
+
+    frame[diffusion_bval_bool] = 1 if (frame[diffusion_bval_col].notna()) and (frame[diffusion_bval_bool] != 0) else 0
+    frame.rename(columns={diffusion_bval_bool: "Diffusionb-valueBool"}, inplace=True)
+    return frame
 
 if __name__ == "__main__":
     # base_data_dir = "/tmp/dcm_classifier_training_data/dcm_train_data"
@@ -226,6 +234,9 @@ if __name__ == "__main__":
     #     parse_column_headers(clean_header_df, file, output_dir + file_name, header=True)
     input_file = "/tmp/dicom_data/no_duplicates/combined_predicthd_data_Feb26.xlsx"
     input_frame = pd.read_excel(input_file)
+    # replace values over 5000 with -12345 (null)
+    input_frame[input_frame >= 5000] = -12345
+
     parse_column_headers(
         clean_header_df,
         input_file,
