@@ -1,7 +1,7 @@
 import re
 import pandas as pd
 from pathlib import Path
-from dcm_classifier.namic_dicom_typing import convert_array_to_index_value
+from src.dcm_classifier.namic_dicom_typing import convert_array_to_index_value
 
 
 max_header_length: int = 34
@@ -206,7 +206,7 @@ if __name__ == "__main__":
     base_data_dir = "/tmp/dcm_classifier_training_data/dcm_train_data"
     processed_data_dir = f"{base_data_dir}/processed_site_data"
     raw_data_dir = f"{base_data_dir}/raw_site_data"
-    header_data_dictionary_frame = f"{base_data_dir}/header_data_dictionary_Dec18.xlsx"
+    header_data_dictionary_frame = f"/home/cavriley/files/dcm_files/header_data_dictionary_Dec18.xlsx"
     header_df = pd.read_excel(header_data_dictionary_frame)
 
     # process header df
@@ -217,21 +217,21 @@ if __name__ == "__main__":
     # delete orig df
     del header_df
 
-    output_dir = f"{base_data_dir}/training/training_"
+    output_dir = f"/tmp/dicom_data/training/"
 
-    input_dir = f"{base_data_dir}/combined/split_combined_file"
-    for file in Path(input_dir).glob("*.xlsx"):
-        file_name = file.name
-        print(f"Input: {file}")
-        parse_column_headers(clean_header_df, file, output_dir + file_name, header=True)
-    # input_file = "/tmp/dcm_classifier_training_data/dcm_train_data/combined/combined_iowa_stroke_data_Jan9.xlsx"
-    # # input_frame = pd.read_excel(input_file)
-    # parse_column_headers(
-    #     clean_header_df,
-    #     input_file,
-    #     output_dir + "combined_iowa_stroke.xlsx",
-    #     header=True,
-    # )
+    # input_dir = f"{base_data_dir}/combined/split_combined_file"
+    # for file in Path(input_dir).glob("*.xlsx"):
+    #     file_name = file.name
+    #     print(f"Input: {file}")
+    #     parse_column_headers(clean_header_df, file, output_dir + file_name, header=True)
+    input_file = "/tmp/dicom_data/no_duplicates/combined_predicthd_data_Feb26.xlsx"
+    input_frame = pd.read_excel(input_file)
+    parse_column_headers(
+        clean_header_df,
+        input_file,
+        output_dir + "combined_training_predicthd_data_Feb26.xlsx",
+        header=True,
+    )
 
     # size = input_frame.shape[0]
     # # create 30 chunks
