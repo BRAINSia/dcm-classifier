@@ -152,10 +152,11 @@ def parse_column_headers(
         #     pass
         if "keep" in row["action"]:
             try:
-                new_data_frame[current_header] = pd.Series(input_df[current_header])
+                # new_data_frame[current_header] = pd.Series(input_df[current_header])
+                new_column_series = pd.Series(input_df[current_header]).reset_index(drop=True)
+                new_data_frame[current_header] = new_column_series
             except KeyError:
-                pass
-                # print(f"KeyError: {current_header}, in {file}")
+                print(f"KeyError: {current_header}, in ")
         elif row["action"] == "one_hot_encoding_from_array":
             try:
                 encoded_frame = one_hot_encoding_from_array(
@@ -165,8 +166,7 @@ def parse_column_headers(
                     left=new_data_frame, right=encoded_frame, on=index_field
                 )
             except KeyError:
-                # print(f"KeyError: {current_header}, in {file}")
-                pass
+                print(f"KeyError: {current_header}, in ")
 
         elif row["action"] == "one_hot_encoding_from_str_col":
             try:
@@ -177,8 +177,8 @@ def parse_column_headers(
                     left=new_data_frame, right=encoded_frame, on=index_field
                 )
             except KeyError:
-                # print(f"KeyError: {current_header}, in {file}")
-                pass
+                print(f"KeyError: {current_header}, in")
+
 
         # elif row["action"] == "one_hot_encoding_from_array_floats":
         #     encoded_frame = one_hot_encoding_from_array_floats(
@@ -232,15 +232,16 @@ if __name__ == "__main__":
     #     file_name = file.name
     #     print(f"Input: {file}")
     #     parse_column_headers(clean_header_df, file, output_dir + file_name, header=True)
-    input_file = "/tmp/dicom_data/no_duplicates/combined_predicthd_data_Feb26.xlsx"
+    input_file = "/tmp/dicom_data/V2-20240229/no_duplicates/combined_all_data_Feb29.xlsx"
     input_frame = pd.read_excel(input_file)
     # replace values over 5000 with -12345 (null)
-    input_frame[input_frame >= 5000] = -12345
+    # input_frame[input_frame >= 5000] = -12345
 
     parse_column_headers(
         clean_header_df,
         input_file,
-        output_dir + "combined_training_predicthd_data_Feb26.xlsx",
+        # output_dir + "combined_training_predicthd_data_Feb26.xlsx",
+        "/tmp/dicom_data/V2-20240229/training/combined_all_training_data_Mar5.xlsx",
         header=True,
     )
 
