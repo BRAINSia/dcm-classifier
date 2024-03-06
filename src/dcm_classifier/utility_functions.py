@@ -197,6 +197,8 @@ def get_bvalue(
             # print(f"Found BValue at {v} for {k}, {value} of type {dicom_element.VR}")
             try:
                 result = float(value)
+                if result > 5000:
+                    return -12345
             except ValueError:
                 print(
                     f"UNKNOWN CONVERSION OF VR={dicom_element.VR}: {type(dicom_element.value)} len={len(dicom_element.value)} ==> {dicom_element.value} to float"
