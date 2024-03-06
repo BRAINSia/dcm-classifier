@@ -443,23 +443,6 @@ def sanitize_dicom_dataset(
                 # ):
                 # The contrast is required but is empty if unknown but also may not be in every dataset
                 dataset_dictionary[field] = "None"
-
-        elif field == "Diffusionb-value":
-            if field not in dataset_dictionary.keys():
-                # Diffusionb-value is not a required field, it can be unknown
-                _default_inferred_value = -12345
-                dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
-                )
-        elif field == "Diffusionb-valueMax":
-            if field not in dataset_dictionary.keys():
-                # Diffusionb-valueMax is not a required field, it can be unknown
-                _default_inferred_value = -12345
-                dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
-                )
         elif field == "Echo Number(s)":
             if field not in dataset_dictionary.keys():
                 # EchoNumber(s) is not a required field, it can be unknown
