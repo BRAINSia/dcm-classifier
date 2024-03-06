@@ -69,7 +69,7 @@ optional_DICOM_fields: list[str] = [
 
 inference_features: list[str] = [
     "Diffusionb-valueBool",
-    "Diffusionb-valueMax",
+    "Diffusionb-value",
     "Echo Number(s)",
     "EchoTime",
     "Echo Train Length",
