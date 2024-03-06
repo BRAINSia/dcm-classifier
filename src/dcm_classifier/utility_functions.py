@@ -543,7 +543,9 @@ def sanitize_dicom_dataset(
 
 
 # organize required features
-image_type_features: list[str] = [field for field in features if "Image Type_" in field]
+image_type_features: list[str] = [
+    field for field in features if ("Image Type_" in field and "ADC" not in field)
+]
 manufacturer_features: list[str] = [
     field for field in features if "Manufacturer_" in field
 ]
@@ -580,6 +582,17 @@ def get_coded_dictionary_elements(
             return dict()
         elif name == "ImageType":
             lower_value_str: str = str(value).lower()
+            if "adc" in lower_value_str:
+                if "eadc" in lower_value_str:
+                    dataset_dictionary["Image Type_EADC"] = 1
+                    dataset_dictionary["Image Type_ADC"] = 0
+                else:
+                    dataset_dictionary["Image Type_ADC"] = 1
+                    dataset_dictionary["Image Type_EADC"] = 0
+            else:
+                dataset_dictionary["Image Type_ADC"] = 0
+                dataset_dictionary["Image Type_EADC"] = 0
+
             throw_away: int = len("Image Type_")
             for feature in image_type_features:
                 if feature[throw_away:].lower() in lower_value_str:
