@@ -1,23 +1,14 @@
 import pandas as pd
 
 
-# label_file = (
-#     "/home/mbrzus/programming/dcm_train_data/training/labeled/combined_all_Jan29.xlsx"
-# )
-# df = pd.read_excel(label_file)
-# # replace label bval_img with bval_vol
-# df.loc[df["label"] == "dwig", "label"] = "bval_vol"
-# df.loc[df["label"] == "t2starw", "label"] = "t2star"
-# df.to_excel(label_file, index=False)
+label_file = "/home/mbrzus/programming/dcm_train_data/V2-20240229/no_duplicates/labeling/combined_all_data_labeling_Feb29_final.xlsx"
+df = pd.read_excel(label_file, index_col=0)
+trainings_file = "/home/mbrzus/programming/dcm_train_data/V2-20240229/training/combined_all_training_data_Mar5.xlsx"
+trainings_df = pd.read_excel(trainings_file, index_col=0)
 
-label_file = "/home/mbrzus/programming/dcm_train_data/labeling/minipig/combined_minipig_labeling_final.xlsx"
-df = pd.read_excel(label_file)
-trainings_file = (
-    "/home/mbrzus/programming/dcm_train_data/training/minipig/training_minipig.xlsx"
-)
-trainings_df = pd.read_excel(trainings_file)
-
-label_df = df[["FileName", "label"]]
+label_df = df[
+    ["FileName", "Diffusionb-valueBool", "HasDiffusionGradientOrientation", "label"]
+]
 print(label_df.shape)
 print(label_df.head())
 
