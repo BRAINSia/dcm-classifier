@@ -252,6 +252,7 @@ class ImageTypeClassifierBase:
         # e_inputs = e_inputs[e_inputs["SeriesNumber"].notna()]
 
         # Load the ONNX model
+        print(f"\n\n{self.classification_model_filename.as_posix()}\n\n")
         sess: rt.InferenceSession = rt.InferenceSession(
             self.classification_model_filename.as_posix()
         )
@@ -361,18 +362,6 @@ class ImageTypeClassifierBase:
                 modality, full_outputs = self.infer_modality(
                     feature_dict=volume.get_volume_dictionary()
                 )
-                # POSSIBLE CATCH of classifier mistake
-                # if there is a B0 value, the modality should be bval_vol, or in some cases ADC, eADC or FA
-                # if the classifier predicts something else, we could catch it and manuall write most probable bval_vol
-                # TODO: verify this
-                if volume.get_volume_bvalue() >= 0:
-                    if modality.replace("LOW_PROBABILITY_", "") not in [
-                        "bval_vol",
-                        "adc",
-                        "eadc",
-                        "fa",
-                    ]:
-                        modality = "bval_vol"
                 volume.set_volume_modality(modality)
                 volume.set_modality_probabilities(pd.DataFrame(full_outputs, index=[0]))
 
@@ -384,39 +373,13 @@ class ImageTypeClassifierBase:
         if len(self.series.get_volume_list()) == 1:
             volume = self.series.get_volume_list()[0]
             modality = volume.get_volume_modality().replace("LOW_PROBABILITY_", "")
-            if modality == "bval_vol":
-                bval = volume.get_volume_bvalue()
 
-                modality_probabilities = volume.get_modality_probabilities()
-                volume_dictionary = volume.get_volume_dictionary()
-                t2w_probability = modality_probabilities["GUESS_ONNX_t2w"][0]
-                adc_probability = modality_probabilities["GUESS_ONNX_adc"][0]
-                dwi_probability = modality_probabilities["GUESS_ONNX_bval_vol"][0]
-                is_image_type_adc = volume_dictionary["Image Type_ADC"] == 1
-                is_diffusion_weighted = volume_dictionary["Image Type_DIFFUSION"] == 1
-                bval = volume.get_volume_bvalue()
-
-                if (
-                    t2w_probability > dwi_probability
-                    and not is_image_type_adc
-                    and not is_diffusion_weighted
-                ):
-                    modality = "t2w"
-                elif adc_probability > dwi_probability or is_image_type_adc:
-                    modality = "adc"
-                elif bval == 0:
-                    modality = "B0"
-                else:
-                    modality = "tracew"
             self.series.set_series_modality(modality)
             self.series.set_modality_probabilities(volume.get_modality_probabilities())
             self.series.set_acquisition_plane(volume.get_acquisition_plane())
             self.series.set_is_isotropic(volume.get_is_isotropic())
             self.series.set_has_contrast(volume.get_has_contrast())
         else:
-            # TODO: Add logic to aggregate modality and acquisition plane information from multiple volumes
-            # TODO: this would include, DWI, multishell DWI, TraceW, PD/T2w
-
             # for acquisition plane we assume as volumes in series have the same acquisition plane
             # similarly we propagate the isotropic and contrast
             self.series.set_acquisition_plane(
@@ -438,13 +401,21 @@ class ImageTypeClassifierBase:
             if len(unique_modalities) == 1:
                 self._update_diffusion_series_modality()
             else:
+                # PDT2 series usually contains one PD and one T2w volume
                 if "pd" in unique_modalities and "t2w" in unique_modalities:
                     self.series.set_series_modality("PDT2")
+                # DWI series usually contains b0 and dwig gradient volumes
+                elif "b0" in unique_modalities and "dwig" in unique_modalities:
+                    self.series.set_series_modality("dwig")
+                # TRACEW series often contains b0 and tracew volumes
+                elif "b0" in unique_modalities and "tracew" in unique_modalities:
+                    self.series.set_series_modality("tracew")
                 else:
                     # if other scenarios are not met, we set the modality to the first volume's modality
                     self.series.set_series_modality(
                         self.series.get_volume_list()[0].get_volume_modality()
                     )
+
         # reclassify volumes with more specific information
         for volume in self.series.get_volume_list():
             volume.set_series_modality(self.series.get_series_modality())
