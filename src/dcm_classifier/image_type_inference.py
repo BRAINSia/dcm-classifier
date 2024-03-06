@@ -31,18 +31,16 @@ from typing import Any
 
 
 imagetype_to_integer_mapping = {
-    "bval_vol": 0,
-    "t1w": 1,
-    "t2star": 2,
-    "t2w": 3,
-    "field_map": 4,
-    "pd": 5,
-    "flair": 6,
-    "adc": 7,
-    "fa": 8,
-    "fmri": 9,
-    "stir": 10,
-    "eadc": 11,
+    "t1w": 0,
+    "gret2star": 1,
+    "t2w": 2,
+    "flair": 3,
+    "b0": 4,
+    "tracew": 5,
+    "adc": 6,
+    "fa": 7,
+    "eadc": 8,
+    "dwig": 9,
 }
 
 
