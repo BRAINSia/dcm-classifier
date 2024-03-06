@@ -451,13 +451,14 @@ class DicomSingleVolumeInfoBase:
         # add features related to b-values and diffusion
         bvalue_current_dicom: int = int(self.get_volume_bvalue())
         volume_info_dict["Diffusionb-value"] = bvalue_current_dicom
-        volume_info_dict["Diffusionb-valueMax"] = bvalue_current_dicom
+        volume_info_dict["Diffusionb-valueBool"] = (
+            0 if bvalue_current_dicom == -12345 else 1
+        )
         volume_info_dict["HasDiffusionGradientOrientation"] = int(
             self.has_diffusion_gradient
         )
 
         # those values are 1 in case of a single volume
-        volume_info_dict["Diffusionb-valueCount"] = 1
         volume_info_dict["SeriesVolumeCount"] = 1
         # add list of dicom files for the volume
         volume_info_dict["list_of_ordered_volume_files"] = self.one_volume_dcm_filenames
