@@ -27,7 +27,7 @@ import tempfile
 import numpy as np
 import numbers
 from numpy import ndarray
-from pydicom.dataset import FileDataset
+from pydicom.dataset import Dataset
 from pydicom.multival import MultiValue
 from .dicom_config import inference_features as features
 
@@ -125,7 +125,7 @@ def is_integer(s: Any) -> bool:
 
 
 def get_bvalue(
-    dicom_header_info: FileDataset, round_to_nearst_10: bool = True
+    dicom_header_info: Dataset, round_to_nearst_10: bool = True
 ) -> float:
     """
     Extract and compute the b-value from DICOM header information.
