@@ -113,4 +113,5 @@ inference_features: list[str] = [
     "Variable Flip Angle Flag_Y",
     "dB/dt",
     "HasDiffusionGradientOrientation",
+    "likely_diffusion",
 ]

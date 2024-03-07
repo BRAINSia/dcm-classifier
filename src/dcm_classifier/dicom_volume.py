@@ -457,7 +457,18 @@ class DicomSingleVolumeInfoBase:
         volume_info_dict["HasDiffusionGradientOrientation"] = int(
             self.has_diffusion_gradient
         )
-
+        if (
+            volume_info_dict["Image Type_DIFFUSION"] == 1
+            or volume_info_dict["Image Type_ADC"] == 1
+            or volume_info_dict["Image Type_EADC"] == 1
+            or volume_info_dict["Image Type_TRACEW"] == 1
+            or volume_info_dict["Image Type_FA"] == 1
+            or volume_info_dict["Diffusionb-value"] > 0
+            or volume_info_dict["HasDiffusionGradientOrientation"] == 1
+        ):
+            volume_info_dict["likely_diffusion"] = 1
+        else:
+            volume_info_dict["likely_diffusion"] = 0
         # those values are 1 in case of a single volume
         volume_info_dict["SeriesVolumeCount"] = 1
         # add list of dicom files for the volume
