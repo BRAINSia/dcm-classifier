@@ -127,8 +127,8 @@ class DicomSingleVolumeInfoBase:
         self.series_modality: str = "INVALID"
         self.modality_probability: pd.DataFrame | None = None
         # TODO: For now set as false as it will be checked for series
-        diffusion_gradient = get_diffusion_gradient_direction(self._pydicom_info)
-        if diffusion_gradient is not None:
+        self.diffusion_gradient = get_diffusion_gradient_direction(self._pydicom_info)
+        if self.diffusion_gradient is not None:
             self.has_diffusion_gradient = True
         else:
             self.has_diffusion_gradient = False

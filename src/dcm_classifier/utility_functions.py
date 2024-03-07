@@ -210,6 +210,22 @@ def get_bvalue(
     return -12345
 
 
+def test_magnitude_of_1(vector: np.ndarray) -> bool:
+    """
+    Ensure that the magnitude of a vector is 1.
+
+    Args:
+        vector (np.ndarray): The input vector.
+
+    Returns:
+        bool: True if the magnitude of the vector is 1, False otherwise.
+    """
+    magnitude = np.linalg.norm(vector)
+    if np.absolute(1 - magnitude) > 1e-2:
+        return False
+    return True
+
+
 def get_diffusion_gradient_direction(
     dicom_header_info: pydicom.Dataset,
 ) -> np.ndarray | None:
@@ -233,6 +249,7 @@ def get_diffusion_gradient_direction(
             # "Toshiba" : # Uses (0x0018, 0x9087) standard
         }
     )
+    gradient_direction = None
     for k, v in private_tags_map.items():
         if v in dicom_header_info:
             gradient_direction_element = dicom_header_info[v]
@@ -248,14 +265,21 @@ def get_diffusion_gradient_direction(
                 else:
                     gradient_direction = np.array(gradient_direction_raw)
 
-                return gradient_direction
+                break
             else:
                 try:
                     gradient_direction = np.array(gradient_direction_element.value)
-                    return gradient_direction
+                    break
                 except TypeError:
-                    return None
-    return None
+                    gradient_direction = None
+
+    # ensure that the gradient direction is a 3D vector
+    if gradient_direction is not None:
+        gradient_direction_size = gradient_direction.size
+        if gradient_direction_size != 3 or not test_magnitude_of_1(gradient_direction):
+            gradient_direction = None
+
+    return gradient_direction
 
 
 def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
