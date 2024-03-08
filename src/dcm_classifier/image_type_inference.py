@@ -252,7 +252,6 @@ class ImageTypeClassifierBase:
         # e_inputs = e_inputs[e_inputs["SeriesNumber"].notna()]
 
         # Load the ONNX model
-        print(f"\n\n{self.classification_model_filename.as_posix()}\n\n")
         sess: rt.InferenceSession = rt.InferenceSession(
             self.classification_model_filename.as_posix()
         )
