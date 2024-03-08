@@ -454,6 +454,7 @@ class DicomSingleVolumeInfoBase:
         volume_info_dict["Diffusionb-valueBool"] = (
             0 if bvalue_current_dicom == -12345 else 1
         )
+        volume_info_dict["has_b0"] = 1 if bvalue_current_dicom == 0 else 0
         volume_info_dict["HasDiffusionGradientOrientation"] = int(
             self.has_diffusion_gradient
         )
