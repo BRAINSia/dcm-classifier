@@ -397,18 +397,30 @@ class ImageTypeClassifierBase:
                 for volume in self.series.get_volume_list()
             ]
             unique_modalities = list(set(modalities))
+
+            # get all bvalues in the series
+            bvals = [
+                volume.get_volume_bvalue() for volume in self.series.get_volume_list()
+            ]
+            unique_bvals = list(set(bvals))
             if len(unique_modalities) == 1:
-                self._update_diffusion_series_modality()
+                if -12345 not in unique_bvals:
+                    self._update_diffusion_series_modality()
+                else:
+                    self.series.set_series_modality(
+                        self.series.get_volume_list()[0].get_volume_modality()
+                    )
             else:
-                # PDT2 series usually contains one PD and one T2w volume
                 if "pd" in unique_modalities and "t2w" in unique_modalities:
                     self.series.set_series_modality("PDT2")
                 # DWI series usually contains b0 and dwig gradient volumes
-                elif "b0" in unique_modalities and "dwig" in unique_modalities:
-                    self.series.set_series_modality("dwig")
+                elif "dwig" in unique_modalities:
+                    self._update_diffusion_series_modality()
                 # TRACEW series often contains b0 and tracew volumes
-                elif "b0" in unique_modalities and "tracew" in unique_modalities:
+                elif "tracew" in unique_modalities:
                     self.series.set_series_modality("tracew")
+                elif -12345 not in unique_bvals:
+                    self._update_diffusion_series_modality()
                 else:
                     # if other scenarios are not met, we set the modality to the first volume's modality
                     self.series.set_series_modality(
