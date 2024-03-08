@@ -299,15 +299,6 @@ def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
     ds1 = pydicom.dcmread(filenames[0].as_posix(), stop_before_pixels=True)
     if (0x0008, 0x0008) not in ds1:
         return "MISSING_IMAGE_TYPE"
-    image_type = ds1[0x0008, 0x0008].value
-    image_type_lower_str = str(image_type).lower()
-    # For now we trust image type to be correct!!!
-    # in some cases Tracew and ADC images can have ImageType Original
-    # in this case we want to skip the image
-    if "'TRACEW'".lower() in image_type_lower_str:
-        return "tracew"
-    if "'ADC'".lower() in image_type_lower_str:
-        return "adc"
 
     gradient_direction_list = []
     for file in filenames:
@@ -317,7 +308,7 @@ def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
             gradient_direction_list.append(gradient_direction)
 
     unique_gradient_directions = np.unique(gradient_direction_list, axis=0)
-    if len(unique_gradient_directions) > 1:
+    if len(unique_gradient_directions) > 3:
         return "dwig"
 
     return "tracew"
