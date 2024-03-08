@@ -114,4 +114,5 @@ inference_features: list[str] = [
     "dB/dt",
     "HasDiffusionGradientOrientation",
     "likely_diffusion",
+    "has_b0"
 ]
