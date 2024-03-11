@@ -390,10 +390,6 @@ class DicomSingleVolumeInfoBase:
         """
         return deepcopy(self.volume_info_dict)
 
-    def get_volume_info_dict(self) -> dict[str, Any]:
-        # This function should be deprecated  Use get_volume_dictionary instead
-        return self.get_volume_dictionary()
-
     def get_volume_bvalue(self) -> float:
         """
         Get the b-value of the DICOM volume.
