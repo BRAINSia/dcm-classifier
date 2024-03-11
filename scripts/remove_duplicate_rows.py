@@ -2,8 +2,8 @@ import pandas as pd
 from pathlib import Path
 
 features = [
-    "Diffusionb-valueCount",
-    "Diffusionb-valueMax",
+    # "Diffusionb-valueCount",
+    # "Diffusionb-valueMax",
     "Echo Number(s)",
     "Echo Time",
     "Echo Train Length",
@@ -34,7 +34,10 @@ def remove_rows_with_duplicate_values(input_frame: str | pd.DataFrame, outpath: 
     else:
         df = input_frame
 
-    df = df[~df.duplicated(features, keep="first")]
+    try:
+        df = df[~df.duplicated(features, keep="first")]
+    except KeyError:
+        print("KeyError in removing duplicate rows")
 
     if save_to_excel:
         df.to_excel(outpath, index=False)
