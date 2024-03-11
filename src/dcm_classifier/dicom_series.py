@@ -236,12 +236,22 @@ class DicomSingleSeries:
             new_volume_info (DicomSingleVolumeInfoBase): The volume information to add.
         """
         self.volume_info_list.append(new_volume_info)
-        # Sort subvolumes based on bvalues similar to dcm2niix
-        sorted(self.volume_info_list, key=lambda x: x.get_volume_bvalue())
+        # Sort subvolumes
+        self.organize_volumes()
 
         # if subvolume already classified as dwig, set series modality to dwig
         if new_volume_info.get_volume_modality() == "dwig":
             self.set_series_modality(new_volume_info.get_volume_modality())
+
+    def organize_volumes(self) -> None:
+        """
+        Organize the subvolumes within the series based on acquisition time.
+        """
+        # AcquisitionTime is an optional field, this might need to be changed in the future
+        sorted(self.volume_info_list, key=lambda x: x.get_volume_dictionary()["AcquisitionTime"])
+        # assign the index to each volume
+        for index, volume in enumerate(self.volume_info_list):
+            volume.set_volume_index(index)
 
     def get_series_info_dict(self) -> dict[str, Any]:
         """
