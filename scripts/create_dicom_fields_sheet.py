@@ -5,7 +5,6 @@ from typing import Optional
 import pandas as pd
 from glob import glob
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
-from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 
 import pydicom
 
@@ -165,32 +164,20 @@ def data_set_to_dict(ds):
 
 
 def generate_dicom_dataframe(
-    session_dirs: list, output_file: str | None, inferer: ImageTypeClassifierBase, save_to_excel: bool = True
+    session_dirs: list, output_file: str | None, save_to_excel: bool = True
 ) -> None | pd.DataFrame:
     dfs = [pd.DataFrame.from_dict({})]
     for ses_dir in session_dirs:
-        study = ProcessOneDicomStudyToVolumesMappingBase(
-            study_directory=ses_dir, inferer=inferer
-        )
-        study.run_inference()
-        print(f"Processing {ses_dir}: {study.series_dictionary}")
+        study = ProcessOneDicomStudyToVolumesMappingBase(study_directory=ses_dir)
+
         for series_number, series in study.series_dictionary.items():
-            series_modality = series.get_series_modality()
-            series_plane = series.get_acquisition_plane()
-            print(f"         {series_number} {series_modality} {series_plane}")
+
             for index, series_vol in enumerate(series.volume_info_list):
                 ds = pydicom.dcmread(
                     series_vol.one_volume_dcm_filenames[0], stop_before_pixels=True
                 )
                 img_dict = data_set_to_dict(ds)
-                img_dict["_vol_index"] = index
-                img_dict["_dcm_volume_type"] = series_vol.get_volume_modality()
-                img_dict[
-                    "_dcm_volume_orientation_patient"
-                ] = series_vol.get_acquisition_plane()
-                img_dict["_dcm_series_number"] = series_number
-                img_dict["_dcm_series_type"] = series_modality
-                img_dict["_dcm_series_orientation_patient"] = series_plane
+
                 try:
                     img_dict["FileName"] = series_vol.one_volume_dcm_filenames[0]
                 except Exception:
@@ -206,12 +193,6 @@ def generate_dicom_dataframe(
         all_columns = list(df.columns)
         ordered_columns = [
             "FileName",
-            "_vol_index",
-            "_dcm_volume_type",
-            "_dcm_volume_orientation_patient",
-            "_dcm_series_number",
-            "_dcm_series_type",
-            "_dcm_series_orientation_patient",
         ] + [x for x in output_additional_flags if x in all_columns]
 
         prefered_odering = make_unique_ordered_list(ordered_columns + all_columns)
@@ -260,6 +241,6 @@ if __name__ == "__main__":
     if not model.exists():
         print(f"Model {model} does not exist")
         sys.exit(255)
-    inferer = ImageTypeClassifierBase(classification_model_filename=model)
-    generate_dicom_dataframe(session_dirs=ses_dirs, output_file=out, inferer=inferer)
+    generate_dicom_dataframe(session_dirs=ses_dirs, output_file=out)
     print(out)
+
