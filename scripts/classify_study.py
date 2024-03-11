@@ -71,7 +71,7 @@ for series_number, series in study.series_dictionary.items():
         #         print(generate_row(str(series_number), modality, plane, iso, column_width=col_width))
         current_dict: dict[str, str] = {}
         current_dict["Series#"] = str(series_number)
-        current_dict["Vol.#"] = str(index)
+        current_dict["Vol.#"] = str(volume.get_volume_index())
         current_dict["Volume Modality"] = str(volume.get_volume_modality())
         current_dict["Series Modality"] = str(series.get_series_modality())
         current_dict["Acq.Plane"] = str(volume.get_acquisition_plane())
