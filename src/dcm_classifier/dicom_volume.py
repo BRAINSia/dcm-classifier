@@ -122,21 +122,26 @@ class DicomSingleVolumeInfoBase:
             _first_filename_for_volume, stop_before_pixels=True, force=True
         )
 
+        # set diffusion information
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
-        self.volume_modality: str = "INVALID"
-        self.series_modality: str = "INVALID"
-        self.modality_probability: pd.DataFrame | None = None
-        # TODO: For now set as false as it will be checked for series
         self.diffusion_gradient = get_diffusion_gradient_direction(self._pydicom_info)
         if self.diffusion_gradient is not None:
             self.has_diffusion_gradient = True
         else:
             self.has_diffusion_gradient = False
+
+        # set default values
+        self.volume_index: int | None = None
+        self.volume_modality: str = "INVALID"
+        self.series_modality: str = "INVALID"
+        self.modality_probability: pd.DataFrame | None = None
         self.average_slice_spacing = -12345.0
         self.acquisition_plane: str = "UNKNOWN"
         self.is_isotropic: bool = False
         self.has_contrast: bool = False
         self.itk_image: FImageType | None = None
+
+        # process volume DICOM files
         (
             _one_study_found,
             self.volume_info_dict,
@@ -222,7 +227,6 @@ class DicomSingleVolumeInfoBase:
         """
         return self.has_contrast
 
-    # TODO change
     def get_contrast_agent(self) -> str:
         """
         Retrieves the contrast agent of the DICOM data.
