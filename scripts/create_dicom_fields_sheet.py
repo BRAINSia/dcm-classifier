@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 from glob import glob
-from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
-from dcm_classifier.image_type_inference import ImageTypeClassifierBase
+from src.dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+from src.dcm_classifier.image_type_inference import ImageTypeClassifierBase
 
 import pydicom
 
