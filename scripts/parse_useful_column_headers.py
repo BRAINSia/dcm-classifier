@@ -91,7 +91,7 @@ def one_hot_encoding_from_str_col(
     return output_frame
 
 
-def truncate_column_names(df: pd.DataFrame, max_length: int) -> pd.DataFrame:
+def truncate_column_names(df: pd.DataFrame, max_length: int) -> pd.DataFrame | None:
     for col in df.columns:
         df[col].name = col.replace(col, col[:max_length])
     return df
@@ -100,10 +100,10 @@ def truncate_column_names(df: pd.DataFrame, max_length: int) -> pd.DataFrame:
 def parse_column_headers(
     header_dictionary_df: pd.DataFrame,
     input_file: str | Path,
-    output_path: str | Path,
-):
+    output_path: str | Path = None,
+    save_to_excel: bool = True,
+) -> pd.DataFrame | None:
     index_field = "FileName"
-    print(f"Input: {input_file}")
     input_df = pd.read_excel(input_file)
 
     # remove the rows that have no file name
@@ -140,21 +140,15 @@ def parse_column_headers(
                 )
             except KeyError:
                 print(f"KeyError: {current_header}")
-
-    new_data_frame.to_excel(output_path, index=False)
-    print(f"Output: {output_path}")
+    if save_to_excel:
+        new_data_frame.to_excel(output_path, index=False)
+    else:
+        return new_data_frame
 
 
 if __name__ == "__main__":
-    # base_data_dir = "/tmp/dcm_classifier_training_data/dcm_train_data"
-    # processed_data_dir = f"{base_data_dir}/processed_site_data"
-    # raw_data_dir = f"{base_data_dir}/raw_site_data"
-    # header_data_dictionary_frame = f"{base_data_dir}/header_data_dictionary_Dec18.xlsx"
-
-    base_data_dir = "/tmp/dcm_classifier_training_data/dcm_train_data"
-    processed_data_dir = f"{base_data_dir}/processed_site_data"
-    raw_data_dir = f"{base_data_dir}/raw_site_data"
-    header_data_dictionary_frame = f"path_to_header_dictionary"
+    base_dir = ""
+    header_data_dictionary_frame = f"{base_dir}/path_to_header_dictionary"
     header_df = pd.read_excel(header_data_dictionary_frame)
 
     # process header df
@@ -165,13 +159,11 @@ if __name__ == "__main__":
     # delete orig df
     del header_df
 
-    output_dir = f"/tmp/dicom_data/training/"
-
-    input_file = "/tmp/dicom_data/V2-20240229/no_duplicates/combined_all_data_Feb29.xlsx"
-    input_frame = pd.read_excel(input_file)
+    output_file = f"{base_dir}/"
+    input_file = f"{base_dir}/"
 
     parse_column_headers(
-        clean_header_df,
-        input_file,
-        "/tmp/dicom_data/V2-20240229/training/combined_all_training_data_Mar5.xlsx",
+        header_dictionary_df=clean_header_df,
+        input_file=input_file,
+        output_path=output_file,
     )

@@ -164,8 +164,8 @@ def data_set_to_dict(ds: pydicom.dataset.Dataset):
 
 
 def generate_dicom_dataframe(
-    session_dirs: list, output_file: str, inferer: ImageTypeClassifierBase
-):
+    session_dirs: list, output_file: str, inferer: ImageTypeClassifierBase, save_to_excel: bool = True
+) -> pd.DataFrame | None:
     dfs = [pd.DataFrame.from_dict({})]
     for ses_dir in session_dirs:
         study = ProcessOneDicomStudyToVolumesMappingBase(
@@ -206,8 +206,10 @@ def generate_dicom_dataframe(
         prefered_odering = make_unique_ordered_list(ordered_columns + all_columns)
 
         df = df[prefered_odering]
-
-        df.to_excel(output_file, index=False)
+        if save_to_excel:
+            df.to_excel(output_file, index=False)
+        else:
+            return df
     else:
         print(f"NO MR DICOM DATA FOUND IN {session_dirs}")
 
