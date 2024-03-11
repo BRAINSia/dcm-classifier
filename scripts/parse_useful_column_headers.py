@@ -99,12 +99,16 @@ def truncate_column_names(df: pd.DataFrame, max_length: int) -> pd.DataFrame | N
 
 def parse_column_headers(
     header_dictionary_df: pd.DataFrame,
-    input_file: str | Path,
+    input_file: (str | Path) | pd.DataFrame,
     output_path: str | Path = None,
     save_to_excel: bool = True,
 ) -> pd.DataFrame | None:
     index_field = "FileName"
-    input_df = pd.read_excel(input_file)
+
+    if isinstance(input_file, pd.DataFrame):
+        input_df = input_file
+    else:
+        input_df: pd.DataFrame = pd.read_excel(input_file)
 
     # remove the rows that have no file name
     input_df = input_df[input_df["FileName"].notna()]
