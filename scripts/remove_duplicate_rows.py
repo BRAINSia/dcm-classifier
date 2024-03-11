@@ -29,7 +29,7 @@ def remove_rows_with_duplicate_values(input_frame: str | pd.DataFrame, outpath: 
     """
     Remove rows with duplicate values from a pandas dataframe
     """
-    if isinstance(input_frame, str):
+    if type(input_frame) is str:
         df = pd.read_excel(input_frame)
     else:
         df = input_frame
