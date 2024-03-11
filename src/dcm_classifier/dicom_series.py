@@ -140,7 +140,7 @@ class DicomSingleSeries:
         self.modality_probability = modality_probability
 
     def get_modality_probabilities(self) -> pd.DataFrame | None:
-        """s
+        """
         Get the modality probabilities DataFrame that returns probability per modality class.
 
         Returns:
@@ -238,10 +238,6 @@ class DicomSingleSeries:
         self.volume_info_list.append(new_volume_info)
         # Sort subvolumes
         self.organize_volumes()
-
-        # if subvolume already classified as dwig, set series modality to dwig
-        if new_volume_info.get_volume_modality() == "dwig":
-            self.set_series_modality(new_volume_info.get_volume_modality())
 
     def organize_volumes(self) -> None:
         """
