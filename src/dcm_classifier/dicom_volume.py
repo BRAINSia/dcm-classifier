@@ -417,6 +417,24 @@ class DicomSingleVolumeInfoBase:
             print(f"Can not convert to int {self._pydicom_info.SeriesNumber}: {e}")
         return -12345
 
+    def get_volume_index(self) -> Optional[int]:
+        """
+        Get the Volume Index within the Series.
+
+        Returns:
+            int: The Volume Index as an integer.
+        """
+        return self.volume_index
+
+    def set_volume_index(self, volume_index: int) -> None:
+        """
+        Set the Volume Index within the Series.
+
+        Args:
+            volume_index (int): The Volume Index within its series.
+        """
+        self.volume_index = volume_index
+
     def is_MR_modality(self) -> bool:
         """
         Check if the modality of the DICOM volume is MR (Magnetic Resonance).
