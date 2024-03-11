@@ -23,7 +23,7 @@ import pandas as pd
 import json
 from copy import deepcopy
 
-from typing import Any
+from typing import Any, List, Dict, Optional
 import pydicom
 from .utility_functions import (
     get_bvalue,
