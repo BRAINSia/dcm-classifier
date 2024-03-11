@@ -105,7 +105,7 @@ def parse_column_headers(
 ) -> pd.DataFrame | None:
     index_field = "FileName"
 
-    if isinstance(input_file, pd.DataFrame):
+    if type(input_file) is pd.DataFrame:
         input_df = input_file
     else:
         input_df: pd.DataFrame = pd.read_excel(input_file)

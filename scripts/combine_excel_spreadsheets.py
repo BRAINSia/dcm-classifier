@@ -7,35 +7,38 @@ import pandas
 import pandas as pd
 
 
-def get_all_column_names(excel_files: list[Path]) -> set[str]:
+def get_all_column_names(excel_files: list[Path] | list[pd.DataFrame]) -> pd.DataFrame:
     # Get all column names from all excel files
 
     # available_columns = set()
     all_dataframes = []
-    for excel_file in excel_files:
-        if "~$" in excel_file.as_posix():
-            # Skip temp files
-            continue
-        print(f"Processing {excel_file}")
+    if not type(excel_files[0]) is pd.DataFrame:
+        for excel_file in excel_files:
+            if "~$" in excel_file.as_posix():
+                # Skip temp files
+                continue
+            print(f"Processing {excel_file}")
 
-        with open(excel_file, "rb") as file:
-            file_extension = excel_file.suffix
-            if file_extension == ".xlsx":
-                df = pd.read_excel(file.read(), engine="openpyxl")
-            elif file_extension == ".xls":
-                df = pd.read_excel(file.read())
-            # elif file_extension == ".csv":
-            #     df = pd.read_csv(file.read())
-            else:
-                raise ValueError(f"Unknown file extension {file_extension}")
+            with open(excel_file, "rb") as file:
+                file_extension = excel_file.suffix
+                if file_extension == ".xlsx":
+                    df = pd.read_excel(file.read(), engine="openpyxl")
+                elif file_extension == ".xls":
+                    df = pd.read_excel(file.read())
+                # elif file_extension == ".csv":
+                #     df = pd.read_csv(file.read())
+                else:
+                    raise ValueError(f"Unknown file extension {file_extension}")
 
-            all_dataframes.append(df)
+                all_dataframes.append(df)
 
-            # curr_columns = set(df.columns)
-            # new_columns = curr_columns - available_columns
-            # print(new_columns)
-            # for col in new_columns:
-            #     available_columns.add(col)
+                # curr_columns = set(df.columns)
+                # new_columns = curr_columns - available_columns
+                # print(new_columns)
+                # for col in new_columns:
+                #     available_columns.add(col)
+    else:
+        all_dataframes = excel_files
 
     big_dataframe: pandas.DataFrame = pd.concat(
         all_dataframes, axis=0, ignore_index=True
