@@ -25,11 +25,14 @@ features = [
 ]
 
 
-def remove_rows_with_duplicate_values(input_path: str, outpath: str = None, save_to_excel: bool = True) -> None | pd.DataFrame:
+def remove_rows_with_duplicate_values(input_frame: str | pd.DataFrame, outpath: str = None, save_to_excel: bool = True) -> None | pd.DataFrame:
     """
     Remove rows with duplicate values from a pandas dataframe
     """
-    df = pd.read_excel(input_path)
+    if isinstance(input_frame, str):
+        df = pd.read_excel(input_frame)
+    else:
+        df = input_frame
 
     df = df[~df.duplicated(features, keep="first")]
 
@@ -37,6 +40,7 @@ def remove_rows_with_duplicate_values(input_path: str, outpath: str = None, save
         df.to_excel(outpath, index=False)
     else:
         return df
+
 
 if __name__ == "__main__":
     input_path = ""
