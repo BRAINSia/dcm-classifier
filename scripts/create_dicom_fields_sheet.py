@@ -136,8 +136,6 @@ output_additional_flags = [
 ]
 
 
-
-
 # PROSTAT_TYPE is a simple application of the series description classifier rule set.
 result_columns = ["PROSTAT_TYPE"]
 
@@ -177,7 +175,7 @@ def generate_dicom_dataframe(
         study.run_inference()
         print(f"Processing {ses_dir}: {study.series_dictionary}")
         for series_number, series in study.series_dictionary.items():
-            series_modality = series.get_modality()
+            series_modality = series.get_series_modality()
             series_plane = series.get_acquisition_plane()
             print(f"         {series_number} {series_modality} {series_plane}")
             for index, series_vol in enumerate(series.volume_info_list):
@@ -186,7 +184,7 @@ def generate_dicom_dataframe(
                 )
                 img_dict = data_set_to_dict(ds)
                 img_dict["_vol_index"] = index
-                img_dict["_dcm_volume_type"] = series_vol.get_modality()
+                img_dict["_dcm_volume_type"] = series_vol.get_volume_modality()
                 img_dict[
                     "_dcm_volume_orientation_patient"
                 ] = series_vol.get_acquisition_plane()
@@ -257,7 +255,7 @@ if __name__ == "__main__":
     model: Path = Path(args.model)
     out = args.out
 
-    path_dirs = sorted(list(glob(f"{dicom_path}/*/*")))
+    path_dirs = sorted(list(glob(f"{dicom_path}/*")))
     ses_dirs = [x for x in path_dirs if Path(x).is_dir()]
     if not model.exists():
         print(f"Model {model} does not exist")
