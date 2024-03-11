@@ -1,14 +1,14 @@
-#!/usr/bin/env python3
-
 import sys
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 from glob import glob
-from src.dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
-from src.dcm_classifier.image_type_inference import ImageTypeClassifierBase
+from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 
 import pydicom
+
 
 phi_tags = (
     "Acquisition Date",
@@ -102,6 +102,7 @@ phi_tags = (
     "Window Center & Width Explanation",
 )
 
+
 output_additional_flags = [
     "FileName",
     "StudyInstanceUID",
@@ -135,8 +136,10 @@ output_additional_flags = [
 ]
 
 
-result_columns = ["PROSTAT_TYPE"]
 
+
+# PROSTAT_TYPE is a simple application of the series description classifier rule set.
+result_columns = ["PROSTAT_TYPE"]
 
 def make_unique_ordered_list(seq):
     # https://stackoverflow.com/a/480227
@@ -145,7 +148,7 @@ def make_unique_ordered_list(seq):
     return [x for x in seq if not (x in seen or seen_add(x))]
 
 
-def data_set_to_dict(ds: pydicom.dataset.Dataset):
+def data_set_to_dict(ds):
     information = dict()
     for elem in ds:
         if elem.VR in ["SQ", "OB", "OW", "OF", "UT", "UN"]:
@@ -156,7 +159,7 @@ def data_set_to_dict(ds: pydicom.dataset.Dataset):
         value: str | None = None
         try:
             value = str(elem.value).strip()
-        except Exception as _:
+        except:
             pass
         if value is not None or value == "":
             information[key] = value
@@ -164,8 +167,8 @@ def data_set_to_dict(ds: pydicom.dataset.Dataset):
 
 
 def generate_dicom_dataframe(
-    session_dirs: list, output_file: str, inferer: ImageTypeClassifierBase, save_to_excel: bool = True
-) -> pd.DataFrame | None:
+    session_dirs: list, output_file: str | None, inferer: ImageTypeClassifierBase, save_to_excel: bool = True
+) -> None | pd.DataFrame:
     dfs = [pd.DataFrame.from_dict({})]
     for ses_dir in session_dirs:
         study = ProcessOneDicomStudyToVolumesMappingBase(
@@ -174,23 +177,30 @@ def generate_dicom_dataframe(
         study.run_inference()
         print(f"Processing {ses_dir}: {study.series_dictionary}")
         for series_number, series in study.series_dictionary.items():
-            modality = series.get_series_modality()
-            plane = series.get_acquisition_plane()
-            print(f"         {series_number} {modality} {plane}")
-            img_dict = {}
+            series_modality = series.get_modality()
+            series_plane = series.get_acquisition_plane()
+            print(f"         {series_number} {series_modality} {series_plane}")
             for index, series_vol in enumerate(series.volume_info_list):
                 ds = pydicom.dcmread(
                     series_vol.one_volume_dcm_filenames[0], stop_before_pixels=True
                 )
                 img_dict = data_set_to_dict(ds)
                 img_dict["_vol_index"] = index
-                img_dict["_dcm_image_type"] = modality
-                img_dict["_dcm_image_orientation_patient"] = plane
-                img_dict["FileName"] = series_vol.one_volume_dcm_filenames[0]
-                for k, v in series.get_series_info_dict().items():
+                img_dict["_dcm_volume_type"] = series_vol.get_modality()
+                img_dict[
+                    "_dcm_volume_orientation_patient"
+                ] = series_vol.get_acquisition_plane()
+                img_dict["_dcm_series_number"] = series_number
+                img_dict["_dcm_series_type"] = series_modality
+                img_dict["_dcm_series_orientation_patient"] = series_plane
+                try:
+                    img_dict["FileName"] = series_vol.one_volume_dcm_filenames[0]
+                except Exception:
+                    img_dict["FileName"] = ""
+                for k, v in series_vol.get_volume_info_dict().items():
                     img_dict[k] = v
-            series_df = pd.DataFrame.from_dict(data=img_dict, orient="index").T
-            dfs.append(series_df)
+                volume_df = pd.DataFrame.from_dict(data=img_dict, orient="index").T
+                dfs.append(volume_df)
 
     if len(dfs) > 1:
         df = pd.concat(dfs, axis=0, ignore_index=True)
@@ -199,13 +209,17 @@ def generate_dicom_dataframe(
         ordered_columns = [
             "FileName",
             "_vol_index",
-            "_dcm_image_type",
-            "_dcm_image_orientation_patient",
+            "_dcm_volume_type",
+            "_dcm_volume_orientation_patient",
+            "_dcm_series_number",
+            "_dcm_series_type",
+            "_dcm_series_orientation_patient",
         ] + [x for x in output_additional_flags if x in all_columns]
 
         prefered_odering = make_unique_ordered_list(ordered_columns + all_columns)
 
         df = df[prefered_odering]
+
         if save_to_excel:
             df.to_excel(output_file, index=False)
         else:
