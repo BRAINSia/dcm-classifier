@@ -5,11 +5,9 @@ import sys
 from typing import Any
 import pandas as pd
 import tabulate
-import warnings
+from collections import OrderedDict as ordered_dict
 
-warnings.simplefilter(action="ignore", category=FutureWarning)
-
-# from tabulate import tabulate
+# warnings.simplefilter(action="ignore", category=FutureWarning)
 
 try:
     from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
@@ -69,7 +67,7 @@ for series_number, series in study.series_dictionary.items():
         # modality = volume.get_modality()
         #         plane = volume.get_acquisition_plane()
         #         print(generate_row(str(series_number), modality, plane, iso, column_width=col_width))
-        current_dict: dict[str, str] = {}
+        current_dict: dict[str, str] = ordered_dict()
         current_dict["Series#"] = str(series_number)
         current_dict["Vol.#"] = str(volume.get_volume_index())
         current_dict["Volume Modality"] = str(volume.get_volume_modality())
@@ -78,8 +76,10 @@ for series_number, series in study.series_dictionary.items():
         current_dict["Isotropic"] = str(volume.get_is_isotropic())
         print(volume.get_modality_probabilities().to_string(index=False))
         current_dict["Bvalue"] = str(volume.get_volume_bvalue())
+        current_dict["SeriesDesc"] = volume.get_volume_series_description()
         # info_dict = series.get_series_info_dict()
         inputs_df: dict[str, Any] = volume.get_volume_dictionary()
+        current_dict["ImageType"] = str(inputs_df.get("ImageType", "Unknown"))
         for unwanted in [
             "FileName",
             "StudyInstanceUID",
