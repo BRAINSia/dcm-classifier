@@ -69,7 +69,8 @@ def one_hot_encoding_from_str_col(
                     else:
                         replace_dict[value] = "other"
 
-        frame[col_name].replace(replace_dict, inplace=True)
+        # frame[col_name].replace(replace_dict, inplace=True)
+        frame[col_name] = frame[col_name].replace(replace_dict)
 
         for manufacturer in manufacturers + ["other"]:
             series = pd.Series(
@@ -111,7 +112,8 @@ def parse_column_headers(
         input_df: pd.DataFrame = pd.read_excel(input_file)
 
     # remove the rows that have no file name
-    input_df = input_df[input_df["FileName"].notna()]
+    not_na = input_df["FileName"].notna()
+    input_df = input_df[not_na]
     new_data_frame = input_df[[index_field]]
 
     for index, row in header_dictionary_df.iterrows():
