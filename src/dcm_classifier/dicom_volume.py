@@ -23,7 +23,7 @@ import pandas as pd
 import json
 from copy import deepcopy
 
-from typing import Any, List, Dict, Optional
+from typing import Any
 import pydicom
 from .utility_functions import (
     get_bvalue,
@@ -146,6 +146,15 @@ class DicomSingleVolumeInfoBase:
             _one_study_found,
             self.volume_info_dict,
         ) = self._make_one_study_info_mapping_from_filelist()
+
+    def get_volume_series_description(self) -> str:
+        """
+        Get the Series Description of the DICOM volume.
+
+        Returns:
+            str: The Series Description.
+        """
+        return self._pydicom_info.SeriesDescription
 
     def set_volume_modality(self, modality: str) -> None:
         """
@@ -413,7 +422,7 @@ class DicomSingleVolumeInfoBase:
             print(f"Can not convert to int {self._pydicom_info.SeriesNumber}: {e}")
         return -12345
 
-    def get_volume_index(self) -> Optional[int]:
+    def get_volume_index(self) -> int | None:
         """
         Get the Volume Index within the Series.
 
