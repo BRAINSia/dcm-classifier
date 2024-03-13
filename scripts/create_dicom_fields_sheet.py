@@ -166,6 +166,17 @@ def data_set_to_dict(ds):
 def generate_dicom_dataframe(
     session_dirs: list, output_file: str | None, save_to_excel: bool = True
 ) -> None | pd.DataFrame:
+    """
+    Generate a dataframe from DICOM data
+
+    Args:
+        session_dirs: list: list of session directories
+        output_file: str | None: path to the output file
+        save_to_excel: bool: whether to save the dataframe to an excel file
+
+    Returns:
+        None | pd.DataFrame: if save_to_excel is True, None is returned, otherwise the dataframe is returned
+    """
     dfs = [pd.DataFrame.from_dict({})]
     for ses_dir in session_dirs:
         study = ProcessOneDicomStudyToVolumesMappingBase(study_directory=ses_dir)
@@ -210,24 +221,28 @@ def generate_dicom_dataframe(
 if __name__ == "__main__":
     import argparse
 
+    current_file: Path = Path(__file__).resolve()
+    root_dir: Path = current_file.parent.parent
+    test_data_dir: Path = root_dir / "tests" / "testing_data" / "anonymized_testing_data" / "anonymized_data"
+
     parser = argparse.ArgumentParser(description="Process some integers.")
     parser.add_argument(
         "--dicom_path",
         type=str,
-        default="/Users/johnsonhj/Botimageai/homerun/DATA/150_Test_Data",
+        default=test_data_dir.as_posix(),
         help="Path to DICOM directory",
     )
     parser.add_argument(
         "--out",
         type=str,
-        default="/Users/johnsonhj/Downloads/testfile.xlsx",
+        default="./testfile.xlsx",
         help="Path to output excel file",
     )
     parser.add_argument(
         "-m",
         "--model",
         type=Path,
-        default=Path(__file__).parent.parent / "models" / "rf_classifier.onnx",
+        default=root_dir / "models" / "rf_classifier.onnx",
         help="Path to the model used for image type inference",
     )
 
