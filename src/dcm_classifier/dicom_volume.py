@@ -180,19 +180,6 @@ class DicomSingleVolumeInfoBase:
         """
         return self.volume_modality
 
-    def set_series_modality(self, modality: str) -> None:
-        """
-        Sets the modality of the DICOM data.
-
-        Args:
-            modality (str): The modality information to be set.
-        """
-        if not isinstance(modality, str):
-            raise ValueError(
-                f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."
-            )
-        self.series_modality = modality
-
     def get_series_modality(self) -> str:
         """
         Retrieves the modality of the DICOM data.
@@ -200,7 +187,7 @@ class DicomSingleVolumeInfoBase:
         Returns:
             str: The modality information.
         """
-        return self.series_modality
+        return self.parent_series.get_series_modality()
 
     def set_is_isotropic(self, isotropic: bool) -> None:
         """
