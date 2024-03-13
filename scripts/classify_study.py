@@ -97,6 +97,8 @@ for series_number, series in study.series_dictionary.items():
 
 
 df: pd.DataFrame = pd.DataFrame(list_of_dictionaries)
+df.sort_values(by=["Series#", "Vol.#"], inplace=True)
+
 table_msg: str = tabulate.tabulate(df, headers="keys", tablefmt="psql", showindex=False)
 print(table_msg)
 
