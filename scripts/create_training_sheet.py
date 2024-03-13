@@ -1,6 +1,7 @@
 import re
 import pandas as pd
 from pathlib import Path
+from training_config import *
 
 
 max_header_length: int = 34
@@ -86,7 +87,7 @@ def truncate_column_names(df: pd.DataFrame, max_length: int) -> pd.DataFrame | N
 
 
 def parse_column_headers(
-    header_dictionary_df: pd.DataFrame,
+    header_dataframe: pd.DataFrame,
     input_file: (str | Path) | pd.DataFrame,
     output_path: str | Path = None,
     save_to_excel: bool = True,
@@ -103,7 +104,7 @@ def parse_column_headers(
     input_df = input_df[not_na]
     new_data_frame = input_df[[index_field]]
 
-    for index, row in header_dictionary_df.iterrows():
+    for index, row in header_dataframe.iterrows():
         current_header = row["header_name"][:max_header_length]
 
         if "keep" in row["action"]:
@@ -141,12 +142,9 @@ def parse_column_headers(
 
 if __name__ == "__main__":
     base_dir = ""
-    header_data_dictionary_frame = f"{base_dir}/path_to_header_dictionary"
-    header_df = pd.read_excel(header_data_dictionary_frame)
 
     # process header df
-    clean_header_df = header_df[header_df["used_for_training"] == 1]
-    clean_header_df = clean_header_df[clean_header_df["action"] != "drop"]
+    clean_header_df = header_df[header_df["action"] != "drop"]
     clean_header_df = truncate_column_names(clean_header_df, max_header_length)
 
     # delete orig df
@@ -156,7 +154,7 @@ if __name__ == "__main__":
     input_file = f"{base_dir}/"
 
     parse_column_headers(
-        header_dictionary_df=clean_header_df,
+        header_dataframe=clean_header_df,
         input_file=input_file,
         output_path=output_file,
     )
