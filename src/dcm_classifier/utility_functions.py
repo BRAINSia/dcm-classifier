@@ -308,7 +308,7 @@ def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
             gradient_direction_list.append(gradient_direction)
 
     unique_gradient_directions = np.unique(gradient_direction_list, axis=0)
-    if len(unique_gradient_directions) > 3:
+    if len(unique_gradient_directions) >= 3:
         return "dwig"
 
     return "tracew"
