@@ -1,5 +1,7 @@
 from pathlib import Path
 import pandas as pd
+import pydicom
+from src.dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 
 
 def combine_all_excel_files(excel_files: list[Path] | list[pd.DataFrame]) -> pd.DataFrame:
@@ -166,3 +168,57 @@ def merge_labels_and_training_data(labels: (str | Path) | pd.DataFrame, training
         merged_df.to_excel(final_df_name, index=False)
     else:
         return merged_df
+
+
+def pydicom_read_cache(
+    filename: Path | str, stop_before_pixels=True
+) -> pydicom.Dataset:
+    """
+    Reads a DICOM file header and caches the result to improve performance on subsequent reads.
+
+    Args:
+        filename: The path to the DICOM file to be read.
+        stop_before_pixels: If True, stops reading before pixel data (default: True).
+    Returns:
+        (pydicom.Dataset): A pydicom.Dataset containing the DICOM file's header data.
+    """
+    pydicom_read_cache_static_filename_dict: dict[str, pydicom.Dataset] = dict()
+
+    global pydicom_read_cache_static_filename_dict
+    lookup_filename: str = str(filename)
+    if lookup_filename in pydicom_read_cache_static_filename_dict:
+        # print(f"Using cached value for {lookup_filename}")
+        pass
+    else:
+        pydicom_read_cache_static_filename_dict[lookup_filename] = pydicom.dcmread(
+            lookup_filename, stop_before_pixels=stop_before_pixels, force=True
+        )
+    return pydicom_read_cache_static_filename_dict.get(lookup_filename)
+
+
+def override_study_UIDs(session_dir: str) -> None:
+    """
+    Override the UIDs of a study
+
+    Args:
+        session_dir: str: path to the session directory
+
+    Returns:
+        None
+    """
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=session_dir, inferer=None
+    )
+
+    study_uid = pydicom.uid.generate_uid()
+    for series_number, series in study.series_dictionary.items():
+        series_uid = pydicom.uid.generate_uid()
+        for volume in series.get_volume_list():
+            for file in volume.get_one_volume_dcm_filenames():
+                ds = pydicom.dcmread(file)
+                # Override the UIDs attribute
+                ds.StudyInstanceUID = study_uid
+                ds.SeriesInstanceUID = series_uid
+                ds.SOPInstanceUID = pydicom.uid.generate_uid()
+                # Save the modified DICOM file
+                ds.save_as(file)
