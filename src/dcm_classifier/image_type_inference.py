@@ -426,7 +426,3 @@ class ImageTypeClassifierBase:
                     self.series.set_series_modality(
                         self.series.get_volume_list()[0].get_volume_modality()
                     )
-
-        # reclassify volumes with more specific information
-        for volume in self.series.get_volume_list():
-            volume.set_series_modality(self.series.get_series_modality())
