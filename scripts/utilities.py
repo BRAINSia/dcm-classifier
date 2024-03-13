@@ -121,27 +121,36 @@ def identify_unusable_cols(frame: pd.DataFrame) -> list[str]:
     return droppable_cols
 
 
-def merge_labels_and_training_data(labels: (str | Path) | pd.DataFrame, training_data: (str | Path) | pd.DataFrame, save_to_excel: bool = True, output: str = None) -> pd.DataFrame | None:
-    # label_file = "/home/mbrzus/programming/dcm_train_data/V2-20240229/no_duplicates/labeling/combined_all_data_labeling_Feb29_final.xlsx"
-    # df = pd.read_excel(label_file, index_col=0)
-    # trainings_file = "/home/mbrzus/programming/dcm_train_data/V2-20240229/training/combined_all_training_data_Mar5.xlsx"
-    # trainings_df = pd.read_excel(trainings_file, index_col=0)
-    out = output
+def merge_labels_and_training_data(labels: (str | Path) | pd.DataFrame, training_data: (str | Path) | pd.DataFrame, save_to_excel: bool = True) -> pd.DataFrame | None:
+    """
+    Merge labels and training data into one dataframe
+
+    Args:
+        labels: (str | Path) | pd.DataFrame: either a path to an excel file or a pandas dataframe
+        training_data: (str | Path) | pd.DataFrame: either a path to an excel file or a pandas dataframe
+        save_to_excel: bool: whether to save the dataframe to an excel file
+
+    Returns:
+        pd.DataFrame | None: if save_to_excel is True and the training_data is a path to an excel file, None is returned, otherwise the dataframe is returned
+
+    """
+    final_df_name = None
+
+    # check if the input is a dataframe or a path to an excel file
     if type(labels) is pd.DataFrame:
         label_df = labels
     else:
         df = pd.read_excel(labels, index_col=0)
         label_df = df[
-            ["FileName", "Diffusionb-valueBool", "HasDiffusionGradientOrientation", "label"]
+            ["FileName", "label"]
         ]
 
+    # check if the input is a dataframe or a path to an excel file
     if type(training_data) is pd.DataFrame:
         trainings_df = training_data
     else:
         trainings_df = pd.read_excel(training_data, index_col=0)
-
-    print(label_df.shape)
-    print(label_df.head())
+        final_df_name = training_data.replace(".xlsx", "_labeled.xlsx")
 
     # merge on "FileName"
     merged_df = pd.merge(
@@ -152,8 +161,8 @@ def merge_labels_and_training_data(labels: (str | Path) | pd.DataFrame, training
         right_on="FileName",
     )
 
-    if save_to_excel:
-        final_df_name = trainings_file.replace(".xlsx", "_labeled.xlsx")
+    # save to excel if save_to_excel is True
+    if save_to_excel and final_df_name is not None:
         merged_df.to_excel(final_df_name, index=False)
     else:
         return merged_df
