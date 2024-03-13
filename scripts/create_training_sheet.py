@@ -6,19 +6,6 @@ from pathlib import Path
 max_header_length: int = 34
 
 
-def identify_unusable_cols(frame: pd.DataFrame) -> pd.DataFrame:
-    df = frame
-    droppable_cols = []
-    length = len(df)
-    for col in df.columns:
-        if (df[col].count() / length) <= 0.05 or df[col].nunique() < 2:
-            droppable_cols.append(col)
-
-    print(f"dropping {len(droppable_cols)} cols")
-    [print(x) for x in sorted(droppable_cols)]
-    return df.drop(columns=droppable_cols)
-
-
 def one_hot_encoding_from_array(
     frame: pd.DataFrame, col_name: str, index_field: str
 ) -> pd.DataFrame:
