@@ -182,9 +182,9 @@ def pydicom_read_cache(
     Returns:
         (pydicom.Dataset): A pydicom.Dataset containing the DICOM file's header data.
     """
-    pydicom_read_cache_static_filename_dict: dict[str, pydicom.Dataset] = dict()
-
     global pydicom_read_cache_static_filename_dict
+    pydicom_read_cache_static_filename_dict = dict()
+
     lookup_filename: str = str(filename)
     if lookup_filename in pydicom_read_cache_static_filename_dict:
         # print(f"Using cached value for {lookup_filename}")
