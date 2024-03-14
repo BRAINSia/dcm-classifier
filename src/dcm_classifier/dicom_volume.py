@@ -467,19 +467,26 @@ class DicomSingleVolumeInfoBase:
                  The dictionary includes Series Number, Echo Time, SAR, b-values, file name,
                  Series and Study Instance UID, Series Description, and various indicators.
         """
+        # sanitize the DICOM dataset
         sanitized_dicom_dict, valid = sanitize_dicom_dataset(
             ro_dataset=self._pydicom_info,
             required_info_list=required_DICOM_fields,
             optional_info_list=optional_DICOM_fields,
         )
+        # if the dataset is not valid, mark as INVALID and return an empty dictionary
         if not valid:
             self.set_volume_modality("INVALID")
             self.set_acquisition_plane("INVALID")
+            return self.get_study_uid, dict()
 
         volume_info_dict: dict[str, Any] = get_coded_dictionary_elements(
             sanitized_dicom_dict
         )
         del sanitized_dicom_dict
+
+        # ensure the volume_info_dict is not empty
+        if not volume_info_dict:
+            return self.get_study_uid, dict()
 
         # add features related to b-values and diffusion
         bvalue_current_dicom: int = int(self.get_volume_bvalue())
