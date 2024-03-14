@@ -124,9 +124,7 @@ def is_integer(s: Any) -> bool:
         return False
 
 
-def get_bvalue(
-    dicom_header_info: Dataset, round_to_nearst_10: bool = True
-) -> float:
+def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> float:
     """
     Extract and compute the b-value from DICOM header information.
 
@@ -642,27 +640,6 @@ def get_coded_dictionary_elements(
                     dataset_dictionary[feature] = 1
                 else:
                     dataset_dictionary[feature] = 0
-        elif name == "In-plane Phase Encoding Direction":
-            if "COL" in str(value).upper():
-                dataset_dictionary["In-plane Phase Encoding Direction_COL"] = 1
-                dataset_dictionary["In-plane Phase Encoding Direction_ROW"] = 0
-            else:
-                dataset_dictionary["In-plane Phase Encoding Direction_COL"] = 0
-                dataset_dictionary["In-plane Phase Encoding Direction_ROW"] = 1
-        elif name == "MR Acquisition Type":
-            if "2D" in str(value).upper():
-                dataset_dictionary["MR Acquisition Type_2D"] = 1
-                dataset_dictionary["MR Acquisition Type_3D"] = 0
-            else:
-                dataset_dictionary["MR Acquisition Type_2D"] = 0
-                dataset_dictionary["MR Acquisition Type_3D"] = 1
-        elif name == "Variable Flip Angle Flag":
-            if "N" in str(value).upper():
-                dataset_dictionary["Variable Flip Angle Flag_N"] = 1
-                dataset_dictionary["Variable Flip Angle Flag_Y"] = 0
-            else:
-                dataset_dictionary["Variable Flip Angle Flag_N"] = 0
-                dataset_dictionary["Variable Flip Angle Flag_Y"] = 1
         elif name == "Sequence Variant":
             lower_sequence_variant_string: str = str(value).lower()
             throw_away: int = len("Sequence Variant_")
@@ -683,6 +660,7 @@ def get_coded_dictionary_elements(
 
         else:
             dataset_dictionary[name] = str(value)
+
     return dataset_dictionary
 
 
