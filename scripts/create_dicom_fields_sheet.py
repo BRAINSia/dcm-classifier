@@ -180,20 +180,18 @@ def generate_dicom_dataframe(
     dfs = [pd.DataFrame.from_dict({})]
     for ses_dir in session_dirs:
         study = ProcessOneDicomStudyToVolumesMappingBase(study_directory=ses_dir)
-
         for series_number, series in study.series_dictionary.items():
-
-            for index, series_vol in enumerate(series.volume_info_list):
+            for index, volume in enumerate(series.volume_info_list):
                 ds = pydicom.dcmread(
-                    series_vol.one_volume_dcm_filenames[0], stop_before_pixels=True
+                    volume.one_volume_dcm_filenames[0], stop_before_pixels=True
                 )
                 img_dict = data_set_to_dict(ds)
 
                 try:
-                    img_dict["FileName"] = series_vol.one_volume_dcm_filenames[0]
+                    img_dict["FileName"] = volume.one_volume_dcm_filenames[0]
                 except Exception:
                     img_dict["FileName"] = ""
-                for k, v in series_vol.get_volume_info_dict().items():
+                for k, v in volume.get_volume_dictionary().items():
                     img_dict[k] = v
                 volume_df = pd.DataFrame.from_dict(data=img_dict, orient="index").T
                 dfs.append(volume_df)
