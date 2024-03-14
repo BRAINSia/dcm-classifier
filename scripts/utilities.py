@@ -1,7 +1,7 @@
 from pathlib import Path
 import pandas as pd
 import pydicom
-from src.dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 
 
 def combine_all_excel_files(excel_files: list[Path] | list[pd.DataFrame]) -> pd.DataFrame:
