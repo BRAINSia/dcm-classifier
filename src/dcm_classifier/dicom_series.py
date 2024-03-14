@@ -227,7 +227,7 @@ class DicomSingleSeries:
         """
         return self.volume_info_list
 
-    def add_volume_to_series(self, new_volume_info: DicomSingleVolumeInfoBase) -> None:
+    def add_volume_to_series(self, new_volume: DicomSingleVolumeInfoBase) -> None:
         """
         Add a DicomSingleVolumeInfoBase object to the series. List containing subvolumes within the series is sorted
         and maintained based on bvalues similar to dcm2niix tool.
@@ -235,7 +235,8 @@ class DicomSingleSeries:
         Args:
             new_volume_info (DicomSingleVolumeInfoBase): The volume information to add.
         """
-        self.volume_info_list.append(new_volume_info)
+        new_volume.set_parent_series(self)
+        self.volume_info_list.append(new_volume)
         # Sort subvolumes
         self.organize_volumes()
 
@@ -277,3 +278,23 @@ class DicomSingleSeries:
         info_dict["SeriesVolumeCount"] = len(self.volume_info_list)
 
         return info_dict
+
+    def get_series_uid(self) -> str:
+        """
+        Get the series instance UID of the DICOM series.
+        This should be the same for all volumes and is picked from the first volume.
+
+        Returns:
+            str: The series instance UID.
+        """
+        return self.volume_info_list[0].get_series_uid()
+
+    def get_study_uid(self) -> str:
+        """
+        Get the Study Instance UID of the DICOM series.
+        This should be the same for all volumes and is picked from the first volume.
+
+        Returns:
+            str: The Study Instance UID.
+        """
+        return self.volume_info_list[0].get_study_uid()

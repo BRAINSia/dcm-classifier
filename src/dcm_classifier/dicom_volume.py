@@ -38,7 +38,6 @@ from .dicom_config import (
     required_DICOM_fields,
     optional_DICOM_fields,
 )
-from .dicom_series import DicomSingleSeries
 
 
 class DicomSingleVolumeInfoBase:
@@ -132,7 +131,7 @@ class DicomSingleVolumeInfoBase:
             self.has_diffusion_gradient = False
 
         # set default values
-        self.parent_series: DicomSingleSeries | None = None
+        self.parent_series = None
         self.volume_index: int | None = None
         self.volume_modality: str = "INVALID"
         self.series_modality: str = "INVALID"
@@ -237,16 +236,16 @@ class DicomSingleVolumeInfoBase:
         else:
             return "None"
 
-    def set_parent_series(self, series: DicomSingleSeries) -> None:
+    def set_parent_series(self, series) -> None:
         """
         Sets the parent series of the DICOM volume.
 
         Args:
-            parent_series (DicomSingleSeries): The parent series object.
+            series (DicomSingleSeries): The parent series object.
         """
         self.parent_series = series
 
-    def get_parent_series(self) -> DicomSingleSeries | None:
+    def get_parent_series(self):
         """
         Retrieves the parent series of the DICOM volume.
 
