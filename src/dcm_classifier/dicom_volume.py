@@ -500,11 +500,11 @@ class DicomSingleVolumeInfoBase:
             self.has_diffusion_gradient
         )
         if (
-            volume_info_dict["Image Type_DIFFUSION"] == 1
-            or volume_info_dict["Image Type_ADC"] == 1
-            or volume_info_dict["Image Type_EADC"] == 1
-            or volume_info_dict["Image Type_TRACEW"] == 1
-            or volume_info_dict["Image Type_FA"] == 1
+            volume_info_dict["ImageType_DIFFUSION"] == 1
+            or volume_info_dict["ImageType_ADC"] == 1
+            or volume_info_dict["ImageType_EADC"] == 1
+            or volume_info_dict["ImageType_TRACEW"] == 1
+            or volume_info_dict["ImageType_FA"] == 1
             or volume_info_dict["Diffusionb-value"] > 0
             or volume_info_dict["HasDiffusionGradientOrientation"] == 1
         ):

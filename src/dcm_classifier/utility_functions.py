@@ -456,7 +456,7 @@ def sanitize_dicom_dataset(
                 # ):
                 # The contrast is required but is empty if unknown but also may not be in every dataset
                 dataset_dictionary[field] = "None"
-        elif field == "Echo Number(s)":
+        elif field == "EchoNumbers":
             if field not in dataset_dictionary.keys():
                 # EchoNumber(s) is not a required field, it can be unknown
                 _default_inferred_value = -12345
@@ -464,7 +464,7 @@ def sanitize_dicom_dataset(
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
                 )
-        elif field == "Echo Train Length":
+        elif field == "EchoTrainLength":
             if field not in dataset_dictionary.keys():
                 # EchoTrainLength is not a required field, it can be unknown
                 _default_inferred_value = -12345
@@ -472,7 +472,7 @@ def sanitize_dicom_dataset(
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
                 )
-        elif field == "Scanning Sequence":
+        elif field == "ScanningSequence":
             if field not in dataset_dictionary.keys():
                 # ScanningSequence is not a required field, it can be unknown
                 _default_inferred_value = "UnknownScanningSequence"
@@ -480,7 +480,7 @@ def sanitize_dicom_dataset(
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
                 )
-        elif field == "Sequence Variant":
+        elif field == "SequenceVariant":
             if field not in dataset_dictionary.keys():
                 # SequenceVariant is not a required field, it can be unknown
                 _default_inferred_value = "UnknownSequenceVariant"
@@ -488,7 +488,7 @@ def sanitize_dicom_dataset(
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
                 )
-        elif field == "In-plane Phase Encoding Direction":
+        elif field == "InPlanePhaseEncodingDirection":
             if field not in dataset_dictionary.keys():
                 # InplanePhaseEncodingDirection is not a required field, it can be unknown
                 _default_inferred_value = "UnknownInplanePhaseEncodingDirection"
@@ -504,7 +504,7 @@ def sanitize_dicom_dataset(
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
                 )
-        elif field == "Imaging Frequency":
+        elif field == "ImagingFrequency":
             if field not in dataset_dictionary.keys():
                 # ImagingFrequency is not a required field, it can be unknown
                 _default_inferred_value = -12345
@@ -512,7 +512,7 @@ def sanitize_dicom_dataset(
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
                 )
-        elif field == "MR Acquisition Type":
+        elif field == "MRAcquisitionType":
             if field not in dataset_dictionary.keys():
                 # MRAcquisitionType is not a required field, it can be unknown
                 _default_inferred_value = "UnknownMRAcquisitionType"
@@ -520,7 +520,7 @@ def sanitize_dicom_dataset(
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
                 )
-        elif field == "Number of Averages":
+        elif field == "NumberOfAverages":
             if field not in dataset_dictionary.keys():
                 # NumberOfAverages is not a required field, it can be unknown
                 _default_inferred_value = -12345
@@ -528,7 +528,7 @@ def sanitize_dicom_dataset(
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
                 )
-        elif field == "Inversion Time":
+        elif field == "InversionTime":
             if field not in dataset_dictionary.keys():
                 # InversionTime is not a required field, it can be unknown
                 _default_inferred_value = -12345
@@ -536,7 +536,7 @@ def sanitize_dicom_dataset(
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
                 )
-        elif field == "Variable Flip Angle Flag":
+        elif field == "VariableFlipAngleFlag":
             if field not in dataset_dictionary.keys():
                 # VariableFlipAngleFlag is not a required field, it can be unknown
                 _default_inferred_value = "UnknownVariableFlipAngleFlag"
@@ -546,7 +546,7 @@ def sanitize_dicom_dataset(
                 )
         elif field == "AcquisitionTime":
             if field not in dataset_dictionary.keys():
-                # InversionTime is not a required field, it can be unknown
+                # AcquisitionTime is not a required field, it can be unknown
                 _default_inferred_value = -12345
                 dataset_dictionary[field] = _default_inferred_value
                 vprint(
@@ -565,16 +565,16 @@ def sanitize_dicom_dataset(
 
 # organize required features
 image_type_features: list[str] = [
-    field for field in features if ("Image Type_" in field and "ADC" not in field)
+    field for field in features if ("ImageType_" in field and "ADC" not in field)
 ]
 manufacturer_features: list[str] = [
     field for field in features if "Manufacturer_" in field
 ]
 scanning_sequence_features: list[str] = [
-    field for field in features if "Scanning Sequence_" in field
+    field for field in features if "ScanningSequence_" in field
 ]
 scanning_variant_features: list[str] = [
-    field for field in features if "Sequence Variant_" in field
+    field for field in features if "SequenceVariant_" in field
 ]
 
 
@@ -605,16 +605,16 @@ def get_coded_dictionary_elements(
             lower_value_str: str = str(value).lower()
             if "adc" in lower_value_str:
                 if "eadc" in lower_value_str:
-                    dataset_dictionary["Image Type_EADC"] = 1
-                    dataset_dictionary["Image Type_ADC"] = 0
+                    dataset_dictionary["ImageType_EADC"] = 1
+                    dataset_dictionary["ImageType_ADC"] = 0
                 else:
-                    dataset_dictionary["Image Type_ADC"] = 1
-                    dataset_dictionary["Image Type_EADC"] = 0
+                    dataset_dictionary["ImageType_ADC"] = 1
+                    dataset_dictionary["ImageType_EADC"] = 0
             else:
-                dataset_dictionary["Image Type_ADC"] = 0
-                dataset_dictionary["Image Type_EADC"] = 0
+                dataset_dictionary["ImageType_ADC"] = 0
+                dataset_dictionary["ImageType_EADC"] = 0
 
-            throw_away: int = len("Image Type_")
+            throw_away: int = len("ImageType_")
             for feature in image_type_features:
                 if feature[throw_away:].lower() in lower_value_str:
                     dataset_dictionary[feature] = 1
@@ -632,17 +632,17 @@ def get_coded_dictionary_elements(
                     dataset_dictionary[feature] = 1
                 else:
                     dataset_dictionary[feature] = 0
-        elif name == "Scanning Sequence":
+        elif name == "ScanningSequence":
             lower_scanning_sequence_string: str = str(value).lower()
-            throw_away: int = len("Scanning Sequence_")
+            throw_away: int = len("ScanningSequence_")
             for feature in scanning_sequence_features:
                 if feature[throw_away:].lower() in lower_scanning_sequence_string:
                     dataset_dictionary[feature] = 1
                 else:
                     dataset_dictionary[feature] = 0
-        elif name == "Sequence Variant":
+        elif name == "SequenceVariant":
             lower_sequence_variant_string: str = str(value).lower()
-            throw_away: int = len("Sequence Variant_")
+            throw_away: int = len("SequenceVariant_")
             for feature in scanning_variant_features:
                 if feature[throw_away:].lower() in lower_sequence_variant_string:
                     dataset_dictionary[feature] = 1
