@@ -332,8 +332,15 @@ def sanitize_dicom_dataset(
     """
     Validates the DICOM fields in the DICOM header to ensure all required fields are present.
 
-    Raises an exception if any required fields are missing.
+    Args:
+        ro_dataset (pydicom.Dataset): The input DICOM dataset.
+        required_info_list (list[str]): A list of required DICOM fields.
+        optional_info_list (list[str]): A list of optional DICOM fields.
 
+    Returns:
+        tuple[dict, bool]: A dictionary containing the sanitized DICOM fields and a boolean indicating whether the validation was successful.
+
+    Raises an exception if any required fields are missing.
     """
     dataset_dictionary: dict[str, Any] = dict()
     dataset = deepcopy(ro_dataset)  # DO NOT MODIFY THE INPUT DATASET!
