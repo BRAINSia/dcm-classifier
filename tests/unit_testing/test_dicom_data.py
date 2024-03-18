@@ -16,7 +16,7 @@ def test_adc_dcm_series_modality(mock_adc_series):
         assert series.get_series_modality() == "adc"
 
 
-def test_ax_dcm_series_acq_plane(mock_series_study, mock_ax_series):
+def test_ax_dcm_series_acq_plane(mock_ax_series):
     for series in mock_ax_series:
         assert series.get_acquisition_plane() == "ax"
 
@@ -24,43 +24,27 @@ def test_ax_dcm_series_acq_plane(mock_series_study, mock_ax_series):
 def test_sag_dcm_series_acq_plane(mock_sag_series):
     for series in mock_sag_series:
         assert series.get_acquisition_plane() == "sag"
-    # for series_number, series in mock_series_study.series_dictionary.items():
-    #     if series_number == 2 or series_number == 10 or series_number == 13:
-    #         assert series.get_acquisition_plane() == "sag"
 
 
 def test_cor_dcm_series_acq_plane(mock_cor_series):
     for series in mock_cor_series:
         assert series.get_acquisition_plane() == "cor"
-    # for series_number, series in mock_series_study.series_dictionary.items():
-    #     if series_number == 3 or series_number == 15:
-    #         assert series.get_acquisition_plane() == "cor"
 
 
 def test_t1_dcm_series_modality(mock_t1_series):
     for series in mock_t1_series:
         assert series.get_series_modality() == "t1w"
-    # for series_number, series in mock_series_study.series_dictionary.items():
-    #     if 10 <= series_number <= 15 and series_number != 11:
-    #         assert series.get_modality() == "t1w"
 
 
 @pytest.mark.skip(reason="This test is failing, and can not be confirmed to be correct")
 def test_flair_dcm_series_modality(mock_flair_series):
     for series in mock_flair_series:
         assert series.get_series_modality() == "flair"
-    # for series_number, series in mock_series_study.series_dictionary.items():
-    #     if series_number == 7:
-    #         assert series.get_modality() == "flair"
 
 
 def test_t2_dcm_series_modality(mock_t2_series):
     for series in mock_t2_series:
         assert series.get_series_modality() == "t2w"
-    # for series_number, series in mock_series_study.series_dictionary.items():
-    #     if series_number == 11:
-    #         assert series.get_modality() == "t2w"
-
 
 # TODO: rewrite this for new behavior
 # def test_no_valid_dcms():
