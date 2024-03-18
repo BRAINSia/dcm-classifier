@@ -2,13 +2,37 @@ import pytest
 
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
+import pydicom
 
 
 current_file_path = Path(__file__).parent.resolve()
 inference_model_path = list(
     Path(__file__).parent.parent.parent.rglob("models/rf_classifier.onnx")
 )[0]
+
+
+def test_all_fields_dont_change(mock_ax_series):
+    all_fields = required_DICOM_fields + optional_DICOM_fields
+    for series in mock_ax_series:
+        for volume in series.get_volume_list():
+            first_file = volume.get_one_volume_dcm_filenames()[0]
+            ds = pydicom.dcmread(first_file, stop_before_pixels=True)
+            for field in all_fields:
+                assert field in volume.get_volume_dictionary()
+                if isinstance(ds[field].value, pydicom.dataelem.RawDataElement):
+                    e = pydicom.dataelem.DataElement_from_raw(ds[field].value)
+                else:
+                    e = ds[field].value
+                assert volume.get_volume_dictionary()[field] == e.value
+
+
+def test_IR_field_exists_in_flair(mock_flair_series):
+    for series in mock_flair_series:
+        for volume in series.get_volume_list():
+            assert volume.get_volume_dictionary()["ScanningSequence_IR"] == 1
+            assert volume.get_volume_dictionary()["ScanningSequence_SE"] == 1
 
 
 def test_adc_dcm_series_modality(mock_adc_series):
@@ -36,7 +60,6 @@ def test_t1_dcm_series_modality(mock_t1_series):
         assert series.get_series_modality() == "t1w"
 
 
-@pytest.mark.skip(reason="This test is failing, and can not be confirmed to be correct")
 def test_flair_dcm_series_modality(mock_flair_series):
     for series in mock_flair_series:
         assert series.get_series_modality() == "flair"
@@ -45,6 +68,7 @@ def test_flair_dcm_series_modality(mock_flair_series):
 def test_t2_dcm_series_modality(mock_t2_series):
     for series in mock_t2_series:
         assert series.get_series_modality() == "t2w"
+
 
 # TODO: rewrite this for new behavior
 # def test_no_valid_dcms():
