@@ -35,17 +35,27 @@ class DicomSingleSeries:
             probabilities.
         acquisition_plane (Optional[str]): The acquisition plane of the series (e.g.,
             "Sagittal", "Axial").
+        is_isotropic (bool): A flag indicating whether the series is isotropic.
+        has_contrast (bool): A flag indicating whether the series has contrast.
 
     Methods:
         get_series_number(self) -> int:
 
-        set_modality(self, modality: str) -> None:
+        set_series_modality(self, modality: str) -> None:
 
-        get_modality(self) -> str:
+        get_series_modality(self) -> str:
 
         set_modality_probabilities(self, modality_probability: pd.DataFrame) -> None:
 
         get_modality_probabilities(self) -> pd.DataFrame:
+
+        set_is_isotropic(self, isotropic: bool) -> None:
+
+        get_is_isotropic(self) -> bool:
+
+        set_has_contrast(self, contrast: bool) -> None:
+
+        get_has_contrast(self) -> bool:
 
         set_acquisition_plane(self, acquisition_plane: str) -> None:
 
@@ -55,7 +65,11 @@ class DicomSingleSeries:
 
         add_volume_to_series(self, new_volume_info: DicomSingleVolumeInfoBase) -> None:
 
+        organize_volumes(self) -> None:
+
         get_series_info_dict(self) -> Dict[str, Any]:
+
+        get_series_uid(self) -> str:
 
     """
 
@@ -245,7 +259,10 @@ class DicomSingleSeries:
         Organize the subvolumes within the series based on acquisition time.
         """
         # AcquisitionTime is an optional field, this might need to be changed in the future
-        sorted(self.volume_info_list, key=lambda x: x.get_volume_dictionary()["AcquisitionTime"])
+        sorted(
+            self.volume_info_list,
+            key=lambda x: x.get_volume_dictionary()["AcquisitionTime"],
+        )
         # assign the index to each volume
         for index, volume in enumerate(self.volume_info_list):
             volume.set_volume_index(index)

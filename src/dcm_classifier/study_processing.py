@@ -56,7 +56,6 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             study_directory: Path,
         ) -> Dict[int, DicomSingleSeries]:
 
-        series_inference(self):
     """
 
     series_restrictions_list_dwi_subvolumes: list[str] = [

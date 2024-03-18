@@ -53,15 +53,24 @@ class ImageTypeClassifierBase:
         classification_model_filename (Union[str, Path]): Path to the classification model file (base implementation requires ONNX file).
         classification_feature_list (List[str]): List of features used for classification.
         image_type_map (Dict[str, str]): Mapping between class name and model integer output.
-        mode (str): "series" or "volume" to run inference on series or volume level (a series could have multiple subvolumes).
         min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
 
     Methods:
+        get_min_probability_threshold(self) -> float:
+
         get_int_to_type_map(self) -> dict:
+
+        _update_diffusion_series_modality(self) -> None:
+
+        check_if_diffusion(self) -> None:
 
         set_series(self, series: DicomSingleSeries) -> None:
 
         infer_acquisition_plane(self, feature_dict: dict = None) -> str:
+
+        infer_isotropic(self, feature_dict: dict = None) -> bool | None:
+
+        infer_contrast(self, feature_dict: dict = None) -> bool | None:
 
         infer_modality(self, feature_dict: dict = None) -> (str, pd.DataFrame):
 
@@ -303,19 +312,11 @@ class ImageTypeClassifierBase:
 
         This method performs image type classification and acquisition plane inference based on the provided features.
 
-        If the `mode` is set to "series," inference is performed on the entire series, and modality and acquisition
-        plane information is updated for the series.
-
-        If the `mode` is set to "volume," inference is performed for each volume within the series, and modality and
-        acquisition plane information is updated for each volume.
-
         Args:
             None
 
         Returns:
             None
-        Raises:
-            ValueError: If an unsupported `mode` is specified.
         """
 
         def validate_features(input_dict: dict) -> bool:
