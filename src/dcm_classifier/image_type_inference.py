@@ -210,7 +210,7 @@ class ImageTypeClassifierBase:
             return True
         return False
 
-    def infer_contrast(self, feature_dict: dict = None) -> bool | None:
+    def infer_contrast(self, feature_dict: dict = None) -> bool:
         """
         Infer whether the image has contrast based on DICOM information and image properties.
         Args:
@@ -221,9 +221,9 @@ class ImageTypeClassifierBase:
         """
         # check if the volume was invalidated
 
-        field = "Contrast/BolusAgent"
+        field = "ContrastBolusAgent"
         if field not in feature_dict.keys():
-            return None
+            return False
 
         # check if the volume has contrast
         if "none" not in feature_dict[field].lower():
