@@ -51,7 +51,7 @@ optional_DICOM_fields: list[str] = [
     "SAR",  # Not present in all derived image types
     "ImageType",  # Not required
     "Manufacturer",  # Not required
-    "Contrast/BolusAgent",  # "(0x0018, 0x0010)"
+    "ContrastBolusAgent",  # "(0x0018, 0x0010)"
     "Diffusionb-value",  # Not required
     "Diffusionb-valueMax",  # Not required
     "EchoNumbers",
@@ -59,12 +59,12 @@ optional_DICOM_fields: list[str] = [
     "ScanningSequence",
     "SequenceVariant",
     "InPlanePhaseEncodingDirection",
-    "dB/dt",
+    "dBdt",
     "ImagingFrequency",
     "MRAcquisitionType",
     "NumberOfAverages",
     "InversionTime",
-    "Variable Flip Angle Flag",
+    "VariableFlipAngleFlag",
     "AcquisitionTime",
 ]
 
@@ -93,7 +93,7 @@ inference_features: list[str] = [
     "ScanningSequence_SE",
     "SequenceVariant_MP",
     "SequenceVariant_SP",
-    "dB/dt",
+    "dBdt",
     "has_b0",
     "has_pos_b0",
     "likely_diffusion",
