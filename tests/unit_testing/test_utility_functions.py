@@ -9,7 +9,7 @@ from dcm_classifier.utility_functions import (
     sanitize_dicom_dataset,
     itk_read_from_dicomfn_list,
     is_integer,
-    test_magnitude_of_1,
+    ensure_magnitude_of_1,
 )
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
@@ -232,10 +232,10 @@ def test_no_pixel_bandwidth():
 def test_unit_vector():
     vec: np.ndarray = np.array([1 / np.sqrt(3), 1 / np.sqrt(3), 1 / np.sqrt(3)])
 
-    assert test_magnitude_of_1(vec) is True
+    assert ensure_magnitude_of_1(vec) is True
 
     vec = np.array([1, 1, 1])
-    assert test_magnitude_of_1(vec) is False
+    assert ensure_magnitude_of_1(vec) is False
 
 
 def test_is_integer():
