@@ -1,3 +1,4 @@
+import numpy as np
 import pydicom
 import pytest
 from dcm_classifier.example_image_processing import slugify, rglob_for_singular_result
@@ -8,6 +9,7 @@ from dcm_classifier.utility_functions import (
     sanitize_dicom_dataset,
     itk_read_from_dicomfn_list,
     is_integer,
+    test_magnitude_of_1,
 )
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
@@ -225,6 +227,15 @@ def test_no_pixel_bandwidth():
 #     with pytest.raises(TypeError) as ex:
 #         ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
 #     assert "not 'NoneType'" in str(ex.value)
+
+
+def test_unit_vector():
+    vec: np.ndarray = np.array([1 / np.sqrt(3), 1 / np.sqrt(3), 1 / np.sqrt(3)])
+
+    assert test_magnitude_of_1(vec) is True
+
+    vec = np.array([1, 1, 1])
+    assert test_magnitude_of_1(vec) is False
 
 
 def test_is_integer():
