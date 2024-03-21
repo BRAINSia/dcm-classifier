@@ -166,9 +166,14 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
 
     for k, v in private_tags_map.items():
         if v in dicom_header_info:
+            # ensure safe extraction of the dicom element
+            if isinstance(dicom_header_info[v], pydicom.dataelem.RawDataElement):
+                dicom_element = pydicom.dataelem.DataElement_from_raw(dicom_header_info[v])
+            else:
+                dicom_element = dicom_header_info[v]
+
             # This decoding of bvalues follows the NAMIC conventions defined at
             # https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
-            dicom_element = dicom_header_info[v]
             if v == private_tags_map["GE"]:
                 large_number_modulo_for_GE = 100000
                 # value = dicom_element.value[0] % large_number_modulo_for_GE
@@ -250,7 +255,11 @@ def get_diffusion_gradient_direction(
     gradient_direction = None
     for k, v in private_tags_map.items():
         if v in dicom_header_info:
-            gradient_direction_element = dicom_header_info[v]
+            # ensure safe extraction of the dicom element
+            if isinstance(dicom_header_info[v], pydicom.dataelem.RawDataElement):
+                gradient_direction_element = pydicom.dataelem.DataElement_from_raw(dicom_header_info[v])
+            else:
+                gradient_direction_element = dicom_header_info[v]
             if v == private_tags_map["Siemens"]:
                 gradient_direction_raw = gradient_direction_element.value
                 if (
