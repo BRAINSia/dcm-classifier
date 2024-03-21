@@ -13,67 +13,51 @@ inference_model_path = list(
 )[0]
 
 
-def test_all_fields_dont_change(mock_ax_series, capsys):
-    # ax_path: Path = (
-    #     current_file_path.parent.parent
-    #     / "tests"
-    #     / "testing_data"
-    #     / "anonymized_testing_data"
-    #     / "anonymized_data"
-    #     / "6"
-    # )
-    # assert ax_path.exists()
-    # study = ProcessOneDicomStudyToVolumesMappingBase(
-    #     study_directory=ax_path, inferer=inferer
-    # )
-    # study.run_inference()
-    # captured = capsys.readouterr()
-    # print(captured.out)
+def test_all_fields_dont_change(mock_ax_series):
+    all_fields_path: Path = (
+        current_file_path.parent
+        / "testing_data"
+        / "anonymized_testing_data"
+        / "all_data"
+    )
+    assert all_fields_path.exists()
+
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=all_fields_path, inferer=inferer
+    )
+    study.run_inference()
+
     all_fields = required_DICOM_fields + optional_DICOM_fields
+    # remove fields that are not in the DICOM header
     all_fields = [
         field
         for field in all_fields
         if field
         not in [
             "Diffusionb-value",
-            # "Contrast/BolusAgent",  # check this, not in pydicom
             "Diffusionb-valueMax",
-            # "InPlanePhaseEncodingDirection",  # check this, COL in pydicom, unknown in pipeline
-            # "dB/dt",  # check this, not in pydicom had to change to dBdt but pipeline not getting value
-            # "NumberOfAverages",  # check this, 4 in pydicom, unknown in pipeline
-            # "InversionTime",  # check this, unknown in pydicom
-            # "Variable Flip Angle Flag",  # check this, not retrieved in pipeline
         ]
     ]
-    for series in mock_ax_series:
+    for series_num, series in study.get_study_dictionary():
         for volume in series.get_volume_list():
             first_file = volume.get_one_volume_dcm_filenames()[0]
             ds = pydicom.dcmread(first_file, stop_before_pixels=True)
             print("\n\n\n")
             print(ds)
             for field in all_fields:
-                # print(field)
-                try:
-                    assert field in volume.get_volume_dictionary()
-                    if isinstance(ds[field].value, pydicom.dataelem.RawDataElement):
-                        e = pydicom.dataelem.DataElement_from_raw(ds[field].value)
-                    else:
-                        e = ds[field].value
-                    # print(e)
-                    # print(volume.get_volume_dictionary()[field])
 
-                    # if element is a list, check each element
-                    if type(e) is pydicom.multival.MultiValue:
-                        for i, v in enumerate(e):
-                            assert volume.get_volume_dictionary()[field][i] == v
-                    else:  # else check the element
-                        assert volume.get_volume_dictionary()[field] == e
-                except Exception as a:
-                    # captured = capsys.readouterr()
-                    # print(captured.out)
-                    print(a)
-                    print(volume.get_volume_dictionary()[field])
-                    print(f"Field {field}")
+                assert field in volume.get_volume_dictionary()
+                if isinstance(ds[field].value, pydicom.dataelem.RawDataElement):
+                    e = pydicom.dataelem.DataElement_from_raw(ds[field].value)
+                else:
+                    e = ds[field].value
+
+                # if element is a list, check each element
+                if type(e) is pydicom.multival.MultiValue:
+                    for i, v in enumerate(e):
+                        assert volume.get_volume_dictionary()[field][i] == v
+                else:  # else check the element
+                    assert volume.get_volume_dictionary()[field] == e
 
 
 def test_scanning_sequence_in_flair(mock_flair_series):
@@ -147,6 +131,8 @@ def test_dcm_vol_has_contrast(contrast_file_path):
     for series_number, series in study.series_dictionary.items():
         assert series.get_volume_list()[0].get_has_contrast() is True
 
+        assert series.get_volume_list()[0].get_contrast_agent() != "None"
+
 
 def test_dcm_vol_no_contrast(no_contrast_file_path):
     assert no_contrast_file_path.exists()
@@ -158,6 +144,32 @@ def test_dcm_vol_no_contrast(no_contrast_file_path):
 
     for series_number, series in study.series_dictionary.items():
         assert series.get_volume_list()[0].get_has_contrast() is False
+
+        assert series.get_volume_list()[0].get_contrast_agent() == "None"
+
+
+def test_dcm_series_no_contrast(no_contrast_file_path):
+    assert no_contrast_file_path.exists()
+
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=no_contrast_file_path, inferer=inferer
+    )
+    study.run_inference()
+
+    for series_number, series in study.series_dictionary.items():
+        assert series.get_has_contrast() is False
+
+
+def test_dcm_series_has_contrast(contrast_file_path):
+    assert contrast_file_path.exists()
+
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=contrast_file_path, inferer=inferer
+    )
+    study.run_inference()
+
+    for series_number, series in study.series_dictionary.items():
+        assert series.get_has_contrast() is True
 
 
 def test_t1w_dcm_volume_modality(mock_volume_study):
