@@ -215,7 +215,7 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
     return -12345
 
 
-def test_magnitude_of_1(vector: np.ndarray) -> bool:
+def ensure_magnitude_of_1(vector: np.ndarray) -> bool:
     """
     Ensure that the magnitude of a vector is 1.
 
@@ -287,7 +287,9 @@ def get_diffusion_gradient_direction(
     # ensure that the gradient direction is a 3D vector
     if gradient_direction is not None:
         gradient_direction_size = gradient_direction.size
-        if gradient_direction_size != 3 or not test_magnitude_of_1(gradient_direction):
+        if gradient_direction_size != 3 or not ensure_magnitude_of_1(
+            gradient_direction
+        ):
             gradient_direction = None
 
     return gradient_direction
