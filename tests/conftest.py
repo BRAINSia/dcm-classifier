@@ -67,11 +67,28 @@ t1_series = [
 flair_series = [study.series_dictionary.get(7)]
 t2_series = [study.series_dictionary.get(11)]
 adc_series = [study.series_dictionary.get(6)]
+tracew_series = [study.series_dictionary.get(5)]
+
+
+dwi_study = ProcessOneDicomStudyToVolumesMappingBase(
+    study_directory=(testing_dicom_dir / "anonymized_dwi_series"), inferer=inferer
+)
+dwi_study.run_inference()
+
+
+@pytest.fixture(scope="session")
+def get_dwi_study():
+    return dwi_study
 
 
 @pytest.fixture(scope="session")
 def get_data_dir():
     return testing_dicom_dir / "anonymized_data"
+
+
+@pytest.fixture(scope="session")
+def mock_tracew_series():
+    return tracew_series
 
 
 @pytest.fixture(scope="session")

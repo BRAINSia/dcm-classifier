@@ -59,11 +59,81 @@ def test_all_fields_dont_change():
                     assert volume.get_volume_dictionary()[field] == e
 
 
+def test_get_series_and_study_uid(mock_tracew_series):
+    for series in mock_tracew_series:
+        assert series.get_series_uid() == "2.25.200346831984180887422376003959445101633"
+        assert series.get_study_uid() == "2.25.106736773675271926686056457127502108539"
+
+
+def test_series_modality_probabilities(mock_t1_series):
+    for series in mock_t1_series:
+        assert series.get_modality_probabilities().shape[1] == 13
+        assert round(series.get_modality_probabilities()["GUESS_ONNX_t1w"][0]) == 1.0
+
+
+def test_set_invalid_series_modality(mock_tracew_series):
+    for series in mock_tracew_series:
+        with pytest.raises(ValueError) as ex:
+            series.set_series_modality(4)
+        assert "ERROR: Can only set_modality with a string." in str(ex.value)
+
+
+def test_set_invalid_series_modality_probabilities(mock_tracew_series):
+    for series in mock_tracew_series:
+        with pytest.raises(ValueError) as ex:
+            series.set_modality_probabilities(4)
+        assert "ERROR: Can only set_modality_probabilities with a pd.DataFrame." in str(
+            ex.value
+        )
+
+
+def test_set_invalid_isotropic(mock_tracew_series):
+    for series in mock_tracew_series:
+        with pytest.raises(ValueError) as ex:
+            series.set_is_isotropic(4)
+        assert "ERROR: " in str(ex.value)
+
+
+def test_get_is_isotropic(mock_tracew_series):
+    for series in mock_tracew_series:
+        assert series.get_is_isotropic() == False
+
+
+def test_set_invalid_contrast(mock_tracew_series):
+    for series in mock_tracew_series:
+        with pytest.raises(ValueError) as ex:
+            series.set_has_contrast(4)
+        assert "ERROR: " in str(ex.value)
+
+
+def test_set_invalid_acq_plane(mock_tracew_series):
+    for series in mock_tracew_series:
+        with pytest.raises(ValueError) as ex:
+            series.set_acquisition_plane(4)
+        assert "ERROR: " in str(ex.value)
+
+
+def test_dwig_dcm_series_modality(get_dwi_study):
+    for series in get_dwi_study.get_study_dictionary().values():
+        assert series.get_series_modality() == "dwig"
+
+
+# def test_b0_volume_modality(get_dwi_study):
+#     for series_num, series in get_dwi_study.get_study_dictionary().items():
+#         for vol in series.get_volume_list():
+#             print(vol.get_volume_index())
+
+
 def test_scanning_sequence_in_flair(mock_flair_series):
     for series in mock_flair_series:
         for volume in series.get_volume_list():
             assert volume.get_volume_dictionary()["ScanningSequence_IR"] == 1
             assert volume.get_volume_dictionary()["ScanningSequence_SE"] == 1
+
+
+def test_tracew_dcm_series_modality(mock_tracew_series):
+    for series in mock_tracew_series:
+        assert series.get_series_modality() == "tracew"
 
 
 def test_adc_dcm_series_modality(mock_adc_series):
