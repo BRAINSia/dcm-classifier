@@ -13,12 +13,12 @@ inference_model_path = list(
 )[0]
 
 
-def test_all_fields_dont_change(mock_ax_series):
+def test_all_fields_dont_change():
     all_fields_path: Path = (
         current_file_path.parent
         / "testing_data"
         / "anonymized_testing_data"
-        / "all_data"
+        / "all_fields_data"
     )
     assert all_fields_path.exists()
 
@@ -28,6 +28,7 @@ def test_all_fields_dont_change(mock_ax_series):
     study.run_inference()
 
     all_fields = required_DICOM_fields + optional_DICOM_fields
+
     # remove fields that are not in the DICOM header
     all_fields = [
         field
@@ -38,14 +39,12 @@ def test_all_fields_dont_change(mock_ax_series):
             "Diffusionb-valueMax",
         ]
     ]
-    for series_num, series in study.get_study_dictionary():
+    for series_num, series in study.get_study_dictionary().items():
         for volume in series.get_volume_list():
             first_file = volume.get_one_volume_dcm_filenames()[0]
             ds = pydicom.dcmread(first_file, stop_before_pixels=True)
-            print("\n\n\n")
-            print(ds)
-            for field in all_fields:
 
+            for field in all_fields:
                 assert field in volume.get_volume_dictionary()
                 if isinstance(ds[field].value, pydicom.dataelem.RawDataElement):
                     e = pydicom.dataelem.DataElement_from_raw(ds[field].value)
