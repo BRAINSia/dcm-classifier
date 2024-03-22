@@ -67,12 +67,17 @@ t1_series = [
 flair_series = [study.series_dictionary.get(7)]
 t2_series = [study.series_dictionary.get(11)]
 adc_series = [study.series_dictionary.get(6)]
+tracew_series = [study.series_dictionary.get(5)]
 
 
 @pytest.fixture(scope="session")
 def get_data_dir():
     return testing_dicom_dir / "anonymized_data"
 
+
+@pytest.fixture(scope="session")
+def mock_tracew_series():
+    return tracew_series
 
 @pytest.fixture(scope="session")
 def mock_ax_series():

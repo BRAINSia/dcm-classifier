@@ -66,6 +66,11 @@ def test_scanning_sequence_in_flair(mock_flair_series):
             assert volume.get_volume_dictionary()["ScanningSequence_SE"] == 1
 
 
+def test_tracew_dcm_series_modality(mock_tracew_series):
+    for series in mock_tracew_series:
+        assert series.get_series_modality() == "tracew"
+
+
 def test_adc_dcm_series_modality(mock_adc_series):
     for series in mock_adc_series:
         assert series.get_series_modality() == "adc"
