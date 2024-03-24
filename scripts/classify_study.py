@@ -6,8 +6,7 @@ from typing import Any
 import pandas as pd
 import tabulate
 from collections import OrderedDict as ordered_dict
-
-# warnings.simplefilter(action="ignore", category=FutureWarning)
+from pathlib import Path
 
 try:
     from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
@@ -49,8 +48,21 @@ def main():
         required=True,
         help="Path to the model used for image type inference",
     )
+    parser.add_argument(
+        "-n",
+        "--nifti_dir",
+        required=False,
+        default=None,
+        help="Path to the directory where the NIFTI files are stored for each volume",
+    )
 
     args = parser.parse_args()
+
+    nifti_dir: Path | None = Path(args.nifti_dir) if args.nifti_dir else None
+    if nifti_dir:
+        import itk
+
+        nifti_dir.mkdir(parents=True, exist_ok=True)
 
     print(description)
     inferer = ImageTypeClassifierBase(classification_model_filename=args.model)
@@ -95,6 +107,20 @@ def main():
             prob_df: pd.DataFrame = volume.get_modality_probabilities()
             list_of_probabilities.append(prob_df)
             list_of_dictionaries.append(current_dict)
+            if nifti_dir is not None:
+                bvalue_suffix: str = (
+                    f"_b{volume.get_volume_bvalue()}"
+                    if volume.get_volume_bvalue() >= 0
+                    else ""
+                )
+                image_file_name: str = (
+                    f"{series_number:04}_{volume.get_volume_index():03}"
+                    f"_{volume.get_series_modality()}{bvalue_suffix}.nii.gz"
+                )
+
+                image_files = volume.get_one_volume_dcm_filenames()
+                itk_image = itk.imread(image_files)
+                itk.imwrite(itk_image, nifti_dir / image_file_name)
 
     df: pd.DataFrame = pd.DataFrame(list_of_dictionaries)
     df.sort_values(by=["Series#", "Vol.#"], inplace=True)
