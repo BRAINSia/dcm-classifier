@@ -1,23 +1,15 @@
-import argparse
-import time
-from io import StringIO
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-import pydotplus
 import onnxruntime as rt
 from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
 
 from sklearn import metrics
 from sklearn.model_selection import GridSearchCV
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.tree import DecisionTreeClassifier, export_graphviz
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
-from sklearn.model_selection import train_test_split, StratifiedKFold, KFold
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.metrics import (
     confusion_matrix,
     accuracy_score,
@@ -127,9 +119,7 @@ def generate_training_data(input_dataframe: str):
     return x_clean, y_clean, df.columns.drop(["label", "label_encoded"]).tolist()
 
 
-def train(
-    x: np.array, y: np.array, columns, samples_per_class=800
-):
+def train(x: np.array, y: np.array, columns, samples_per_class=800):
     """
     Train the model using the input training data.
     Args:
@@ -276,9 +266,7 @@ def train(
     return forest_importances
 
 
-def k_fold_cross_validation(
-    x, y, input_vector_size, n_splits=5, samples_per_class=800
-):
+def k_fold_cross_validation(x, y, input_vector_size, n_splits=5, samples_per_class=800):
     """
     Perform k-fold cross-validation to evaluate the model.
     Args:
@@ -459,7 +447,7 @@ def inference_metric_test(model_filename: str, model_df: str, out_file: str, fea
     df = pd.read_excel(model_df)
     df = df[df["label"].isin(imagetype_to_integer_mapping.keys())]
     # Filter rows based on available classes
-    available_classes = df["label"].unique()
+    # available_classes = df["label"].unique()
     # Normalize the data
     df["label_encoded"] = df["label"].map(imagetype_to_integer_mapping)
     # # ensure there are no empty or Nan values
@@ -543,7 +531,7 @@ def perform_grid_search(
     # Define the parameter grid
     param_grid = {
         "n_estimators": [1, 10, 25, 50, 75, 100, 150, 200],
-        "max_depth": [1, 2, 4, 6, 8, 10, 12, 15, 20, 25, 30]
+        "max_depth": [1, 2, 4, 6, 8, 10, 12, 15, 20, 25, 30],
         # Add more parameters if needed
     }
     # make x_train and y_train unique

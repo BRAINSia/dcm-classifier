@@ -1,6 +1,5 @@
 import sys
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 from glob import glob
@@ -138,6 +137,7 @@ output_additional_flags = [
 # PROSTAT_TYPE is a simple application of the series description classifier rule set.
 result_columns = ["PROSTAT_TYPE"]
 
+
 def make_unique_ordered_list(seq):
     # https://stackoverflow.com/a/480227
     seen = set()
@@ -156,7 +156,7 @@ def data_set_to_dict(ds):
         value: str | None = None
         try:
             value = str(elem.value).strip()
-        except:
+        except Exception as _e:
             pass
         if value is not None or value == "":
             information[key] = value
@@ -221,7 +221,13 @@ if __name__ == "__main__":
 
     current_file: Path = Path(__file__).resolve()
     root_dir: Path = current_file.parent.parent
-    test_data_dir: Path = root_dir / "tests" / "testing_data" / "anonymized_testing_data" / "anonymized_data"
+    test_data_dir: Path = (
+        root_dir
+        / "tests"
+        / "testing_data"
+        / "anonymized_testing_data"
+        / "anonymized_data"
+    )
 
     parser = argparse.ArgumentParser(description="Process some integers.")
     parser.add_argument(
@@ -256,4 +262,3 @@ if __name__ == "__main__":
         sys.exit(255)
     generate_dicom_dataframe(session_dirs=ses_dirs, output_file=out)
     print(out)
-

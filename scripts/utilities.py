@@ -4,7 +4,9 @@ import pydicom
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 
 
-def combine_all_excel_files(excel_files: list[Path] | list[pd.DataFrame]) -> pd.DataFrame:
+def combine_all_excel_files(
+    excel_files: list[Path] | list[pd.DataFrame],
+) -> pd.DataFrame:
     """
     combine all excel files into one dataframe
 
@@ -17,7 +19,7 @@ def combine_all_excel_files(excel_files: list[Path] | list[pd.DataFrame]) -> pd.
 
     # available_columns = set()
     all_dataframes = []
-    if not type(excel_files[0]) is pd.DataFrame:
+    if type(excel_files[0]) is not pd.DataFrame:
         for excel_file in excel_files:
             if "~$" in excel_file.as_posix():
                 # Skip temp files
@@ -45,9 +47,7 @@ def combine_all_excel_files(excel_files: list[Path] | list[pd.DataFrame]) -> pd.
     else:
         all_dataframes = excel_files
 
-    big_dataframe: pd.DataFrame = pd.concat(
-        all_dataframes, axis=0, ignore_index=True
-    )
+    big_dataframe: pd.DataFrame = pd.concat(all_dataframes, axis=0, ignore_index=True)
     return big_dataframe
 
 
@@ -75,7 +75,9 @@ removal_features = [
 ]
 
 
-def remove_rows_with_duplicate_values(input_frame: str | pd.DataFrame, outpath: str = None, save_to_excel: bool = True) -> None | pd.DataFrame:
+def remove_rows_with_duplicate_values(
+    input_frame: str | pd.DataFrame, outpath: str = None, save_to_excel: bool = True
+) -> None | pd.DataFrame:
     """
     Remove rows with duplicate values from a pandas dataframe
 
@@ -87,7 +89,7 @@ def remove_rows_with_duplicate_values(input_frame: str | pd.DataFrame, outpath: 
     Returns:
         None | pd.DataFrame: if save_to_excel is True, None is returned, otherwise the dataframe is returned
     """
-    if type(input_frame) is str:
+    if isinstance(input_frame, str):
         df = pd.read_excel(input_frame)
     else:
         df = input_frame
@@ -123,7 +125,11 @@ def identify_unusable_cols(frame: pd.DataFrame) -> list[str]:
     return droppable_cols
 
 
-def merge_labels_and_training_data(labels: (str | Path) | pd.DataFrame, training_data: (str | Path) | pd.DataFrame, save_to_excel: bool = True) -> pd.DataFrame | None:
+def merge_labels_and_training_data(
+    labels: (str | Path) | pd.DataFrame,
+    training_data: (str | Path) | pd.DataFrame,
+    save_to_excel: bool = True,
+) -> pd.DataFrame | None:
     """
     Merge labels and training data into one dataframe
 
@@ -143,9 +149,7 @@ def merge_labels_and_training_data(labels: (str | Path) | pd.DataFrame, training
         label_df = labels
     else:
         df = pd.read_excel(labels, index_col=0)
-        label_df = df[
-            ["FileName", "label"]
-        ]
+        label_df = df[["FileName", "label"]]
 
     # check if the input is a dataframe or a path to an excel file
     if type(training_data) is pd.DataFrame:

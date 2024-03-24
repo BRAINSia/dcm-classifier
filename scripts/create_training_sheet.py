@@ -1,8 +1,8 @@
 import re
 import pandas as pd
 from pathlib import Path
-from training_config import *
 
+from scripts.training_config import header_df
 
 max_header_length: int = 34
 
@@ -17,7 +17,7 @@ def one_hot_encoding_from_array(
     # get all the unique column
     unique_values = column[col_name].unique()
     for value in unique_values:
-        if type(value) is not str:
+        if not isinstance(value, str):
             continue
         row_contents = re.findall(r"\b\w+\b", value)
         if len(row_contents) > 0:
@@ -49,7 +49,7 @@ def one_hot_encoding_from_str_col(
         manufacturers = ["siemens", "ge", "philips", "toshiba"]
         replace_dict = {}
         for value in possible_values:
-            if type(value) is str:
+            if isinstance(value, str):
                 for manufacturer in manufacturers:
                     if manufacturer in value.lower():
                         replace_dict[value] = manufacturer
@@ -68,7 +68,7 @@ def one_hot_encoding_from_str_col(
             output_frame = output_frame.merge(series, left_index=True, right_index=True)
     else:
         for value in possible_values:
-            if type(value) is str:
+            if isinstance(value, str):
                 series = pd.Series(
                     (frame[col_name].str.contains(value)).fillna(0).astype("int16"),
                     name=f"{col_name}_{value.replace(' ', '_')}",
@@ -109,7 +109,9 @@ def parse_column_headers(
 
         if "keep" in row["action"]:
             try:
-                new_column_series = pd.Series(input_df[current_header]).reset_index(drop=True)
+                new_column_series = pd.Series(input_df[current_header]).reset_index(
+                    drop=True
+                )
                 new_data_frame[current_header] = new_column_series
             except KeyError:
                 print(f"KeyError: {current_header}")
