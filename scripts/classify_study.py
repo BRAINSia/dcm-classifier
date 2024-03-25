@@ -12,8 +12,6 @@ try:
     from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
     from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 except Exception as e:
-    from pathlib import Path
-
     print(f"Missing module import {e}")
     print(
         f"Try setting export PYTHONPATH={Path(__file__).parent.parent.as_posix()}/src"
@@ -116,9 +114,7 @@ def main():
                     f"{series_number:04}_{volume.get_volume_index():03}"
                     f"_{volume.get_series_modality()}{bvalue_suffix}.nii.gz"
                 )
-
-                image_files = volume.get_one_volume_dcm_filenames()
-                itk_image = itk.imread(image_files)
+                itk_image = volume.get_itk_image()
                 itk.imwrite(itk_image, nifti_dir / image_file_name)
 
     df: pd.DataFrame = pd.DataFrame(list_of_dictionaries)
