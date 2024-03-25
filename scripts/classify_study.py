@@ -86,8 +86,10 @@ def main():
             current_dict["Isotropic"] = str(volume.get_is_isotropic())
             print(volume.get_modality_probabilities().to_string(index=False))
             current_dict["Bvalue"] = str(volume.get_volume_bvalue())
-            current_dict["SeriesDesc"] = volume.get_volume_series_description()
-            # info_dict = series.get_series_info_dict()
+            try:
+                current_dict["SeriesDesc"] = volume.get_volume_series_description()
+            except AttributeError as e:
+                current_dict["SeriesDesc"] = "None"
             inputs_df: dict[str, Any] = volume.get_volume_dictionary()
             current_dict["ImageType"] = str(inputs_df.get("ImageType", "Unknown"))
             for unwanted in [
