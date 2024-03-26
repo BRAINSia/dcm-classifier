@@ -238,6 +238,25 @@ def test_unit_vector():
     assert ensure_magnitude_of_1(vec) is False
 
 
+def test_get_gradient_direction(get_data_dir):
+    # testing no gradient, not dwi series
+    no_grad_dir = get_data_dir / "1" / "DICOM"
+    no_grad = list(no_grad_dir.rglob("*.dcm"))[0]
+    ds = pydicom.dcmread(no_grad)
+    assert get_diffusion_gradient_direction(ds) is None
+
+    # testing gradient direction
+    grad_dir = get_data_dir.parent / "anonymized_dwi_series" / "DICOM"
+    grad = list(grad_dir.rglob("*.dcm"))[0]
+    ds_w_grad = pydicom.dcmread(grad)
+
+    # ensure each element in the diffusion gradient direction is equal to the value in the DICOM header
+    for elem in zip(
+        get_diffusion_gradient_direction(ds_w_grad), ds_w_grad[(0x0019, 0x100E)].value
+    ):
+        assert elem[0] == elem[1]
+
+
 def test_is_integer():
     assert is_integer("1") is True
     assert is_integer("test") is False
