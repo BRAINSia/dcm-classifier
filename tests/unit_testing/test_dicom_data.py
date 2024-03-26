@@ -59,6 +59,17 @@ def test_all_fields_dont_change():
                     assert volume.get_volume_dictionary()[field] == e
 
 
+def test_dwig_dcm_series_modality(get_dwi_study):
+    for series in get_dwi_study.get_study_dictionary().values():
+        assert series.get_series_modality() == "dwig"
+
+
+# def test_b0_volume_modality(get_dwi_study):
+#     for series_num, series in get_dwi_study.get_study_dictionary().items():
+#         for vol in series.get_volume_list():
+#             print(vol.get_volume_index())
+
+
 def test_scanning_sequence_in_flair(mock_flair_series):
     for series in mock_flair_series:
         for volume in series.get_volume_list():
