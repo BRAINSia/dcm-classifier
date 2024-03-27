@@ -2,6 +2,8 @@ import numpy as np
 import pydicom
 import pytest
 from dcm_classifier.example_image_processing import slugify, rglob_for_singular_result
+from dcm_classifier.image_type_inference import *
+from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 from dcm_classifier.utility_functions import (
     vprint,
     get_diffusion_gradient_direction,
@@ -143,7 +145,7 @@ def test_multiple_series_UID():
     assert "Too many series in DICOMs in:" in str(ex.value)
 
 
-def test_ADC_in_image_type_field():
+def test_diff_grad_dir():
     assert dicom_file_dir.exists()
     file = list(dicom_file_dir.rglob("*.dcm"))[0]
     ds = pydicom.dcmread(file, stop_before_pixels=True)
@@ -200,6 +202,79 @@ def test_no_pixel_bandwidth():
     ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
 
     assert ds_dict["PixelBandwidth"] == "INVALID_VALUE"
+
+
+def test_invalid_fields():
+    file_dir = dicom_file_dir.parent
+
+    assert file_dir.exists()
+    vol = list()
+    for file in file_dir.iterdir():
+        if "no_valid" in file.stem:
+            vol.append(file)
+
+    f = pydicom.dcmread(vol[0])
+    ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
+
+    # Convert all values to strings
+    ds_dict = {str(field): str(value) for field, value in ds_dict.items()}
+
+    all_fields = required_DICOM_fields + optional_DICOM_fields
+    all_fields = [
+        field
+        for field in all_fields
+        if field
+        not in [
+            "Diffusionb-value",
+            "Diffusionb-valueMax",
+            "StudyInstanceUID",
+            "SeriesInstanceUID",
+            "FileName",
+            "list_of_ordered_volume_files",
+        ]
+    ]
+
+    # assert the fields that are in the dataset are set to one of these invalid values
+    invalid_fields = ["INVALID_VALUE", "-12345", "Unknown", "-12345.0", "None", ""]
+    for field in all_fields:
+        print(field, ds_dict[field])
+        if "unknown" in ds_dict[field].lower():
+            assert True
+        else:
+            assert ds_dict[field] in invalid_fields
+
+
+def test_run_inference_validate_features(get_data_dir):
+    dwi_directory = get_data_dir.parent / "anonymized_dwi_series"
+    assert dwi_directory.exists()
+
+    # run study on anonymized data
+    inferer = ImageTypeClassifierBase(
+        classification_model_filename=inference_model_path
+    )
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=dwi_directory, inferer=inferer
+    )
+
+    # remove the fields that are validated in the inference
+
+    for series_num, series in study.series_dictionary.items():
+        for vol in series.get_volume_list():
+            del vol.__getattribute__("volume_info_dict")["ImageType"]
+            del vol.__getattribute__("volume_info_dict")["SeriesNumber"]
+            del vol.__getattribute__("volume_info_dict")["EchoTime"]
+            del vol.__getattribute__("volume_info_dict")["PixelBandwidth"]
+
+    study.run_inference()
+
+    for series_num, series in study.series_dictionary.items():
+        # print(
+        #     ImageTypeClassifierBase.infer_modality(
+        #         series.get_volume_list()[0].get_volume_dictionary()
+        #     )
+        # )
+        for vol in series.get_volume_list():
+            assert vol.get_volume_modality() == "INVALID"
 
 
 # def test_invalid_fields():
