@@ -418,6 +418,7 @@ class ImageTypeClassifierBase:
                 elif "dwig" in unique_modalities:
                     self._update_diffusion_series_modality()
                 # TRACEW series often contains b0 and tracew volumes
+                # TODO: get more data for testing
                 elif "tracew" in unique_modalities:
                     self.series.set_series_modality("tracew")
                 elif -12345 not in unique_bvals:
