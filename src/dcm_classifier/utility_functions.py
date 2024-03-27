@@ -176,6 +176,7 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
 
             # This decoding of bvalues follows the NAMIC conventions defined at
             # https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
+            # TODO: add testing for this
             if v == private_tags_map["GE"]:
                 large_number_modulo_for_GE = 100000
                 # value = dicom_element.value[0] % large_number_modulo_for_GE
@@ -189,6 +190,7 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
                 continue
             else:
                 value = dicom_element.value
+            # TODO: add testing for this
             if dicom_element.VR == "OB":
                 if isinstance(value, bytes):
                     value = value.decode("utf-8", "backslashreplace")
