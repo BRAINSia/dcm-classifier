@@ -59,6 +59,18 @@ def test_all_fields_dont_change():
                     assert volume.get_volume_dictionary()[field] == e
 
 
+def test_get_series_and_study_uid(mock_tracew_series):
+    for series in mock_tracew_series:
+        assert series.get_series_uid() == "2.25.200346831984180887422376003959445101633"
+        assert series.get_study_uid() == "2.25.106736773675271926686056457127502108539"
+
+
+def test_series_modality_probabilities(mock_t1_series):
+    for series in mock_t1_series:
+        assert series.get_modality_probabilities().shape[1] == 13
+        assert round(series.get_modality_probabilities()["GUESS_ONNX_t1w"][0]) == 1.0
+
+
 def test_dwig_dcm_series_modality(get_dwi_study):
     for series in get_dwi_study.get_study_dictionary().values():
         assert series.get_series_modality() == "dwig"
