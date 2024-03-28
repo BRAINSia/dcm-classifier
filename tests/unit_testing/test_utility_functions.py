@@ -13,6 +13,7 @@ from dcm_classifier.utility_functions import (
     is_integer,
     ensure_magnitude_of_1,
     convert_array_to_index_value,
+    get_coded_dictionary_elements,
 )
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
@@ -344,3 +345,16 @@ def test_conv_arr_to_index_val():
     with pytest.raises(ValueError) as ex:
         convert_array_to_index_value("test", arr)
     assert "could not convert string to float" in str(ex.value)
+
+
+def test_get_invalid_coded_dictionary():
+    test_dict = {"example_value": "INVALID_VALUE"}
+
+    assert get_coded_dictionary_elements(test_dict) == {}
+
+
+def test_get_EADC_image_type():
+    test_dict = {"ImageType": ["ORIGINAL", "PRIMARY", "EADC", "NONE"]}
+
+    assert get_coded_dictionary_elements(test_dict)["ImageType_EADC"] == 1
+
