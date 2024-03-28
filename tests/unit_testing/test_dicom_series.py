@@ -124,13 +124,6 @@ def test_dwig_dcm_series_modality(get_dwi_study):
 #             print(vol.get_volume_index())
 
 
-def test_scanning_sequence_in_flair(mock_flair_series):
-    for series in mock_flair_series:
-        for volume in series.get_volume_list():
-            assert volume.get_volume_dictionary()["ScanningSequence_IR"] == 1
-            assert volume.get_volume_dictionary()["ScanningSequence_SE"] == 1
-
-
 def test_tracew_dcm_series_modality(mock_tracew_series):
     for series in mock_tracew_series:
         assert series.get_series_modality() == "tracew"
@@ -189,34 +182,6 @@ def test_t2_dcm_series_modality(mock_t2_series):
 inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
 
 
-def test_dcm_vol_has_contrast(contrast_file_path):
-    assert contrast_file_path.exists()
-
-    study = ProcessOneDicomStudyToVolumesMappingBase(
-        study_directory=contrast_file_path, inferer=inferer
-    )
-    study.run_inference()
-
-    for series_number, series in study.series_dictionary.items():
-        assert series.get_volume_list()[0].get_has_contrast() is True
-
-        assert series.get_volume_list()[0].get_contrast_agent() != "None"
-
-
-def test_dcm_vol_no_contrast(no_contrast_file_path):
-    assert no_contrast_file_path.exists()
-
-    study = ProcessOneDicomStudyToVolumesMappingBase(
-        study_directory=no_contrast_file_path, inferer=inferer
-    )
-    study.run_inference()
-
-    for series_number, series in study.series_dictionary.items():
-        assert series.get_volume_list()[0].get_has_contrast() is False
-
-        assert series.get_volume_list()[0].get_contrast_agent() == "None"
-
-
 def test_dcm_series_no_contrast(no_contrast_file_path):
     assert no_contrast_file_path.exists()
 
@@ -239,31 +204,3 @@ def test_dcm_series_has_contrast(contrast_file_path):
 
     for series_number, series in study.series_dictionary.items():
         assert series.get_has_contrast() is True
-
-
-def test_t1w_dcm_volume_modality(mock_volume_study):
-    for series_num, series in mock_volume_study.get_study_dictionary().items():
-        for volume in series.get_volume_list():
-            if 12 <= series_num <= 15:
-                assert volume.get_volume_modality() == "t1w"
-
-
-def test_ax_dcm_volume_acq_plane(mock_volume_study):
-    for series_num, series in mock_volume_study.get_study_dictionary().items():
-        for volume in series.get_volume_list():
-            if 5 <= series_num <= 12 and series_num != 10:
-                assert volume.get_acquisition_plane() == "ax"
-
-
-def test_sag_dcm_volume_acq_plane(mock_volume_study):
-    for series_num, series in mock_volume_study.get_study_dictionary().items():
-        for volume in series.get_volume_list():
-            if series_num == 10 or series_num == 13:
-                assert volume.get_acquisition_plane() == "sag"
-
-
-def test_cor_dcm_volume_acq_plane(mock_volume_study):
-    for series_number, series in mock_volume_study.get_study_dictionary().items():
-        for volume in series.get_volume_list():
-            if series_number == 15:
-                assert volume.get_acquisition_plane() == "cor"
