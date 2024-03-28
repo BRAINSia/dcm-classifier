@@ -151,3 +151,54 @@ def test_is_MR_modality(mock_volume_study):
     for series_num, series in mock_volume_study.get_study_dictionary().items():
         for volume in series.get_volume_list():
             assert volume.is_MR_modality() is False
+
+
+def test_setting_invalid_modality(mock_tracew_series):
+    for series in mock_tracew_series:
+        for volume in series.get_volume_list():
+            with pytest.raises(ValueError) as ex:
+                volume.set_volume_modality(4)
+            assert "ERROR: Can only set_modality with a string." in str(ex.value)
+
+
+def test_get_series_modality_from_subvol(mock_tracew_series):
+    for series in mock_tracew_series:
+        for volume in series.get_volume_list():
+            assert volume.get_series_modality() == "tracew"
+
+
+def test_get_parent_series(mock_tracew_series):
+    for series in mock_tracew_series:
+        for volume in series.get_volume_list():
+            assert volume.get_parent_series() == series
+
+
+def test_setting_invalid_modality_probabilities(mock_tracew_series):
+    for series in mock_tracew_series:
+        for volume in series.get_volume_list():
+            with pytest.raises(ValueError) as ex:
+                volume.set_modality_probabilities(4)
+            assert (
+                "ERROR: Can only set_modality_probabilities with a pd.DataFrame."
+                in str(ex.value)
+            )
+
+
+# def test_getting_invalid_series_number(get_data_dir):
+#     dicom_path = (
+#         get_data_dir.parent / "invalid_data" / "invalid_fields" / "invalidSeriesNum.dcm"
+#     )
+#     assert dicom_path.exists()
+#     vol = DicomSingleVolumeInfoBase(dicom_path.as_posix())
+#
+#     with pytest.raises(ValueError) as ex:
+#         vol.get_series_number()
+#     assert vol.get_series_number() == -12345
+
+
+def test_get_volume_index(mock_tracew_series):
+    for series in mock_tracew_series:
+        for volume in series.get_volume_list():
+            volume.set_volume_index(1)
+
+            assert volume.get_volume_index() == 1

@@ -12,6 +12,7 @@ from dcm_classifier.utility_functions import (
     itk_read_from_dicomfn_list,
     is_integer,
     ensure_magnitude_of_1,
+    convert_array_to_index_value,
 )
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
@@ -336,3 +337,10 @@ def test_is_integer():
     assert is_integer("1") is True
     assert is_integer("test") is False
     assert is_integer("1.0") is False
+
+
+def test_conv_arr_to_index_val():
+    arr = "yes//this//is//a//test"
+    with pytest.raises(ValueError) as ex:
+        convert_array_to_index_value("test", arr)
+    assert "could not convert string to float" in str(ex.value)
