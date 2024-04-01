@@ -1,0 +1,39 @@
+name: Continuous integration workflow
+on:
+  push:
+    branches:
+      - "add_github_actions"
+    paths:
+      - ".github/workflows/ci.yml"
+  pull_request:
+    branches:
+      - "main"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_dev.txt
+          pip install sphinx sphinx-rtd-theme  # Install Sphinx and a theme (e.g., Read the Docs theme)
+
+      - name: Run pre-commit hooks
+        run: pre-commit run --all-files
+
+      - name: Run coverage
+        run: |
+          coverage run --concurrency=multiprocessing --parallel-mode -m pytest tests # possibly remove --junitxml=tests/pytest.xml
+          coverage combine
+          coverage report --format=text -m |tee tests/pytest-coverage.txt
+
+      - name: Build documentation with Sphinx
+        run: |
+          sphinx-build -b html src/dcm_classifier documentation  # Adjust paths as necessary
+
