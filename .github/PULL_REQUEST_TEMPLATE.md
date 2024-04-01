@@ -2,7 +2,7 @@
 <!-- _What is the purpose of this pull request?_ -->
 
 # Implementation
-<!-- 
+<!--
 _What items were implemented?_
 _What are their key components and functionality?_
 _What does this add to the overall project?_
@@ -21,7 +21,7 @@ _Where are these documented?_
 <!-- _Did you run into any problems, if so how did you resolve them? -->
 
 # Notes
-<!-- 
+<!--
 _Any screenshots/videos demonstrating the functioning of the changes made in this pull request?_
 _Is there any other important notes related to this pull request?
 

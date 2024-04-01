@@ -14,6 +14,6 @@ _What part of the project does it pertain to and what does it accomplish?_
 -->
 
 # Additional Notes
-<!-- 
+<!--
 _Any additional notes here_
 -->
