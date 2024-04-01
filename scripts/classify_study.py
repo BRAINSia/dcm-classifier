@@ -86,7 +86,7 @@ def main():
             current_dict["Bvalue"] = str(volume.get_volume_bvalue())
             try:
                 current_dict["SeriesDesc"] = volume.get_volume_series_description()
-            except AttributeError as e:
+            except AttributeError:
                 current_dict["SeriesDesc"] = "None"
             inputs_df: dict[str, Any] = volume.get_volume_dictionary()
             current_dict["ImageType"] = str(inputs_df.get("ImageType", "Unknown"))

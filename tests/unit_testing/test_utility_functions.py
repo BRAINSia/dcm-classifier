@@ -357,4 +357,3 @@ def test_get_EADC_image_type():
     test_dict = {"ImageType": ["ORIGINAL", "PRIMARY", "EADC", "NONE"]}
 
     assert get_coded_dictionary_elements(test_dict)["ImageType_EADC"] == 1
-
