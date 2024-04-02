@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.10.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.10.12
 
       - name: Install dependencies
         run: |
@@ -27,13 +27,18 @@ jobs:
       - name: Run pre-commit hooks
         run: pre-commit run --all-files
 
-      - name: Run coverage
-        run: |
-          coverage run --concurrency=multiprocessing --parallel-mode -m pytest tests # possibly remove --junitxml=tests/pytest.xml
-          coverage combine
-          coverage report --format=text -m |tee tests/pytest-coverage.txt
+#      - name: Run coverage
+#        run: |
+#          coverage run --concurrency=multiprocessing --parallel-mode -m pytest tests --junitxml=tests/pytest.xml
+#          coverage combine
+#          coverage report --format=text -m |tee tests/pytest-coverage.txt
 
-      - name: Build documentation with Sphinx
-        run: |
-          sphinx-build -b html src/dcm_classifier documentation  # Adjust paths as necessary
+      - name: Run tests
+        working-directory: ./tests
+        run: pytest
 
+#          export PYTHONPATH="${PYTHONPATH}:$(dirname $(pwd))"
+
+#      - name: Build documentation with Sphinx
+#        run: |
+#          sphinx-build -b html src/dcm_classifier documentation
