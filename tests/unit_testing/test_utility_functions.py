@@ -2,7 +2,7 @@ import numpy as np
 import pydicom
 import pytest
 from dcm_classifier.example_image_processing import slugify, rglob_for_singular_result
-from dcm_classifier.image_type_inference import *
+from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 from dcm_classifier.utility_functions import (
     vprint,
