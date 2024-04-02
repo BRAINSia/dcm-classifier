@@ -1,15 +1,12 @@
 name: Push to main
 on:
-  push:
-    branches:
-      - "add_github_actions"
-    paths:
-      - ".github/workflows/push_to_main.yml"
   pull_request:
     branches:
       - "main"
+    paths:
+      - ".github/workflows/push_to_main.yml"
 jobs:
-  test:
+  push_to_main:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -26,12 +23,6 @@ jobs:
 
       - name: Run pre-commit hooks
         run: pre-commit run --all-files
-
-#      - name: Run coverage
-#        run: |
-#          coverage run --concurrency=multiprocessing --parallel-mode -m pytest tests --junitxml=tests/pytest.xml
-#          coverage combine
-#          coverage report --format=text -m |tee tests/pytest-coverage.txt
 
       - name: Run tests
         working-directory: ./tests
