@@ -1,10 +1,10 @@
-name: Continuous integration workflow
+name: Push to main
 on:
   push:
     branches:
       - "add_github_actions"
     paths:
-      - ".github/workflows/ci.yml"
+      - ".github/workflows/push_to_main.yml"
   pull_request:
     branches:
       - "main"

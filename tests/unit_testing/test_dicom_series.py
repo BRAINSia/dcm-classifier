@@ -96,7 +96,7 @@ def test_set_invalid_isotropic(mock_tracew_series):
 
 def test_get_is_isotropic(mock_tracew_series):
     for series in mock_tracew_series:
-        assert series.get_is_isotropic() == False
+        assert series.get_is_isotropic() is False
 
 
 def test_set_invalid_contrast(mock_tracew_series):
