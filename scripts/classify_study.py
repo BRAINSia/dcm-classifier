@@ -43,7 +43,7 @@ def main():
     parser.add_argument(
         "-m",
         "--model",
-        required=True,
+        required=False,
         help="Path to the model used for image type inference",
     )
     parser.add_argument(
@@ -63,7 +63,11 @@ def main():
         nifti_dir.mkdir(parents=True, exist_ok=True)
 
     print(description)
-    inferer = ImageTypeClassifierBase(classification_model_filename=args.model)
+
+    if args.model is None:
+        inferer = ImageTypeClassifierBase()
+    else:
+        inferer = ImageTypeClassifierBase(classification_model_filename=args.model)
     study = ProcessOneDicomStudyToVolumesMappingBase(
         study_directory=args.session_directory, inferer=inferer
     )
