@@ -15,9 +15,19 @@ Please reference the manuscript:
 
 # Instructions
 
-Below are useful commands to start using the tool.
+Below are instructions for installing and using the package as a user and developer.
 
-Clone git repo
+## User Instructions
+
+**Pip install**
+
+Users have the ability to simply pip install the package which will install the classifier and all necessary dependencies to run the classifier for ease of use. This will also provide the user with the pretrained model for classification.
+
+`$ pip install dcm-classifier`
+
+**Clone the repository**
+
+If you prefer to clone the git repository:
 
 `$ git clone https://github.com/BRAINSia/dcm-classifier.git`
 
@@ -29,20 +39,31 @@ Setup virtual environment
 
 `$ python3 -m venv <venv_path> && source <venv_path>/bin/activate`
 
-
 Install required packages
 
 `$ pip install -r requirements.txt`
 
-# Development
+## Developer Instructions
+
+For development, clone the repository and install the developer requirements in a virtual environment. Development allows for training of new models using the scripts directory.
+
 `$ pip install -r requirements_dev.txt`
 
+Install pre-commit hooks
+
 `$ pre-commit install`
+
+Run pre-commit hooks to ensure code quality
+
 `$ pre-commit run -a`
 
-Run the script!
+Run the classify study script, the path to a model can be omitted and the default model provided in the package will be used.
+    
+`$ python3 <path_to_scripts_directory>/classify_study.py -d <path_to_dicom_session>`
 
-`python3 classify_study.py -m models/rf_classifier.onnx -d <path_to_dicom_session>`
+or
+
+`$ python3 <path_to_scripts_directory>/classify_study.py -m models/ova_rf_classifier.onnx -d <path_to_dicom_session>`
 
 ## Testing
 ```bash
@@ -59,6 +80,34 @@ Run the script!
  coverage xml -o tests/coverage.xml
 ```
 
+# FAQs
+
+1. **What is the purpose of this package?**
+
+    The purpose of this package is to provide a tool for classifying DICOM images based on their header information. This tool can be used to automate the classification process and eliminate human error.
+
+
+2. **What are the key features of this package?**
+
+    The key features of this package include:
+    - Classification of DICOM images based on header information
+    - Automated classification process
+    - Elimination of human error
+
+
+3. **What are the benefits of using this package?**
+
+
+4. **What are the limitations of this package?**
+
+
+5. **What are the future plans for this package and how can I contribute?**
+
+    The future plans for this package include:
+    - Adding support for more image modalities
+    - Improving the classification accuracy
+    - Adding support for more DICOM header fields
+
 # Authors
 
 1. **Michal Brzus**
@@ -68,3 +117,7 @@ Run the script!
 2. [**Hans J. Johnson**](https://engineering.uiowa.edu/people/hans-johnson)
 
     github: [BRAINSia](https://github.com/BRAINSia), email: hans-johnson@uiowa.edu
+
+3. **Cavan Riley**
+
+    github: [CavRiley](https://github.com/CavRiley), email: cavan-riley@uiowa.edu
