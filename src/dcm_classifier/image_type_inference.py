@@ -27,7 +27,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from typing import Any
+from typing import Any, Optional
 
 
 imagetype_to_integer_mapping = {
@@ -42,6 +42,9 @@ imagetype_to_integer_mapping = {
     "eadc": 8,
     "dwig": 9,
 }
+
+current_file_path = Path(__file__).absolute()
+dcm_classifier_path = current_file_path.parent
 
 
 class ImageTypeClassifierBase:
@@ -79,7 +82,9 @@ class ImageTypeClassifierBase:
 
     def __init__(
         self,
-        classification_model_filename: str | Path,
+        classification_model_filename: str | Path = dcm_classifier_path
+        / "models"
+        / "ova_rf_classifier.onnx",
         classification_feature_list: list[str] = inference_features,
         image_type_map: dict[str, int] = imagetype_to_integer_mapping,
         min_probability_threshold: float = 0.4,
@@ -94,6 +99,7 @@ class ImageTypeClassifierBase:
             mode (str): "series" or "volume" to run inference on series or volume level (a series could have multiple subvolumes).
             min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
         """
+
         self.classification_model_filename: str | Path = Path(
             classification_model_filename
         )
