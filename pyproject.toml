@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dcm_classifier"
-version = '0.7.0.rc2'
+version = '0.7.0.rc6'
 authors = [
   { name="Michal Brzus", email="michal-brzus@uiowa.edu" },
   { name="Hans Johnson", email="hans-johnson@uiowa.edu" },
@@ -29,6 +29,9 @@ dependencies = [
     "python-gdcm>=3.0.10", # NOTE: python-gdcm replaces pylibjpeg for plugin support for pydicom
     "tabulate>=0.9.0",
 ]
+
+[tool.hatchling.data]
+include = ["models/ova_rf_classifier.onnx"]
 
 [tool.pytest.ini_options]
 minversion = "7.2"
