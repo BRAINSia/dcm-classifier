@@ -11,7 +11,7 @@ This project was supported by several funding sources including:
 # Citing
 Please reference the manuscript:
 
-`Michal Brzus, Cavan J. Riley, Joel Bruss, Aaron Boes, Randall Jones, Hans J. Johnson, "DICOM sequence selection for medical imaging applications," Proc. SPIE 12931, Medical Imaging 2024: Imaging Informatics for Healthcare, Research, and Applications, 12931 (2024)`
+`Michal Brzus, Cavan J. Riley, Joel Bruss, Aaron Boes, Randall Jones, Hans J. Johnson, "DICOM sequence selection for medical imaging applications," Proc. SPIE 12931, Medical Imaging 2024: Imaging Informatics for Healthcare, Research, and Applications, 1293108 (2 April 2024); https://doi.org/10.1117/12.3006568`
 
 # Instructions
 
@@ -58,7 +58,7 @@ Run pre-commit hooks to ensure code quality
 `$ pre-commit run -a`
 
 Run the classify study script, the path to a model can be omitted and the default model provided in the package will be used.
-    
+
 `$ python3 <path_to_scripts_directory>/classify_study.py -d <path_to_dicom_session>`
 
 or
