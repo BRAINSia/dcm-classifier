@@ -8,14 +8,25 @@ This project was supported by several funding sources including:
  - NIH-NINDS R01NS114405 and NINDS R01 NS119896
  - [Botimageai](https://www.botimageai.com/).
 
-# Citing
+## Paper
+
+Click [here](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12931/3006568/DICOM-sequence-selection-for-medical-imaging-applications/10.1117/12.3006568.full#_=_) to view the published paper.
+
+
+##  Citing
 Please reference the manuscript:
 
 `Michal Brzus, Cavan J. Riley, Joel Bruss, Aaron Boes, Randall Jones, Hans J. Johnson, "DICOM sequence selection for medical imaging applications," Proc. SPIE 12931, Medical Imaging 2024: Imaging Informatics for Healthcare, Research, and Applications, 1293108 (2 April 2024); https://doi.org/10.1117/12.3006568`
 
+Additionally, please reference the citations located in the [citations directory](https://github.com/BRAINSia/dcm-classifier/tree/main/citations)
+
 # Instructions
 
 Below are instructions for installing and using the package as a user and developer.
+
+## Tutorials
+
+Tutorial notebooks are provided in the scripts directory for training and using the classifier along with all the necessary scripts for training a custom model.
 
 ## User Instructions
 
@@ -61,17 +72,21 @@ Run the classify study script, the path to a model can be omitted and the defaul
 
 `$ python3 <path_to_scripts_directory>/classify_study.py -d <path_to_dicom_session>`
 
-or
+or pass the path to a separate model
 
 `$ python3 <path_to_scripts_directory>/classify_study.py -m models/ova_rf_classifier.onnx -d <path_to_dicom_session>`
 
-## Testing
+### Testing
+
+Testing in the dcm-classifier package is done using pytest. To run the tests, navigate to the root directory of the package and run the following command:
 ```bash
   pytest
-# or to fail on warnings
+  # or to fail on warnings
   python3 -Werror::FutureWarning -m pytest
 ```
-## Coverage Analysis
+### Coverage Analysis
+
+To run coverage analysis, navigate to the root directory of the package and run the following commands:
 ```bash
  coverage run --concurrency=multiprocessing --parallel-mode -m pytest tests --junitxml=tests/pytest.xml
  coverage combine
@@ -79,6 +94,11 @@ or
  coverage xml -o tests/coverage.xml
  coverage xml -o tests/coverage.xml
 ```
+### Contributing
+
+We welcome contributions from the community! Before getting started, please take a moment to review our [Contribution Guidelines](CONTRIBUTING.md) for instructions on how to contribute to this project. Whether you're fixing a bug, implementing a new feature, or improving documentation, your contributions are greatly appreciated!
+
+
 
 # FAQs
 
@@ -95,13 +115,7 @@ or
     - Elimination of human error
 
 
-3. **What are the benefits of using this package?**
-
-
-4. **What are the limitations of this package?**
-
-
-5. **What are the future plans for this package and how can I contribute?**
+3. **What are the future plans for this package and how can I contribute?**
 
     The future plans for this package include:
     - Adding support for more image modalities
