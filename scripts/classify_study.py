@@ -80,6 +80,7 @@ def main():
     for series_number, series in study.series_dictionary.items():
         for index, volume in enumerate(series.get_volume_list()):
             current_dict: dict[str, str] = ordered_dict()
+            current_dict["Series#"] = str(series_number)
             try:
                 current_dict["Vol.#"] = str(volume.get_volume_index())
             except AttributeError:
