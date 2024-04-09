@@ -80,14 +80,32 @@ def main():
     for series_number, series in study.series_dictionary.items():
         for index, volume in enumerate(series.get_volume_list()):
             current_dict: dict[str, str] = ordered_dict()
-            current_dict["Series#"] = str(series_number)
-            current_dict["Vol.#"] = str(volume.get_volume_index())
-            current_dict["Volume Modality"] = str(volume.get_volume_modality())
-            current_dict["Series Modality"] = str(series.get_series_modality())
-            current_dict["Acq.Plane"] = str(volume.get_acquisition_plane())
-            current_dict["Isotropic"] = str(volume.get_is_isotropic())
+            try:
+                current_dict["Vol.#"] = str(volume.get_volume_index())
+            except AttributeError:
+                current_dict["Vol.#"] = "None"
+            try:
+                current_dict["Volume Modality"] = str(volume.get_volume_modality())
+            except AttributeError:
+                current_dict["Volume Modality"] = "None"
+            try:
+                current_dict["Series Modality"] = str(series.get_series_modality())
+            except AttributeError:
+                current_dict["Series Modality"] = "None"
+            try:
+                current_dict["Acq.Plane"] = str(volume.get_acquisition_plane())
+            except AttributeError:
+                current_dict["Acq.Plane"] = "None"
+            try:
+                current_dict["Isotropic"] = str(volume.get_is_isotropic())
+            except AttributeError:
+                current_dict["Isotropic"] = "None"
+
             print(volume.get_modality_probabilities().to_string(index=False))
-            current_dict["Bvalue"] = str(volume.get_volume_bvalue())
+            try:
+                current_dict["Bvalue"] = str(volume.get_volume_bvalue())
+            except AttributeError:
+                current_dict["Bvalue"] = "None"
             try:
                 current_dict["SeriesDesc"] = volume.get_volume_series_description()
             except AttributeError:
