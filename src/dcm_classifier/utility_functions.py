@@ -585,7 +585,7 @@ def sanitize_dicom_dataset(
         elif field == "AcquisitionTime":
             if field not in dataset:
                 # AcquisitionTime is not a required field, it can be unknown
-                _default_inferred_value = -12345
+                _default_inferred_value = "000000.00"
                 dataset_dictionary[field] = _default_inferred_value
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
