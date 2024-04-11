@@ -261,7 +261,7 @@ class DicomSingleSeries:
         # AcquisitionTime is an optional field, this might need to be changed in the future
         sorted(
             self.volume_info_list,
-            key=lambda x: x.get_volume_dictionary().get("AcquisitionTime", -12345),
+            key=lambda x: x.get_volume_dictionary().get("AcquisitionTime", "000000.00"),
         )
         # assign the index to each volume
         for index, volume in enumerate(self.volume_info_list):
