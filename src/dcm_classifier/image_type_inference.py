@@ -372,10 +372,10 @@ class ImageTypeClassifierBase:
                 volume.set_modality_probabilities(pd.DataFrame(full_outputs, index=[0]))
             else:
                 # if features are not validated, set values to defaults
-                volume.set_acquisition_plane("UNKNOWN")
+                volume.set_acquisition_plane("INVALID")
                 volume.set_is_isotropic(False)
                 volume.set_has_contrast(False)
-                volume.set_volume_modality("UNKNOWN")
+                volume.set_volume_modality("INVALID")
                 volume.set_modality_probabilities(pd.DataFrame())
 
         """
