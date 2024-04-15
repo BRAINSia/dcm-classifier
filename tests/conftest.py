@@ -18,15 +18,9 @@ inference_model_path = list(
 
 # path to the testing data directory
 test_data_dir_path: Path = Path(__file__).parent / "testing_data"
-tar_path: Path = test_data_dir_path / "anonymized_testing_data.tar.gz"
 
 # path to the anonymized testing data directory
 testing_dicom_dir: Path = test_data_dir_path / "anonymized_testing_data"
-
-# Check to see if tar file is unpacked or not
-if not testing_dicom_dir.exists():
-    testing_dicom_dir.mkdir(parents=True)
-    subprocess.run(f"tar -xf {tar_path} -C {test_data_dir_path}", shell=True)
 
 # run study on anonymized data
 inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
@@ -35,8 +29,6 @@ study = ProcessOneDicomStudyToVolumesMappingBase(
 )
 study.run_inference()
 
-s_test = study.series_dictionary.get(15)
-print(s_test.get_volume_list()[0].get_one_volume_dcm_filenames()[0])
 
 ax_series = [
     study.series_dictionary.get(6),
