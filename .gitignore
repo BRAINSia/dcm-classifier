@@ -3,7 +3,6 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks,latex,c,c++
 
 # test files
-tests/testing_data/anonymized_testing_data/**
 pytest.xml
 pytest-coverage.txt
 
@@ -13,8 +12,7 @@ pytest-coverage.txt
 
 # image files
 *.nii.gz
-# dicom files
-*.dcm
+
 
 # directories
 **/cnn_logs
