@@ -101,8 +101,8 @@ def main():
                 current_dict["Isotropic"] = str(volume.get_is_isotropic())
             except AttributeError:
                 current_dict["Isotropic"] = "None"
-
-            print(volume.get_modality_probabilities().to_string(index=False))
+            vol_probabilities = volume.get_modality_probabilities()
+            print(vol_probabilities.to_string(index=False))
             try:
                 current_dict["Bvalue"] = str(volume.get_volume_bvalue())
             except AttributeError:
