@@ -60,67 +60,6 @@ class DicomSingleVolumeInfoBase:
         volume_index (Optional[int]): The index of the DICOM volume within its series.
         has_diffusion_gradient (bool): True if the DICOM volume has diffusion gradient, False otherwise.
 
-    Methods:
-        get_volume_series_description(self) -> str:
-
-        set_volume_modality(self, modality: str) -> None:
-
-        get_volume_modality(self) -> str:
-
-        get_series_modality(self) -> str:
-
-        set_is_isotropic(self, isotropic: bool) -> None:
-
-        get_is_isotropic(self) -> bool:
-
-        set_has_contrast(self, contrast: bool) -> None:
-
-        get_has_contrast(self) -> bool:
-
-        get_contrast_agent(self) -> str:
-
-        set_parent_series(self, series) -> None:
-
-        get_parent_series(self):
-
-        set_modality_probabilities(self, modality_probability: pd.DataFrame) -> None:
-
-        get_modality_probabilities(self) -> pd.DataFrame:
-
-        set_acquisition_plane(self, acquisition_plane: str) -> None:
-
-        get_acquisition_plane(self) -> str:
-
-        get_primary_volume_info(self, vol_index: int = 0) -> Dict[str, str]:
-
-        get_itk_image(self) -> FImageType:
-
-        get_series_uid(self) -> str:
-
-        get_study_uid(self) -> str:
-
-        get_series_pixel_spacing(self) -> str:
-
-        get_series_size(self) -> str:
-
-        get_one_volume_dcm_filenames(self) -> List[Path]:
-
-        get_volume_dictionary(self) -> Dict[str, Any]:
-
-        get_volume_bvalue(self) -> float:
-
-        get_series_number(self) -> int:
-
-        get_volume_index(self) -> int | None:
-
-        set_volume_index(self, volume_index: int) -> None:
-
-        is_MR_modality(self):
-
-        _make_one_study_info_mapping_from_filelist(self) -> (str, dict):
-
-        get_image_diagnostics(self) -> str:
-
     """
 
     def __init__(self, one_volume_dcm_filenames: list[Path | str]) -> None:

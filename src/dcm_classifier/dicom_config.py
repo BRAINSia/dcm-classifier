@@ -27,11 +27,11 @@ DICOM header and reduces the dimensionality of the data, thus improving processi
 
 Attributes:
     required_DICOM_fields (tuple): A tuple containing the names of
-    DICOM header columns to be dropped from the dataset.
+        DICOM header columns to be dropped from the dataset.
 
 Example:
     Example usage to drop these columns from a DataFrame:
-    df.drop(columns=required_DICOM_fields, inplace=True)
+    >>> df.drop(columns=required_DICOM_fields, inplace=True)
 """
 
 required_DICOM_fields: list[str] = [
