@@ -70,33 +70,8 @@ def test_slugify():
     ]
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_cmd_exists():
-    pass
-
-
-@pytest.mark.skip(reason="Not implemented yet")
-def test_compare_rgb_slices():
-    pass
-
-
-@pytest.mark.skip(reason="Not implemented yet")
+@pytest.mark.skip(reason="Not implemented yet, need more test data")
 def test_get_bvalue():
-    pass
-
-
-@pytest.mark.skip(reason="Not implemented yet")
-def test_get_min_max():
-    pass
-
-
-@pytest.mark.skip(reason="Not implemented yet")
-def test_get_coded_dictionary_elements():
-    pass
-
-
-@pytest.mark.skip(reason="Not implemented yet")
-def test_exp_image():
     pass
 
 

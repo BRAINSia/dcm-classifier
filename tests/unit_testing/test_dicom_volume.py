@@ -128,16 +128,6 @@ def test_get_modality(mock_volumes):
     assert volume_info.get_volume_modality() == "fa"
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_set_modality_probabilities(mock_volumes):
-    probabilities = pd.DataFrame(
-        data={"case1": 0.4, "case2": 0.3, "case3": 0.75}, index=["t1w", "flair", "t2w"]
-    )
-    vol = DicomSingleVolumeInfoBase(mock_volumes[0])
-    vol.set_modality_probabilities(probabilities)
-    assert vol.get_modality_probabilities().aggregate == probabilities
-
-
 def test_no_files_provided():
     with pytest.raises(ValueError) as ex:
         _ = DicomSingleVolumeInfoBase([])
@@ -146,11 +136,6 @@ def test_no_files_provided():
 
 def test_invalid_volume_modality(mock_volumes):
     assert DicomSingleVolumeInfoBase(mock_volumes[0]).get_volume_modality() == "INVALID"
-
-
-@pytest.mark.skip(reason="Not implemented yet")
-def test_get_modality_probabilities():
-    pass
 
 
 # Test asserts false because the mock volume has a flair modality but that is an MR modality...
