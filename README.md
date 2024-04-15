@@ -78,7 +78,17 @@ or pass the path to a separate model
 
 ### Testing
 
-Testing in the dcm-classifier package is done using pytest. To run the tests, navigate to the root directory of the package and run the following command:
+Testing in the dcm-classifier package is done using pytest. To run the tests, navigate to the root directory of the package
+
+The testing data is stored in Git LFS so the following commands will be needed before running pytest
+
+```bash
+  git lfs fetch
+  git lfs checkout
+```
+
+and now
+
 ```bash
   pytest
   # or to fail on warnings
