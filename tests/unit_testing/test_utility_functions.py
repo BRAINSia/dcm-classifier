@@ -14,6 +14,7 @@ from dcm_classifier.utility_functions import (
     ensure_magnitude_of_1,
     convert_array_to_index_value,
     get_coded_dictionary_elements,
+    get_bvalue,
 )
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
@@ -204,6 +205,19 @@ def test_no_pixel_bandwidth():
     ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
 
     assert ds_dict["PixelBandwidth"] == "INVALID_VALUE"
+
+
+def test_empty_bvalue():
+    assert dicom_file_dir.exists()
+    vol = list()
+    for file in dicom_file_dir.iterdir():
+        if "emptyBValue" in file.stem:
+            vol.append(file)
+
+    f = pydicom.dcmread(vol[0])
+    bval = get_bvalue(f)
+
+    assert bval == -12345
 
 
 def test_invalid_fields():
