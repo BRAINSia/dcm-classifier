@@ -179,7 +179,6 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
             # TODO: add testing for this
             if v == private_tags_map["GE"]:
                 large_number_modulo_for_GE = 100000
-                # value = dicom_element.value[0] % large_number_modulo_for_GE
                 # TODO: This is a hack to get around an error. Might be due to missing data in SickKids project
                 try:
                     value = dicom_element.value[0] % large_number_modulo_for_GE
@@ -202,6 +201,9 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
                     )
                     return -12345
             # print(f"Found BValue at {v} for {k}, {value} of type {dicom_element.VR}")
+            if value is None:
+                # Field exists without value, USE DEFAULT
+                return -12345
             try:
                 result = float(value)
                 if result > 5000:
@@ -210,6 +212,9 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
                 print(
                     f"UNKNOWN CONVERSION OF VR={dicom_element.VR}: {type(dicom_element.value)} len={len(dicom_element.value)} ==> {dicom_element.value} to float"
                 )
+                return -12345
+            except Exception as e:
+                print(f"UNKNOWN IDENTIFICATION OF BVALUE: {e}")
                 return -12345
             if round_to_nearst_10:
                 result = round(result / 10.0) * 10
