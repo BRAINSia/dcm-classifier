@@ -21,7 +21,7 @@ from pathlib import Path
 relative_testing_data_path: Path = Path(__file__).parent.parent / "testing_data"
 current_file_path: Path = Path(__file__).parent
 inference_model_path = list(
-    current_file_path.parent.parent.rglob("models/rf_classifier.onnx")
+    current_file_path.parent.parent.rglob("models/ova_rf_classifier.onnx")
 )[0]
 
 
