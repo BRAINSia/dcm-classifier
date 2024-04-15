@@ -179,7 +179,7 @@ class DicomSingleVolumeInfoBase:
         Returns:
             str: The Series Description.
         """
-        return self._pydicom_info.SeriesDescription
+        return self._pydicom_info.get("SeriesDescription", "UNKNOWN_SeriesDescription")
 
     def set_volume_modality(self, modality: str) -> None:
         """
@@ -256,7 +256,9 @@ class DicomSingleVolumeInfoBase:
             str: The contrast agent.
         """
         if self.get_has_contrast():
-            return self._pydicom_info.ContrastBolusAgent
+            return self._pydicom_info.get(
+                "ContrastBolusAgent", "UNKNOWN_ContrastBolusAgent"
+            )
         else:
             return "None"
 
@@ -377,7 +379,7 @@ class DicomSingleVolumeInfoBase:
         Returns:
             str: The Series Instance UID.
         """
-        return self._pydicom_info.SeriesInstanceUID
+        return self._pydicom_info.get("SeriesInstanceUID", "UNKNOWN_SeriesInstanceUID")
 
     def get_study_uid(self) -> str:
         """
@@ -386,7 +388,7 @@ class DicomSingleVolumeInfoBase:
         Returns:
             str: The Study Instance UID.
         """
-        return self._pydicom_info.StudyInstanceUID
+        return self._pydicom_info.get("StudyInstanceUID", "UNKNOWN_StudyInstanceUID")
 
     def get_series_pixel_spacing(self) -> str:
         """
@@ -395,7 +397,7 @@ class DicomSingleVolumeInfoBase:
         Returns:
             str: The pixel spacing as a string.
         """
-        return str(self._pydicom_info.PixelSpacing)
+        return str(self._pydicom_info.get("PixelSpacing", "[NA,NA]"))
 
     def get_series_size(self) -> str:
         """
@@ -405,8 +407,8 @@ class DicomSingleVolumeInfoBase:
             str: The size of the DICOM series as a string.
         """
         size_list: list[int] = [
-            self._pydicom_info.Rows,
-            self._pydicom_info.Columns,
+            self._pydicom_info.get("Rows", 0),
+            self._pydicom_info.get("Columns", 0),
             len(self.one_volume_dcm_filenames),
         ]
         return str(size_list)
@@ -446,10 +448,13 @@ class DicomSingleVolumeInfoBase:
             int: The Series Number as an integer.
         """
         try:
-            series_number_int: int = int(self._pydicom_info.SeriesNumber)
+            series_number_int: int = int(self._pydicom_info.get("SeriesNumber", -12345))
             return series_number_int
         except Exception as e:
-            print(f"Can not convert to int {self._pydicom_info.SeriesNumber}: {e}")
+            if "SeriesNumber" not in self._pydicom_info:
+                print("SeriesNumber not found in DICOM file")
+            else:
+                print(f"Can not convert to int {self._pydicom_info.SeriesNumber}: {e}")
         return -12345
 
     def get_volume_index(self) -> int | None:
@@ -477,9 +482,14 @@ class DicomSingleVolumeInfoBase:
         Returns:
             status (bool): True if the modality is MR, False otherwise.
         """
-        status = bool(self._pydicom_info.Modality != "MR")
+        status: bool = bool(
+            self._pydicom_info.get("Modality", "Unknown_Modality") != "MR"
+        )
         if not status:
-            vprint(f"Skipping non-MR modality : {self._pydicom_info.Modality}")
+            if "Modality" not in self._pydicom_info:
+                vprint("Skipping DICOM file without Modality information")
+            else:
+                vprint(f"Skipping non-MR modality : {self._pydicom_info.Modality}")
         return status
 
     def _make_one_study_info_mapping_from_filelist(self) -> (str, dict):
