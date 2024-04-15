@@ -38,39 +38,6 @@ class DicomSingleSeries:
         is_isotropic (bool): A flag indicating whether the series is isotropic.
         has_contrast (bool): A flag indicating whether the series has contrast.
 
-    Methods:
-        get_series_number(self) -> int:
-
-        set_series_modality(self, modality: str) -> None:
-
-        get_series_modality(self) -> str:
-
-        set_modality_probabilities(self, modality_probability: pd.DataFrame) -> None:
-
-        get_modality_probabilities(self) -> pd.DataFrame:
-
-        set_is_isotropic(self, isotropic: bool) -> None:
-
-        get_is_isotropic(self) -> bool:
-
-        set_has_contrast(self, contrast: bool) -> None:
-
-        get_has_contrast(self) -> bool:
-
-        set_acquisition_plane(self, acquisition_plane: str) -> None:
-
-        get_acquisition_plane(self) -> str:
-
-        get_volume_list(self) -> List[DicomSingleVolumeInfoBase]:
-
-        add_volume_to_series(self, new_volume_info: DicomSingleVolumeInfoBase) -> None:
-
-        organize_volumes(self) -> None:
-
-        get_series_info_dict(self) -> Dict[str, Any]:
-
-        get_series_uid(self) -> str:
-
     """
 
     def __init__(

@@ -31,31 +31,6 @@ class ProcessOneDicomStudyToVolumesMappingBase:
     Attributes:
         series_restrictions_list_dwi_subvolumes (List[str]): List of DICOM tags used for filtering DWI sub-volumes.
 
-    Methods:
-        _is_pathlike_object(path_rep: Union[str, Path, PurePath]) -> bool:
-
-        __init__(
-            self,
-            study_directory: Union[str, Path],
-            search_series: Optional[Dict[str, int]] = None,
-            inferer: Optional[ImageTypeClassifierBase] = None,
-        ):
-
-        get_list_of_primary_volume_info(self) -> List[Dict[str, str]]:
-
-        get_study_dictionary(self):
-
-        set_inferer(self, inferer: ImageTypeClassifierBase):
-
-        run_inference(self):
-
-        validate(self):
-
-        __identify_single_volumes(
-            self,
-            study_directory: Path,
-        ) -> Dict[int, DicomSingleSeries]:
-
     """
 
     series_restrictions_list_dwi_subvolumes: list[str] = [
@@ -210,9 +185,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         Example:
             Example usage to retrieve series information:
-            study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
-            study_dict = study.get_study_dictionary()
-            series_info = study_dict.get(1)  # Retrieve information for series number 1
+            >>> study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
+            >>> study_dict = study.get_study_dictionary()
+            >>> series_info = study_dict.get(1)  # Retrieve information for series number 1
         """
         return self.series_dictionary
 
@@ -229,9 +204,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         Example:
             Example usage to set an image type classifier:
-            study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
-            image_classifier = MyImageTypeClassifier()  # Replace with your classifier instance
-            study.set_inferer(image_classifier)
+            >>> study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
+            >>> image_classifier = MyImageTypeClassifier()  # Replace with your classifier instance
+            >>> study.set_inferer(image_classifier)
         """
         self.inferer = inferer
 
@@ -285,9 +260,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         Example:
             Example usage to identify and map DICOM series:
-            study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
-            series_mapping = study.__identify_single_volumes(study_directory_path)
-            series_info = series_mapping.get(1)  # Retrieve information for series number 1
+            >>> study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
+            >>> series_mapping = study.__identify_single_volumes(study_directory_path)
+            >>> series_info = series_mapping.get(1)  # Retrieve information for series number 1
         """
         namesGenerator = itk.GDCMSeriesFileNames.New()
         namesGenerator.SetUseSeriesDetails(True)

@@ -58,26 +58,6 @@ class ImageTypeClassifierBase:
         image_type_map (Dict[str, str]): Mapping between class name and model integer output.
         min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
 
-    Methods:
-        get_min_probability_threshold(self) -> float:
-
-        get_int_to_type_map(self) -> dict:
-
-        _update_diffusion_series_modality(self) -> None:
-
-        check_if_diffusion(self) -> None:
-
-        set_series(self, series: DicomSingleSeries) -> None:
-
-        infer_acquisition_plane(self, feature_dict: dict = None) -> str:
-
-        infer_isotropic(self, feature_dict: dict = None) -> bool | None:
-
-        infer_contrast(self, feature_dict: dict = None) -> bool | None:
-
-        infer_modality(self, feature_dict: dict = None) -> (str, pd.DataFrame):
-
-        run_inference(self) -> None:
     """
 
     def __init__(
