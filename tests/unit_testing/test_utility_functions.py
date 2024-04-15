@@ -226,7 +226,15 @@ def test_invalid_fields():
     ]
 
     # assert the fields that are in the dataset are set to one of these invalid values
-    invalid_fields = ["INVALID_VALUE", "-12345", "Unknown", "-12345.0", "None", ""]
+    invalid_fields = [
+        "INVALID_VALUE",
+        "-12345",
+        "Unknown",
+        "-12345.0",
+        "None",
+        "",
+        "000000.00",
+    ]
     for field in all_fields:
         print(field, ds_dict[field])
         if "unknown" in ds_dict[field].lower():
