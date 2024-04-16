@@ -31,6 +31,13 @@ class ProcessOneDicomStudyToVolumesMappingBase:
     Attributes:
         series_restrictions_list_dwi_subvolumes (List[str]): List of DICOM tags used for filtering DWI sub-volumes.
 
+        study_directory (Path): The path to the DICOM study directory as a pathlib Path object.
+
+        search_series (Optional[Dict[str, int]]): A dictionary of series to search within the study.
+
+        series_dictionary (Dict[int, DicomSingleSeries]): A dictionary mapping series numbers to DicomSingleSeries objects.
+
+        inferer (Optional[ImageTypeClassifierBase]): An image type classifier for inference.
     """
 
     series_restrictions_list_dwi_subvolumes: list[str] = [
@@ -117,17 +124,14 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         Args:
             study_directory (Union[str, Path]): The path to the DICOM study directory.
+
             search_series (Optional[Dict[str, int]]): A dictionary of series to search within the study.
+
             inferer (Optional[ImageTypeClassifierBase]): An image type classifier for inference.
 
         Raises:
             ValueError: If the provided study_directory is not a valid path or path-like object.
 
-        Attributes:
-            study_directory (Path): The path to the DICOM study directory as a pathlib Path object.
-            search_series (Optional[Dict[str, int]]): A dictionary of series to search within the study.
-            series_dictionary (Dict[int, DicomSingleSeries]): A dictionary mapping series numbers to DicomSingleSeries objects.
-            inferer (Optional[ImageTypeClassifierBase]): An image type classifier for inference.
         """
         if ProcessOneDicomStudyToVolumesMappingBase._is_pathlike_object(
             study_directory
@@ -153,8 +157,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         primary volume information for a single subseries.
 
         Returns:
-            List[Dict[str, str]]: A list of dictionaries containing primary volume information.
-                Each dictionary includes keys and values for primary volume attributes. See get_primary_volume_info function in dicom_volume.py
+            List[Dict[str, str]]: A list of dictionaries containing primary volume information. Each dictionary includes keys and values for primary volume attributes. See get_primary_volume_info function in dicom_volume.py
 
         """
         list_of_volume_info_dictionaries: list[dict[str, str]] = list()
@@ -185,6 +188,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         Example:
             Example usage to retrieve series information:
+
             >>> study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
             >>> study_dict = study.get_study_dictionary()
             >>> series_info = study_dict.get(1)  # Retrieve information for series number 1
@@ -204,6 +208,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         Example:
             Example usage to set an image type classifier:
+
             >>> study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
             >>> image_classifier = MyImageTypeClassifier()  # Replace with your classifier instance
             >>> study.set_inferer(image_classifier)
@@ -260,6 +265,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         Example:
             Example usage to identify and map DICOM series:
+
             >>> study = ProcessOneDicomStudyToVolumesMappingBase(study_directory_path)
             >>> series_mapping = study.__identify_single_volumes(study_directory_path)
             >>> series_info = series_mapping.get(1)  # Retrieve information for series number 1

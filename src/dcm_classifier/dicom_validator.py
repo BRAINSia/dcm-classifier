@@ -29,18 +29,10 @@ class DicomValidatorBase:
     specific user projects
 
     Attributes:
-        single_volume_info (DicomSingleVolumeInfoBase): An instance of DicomSingleVolumeInfoBase
-            containing information about a single DICOM volume.
+        single_volume_info (DicomSingleVolumeInfoBase): An instance of DicomSingleVolumeInfoBase containing information about a single DICOM volume.
+
         _validation_failure_reports (List[str]): A list of validation failure messages.
 
-    Methods:
-        append_to_validation_failure_reports(self, msg: str) -> None:
-
-        generate_validation_report_str(self, verbose_reporting: bool = False) -> str:
-
-        write_validation_report(self, report_filename_to_append: Optional[Path]) -> None:
-
-        validate(self) -> bool:
     """
 
     def __init__(self, single_volume_info: DicomSingleVolumeInfoBase) -> None:
@@ -48,8 +40,7 @@ class DicomValidatorBase:
         Initialize the DicomValidatorBase.
 
         Args:
-            single_volume_info (DicomSingleVolumeInfoBase): An instance of DicomSingleVolumeInfoBase
-                containing information about a single DICOM volume.
+            single_volume_info (DicomSingleVolumeInfoBase): An instance of DicomSingleVolumeInfoBase containing information about a single DICOM volume.
         """
         self.single_volume_info: DicomSingleVolumeInfoBase = single_volume_info
         self._validation_failure_reports: list[str] = list()
@@ -112,7 +103,7 @@ class DicomValidatorBase:
 
         Args:
             report_filename_to_append (Optional[Path]): The filename to write the report to.
-                If None, the report will be printed to the console.
+            If None, the report will be printed to the console.
         """
         msg: str = self.generate_validation_report_str()
 

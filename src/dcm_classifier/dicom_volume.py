@@ -46,18 +46,31 @@ class DicomSingleVolumeInfoBase:
 
     Attributes:
         one_volume_dcm_filenames (List[Path]): A list of DICOM file paths representing a single volume.
+
         ro_user_supplied_dcm_filenames (List[Path]): A list of DICOM file paths representing a single volume.
+
         _pydicom_info (pydicom.Dataset): A pydicom.Dataset containing information about the DICOM volume.
+
         bvalue (float): The b-value of the DICOM volume.
+
         volume_info_dict (Dict[str, Any]): A dictionary containing information about the DICOM volume.
+
         itk_image (Optional[FImageType]): The ITK image of the DICOM volume.
+
         volume_modality (Optional[str]): The modality of the DICOM volume (e.g., "CT", "MRI").
+
         modality_probability (Optional[pd.DataFrame]): A DataFrame containing modality probabilities.
+
         acquisition_plane (Optional[str]): The acquisition plane of the DICOM volume (e.g., "Sagittal", "Axial").
+
         is_isotropic (Optional[bool]): True if the DICOM volume is isotropic, False otherwise.
+
         has_contrast (Optional[bool]): True if the DICOM volume has contrast, False otherwise.
+
         parent_series (Optional[DicomSingleSeries]): The parent series of the DICOM volume.
+
         volume_index (Optional[int]): The index of the DICOM volume within its series.
+
         has_diffusion_gradient (bool): True if the DICOM volume has diffusion gradient, False otherwise.
 
     """
