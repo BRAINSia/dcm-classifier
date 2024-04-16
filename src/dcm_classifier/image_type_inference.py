@@ -54,17 +54,18 @@ class ImageTypeClassifierBase:
 
     Attributes:
         classification_model_filename (Union[str, Path]): Path to the classification model file (base implementation requires ONNX file).
+
         classification_feature_list (List[str]): List of features used for classification.
+
         image_type_map (Dict[str, str]): Mapping between class name and model integer output.
+
         min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
 
     """
 
     def __init__(
         self,
-        classification_model_filename: str | Path = dcm_classifier_path
-        / "models"
-        / "ova_rf_classifier.onnx",
+        classification_model_filename: Optional[str | Path] = None,
         classification_feature_list: list[str] = inference_features,
         image_type_map: dict[str, int] = imagetype_to_integer_mapping,
         min_probability_threshold: float = 0.4,
@@ -74,15 +75,23 @@ class ImageTypeClassifierBase:
 
         Args:
             classification_model_filename (Union[str, Path]): Path to the classification model file (base implementation requires ONNX file).
+
             classification_feature_list (List[str]): List of features used for classification.
+
             image_type_map (Dict[str, str]): Mapping between class name and model integer output.
+
             mode (str): "series" or "volume" to run inference on series or volume level (a series could have multiple subvolumes).
+
             min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
         """
-
-        self.classification_model_filename: str | Path = Path(
-            classification_model_filename
-        )
+        if self.classification_model_filename is None:
+            self.classification_model_filename = (
+                dcm_classifier_path / "models" / "ova_rf_classifier.onnx"
+            )
+        else:
+            self.classification_model_filename: str | Path = Path(
+                classification_model_filename
+            )
         self.classification_feature_list: list[str] = classification_feature_list
         self.imagetype_to_int_map: dict[str, int] = image_type_map
         self.int_to_imagetype_map: dict[int, str] = self.get_int_to_type_map()
@@ -173,8 +182,9 @@ class ImageTypeClassifierBase:
     def infer_isotropic(self, feature_dict: dict = None) -> bool | None:
         """
         Infer the acquisition plane based on DICOM information and image properties.
+
         Args:
-            feature_dict: A dictionary containing features used for classification.
+            feature_dict (dict): A dictionary containing features used for classification.
 
         Returns:
             bool: True if the image is isotropic, False otherwise.
@@ -199,8 +209,9 @@ class ImageTypeClassifierBase:
     def infer_contrast(self, feature_dict: dict = None) -> bool:
         """
         Infer whether the image has contrast based on DICOM information and image properties.
+
         Args:
-            feature_dict: A dictionary containing features used for classification.
+            feature_dict (dict): A dictionary containing features used for classification.
 
         Returns:
             bool: True if the image has contrast, False otherwise.

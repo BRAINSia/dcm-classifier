@@ -18,6 +18,9 @@
 
 
 """
+Dicom Configuration:
+
+
 List of DICOM header columns that are required for this tool. In the future, the list can be expanded
 or modified as needed.
 
@@ -26,12 +29,11 @@ classification task, or needed for data organization. Requiring only those field
 DICOM header and reduces the dimensionality of the data, thus improving processing efficiency.
 
 Attributes:
-    required_DICOM_fields (tuple): A tuple containing the names of
-        DICOM header columns to be dropped from the dataset.
+    required_DICOM_fields (list[str]): A list of required DICOM fields.
 
-Example:
-    Example usage to drop these columns from a DataFrame:
-    >>> df.drop(columns=required_DICOM_fields, inplace=True)
+    optional_DICOM_fields (list[str]): A list of optional DICOM fields.
+
+    inference_features (list[str]): A list of features that are used for inference.
 """
 
 required_DICOM_fields: list[str] = [

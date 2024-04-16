@@ -141,6 +141,7 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
 
     Args:
         dicom_header_info: A pydicom object containing DICOM header information.
+
         round_to_nearst_10 (bool): Whether to round the computed b-value to the nearest 10. (i.e. bvalues of 46,47,48,49,50,51,52,53,54,55 are reported as 50)
 
     Returns:
@@ -243,6 +244,7 @@ def get_diffusion_gradient_direction(
 ) -> np.ndarray | None:
     """
     Extract the diffusion gradient direction from DICOM header information.
+
     Args:
         dicom_header_info: pydicom.Dataset object containing header information.
 
@@ -340,6 +342,7 @@ def vprint(msg: str, verbose: bool = False) -> None:
 
     Args:
         msg (str): The message to print.
+
         verbose (bool, optional): Whether to print the message. Default is False.
     """
     if verbose:
@@ -356,7 +359,9 @@ def sanitize_dicom_dataset(
 
     Args:
         ro_dataset (pydicom.Dataset): The input DICOM dataset.
+
         required_info_list (list[str]): A list of required DICOM fields.
+
         optional_info_list (list[str]): A list of optional DICOM fields.
 
     Returns:
@@ -716,6 +721,7 @@ def convert_array_to_min_max(name: str, value_list: list[int]) -> list:
 
     Args:
         name: Original DICOM field name.
+
         value_list: Original DICOM list values.
 
     Returns:
@@ -735,6 +741,7 @@ def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) ->
 
     Args:
         name: Original DICOM field name.
+
         value_list: Original DICOM list values.
 
     Returns:

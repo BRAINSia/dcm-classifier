@@ -22,6 +22,7 @@ def compute_tracew_adc_from_diffusion(
 
     Args:
         series (DicomSingleSeries): The diffusion series.
+
         tracew_bval (int): The preferred b-value for the trace-weighted image.
 
     Returns:
@@ -74,6 +75,7 @@ def two_point_compute_adc(
 
     Args:
         list_of_raw_bimages (List[FImageType]): A list of b-weighted images.
+
         list_of_bvalues (List[float]): A list of b-values.
 
     Returns:
@@ -108,6 +110,7 @@ def compute_adc_from_multi_b_values(
 
     Args:
         list_of_raw_bimages (List[FImageType]): A list of b-weighted images.
+
         list_of_bvalues (List[float]): A list of b-values.
 
     Returns:
@@ -183,7 +186,9 @@ def rglob_for_singular_result(
 
     Args:
         base_dir (Path): The base directory to start the search from.
+
         pattern (str): The pattern to match against.
+
         require_result_type (Optional[str]): If specified, the type of result to require ("f" for file, "d" for directory).
 
     Returns:
@@ -213,7 +218,9 @@ def rglob_for_singular_result_from_pattern_list(
 
     Args:
         base_dir (Path): The base directory to start the search from.
+
         patterns (List[str]): The list of patterns to match against.
+
         require_result_type (Optional[str]): If specified, the type of result to require ("f" for file, "d" for directory).
 
     Returns:
@@ -249,6 +256,7 @@ def compare_RGB_slices(refr_slice_fn: Path, test_slice_fn: Path) -> (int, dict):
 
     Args:
         refr_slice_fn (Path): Filepath to the reference RGB image slice.
+
         test_slice_fn (Path): Filepath to the test RGB image slice.
 
     Returns:
@@ -290,9 +298,13 @@ def compare_3d_float_images(
 
     Args:
         refr_fn (Path): Filepath to the reference image.
+
         test_fn (Path): Filepath to the test image.
+
         difference_threshold (float): Threshold for pixel differences.
+
         tolerance_radius (float): Tolerance radius for comparison.
+
         force_exact_directions (bool): Whether to force exact directions in comparison.
 
     Returns:
@@ -350,6 +362,7 @@ def slugify(
 
     Args:
         value: The string to be converted.
+
         allow_unicode (bool): If True, allows Unicode characters in the slug.
 
     Returns:
@@ -400,7 +413,9 @@ def itk_get_center_slice(
 
     Args:
         inputImage (FImageType): The input itk image with pixel type itk.F (float).
+
         pixel_min (float): Minimum pixel value.
+
         pixel_max (float): Maximum pixel value.
 
     Returns:
@@ -480,6 +495,7 @@ def add_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
 
     Args:
         im1 (FImageType): The first input image.
+
         im2 (FImageType): The second input image.
 
     Returns:
@@ -498,6 +514,7 @@ def add_const_to_itk_images(im1: FImageType, offset: float) -> FImageType:
 
     Args:
         im1 (FImageType): The input image.
+
         offset (float): The constant offset to be added to each pixel value.
 
     Returns:
@@ -516,6 +533,7 @@ def sub_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
 
     Args:
         im1 (FImageType): The first input image.
+
         im2 (FImageType): The second input image.
 
     Returns:
@@ -535,6 +553,7 @@ def div_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
 
     Args:
         im1 (FImageType): The first input image.
+
         im2 (FImageType): The second input image.
 
     Returns:
@@ -554,6 +573,7 @@ def multiply_itk_images(im1: FImageType, scale: float) -> FImageType:
 
     Args:
         im1 (FImageType): The input image.
+
         scale (float): The constant scale factor to multiply each pixel value.
 
     Returns:
@@ -596,7 +616,9 @@ def itk_clamp_image_filter(
 
     Args:
         input_image (FImageType): The input image.
+
         lower_clamp (float): The lower bound for clamping pixel values.
+
         upper_clamp (float, optional): The upper bound for clamping pixel values. Default is 10^38.
 
     Returns:
@@ -618,6 +640,7 @@ def scaled_by_bvalue_images(
 
     Args:
         list_of_images (List[FImageType]): A list of input images.
+
         list_of_bvalues (List[float]): A list of b-values corresponding to the input images.
 
     Returns:

@@ -28,14 +28,17 @@ class DicomSingleSeries:
 
     Attributes:
         series_number (int): The series number.
-        volume_info_list (List[DicomSingleVolumeInfoBase]): A list to store
-            DicomSingleVolumeInfoBase objects for this series.
+
+        volume_info_list (List[DicomSingleVolumeInfoBase]): A list to store DicomSingleVolumeInfoBase objects for this series.
+
         series_modality (Optional[str]): The modality of the series (e.g., "CT", "MRI").
-        modality_probability (Optional[pd.DataFrame]): A DataFrame containing modality
-            probabilities.
-        acquisition_plane (Optional[str]): The acquisition plane of the series (e.g.,
-            "Sagittal", "Axial").
+
+        modality_probability (Optional[pd.DataFrame]): A DataFrame containing modality probabilities.
+
+        acquisition_plane (Optional[str]): The acquisition plane of the series (e.g., "Sagittal", "Axial").
+
         is_isotropic (bool): A flag indicating whether the series is isotropic.
+
         has_contrast (bool): A flag indicating whether the series has contrast.
 
     """
@@ -49,16 +52,6 @@ class DicomSingleSeries:
 
         Args:
             series_number (int): The series number associated with this series.
-
-        Attributes:
-            series_number (int): The series number.
-            volume_info_list (List[DicomSingleVolumeInfoBase]): A list to store
-                DicomSingleVolumeInfoBase objects for this series.
-            modality (Optional[str]): The modality of the series (e.g., "t1w", "flair").
-            modality_probability (Optional[pd.DataFrame]): A DataFrame containing modality
-                probabilities.
-            acquisition_plane (Optional[str]): The acquisition plane of the series (e.g.,
-                "Sagittal", "Axial").
         """
         self.series_number: int = series_number
         self.volume_info_list: list[DicomSingleVolumeInfoBase] = list()
