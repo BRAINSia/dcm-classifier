@@ -6,7 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import sphinx_rtd_theme
+import sys
+import os
 
+sys.path.insert(0, os.path.abspath("../../src"))
 
 project = "dcm-classifier"
 copyright = "2024, Michal Brzus and Hans Johnson and Cavan Riley"
@@ -20,9 +23,9 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
     "sphinx.ext.todo",
-    "sphinx.ext.ifconfig",
+    # "sphinx.ext.ifconfig",
     "sphinx.ext.autosummary",
-    "sphinx.ext.napoleon",  # Numpy style docstrings
+    # "sphinx.ext.napoleon",  # Numpy style docstrings
     # "sphinx.ext.linkcode",
 ]
 
