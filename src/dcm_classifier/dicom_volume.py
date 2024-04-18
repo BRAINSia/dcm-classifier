@@ -315,7 +315,12 @@ class DicomSingleVolumeInfoBase:
 
     def get_itk_image(self, apply_dcm_scaling_info: bool = True) -> FImageType:
         """
-        Get the ITK image associated with the DICOM volume.
+            Get the ITK image associated with the DICOM volume.
+            If no image is available, it will be read from the DICOM files
+            and optionally scaled based on the apply_dcm_scaling_info value.
+
+        Args:
+            apply_dcm_scaling_info (bool, optional): A flag indicating whether to apply the scaling information from the DICOM header to the ITK image. Defaults to True.
 
         Returns:
             FImageType: The ITK image of the DICOM volume with pixel type itk.F (float).

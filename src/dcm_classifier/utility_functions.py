@@ -349,19 +349,35 @@ def vprint(msg: str, verbose: bool = False) -> None:
 
 
 def get_dcm_scaling_info(ordered_filenames: list[Path]) -> (float, float):
+    """
+    Extracts the slope and intercept for scaling pixel values from the DICOM header.
+
+    This function reads the DICOM header from the first file in the provided list of filenames.
+    It then looks for specific DICOM tags that contain the slope and intercept values used for scaling pixel values.
+    If these tags are not found, it defaults to a slope of 1.0 and an intercept of 0.0.
+
+
+
+    NOTE Preferred keys do not seem to be widely present in our data but from the documentation this is the
+    preferred scaling information
+    Preferred keys are used to calculate the "Real World Value: DICOM defined real world units" (RWV) of the image
+    Secondary keys are used to calculate the "Displayed Value: The value which is shown to the user when using scanner
+        interface, ROIS, measurements etc."
+    These have been shown to produce more consistent results than no scaling at all
+
+    For more information got to the Image Scaling Section of  https://github.com/rordenlab/dcm2niix/tree/master/Philips
+    Args:
+        ordered_filenames (list[Path]): A list of DICOM file paths.
+
+    Returns:
+        tuple: A tuple containing the slope and intercept values (in that order).
+    """
+
     dcm_file = ordered_filenames[0]
     dcm_header = pydicom.dcmread(dcm_file, stop_before_pixels=True)
-    # https://github.com/rordenlab/dcm2niix/tree/master/Philips Go to the "ImageScaling" Section
 
-    # Default to 1.0 and 0.0 if no scaling information is found
     slope: float = 1.0
     intercept: float = 0.0
-
-    # NOTE Preferred keys do not seem to be widly present in our data but from the documentation this is the
-    # preferred scaling information
-    # Preferred keys are used to calculate the "Real World Value: DICOM defined real world units" (RWV) of the image
-    # Secondary keys are used to calculate the "Displayed Value: The value which is shown to the user when using scanner interface, ROIS, measurements etc."\
-    # These have been shown to produce more consistent results than no scaling at all
     preferred_keys = {
         "PhilipsRWVSlope": (0x0040, 0x9225),
         "PhilipsRWVIntercept": (0x0040, 0x9224),
@@ -396,17 +412,20 @@ def apply_scaling_to_image(
     itk_image: FImageType, slope: float, intercept: float
 ) -> FImageType:
     """
-    Apply scaling to an ITK image.
+    Applies a linear transformation to the pixel values of an ITK image.
+
+    This function multiplies the pixel values of the input image by a given slope and then adds a given intercept.
+    If the slope is 1.0 and the intercept is 0.0, the function returns the input image without any modifications.
 
     Args:
         itk_image (FImageType): The input ITK image.
 
-        slope (float): The slope.
+        slope (float): The slope of the linear transformation.
 
-        intercept (float): The intercept.
+        intercept (float): The intercept of the linear transformation.
 
     Returns:
-        FImageType: The scaled ITK image.
+        FImageType: The transformed ITK image.
     """
     if slope == 1.0 and intercept == 0.0:
         return itk_image
