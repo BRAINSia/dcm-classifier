@@ -65,7 +65,7 @@ class ImageTypeClassifierBase:
 
     def __init__(
         self,
-        classification_model_filename: Optional[str | Path] = None,
+        classification_model_filename: str | Path | None = None,
         classification_feature_list: list[str] = inference_features,
         image_type_map: dict[str, int] = imagetype_to_integer_mapping,
         min_probability_threshold: float = 0.4,
@@ -84,7 +84,7 @@ class ImageTypeClassifierBase:
 
             min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
         """
-        if self.classification_model_filename is None:
+        if classification_model_filename is None:
             self.classification_model_filename = (
                 dcm_classifier_path / "models" / "ova_rf_classifier.onnx"
             )
