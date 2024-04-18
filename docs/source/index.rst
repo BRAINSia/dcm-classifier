@@ -12,9 +12,25 @@ Overview
 
 Welcome to dcm-classifier’s documentation! This package is a simple tool to classify DICOM files based on their metadata. It is designed to be used in a research context, where the user has a collection of DICOM files and wants to classify them based on their metadata. The package is designed to be simple to use and to provide a simple interface to the user.
 
-Indices and tables
-==================
+Index
+=====
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+
+Installation
+==========================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Getting Started
+
+   installation/index
+
+Documentation
+==========================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API Reference
+
+   modules.rst
