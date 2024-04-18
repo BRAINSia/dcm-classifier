@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import pandas as pd
 from dcm_classifier.dicom_volume import (
     DicomSingleVolumeInfoBase,
 )

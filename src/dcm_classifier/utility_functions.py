@@ -31,7 +31,6 @@ from pydicom.dataset import Dataset
 from pydicom.multival import MultiValue
 from .dicom_config import inference_features as features
 
-
 FImageType = itk.Image[itk.F, 3]
 UCImageType = itk.Image[itk.UC, 3]
 
@@ -347,6 +346,72 @@ def vprint(msg: str, verbose: bool = False) -> None:
     """
     if verbose:
         print(msg)
+
+
+def get_dcm_scaling_info(ordered_filenames: list[Path]) -> (float, float):
+    dcm_file = ordered_filenames[0]
+    dcm_header = pydicom.dcmread(dcm_file, stop_before_pixels=True)
+    # https://github.com/rordenlab/dcm2niix/tree/master/Philips Go to the "ImageScaling" Section
+
+    # Default to 1.0 and 0.0 if no scaling information is found
+    slope: float = 1.0
+    intercept: float = 0.0
+
+    # NOTE Preferred keys do not seem to be widly present in our data but from the documentation this is the
+    # preferred scaling information
+    # Preferred keys are used to calculate the "Real World Value: DICOM defined real world units" (RWV) of the image
+    # Secondary keys are used to calculate the "Displayed Value: The value which is shown to the user when using scanner interface, ROIS, measurements etc."\
+    # These have been shown to produce more consistent results than no scaling at all
+    preferred_keys = {
+        "PhilipsRWVSlope": (0x0040, 0x9225),
+        "PhilipsRWVIntercept": (0x0040, 0x9224),
+    }
+    secondary_keys = {
+        "PhilipsRescaleSlope": (0x0028, 0x1053),
+        "PhilipsRescaleIntercept": (0x0028, 0x1052),
+    }
+    all_keys = {**preferred_keys, **secondary_keys}
+    keys_found: list[str] = []
+    for key_name, key in all_keys.items():
+        if key in dcm_header:
+            print(f"Found {key} in {dcm_file} with value {dcm_header[key].value}")
+            keys_found.append(key)
+
+    # All
+    if len(keys_found) >= 2:
+        if set(preferred_keys.keys()).issubset(keys_found):
+            slope = dcm_header.get(preferred_keys["PhilipsRWVSlope"]).value
+            intercept = dcm_header.get(preferred_keys["PhilipsRWVIntercept"]).value
+        elif set(secondary_keys.keys()).issubset(keys_found):
+            slope = dcm_header.get(secondary_keys["PhilipsRescaleSlope"]).value
+            intercept = dcm_header.get(secondary_keys["PhilipsRescaleIntercept"]).value
+        else:
+            warnings.warn(
+                f"Found some but not all required keys in {dcm_file} {keys_found}"
+            )
+    return slope, intercept
+
+
+def apply_scaling_to_image(
+    itk_image: FImageType, slope: float, intercept: float
+) -> FImageType:
+    """
+    Apply scaling to an ITK image.
+
+    Args:
+        itk_image (FImageType): The input ITK image.
+
+        slope (float): The slope.
+
+        intercept (float): The intercept.
+
+    Returns:
+        FImageType: The scaled ITK image.
+    """
+    if slope == 1.0 and intercept == 0.0:
+        return itk_image
+    multiplied_image = multiply_itk_images(itk_image, slope)
+    return add_const_to_itk_images(multiplied_image, intercept)
 
 
 def sanitize_dicom_dataset(
@@ -771,3 +836,45 @@ def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) ->
     for index in range(0, len(number_list)):
         named_list.append((name + "_" + str(index), number_list[index]))
     return named_list
+
+
+def add_const_to_itk_images(im1: FImageType, offset: float) -> FImageType:
+    """
+    Add a constant offset to all pixel values in the input image.
+
+    Args:
+        im1 (FImageType): The input image.
+
+        offset (float): The constant offset to be added to each pixel value.
+
+    Returns:
+        FImageType: The image with the constant offset added to its pixel values.
+    """
+    sum_image_filter = itk.AddImageFilter[FImageType, FImageType, FImageType].New()
+    sum_image_filter.SetInput(im1)
+    sum_image_filter.SetConstant(offset)
+    sum_image_filter.Update()
+    return sum_image_filter.GetOutput()
+
+
+def multiply_itk_images(im1: FImageType, scale: float) -> FImageType:
+    """
+    Multiply all pixel values in the input image by a constant scale.
+
+    Args:
+        im1 (FImageType): The input image.
+
+        scale (float): The constant scale factor to multiply each pixel value.
+
+    Returns:
+        FImageType: The image with pixel values multiplied by the specified scale factor.
+    """
+
+    # TODO: Add inplace computations for speed
+    mult_image_filter = itk.MultiplyImageFilter[
+        FImageType, FImageType, FImageType
+    ].New()
+    mult_image_filter.SetInput(im1)
+    mult_image_filter.SetConstant(scale)
+    mult_image_filter.Update()
+    return mult_image_filter.GetOutput()

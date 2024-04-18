@@ -5,7 +5,12 @@ from pathlib import Path
 
 import numpy as np
 import pydicom
-from .utility_functions import get_bvalue, itk_read_from_dicomfn_list
+from .utility_functions import (
+    get_bvalue,
+    itk_read_from_dicomfn_list,
+    add_const_to_itk_images,
+    multiply_itk_images,
+)
 from .dicom_series import DicomSingleSeries
 
 
@@ -508,25 +513,6 @@ def add_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
     return sum_image_filter.GetOutput()
 
 
-def add_const_to_itk_images(im1: FImageType, offset: float) -> FImageType:
-    """
-    Add a constant offset to all pixel values in the input image.
-
-    Args:
-        im1 (FImageType): The input image.
-
-        offset (float): The constant offset to be added to each pixel value.
-
-    Returns:
-        FImageType: The image with the constant offset added to its pixel values.
-    """
-    sum_image_filter = itk.AddImageFilter[FImageType, FImageType, FImageType].New()
-    sum_image_filter.SetInput(im1)
-    sum_image_filter.SetConstant(offset)
-    sum_image_filter.Update()
-    return sum_image_filter.GetOutput()
-
-
 def sub_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
     """
     Subtract pixel values of the second input image from the first input image element-wise.
@@ -565,29 +551,6 @@ def div_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
     div_image_filter.SetInput2(im2)
     div_image_filter.Update()
     return div_image_filter.GetOutput()
-
-
-def multiply_itk_images(im1: FImageType, scale: float) -> FImageType:
-    """
-    Multiply all pixel values in the input image by a constant scale.
-
-    Args:
-        im1 (FImageType): The input image.
-
-        scale (float): The constant scale factor to multiply each pixel value.
-
-    Returns:
-        FImageType: The image with pixel values multiplied by the specified scale factor.
-    """
-
-    # TODO: Add inplace computations for speed
-    mult_image_filter = itk.MultiplyImageFilter[
-        FImageType, FImageType, FImageType
-    ].New()
-    mult_image_filter.SetInput(im1)
-    mult_image_filter.SetConstant(scale)
-    mult_image_filter.Update()
-    return mult_image_filter.GetOutput()
 
 
 def add_list_of_images(list_of_images: list[FImageType]) -> FImageType:
