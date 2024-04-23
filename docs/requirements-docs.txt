@@ -1,4 +1,4 @@
-Sphinx==7.3.6
+Sphinx==7.3.5
 sphinx_rtd_theme==2.0.0
 sphinxcontrib-applehelp==1.0.8
 sphinxcontrib-devhelp==1.0.6
