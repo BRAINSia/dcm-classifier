@@ -73,16 +73,15 @@ class ImageTypeClassifierBase:
         """
         Initialize the ImageTypeClassifierBase.
 
-        Args:
-            classification_model_filename (Union[str, Path]): Path to the classification model file (base implementation requires ONNX file).
+        :param classification_model_filename: Path to the classification model file (base implementation requires ONNX file).
+        :param classification_feature_list: List of features used for classification.
+        :param image_type_map: Mapping between class name and model integer output.
+        :param min_probability_threshold: Minimum probability threshold for classification, defaults to 0.4. If maximum class probability
+        :type classification_model_filename: str | Path
+        :type classification_feature_list: list[str]
+        :type image_type_map: dict[str, int]
+        :type min_probability_threshold: float
 
-            classification_feature_list (List[str]): List of features used for classification.
-
-            image_type_map (Dict[str, str]): Mapping between class name and model integer output.
-
-            mode (str): "series" or "volume" to run inference on series or volume level (a series could have multiple subvolumes).
-
-            min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
         """
         if classification_model_filename is None:
             self.classification_model_filename = (
@@ -104,8 +103,8 @@ class ImageTypeClassifierBase:
         """
         Get the minimum probability threshold for classification.
 
-        Returns:
-            float: Minimum probability threshold for classification.
+        :return: Minimum probability threshold for classification.
+        :rtype: float
         """
         return self.min_probability_threshold
 
@@ -113,8 +112,8 @@ class ImageTypeClassifierBase:
         """
         Get the integer to image type mapping.
 
-        Returns:
-            dict: Dictionary mapping integers to image type names.
+        :return: Dictionary mapping integers to image type names.
+        :rtype: dict
         """
         return {v: k for k, v in self.imagetype_to_int_map.items()}
 
@@ -140,9 +139,10 @@ class ImageTypeClassifierBase:
         """
         Set the DICOM series for classification.
 
-        Args:
-            series (DicomSingleSeries): DicomSingleSeries object representing the DICOM series.
+        :param series: DicomSingleSeries object representing the DICOM series.
+        :type series: DicomSingleSeries
         """
+
         self.series = series
         self.series_number = series.get_series_number()
         self.info_dict = self.series.get_series_info_dict()
@@ -157,11 +157,11 @@ class ImageTypeClassifierBase:
 
         To determine if the image is isotropic, we check if the all spacing components are within 10% of the cube root of the voxel volume.
 
-        Args:
-            feature_dict (dict): Optional dictionary of additional features for inference.
+        :param feature_dict: A dictionary containing features used for classification.
+        :type feature_dict: dict
 
-        Returns:
-            str: A string representing the inferred acquisition plane ("iso" for isotropic, "ax" for axial, "sag" for sagittal and "cor" for coronal).
+        :return: A string representing the inferred acquisition plane ("iso" for isotropic, "ax" for axial, "sag" for sagittal and "cor" for coronal).
+        :rtype: str
         """
         # check if the volume was invalidated
         for field in [
@@ -183,11 +183,11 @@ class ImageTypeClassifierBase:
         """
         Infer the acquisition plane based on DICOM information and image properties.
 
-        Args:
-            feature_dict (dict): A dictionary containing features used for classification.
+        :param feature_dict: A dictionary containing features used for classification.
+        :type feature_dict: dict
 
-        Returns:
-            bool: True if the image is isotropic, False otherwise.
+        :return: A boolean representing whether the image is isotropic.
+        :rtype: bool
         """
         # TODO: this might need to be changed if acquisition is 3d and spacing has more than 2 values
         # check if the volume was invalidated
@@ -210,11 +210,11 @@ class ImageTypeClassifierBase:
         """
         Infer whether the image has contrast based on DICOM information and image properties.
 
-        Args:
-            feature_dict (dict): A dictionary containing features used for classification.
+        :param feature_dict: A dictionary containing features used for classification.
+        :type feature_dict: dict
 
-        Returns:
-            bool: True if the image has contrast, False otherwise.
+        :return: A boolean representing whether the image has contrast.
+        :rtype: bool
         """
         # check if the volume was invalidated
 
@@ -233,13 +233,11 @@ class ImageTypeClassifierBase:
 
         This method uses an ONNX model for image type classification to predict the modality of the series.
 
-        Args:
-            feature_dict (dict): A dictionary containing features used for classification.
+        :param feature_dict: A dictionary containing features used for classification.
+        :type feature_dict: dict
 
-        Returns:
-            Tuple(str, pd.DataFrame): A tuple containing:
-                - A string representing the inferred modality (image type).
-                - A Pandas DataFrame containing classification results, including class probabilities.
+        :return: A tuple containing the inferred modality and a Pandas DataFrame containing classification results.
+        :rtype: Tuple[str, pd.DataFrame]
         """
         # check if all features are present for inference
         # if len(self.classification_feature_list) < len(inference_features):
@@ -309,11 +307,6 @@ class ImageTypeClassifierBase:
 
         This method performs image type classification and acquisition plane inference based on the provided features.
 
-        Args:
-            None
-
-        Returns:
-            None
         """
 
         def validate_features(input_dict: dict) -> bool:
@@ -323,11 +316,11 @@ class ImageTypeClassifierBase:
             This function checks if all the features specified in the `classification_feature_list` are present in
             the input feature dictionary.
 
-            Args:
-                input_dict (dict): A dictionary containing features for classification.
+            :param input_dict: A dictionary containing features for classification.
+            :type input_dict: dict
 
-            Returns:
-                bool: True if all required features are present, False otherwise.
+            :return: True if all required features are present, False otherwise.
+            :rtype: bool
 
             """
             missing_features = []

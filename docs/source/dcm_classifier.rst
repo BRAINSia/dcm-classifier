@@ -1,9 +1,3 @@
-dcm\_classifier package
-=======================
-
-Submodules
-----------
-
 dcm\_classifier.dicom\_config
 ------------------------------------
 
@@ -68,10 +62,3 @@ dcm\_classifier.utility\_functions
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: dcm_classifier
-   :members:
-   :undoc-members:
-   :show-inheritance:

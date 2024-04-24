@@ -50,8 +50,9 @@ class DicomSingleSeries:
         """
         Initialize a DicomSingleSeries instance with the provided series number.
 
-        Args:
-            series_number (int): The series number associated with this series.
+        :param series_number: The series number associated with this series.
+        :type series_number: int
+
         """
         self.series_number: int = series_number
         self.volume_info_list: list[DicomSingleVolumeInfoBase] = list()
@@ -65,8 +66,8 @@ class DicomSingleSeries:
         """
         Get the series number of this DICOM series.
 
-        Returns:
-            int: The series number.
+        :return: The series number.
+        :rtype: int
         """
         return self.series_number
 
@@ -74,8 +75,8 @@ class DicomSingleSeries:
         """
         Set the modality of the DICOM series.
 
-        Args:
-            modality (str): The modality of the series (e.g., "t1w", "flair").
+        :param modality: The modality of the series.
+        :type modality: str
         """
         if not isinstance(modality, str):
             raise ValueError(
@@ -87,8 +88,8 @@ class DicomSingleSeries:
         """
         Get the modality of the DICOM series.
 
-        Returns:
-            str: The modality.
+        :return: The modality of the series.
+        :rtype: str
         """
         if self.series_modality is None:
             return "INVALID"
@@ -100,8 +101,8 @@ class DicomSingleSeries:
         """
         Set the modality probabilities DataFrame.
 
-        Args:
-            modality_probability (pd.DataFrame): A DataFrame containing modality probabilities.
+        :param modality_probability: A DataFrame containing modality probabilities.
+        :type modality_probability: pd.DataFrame
         """
         if (
             not isinstance(modality_probability, pd.DataFrame)
@@ -117,8 +118,8 @@ class DicomSingleSeries:
         """
         Get the modality probabilities DataFrame that returns probability per modality class.
 
-        Returns:
-            pd.DataFrame: A DataFrame containing modality probabilities.
+        :param modality_probability: A DataFrame containing modality probabilities.
+        :type modality_probability: pd.DataFrame
         """
         return self.modality_probability
 
@@ -126,8 +127,8 @@ class DicomSingleSeries:
         """
         Sets the isotropic flag of the DICOM data.
 
-        Args:
-            isotropic (bool): The isotropic flag to be set.
+        :param isotropic: The isotropic flag to be set.
+        :type isotropic: bool
         """
         if not isinstance(isotropic, bool):
             raise ValueError(
@@ -140,8 +141,8 @@ class DicomSingleSeries:
         """
         Retrieves the isotropic flag of the DICOM data.
 
-        Returns:
-            bool: The isotropic flag.
+        :return: The isotropic flag.
+        :rtype: bool
         """
         return self.is_isotropic
 
@@ -149,8 +150,8 @@ class DicomSingleSeries:
         """
         Sets the contrast flag of the DICOM data.
 
-        Args:
-            contrast (bool): The contrast flag to be set.
+        :param contrast: The contrast flag to be set.
+        :type contrast: bool
         """
         if not isinstance(contrast, bool):
             raise ValueError(
@@ -163,8 +164,8 @@ class DicomSingleSeries:
         """
         Retrieves the contrast flag of the DICOM data.
 
-        Returns:
-            bool: The contrast flag.
+        :return: The contrast flag.
+        :rtype: bool
         """
         return self.has_contrast
 
@@ -172,8 +173,8 @@ class DicomSingleSeries:
         """
         Set the acquisition plane of the DICOM series.
 
-        Args:
-            acquisition_plane (str): The acquisition plane (e.g., "Sagittal", "Axial").
+        :param acquisition_plane: The acquisition plane of the series.
+        :type acquisition_plane: str
 
         """
         if not isinstance(acquisition_plane, str):
@@ -187,8 +188,8 @@ class DicomSingleSeries:
         """
         Get the acquisition plane of the DICOM series.
 
-        Returns:
-            str: The acquisition plane.
+        :return: The acquisition plane of the series.
+        :rtype: str
         """
         return self.acquisition_plane
 
@@ -196,8 +197,8 @@ class DicomSingleSeries:
         """
         Get the list of DicomSingleVolumeInfoBase objects for this series.
 
-        Returns:
-            List[DicomSingleVolumeInfoBase]: A list of volume information objects.
+        :return: A list of volume information objects.
+        :rtype: List[DicomSingleVolumeInfoBase]
         """
         return self.volume_info_list
 
@@ -206,8 +207,8 @@ class DicomSingleSeries:
         Add a DicomSingleVolumeInfoBase object to the series. List containing subvolumes within the series is sorted
         and maintained based on bvalues similar to dcm2niix tool.
 
-        Args:
-            new_volume_info (DicomSingleVolumeInfoBase): The volume information to add.
+        :param new_volume: The volume information to add.
+        :type new_volume: DicomSingleVolumeInfoBase
         """
         new_volume.set_parent_series(self)
         self.volume_info_list.append(new_volume)
@@ -234,8 +235,8 @@ class DicomSingleSeries:
         This method merges information dictionaries from all volumes in the series and adds
         additional fields such as the bvalue-count, bvalue-max, and series count.
 
-        Returns:
-            Dict[str, Any]: A dictionary with information about the series.
+        :return: A dictionary with information about the series.
+        :rtype: dict[str, Any]
         """
         info_dict = self.volume_info_list[0].get_volume_dictionary()
         if len(self.volume_info_list) == 1:
@@ -261,8 +262,8 @@ class DicomSingleSeries:
         Get the series instance UID of the DICOM series.
         This should be the same for all volumes and is picked from the first volume.
 
-        Returns:
-            str: The series instance UID.
+        :return: The series instance UID.
+        :rtype: str
         """
         return self.volume_info_list[0].get_series_uid()
 
@@ -271,7 +272,7 @@ class DicomSingleSeries:
         Get the Study Instance UID of the DICOM series.
         This should be the same for all volumes and is picked from the first volume.
 
-        Returns:
-            str: The Study Instance UID.
+        :return: The Study Instance UID.
+        :rtype: str
         """
         return self.volume_info_list[0].get_study_uid()

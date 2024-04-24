@@ -42,11 +42,13 @@ def itk_read_from_dicomfn_list(
     """
     Read DICOM files from a list and return an ITK image.
 
-    Args:
-        single_volume_dcm_files_list (List[Union[str, Path]]): A list of DICOM file paths.
+    :param single_volume_dcm_files_list: A list of DICOM file paths.
+    :type single_volume_dcm_files_list: list[str | Path]
 
-    Returns:
-        FImageType: The ITK image created from the DICOM files with pixel type itk.F (float).
+    :return: The ITK image created from the DICOM files with pixel type itk.F (float).
+    :rtype: FImageType
+
+    :raises FileNotFoundError: If no DICOM files are found in the input list.
     """
     with tempfile.TemporaryDirectory(
         prefix="all_dcm_for_volume_", suffix="_TMP"
@@ -93,11 +95,11 @@ def is_number(s: Any) -> bool:
     Check if a string is a number.
     https://stackoverflow.com/q/354038
 
-    Args:
-        s (Any): The string to check.
+    :param s: The string to check.
+    :type s: Any
 
-    Returns:
-        bool: True if the string is a number, False otherwise.
+    :return: True if the string is a number, False otherwise.
+    :rtype: bool
     """
     try:
         float(s)
@@ -111,11 +113,12 @@ def is_integer(s: Any) -> bool:
     Check if a string is a number.
     https://stackoverflow.com/q/354038
 
-    Args:
-        s (Any): The string to check.
+    :param s: The string to check.
+    :type s: Any
 
-    Returns:
-        bool: True if the string is a number, False otherwise.
+    :return: True if the string is an integer, False otherwise.
+    :rtype: bool
+
     """
     try:
         int(s)
@@ -129,23 +132,30 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
     Extract and compute the b-value from DICOM header information.
 
     How to compute b-values
+
     http://clinical-mri.com/wp-content/uploads/software_hardware_updates/Graessner.pdf
 
     How to compute b-values difference of non-zero values
+
     https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4610399/
 
+
     https://dicom.innolitics.com/ciods/enhanced-mr-image/enhanced-mr-image-multi-frame-functional-groups/52009229/00189117/00189087
-    NOTE: Bvalue is conditionally required.  This script is to re-inject implied values based on manual inspection or other data sources
+
+    .. note::
+        Bvalue is conditionally required.  This script is to re-inject implied values based on manual inspection or other data sources
 
     `dicom_header_info = dicom.dcmread(dicom_file_name, stop_before_pixels=True)`
 
-    Args:
-        dicom_header_info: A pydicom object containing DICOM header information.
+    :param dicom_header_info: pydicom.Dataset object containing header information.
+    :type dicom_header_info: pydicom.Dataset
 
-        round_to_nearst_10 (bool): Whether to round the computed b-value to the nearest 10. (i.e. bvalues of 46,47,48,49,50,51,52,53,54,55 are reported as 50)
+    :param round_to_nearst_10: Whether to round the computed b-value to the nearest 10. (i.e. bvalues of 46,47,48,49,50,51,52,53,54,55 are reported as 50)
+    :type round_to_nearst_10: bool, optional
 
-    Returns:
-        float: The computed or extracted b-value.
+    :return: The computed or extracted b-value.
+    :rtype: float
+
     """
 
     # bvalue tags from private fields provided by https://www.nmr.mgh.harvard.edu/~greve/dicom-unpack
@@ -227,11 +237,11 @@ def ensure_magnitude_of_1(vector: np.ndarray) -> bool:
     """
     Ensure that the magnitude of a vector is 1.
 
-    Args:
-        vector (np.ndarray): The input vector.
+    :param vector: numpy array containing the vector.
+    :type vector: np.ndarray
 
-    Returns:
-        bool: True if the magnitude of the vector is 1, False otherwise.
+    :return: True if the magnitude of the vector is 1, False otherwise.
+    :rtype: bool
     """
     magnitude = np.linalg.norm(vector)
     if np.absolute(1 - magnitude) > 1e-2:
@@ -245,11 +255,11 @@ def get_diffusion_gradient_direction(
     """
     Extract the diffusion gradient direction from DICOM header information.
 
-    Args:
-        dicom_header_info: pydicom.Dataset object containing header information.
+    :param dicom_header_info: pydicom.Dataset object containing header information.
+    :type dicom_header_info: pydicom.Dataset
 
-    Returns:
-        numpy array containing the diffusion gradient direction.
+    :return: numpy array containing the diffusion gradient direction.
+    :rtype: np.ndarray | None
     """
     private_tags_map = collections.OrderedDict(
         {
@@ -309,11 +319,11 @@ def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
     NAMIC Notes on DWI private fields:
     https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
 
-    Args:
-        filenames: list of DICOM file names corresponding to a single volume
+    :param filenames: list of DICOM file names corresponding to a single volume.
+    :type filenames: list[Path]
 
-    Returns:
-        bool: True if the volume contains non-zero diffusion gradient directions
+    :return: "dwig" if the volume contains non-zero diffusion gradient directions, "tracew" otherwise.
+    :rtype: str
 
     """
     # check for derived data with constant diffusion gradient direction
@@ -340,10 +350,12 @@ def vprint(msg: str, verbose: bool = False) -> None:
     """
     Conditionally print a message if the 'verbose' flag is set.
 
-    Args:
-        msg (str): The message to print.
+    :param msg: The message to print.
+    :type msg: str
 
-        verbose (bool, optional): Whether to print the message. Default is False.
+    :param verbose: Whether to print the message. Default is False.
+    :type verbose: bool, optional
+
     """
     if verbose:
         print(msg)
@@ -357,17 +369,18 @@ def sanitize_dicom_dataset(
     """
     Validates the DICOM fields in the DICOM header to ensure all required fields are present.
 
-    Args:
-        ro_dataset (pydicom.Dataset): The input DICOM dataset.
+    :param ro_dataset: The input DICOM dataset.
+    :type ro_dataset: pydicom.Dataset
+    :param required_info_list: A list of required DICOM fields.
+    :type required_info_list: list[str]
+    :param optional_info_list: A list of optional DICOM fields.
+    :type optional_info_list: list[str]
 
-        required_info_list (list[str]): A list of required DICOM fields.
+    :return: A dictionary containing the sanitized DICOM fields and a boolean indicating whether the validation was successful.
+    :rtype: tuple[dict, bool]
 
-        optional_info_list (list[str]): A list of optional DICOM fields.
+    :raises ValueError: Raises an exception if any required fields are missing.
 
-    Returns:
-        tuple[dict, bool]: A dictionary containing the sanitized DICOM fields and a boolean indicating whether the validation was successful.
-
-    Raises an exception if any required fields are missing.
     """
     dataset_dictionary: dict[str, Any] = dict()
     dataset = deepcopy(ro_dataset)  # DO NOT MODIFY THE INPUT DATASET!
@@ -635,12 +648,14 @@ def get_coded_dictionary_elements(
     """
     Extract specific information from a DICOM fields dataset and create a coded dictionary with extracted features.
 
-    Args:
-        dicom_sanitized_dataset (dict): Sanitized dictionary containing required DICOM header information.
+    :param dicom_sanitized_dataset: Sanitized dictionary containing required DICOM header information.
+    :type dicom_sanitized_dataset: dict
 
-    Returns:
-        Dict[str, Any]: A dictionary containing extracted information in a coded format.
+    :return: A dictionary containing extracted information in a coded format.
+    :rtype: dict
+
     """
+
     dataset_dictionary: dict[str, Any] = deepcopy(dicom_sanitized_dataset)
     for name, value in dicom_sanitized_dataset.items():
         if name == "PixelSpacing":
@@ -719,13 +734,15 @@ def convert_array_to_min_max(name: str, value_list: list[int]) -> list:
     """
     Compute the minimum and maximum values of a DICOM array field.
 
-    Args:
-        name: Original DICOM field name.
+    :param name: Original DICOM field name.
+    :type name: str
 
-        value_list: Original DICOM list values.
+    :param value_list: Original DICOM list values.
+    :type value_list: list[int]
 
-    Returns:
-        list: A list of (name, value) pairs representing the minimum and maximum values.
+    :return: A list of (name, value) pairs representing the minimum and maximum values.
+    :rtype: list
+
     """
 
     name = name.replace(" ", "")
@@ -739,13 +756,14 @@ def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) ->
     """
     Takes a DICOM array and expands it to an indexed list of values.
 
-    Args:
-        name: Original DICOM field name.
+    :param name: Original DICOM field name.
+    :type name: str
 
-        value_list: Original DICOM list values.
+    :param value_list: Original DICOM list values.
+    :type value_list: MultiValue | ndarray
 
-    Returns:
-        A list of (name, value) pairs, where each value in the original list is indexed with a unique name.
+    :return: A list of (name, value) pairs representing the indexed values.
+    :rtype: list
     """
     # If value is a multi-value field, then break it apart
     multi_value_list = value_list
