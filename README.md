@@ -24,6 +24,10 @@ Additionally, please reference the citations located in the [citations directory
 
 Below are instructions for installing and using the package as a user and developer.
 
+## Documentation
+
+The documentation for the package can be found [here](https://dcm-classifier.readthedocs.io/en/latest/index.html)
+
 ## Tutorials
 
 Tutorial notebooks are provided in the scripts directory for training and using the classifier along with all the necessary scripts for training a custom model.
