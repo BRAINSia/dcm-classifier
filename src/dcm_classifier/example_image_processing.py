@@ -20,13 +20,13 @@ def compute_tracew_adc_from_diffusion(
     """
     Compute the trace-weighted image from a diffusion series.
 
-    Args:
-        series (DicomSingleSeries): The diffusion series.
+    :param series: The diffusion series.
+    :type series: DicomSingleSeries
+    :param tracew_bval: The preferred b-value for the trace-weighted image, defaults to 1000
+    :type tracew_bval: int, optional
 
-        tracew_bval (int): The preferred b-value for the trace-weighted image.
-
-    Returns:
-        FImageType: The computed trace-weighted image with pixel type itk.F (float).
+    :return: The computed trace-weighted image with pixel type itk.F (float).
+    :rtype: FImageType
     """
     volume_list = series.get_volume_list()
     bval_volumes_dict = {}
@@ -73,13 +73,14 @@ def two_point_compute_adc(
     """
     Compute ADC from the min and max b-value images (assumes list_of_images is sorted by ascending b-value).
 
-    Args:
-        list_of_raw_bimages (List[FImageType]): A list of b-weighted images.
+    :param list_of_raw_bimages: A list of b-weighted images.
+    :type list_of_raw_bimages: list[FImageType]
 
-        list_of_bvalues (List[float]): A list of b-values.
+    :param list_of_bvalues: A list of b-values.
+    :type list_of_bvalues: list[float]
 
-    Returns:
-        FImageType: The computed itk ADC image with pixel type itk.F (float).
+    :return: The computed itk ADC image with pixel type itk.F (float).
+    :rtype: FImageType
     """
     # ADC = - (ln(SI_b1) - ln(SI_b2) ) / (b_1 - b_2)
     # ADC = - (ln(SI_b1/SI_b2))/ (b_1 - b_2)
@@ -108,13 +109,14 @@ def compute_adc_from_multi_b_values(
 
     https://www.ajronline.org/doi/full/10.2214/AJR.15.15945?mobileUi=0
 
-    Args:
-        list_of_raw_bimages (List[FImageType]): A list of b-weighted images.
+    :param list_of_raw_bimages: A list of b-weighted images.
+    :type list_of_raw_bimages: list[FImageType]
 
-        list_of_bvalues (List[float]): A list of b-values.
+    :param list_of_bvalues: A list of b-values.
+    :type list_of_bvalues: list[float]
 
-    Returns:
-        FImageType: The computed itk ADC image with pixel type itk.F (float).
+    :return: The computed itk ADC image with pixel type itk.F (float).
+    :rtype: FImageType
     """
 
     list_of_log_images: list[FImageType] = list()
@@ -161,11 +163,11 @@ def read_dwi_series_itk(dicom_directory: Path) -> (float, FImageType):
     """
     Given a directory of DICOM images of coherent DICOMs, read the volume and b-value.
 
-    Args:
-        dicom_directory (Path): The directory containing DICOM image files.
+    :param dicom_directory: The directory containing DICOM image files.
+    :type dicom_directory: Path
 
-    Returns:
-        Tuple[float, FImageType]: A tuple containing the extracted b-value and the ITK image with pixel type itk.F (float).
+    :return: A tuple containing the extracted b-value and the ITK image with pixel type itk.F (float).
+    :rtype: Tuple[float, FImageType]
     """
     all_files: list[str] = [x.as_posix() for x in dicom_directory.glob("*.dcm")]
     bvalue_image = itk_read_from_dicomfn_list(all_files)
@@ -184,15 +186,15 @@ def rglob_for_singular_result(
     """
     Recursively search for files or directories matching a pattern in a base directory.
 
-    Args:
-        base_dir (Path): The base directory to start the search from.
+    :param base_dir: The base directory to start the search from.
+    :type base_dir: Path
+    :param pattern: The pattern to match against.
+    :type pattern: str
+    :param require_result_type: If specified, the type of result to require ("f" for file, "d" for directory).
+    :type require_result_type: str, optional
 
-        pattern (str): The pattern to match against.
-
-        require_result_type (Optional[str]): If specified, the type of result to require ("f" for file, "d" for directory).
-
-    Returns:
-        Optional[Path]: The matching result if found, or None if no result or multiple results are found.
+    :return: The matching result if found, or None if no result or multiple results are found.
+    :rtype: Optional[Path]
     """
 
     glob_obj = base_dir.rglob(pattern) if recursive_search else base_dir.glob(pattern)
@@ -216,15 +218,16 @@ def rglob_for_singular_result_from_pattern_list(
     """
     Recursively search for files or directories matching patterns from a list in a base directory.
 
-    Args:
-        base_dir (Path): The base directory to start the search from.
+    :param base_dir: The base directory to start the search from.
+    :type base_dir: Path
+    :param patterns: The list of patterns to match against.
+    :type patterns: List[str]
+    :param require_result_type: If specified, the type of result to require ("f" for file, "d" for directory).
+    :type require_result_type: str, optional
 
-        patterns (List[str]): The list of patterns to match against.
+    :return: The matching result if found, or None if no result or multiple results are found.
+    :rtype: Optional[Path]
 
-        require_result_type (Optional[str]): If specified, the type of result to require ("f" for file, "d" for directory).
-
-    Returns:
-        Optional[Path]: The matching result if found, or None if no result or multiple results are found.
     """
     for pattern in patterns:
         candidate = rglob_for_singular_result(
@@ -239,11 +242,11 @@ def cmd_exists(cmd):
     """
     Check if a command exists in the system's PATH.
 
-    Args:
-        cmd (str): The command to check for existence.
+    :param cmd: The command to check for existence.
+    :type cmd: str
 
-    Returns:
-        bool: True if the command exists, False otherwise.
+    :return: True if the command exists, False otherwise.
+    :rtype: bool
     """
     import shutil
 
@@ -254,14 +257,13 @@ def compare_RGB_slices(refr_slice_fn: Path, test_slice_fn: Path) -> (int, dict):
     """
     Compare two RGB image slices and count the number of pixels with differences.
 
-    Args:
-        refr_slice_fn (Path): Filepath to the reference RGB image slice.
+    :param refr_slice_fn: The reference RGB image slice.
+    :type refr_slice_fn: Path
+    :param test_slice_fn: The test RGB image slice.
+    :type test_slice_fn: Path
+    :return: A tuple containing the number of differing pixels and a dictionary containing the reference, test, and difference images.
+    :rtype: Tuple[int, Dict[str, FImageType]]
 
-        test_slice_fn (Path): Filepath to the test RGB image slice.
-
-    Returns:
-        Tuple[int, Dict[str, FImageType]]: A tuple containing the number of differing pixels
-        and a dictionary containing the reference, test, and difference images.
     """
 
     images_dict: dict[FImageType] = dict()
@@ -296,21 +298,19 @@ def compare_3d_float_images(
     """
     Compare two 3D float images and count the number of pixels with differences.
 
-    Args:
-        refr_fn (Path): Filepath to the reference image.
+    :param refr_fn: The reference image filename.
+    :type refr_fn: Path
+    :param test_fn: The test image filename.
+    :type test_fn: Path
+    :param difference_threshold: The threshold for pixel differences.
+    :type difference_threshold: float
+    :param tolerance_radius: The tolerance radius for comparison.
+    :type tolerance_radius: float
+    :param force_exact_directions: Whether to force exact directions in comparison.
+    :type force_exact_directions: bool
+    :return: A tuple containing the number of differing pixels, a dictionary containing the reference, test, and difference images, and a boolean indicating if the images are in the same space.
+    :rtype: Tuple[int, Dict[str, FImageType], bool]
 
-        test_fn (Path): Filepath to the test image.
-
-        difference_threshold (float): Threshold for pixel differences.
-
-        tolerance_radius (float): Tolerance radius for comparison.
-
-        force_exact_directions (bool): Whether to force exact directions in comparison.
-
-    Returns:
-        Tuple[int, Dict[str, FImageType], bool]: A tuple containing the number of differing pixels,
-        a dictionary containing the reference, test, and difference images, and a boolean indicating
-        if the images are in the same space.
     """
 
     images_dict: dict[FImageType] = dict()
@@ -360,13 +360,15 @@ def slugify(
     trailing whitespace, dashes, and underscores.
 
 
-    Args:
-        value: The string to be converted.
+    :param value: The string to be converted.
+    :type value: str
+    :param allow_uppercase: Whether to allow uppercase characters.
+    :type allow_uppercase: bool
+    :param allow_unicode: Whether to allow Unicode characters.
+    :type allow_unicode: bool
 
-        allow_unicode (bool): If True, allows Unicode characters in the slug.
-
-    Returns:
-        str: The slugified string.
+    :return: The slugified string.
+    :rtype: str
     """
 
     "https://stackoverflow.com/a/295466"
@@ -390,11 +392,11 @@ def get_min_max(inputImage: FImageType) -> (float, float):
     """
     Calculate and return the minimum and maximum pixel values of the given image.
 
-    Args:
-        inputImage (FImageType): The input image for which the minimum and maximum pixel values are to be calculated.
+    :param inputImage: The input image for which the minimum and maximum pixel values are to be calculated.
+    :type inputImage: FImageType
 
-    Returns:
-        Tuple[float, float]: A tuple containing two floats: the minimum and maximum pixel values of the input image.
+    :return: A tuple containing two floats: the minimum and maximum pixel values of the input image.
+    :rtype: Tuple[float, float]
     """
 
     min_max_image_filter = itk.MinimumMaximumImageCalculator[FImageType].New()
@@ -411,15 +413,15 @@ def itk_get_center_slice(
     """
     Extract the center slice of an input image and perform intensity windowing.
 
-    Args:
-        inputImage (FImageType): The input itk image with pixel type itk.F (float).
+    :param inputImage: The input image.
+    :type inputImage: FImageType
+    :param pixel_min: The minimum pixel value.
+    :type pixel_min: float
+    :param pixel_max: The maximum pixel value.
+    :type pixel_max: float
+    :return: The center slice image with adjusted intensity values.
+    :rtype: UCImageType
 
-        pixel_min (float): Minimum pixel value.
-
-        pixel_max (float): Maximum pixel value.
-
-    Returns:
-        UCImageType: The center slice image with adjusted intensity values.
     """
     extractFilter = itk.ExtractImageFilter[FImageType, FImageType].New()
     extractFilter.SetInput(inputImage)
@@ -461,11 +463,12 @@ def log_image(inimage: FImageType) -> FImageType:
     """
     Compute the natural logarithm of pixel values in the input image.
 
-    Args:
-        inimage (FImageType): The input image.
+    :param inimage: The input image.
+    :type inimage: FImageType
 
-    Returns:
-        FImageType: The image with pixel values transformed using the natural logarithm.
+    :return: The image with pixel values transformed using the natural logarithm.
+    :rtype: FImageType
+
     """
     lif = itk.LogImageFilter[FImageType, FImageType].New()
     lif.SetInput(inimage)
@@ -477,11 +480,11 @@ def exp_image(inimage: FImageType) -> FImageType:
     """
     Compute the exponential of pixel values in the input image.
 
-    Args:
-        inimage (FImageType): The input image.
+    :param inimage: The input image.
+    :type inimage: FImageType
+    :return: The image with pixel values transformed using the exponential function.
+    :rtype: FImageType
 
-    Returns:
-        FImageType: The image with pixel values transformed using the exponential function.
     """
     exp_image_filter = itk.ExpImageFilter[FImageType, FImageType].New()
     exp_image_filter.SetInput(inimage)
@@ -493,13 +496,13 @@ def add_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
     """
     Add two input images element-wise.
 
-    Args:
-        im1 (FImageType): The first input image.
+    :param im1: The first input image.
+    :type im1: FImageType
+    :param im2: The second input image.
+    :type im2: FImageType
 
-        im2 (FImageType): The second input image.
-
-    Returns:
-        FImageType: The resulting image from adding the two input images element-wise.
+    :return: The image with pixel values added element-wise.
+    :rtype: FImageType
     """
     sum_image_filter = itk.AddImageFilter[FImageType, FImageType, FImageType].New()
     sum_image_filter.SetInput1(im1)
@@ -512,13 +515,13 @@ def add_const_to_itk_images(im1: FImageType, offset: float) -> FImageType:
     """
     Add a constant offset to all pixel values in the input image.
 
-    Args:
-        im1 (FImageType): The input image.
+    :param im1: The input image.
+    :type im1: FImageType
+    :param offset: The constant offset to be added to each pixel value.
+    :type offset: float
 
-        offset (float): The constant offset to be added to each pixel value.
-
-    Returns:
-        FImageType: The image with the constant offset added to its pixel values.
+    :return: The image with the constant offset added to its pixel values.
+    :rtype: FImageType
     """
     sum_image_filter = itk.AddImageFilter[FImageType, FImageType, FImageType].New()
     sum_image_filter.SetInput(im1)
@@ -531,13 +534,13 @@ def sub_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
     """
     Subtract pixel values of the second input image from the first input image element-wise.
 
-    Args:
-        im1 (FImageType): The first input image.
+    :param im1: The first input image.
+    :type im1: FImageType
+    :param im2: The second input image.
+    :type im2: FImageType
 
-        im2 (FImageType): The second input image.
-
-    Returns:
-        FImageType: The resulting image from subtracting the pixel values of the second image from the first image.
+    :return: The image with pixel values subtracted element-wise.
+    :rtype: FImageType
     """
 
     sub_image_filter = itk.SubtractImageFilter[FImageType, FImageType, FImageType].New()
@@ -551,13 +554,13 @@ def div_itk_images(im1: FImageType, im2: FImageType) -> FImageType:
     """
     Divide pixel values of the first input image by the corresponding pixel values of the second input image element-wise.
 
-    Args:
-        im1 (FImageType): The first input image.
+    :param im1: The first input image.
+    :type im1: FImageType
+    :param im2: The second input image.
+    :type im2: FImageType
 
-        im2 (FImageType): The second input image.
-
-    Returns:
-        FImageType: The resulting image from dividing the pixel values of the first image by the second image.
+    :return: The image with pixel values divided element-wise.
+    :rtype: FImageType
     """
 
     div_image_filter = itk.DivideImageFilter[FImageType, FImageType, FImageType].New()
@@ -571,13 +574,13 @@ def multiply_itk_images(im1: FImageType, scale: float) -> FImageType:
     """
     Multiply all pixel values in the input image by a constant scale.
 
-    Args:
-        im1 (FImageType): The input image.
+    :param im1: The input image.
+    :type im1: FImageType
+    :param scale: The constant scale factor to multiply each pixel value.
+    :type scale: float
 
-        scale (float): The constant scale factor to multiply each pixel value.
-
-    Returns:
-        FImageType: The image with pixel values multiplied by the specified scale factor.
+    :return: The image with pixel values multiplied by the specified scale factor.
+    :rtype: FImageType
     """
 
     # TODO: Add inplace computations for speed
@@ -594,11 +597,11 @@ def add_list_of_images(list_of_images: list[FImageType]) -> FImageType:
     """
     Sum the pixel values of a list of images element-wise.
 
-    Args:
-        list_of_images (List[FImageType]): A list of input images to be summed.
+    :param list_of_images: The list of input images to be summed.
+    :type list_of_images: List[FImageType]
 
-    Returns:
-        FImageType: The resulting image after adding all the input images element-wise.
+    :return: The image with pixel values summed element-wise.
+    :rtype: FImageType
     """
     if len(list_of_images) == 1:
         return list_of_images[0]
@@ -614,15 +617,15 @@ def itk_clamp_image_filter(
     """
     Clamp pixel values of an input image within a specified range.
 
-    Args:
-        input_image (FImageType): The input image.
+    :param input_image: The input image.
+    :type input_image: FImageType
+    :param lower_clamp: The lower bound for clamping pixel values.
+    :type lower_clamp: float
+    :param upper_clamp: The upper bound for clamping pixel values, defaults to 10**38
+    :type upper_clamp: float, optional
 
-        lower_clamp (float): The lower bound for clamping pixel values.
-
-        upper_clamp (float, optional): The upper bound for clamping pixel values. Default is 10^38.
-
-    Returns:
-        FImageType: The image with pixel values clamped within the specified range.
+    :return: The image with pixel values clamped within the specified range.
+    :rtype: FImageType
     """
     cif = itk.ClampImageFilter[FImageType, FImageType].New()
     cif.SetInput(input_image)
@@ -638,13 +641,14 @@ def scaled_by_bvalue_images(
     """
     Multiply a list of images by their corresponding b-values element-wise.
 
-    Args:
-        list_of_images (List[FImageType]): A list of input images.
+    :param list_of_images: The list of input images.
+    :type list_of_images: List[FImageType]
+    :param list_of_bvalues: The list of b-values corresponding to the input images.
+    :type list_of_bvalues: List[float]
 
-        list_of_bvalues (List[float]): A list of b-values corresponding to the input images.
+    :return: The list of images with pixel values scaled by their respective b-values.
+    :rtype: List[FImageType]
 
-    Returns:
-        List[FImageType]: A list of images with pixel values scaled by their respective b-values.
     """
 
     scaled_by_bvalue_list: list[FImageType] = list()
@@ -658,8 +662,8 @@ def uniform_adc_scale_factor() -> float:
     """
     Return the uniform scaling factor for b-value images.
 
-    Returns:
-        float: The scale factor, which is 10^6.
+    :return: The uniform scaling factor for b-value images.
+    :rtype: float
     """
 
     # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3998685/

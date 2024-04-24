@@ -33,4 +33,4 @@ Documentation
    :maxdepth: 2
    :caption: API Reference
 
-   modules.rst
+   modules

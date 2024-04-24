@@ -79,8 +79,9 @@ class DicomSingleVolumeInfoBase:
         """
         Initializes a DicomSingleVolumeInfoBase instance with a list of DICOM file paths.
 
-        Args:
-            one_volume_dcm_filenames (List[Union[Path, str]]): A list of DICOM file paths representing a single volume.
+        :param one_volume_dcm_filenames:
+        :type one_volume_dcm_filenames: list[Path | str]
+
         """
         self.one_volume_dcm_filenames: list[Path] = [
             Path(x).resolve() for x in one_volume_dcm_filenames
@@ -128,8 +129,8 @@ class DicomSingleVolumeInfoBase:
         """
         Get the Series Description of the DICOM volume.
 
-        Returns:
-            str: The Series Description.
+        :return: The Series Description.
+        :rtype: str
         """
         return self._pydicom_info.get("SeriesDescription", "UNKNOWN_SeriesDescription")
 
@@ -137,8 +138,8 @@ class DicomSingleVolumeInfoBase:
         """
         Sets the modality of the DICOM data.
 
-        Args:
-            modality (str): The modality information to be set.
+        :param modality: The modality information to be set.
+        :type modality: str
         """
         if not isinstance(modality, str):
             raise ValueError(
@@ -150,8 +151,8 @@ class DicomSingleVolumeInfoBase:
         """
         Retrieves the modality of the DICOM data.
 
-        Returns:
-            str: The modality information.
+        :return: The modality information.
+        :rtype: str
         """
         return self.volume_modality
 
@@ -159,8 +160,8 @@ class DicomSingleVolumeInfoBase:
         """
         Retrieves the modality of the DICOM data.
 
-        Returns:
-            str: The modality information.
+        :return: The modality information.
+        :rtype: str
         """
         return self.parent_series.get_series_modality()
 
@@ -168,8 +169,8 @@ class DicomSingleVolumeInfoBase:
         """
         Sets the isotropic flag of the DICOM data.
 
-        Args:
-            isotropic (bool): The isotropic flag to be set.
+        :param isotropic: The isotropic flag to be set.
+        :type isotropic: bool
         """
         self.is_isotropic = isotropic
 
@@ -177,8 +178,8 @@ class DicomSingleVolumeInfoBase:
         """
         Retrieves the isotropic flag of the DICOM data.
 
-        Returns:
-            bool: The isotropic flag.
+        :return: The isotropic flag.
+        :rtype: bool
         """
         return self.is_isotropic
 
@@ -186,8 +187,8 @@ class DicomSingleVolumeInfoBase:
         """
         Sets the contrast flag of the DICOM data.
 
-        Args:
-            contrast (bool): The contrast flag to be set.
+        :param contrast: The contrast flag to be set.
+        :type contrast: bool
         """
         self.has_contrast = contrast
 
@@ -195,8 +196,8 @@ class DicomSingleVolumeInfoBase:
         """
         Retrieves the contrast flag of the DICOM data.
 
-        Returns:
-            bool: The contrast flag.
+        :return: The contrast flag.
+        :rtype: bool
         """
         return self.has_contrast
 
@@ -204,8 +205,8 @@ class DicomSingleVolumeInfoBase:
         """
         Retrieves the contrast agent of the DICOM data.
 
-        Returns:
-            str: The contrast agent.
+        :return: The contrast agent.
+        :rtype: str
         """
         if self.get_has_contrast():
             return self._pydicom_info.get(
@@ -218,8 +219,8 @@ class DicomSingleVolumeInfoBase:
         """
         Sets the parent series of the DICOM volume.
 
-        Args:
-            series (DicomSingleSeries): The parent series object.
+        :param series: The parent series object.
+        :type series: DicomSingleSeries
         """
         self.parent_series = series
 
@@ -227,8 +228,8 @@ class DicomSingleVolumeInfoBase:
         """
         Retrieves the parent series of the DICOM volume.
 
-        Returns:
-            DicomSingleSeries: The parent series object.
+        :return: The parent series object.
+        :rtype: DicomSingleSeries
         """
         return self.parent_series
 
@@ -238,8 +239,8 @@ class DicomSingleVolumeInfoBase:
         """
         Sets the modality probabilities for the DICOM data.
 
-        Args:
-            modality_probability (pd.DataFrame): A pandas DataFrame containing modality probabilities.
+        :param modality_probability: The modality probabilities to be set.
+        :type modality_probability: pd.DataFrame
         """
         if (
             not isinstance(modality_probability, pd.DataFrame)
@@ -255,8 +256,8 @@ class DicomSingleVolumeInfoBase:
         """
         Get the modality probabilities DataFrame that returns probability per modality class.
 
-        Returns:
-            pd.DataFrame: A pandas DataFrame containing modality probabilities.
+        :return: The modality probabilities.
+        :rtype: pd.DataFrame
         """
         return self.modality_probability
 
@@ -264,8 +265,9 @@ class DicomSingleVolumeInfoBase:
         """
         Sets the acquisition plane information for the DICOM data.
 
-        Args:
-            acquisition_plane (str): The acquisition plane information to be set.
+        :param acquisition_plane: The acquisition plane information to be set.
+        :type acquisition_plane: str
+
         """
         self.acquisition_plane = acquisition_plane
 
@@ -273,8 +275,8 @@ class DicomSingleVolumeInfoBase:
         """
         Retrieves the acquisition plane information for the DICOM data.
 
-        Returns:
-            str: The acquisition plane information.
+        :return: The acquisition plane information.
+        :rtype: str
         """
         return self.acquisition_plane
 
@@ -282,11 +284,11 @@ class DicomSingleVolumeInfoBase:
         """
         Get primary volume information for the specified volume index.
 
-        Args:
-            vol_index (int) Optional: Index of the volume for which to retrieve information, defaults to 0.
+        :param vol_index: index of the volume for which to retrieve information
+        :type vol_index: int, optional
 
-        Returns:
-            Dict[str, str]: A dictionary containing primary volume information.
+        :return: A dictionary containing primary volume information.
+        :rtype: Dict[str, str]
         """
         fields_to_copy: dict[str, str] = {
             "SeriesNumber": "SeriesNum",
@@ -314,8 +316,9 @@ class DicomSingleVolumeInfoBase:
         """
         Get the ITK image associated with the DICOM volume.
 
-        Returns:
-            FImageType: The ITK image of the DICOM volume with pixel type itk.F (float).
+        :return: The ITK image of the DICOM volume.
+        :rtype: FImageType
+
         """
         if self.itk_image is None:
             self.itk_image = itk_read_from_dicomfn_list(
@@ -328,8 +331,8 @@ class DicomSingleVolumeInfoBase:
         """
         Get the Series Instance UID of the DICOM volume.
 
-        Returns:
-            str: The Series Instance UID.
+        :return: The Series Instance UID.
+        :rtype: str
         """
         return self._pydicom_info.get("SeriesInstanceUID", "UNKNOWN_SeriesInstanceUID")
 
@@ -337,8 +340,8 @@ class DicomSingleVolumeInfoBase:
         """
         Get the Study Instance UID of the DICOM volume.
 
-        Returns:
-            str: The Study Instance UID.
+        :return: The Study Instance UID.
+        :rtype: str
         """
         return self._pydicom_info.get("StudyInstanceUID", "UNKNOWN_StudyInstanceUID")
 
@@ -355,8 +358,8 @@ class DicomSingleVolumeInfoBase:
         """
         Get the size of the DICOM series.
 
-        Returns:
-            str: The size of the DICOM series as a string.
+        :return: The size of the DICOM series.
+        :rtype: str
         """
         size_list: list[int] = [
             self._pydicom_info.get("Rows", 0),
@@ -369,8 +372,8 @@ class DicomSingleVolumeInfoBase:
         """
         Get the list of DICOM file paths for the single DICOM volume.
 
-        Returns:
-            List[Path]: A list of file paths for the DICOM files in the single volume.
+        :return: A list of file paths for the DICOM files in the single volume.
+        :rtype: List[Path]
         """
         return deepcopy(self.one_volume_dcm_filenames)
 
@@ -378,8 +381,8 @@ class DicomSingleVolumeInfoBase:
         """
         Get the dictionary containing information about the DICOM volume.
 
-        Returns:
-            Dict[str, Any]: A dictionary containing information about the DICOM volume.
+        :return: A dictionary containing information about the DICOM volume.
+        :rtype: Dict[str, Any]
         """
         return deepcopy(self.volume_info_dict)
 
@@ -387,8 +390,9 @@ class DicomSingleVolumeInfoBase:
         """
         Get the b-value of the DICOM volume.
 
-        Returns:
-            float: The b-value of the DICOM volume as a float.
+        :return: The b-value of the DICOM volume.
+        :rtype: float
+
         """
         return self.bvalue
 
@@ -396,8 +400,9 @@ class DicomSingleVolumeInfoBase:
         """
         Get the Series Number of the DICOM volume.
 
-        Returns:
-            int: The Series Number as an integer.
+        :return: The Series Number.
+        :rtype: int
+
         """
         try:
             series_number_int: int = int(self._pydicom_info.get("SeriesNumber", -12345))
@@ -413,8 +418,8 @@ class DicomSingleVolumeInfoBase:
         """
         Get the Volume Index within the Series.
 
-        Returns:
-            int: The Volume Index as an integer.
+        :return: The Volume Index within the Series.
+        :rtype: int
         """
         return self.volume_index
 
@@ -422,8 +427,9 @@ class DicomSingleVolumeInfoBase:
         """
         Set the Volume Index within the Series.
 
-        Args:
-            volume_index (int): The Volume Index within its series.
+        :param volume_index: The Volume Index within its series.
+        :type volume_index: int
+
         """
         self.volume_index = volume_index
 
@@ -431,8 +437,8 @@ class DicomSingleVolumeInfoBase:
         """
         Check if the modality of the DICOM volume is MR (Magnetic Resonance).
 
-        Returns:
-            status (bool): True if the modality is MR, False otherwise.
+        :return: True if the modality is MR, False otherwise.
+        :rtype: bool
         """
         status: bool = bool(
             self._pydicom_info.get("Modality", "Unknown_Modality") != "MR"
@@ -448,10 +454,8 @@ class DicomSingleVolumeInfoBase:
         """
         Create a dictionary containing information about the DICOM volume from the list of DICOM files.
 
-        Returns:
-            Tuple[str, dict]: A tuple containing the Study Instance UID and a dictionary with volume information.
-                 The dictionary includes Series Number, Echo Time, SAR, b-values, file name,
-                 Series and Study Instance UID, Series Description, and various indicators.
+        :return: A tuple containing the Study Instance UID and a dictionary with volume information.
+        :rtype: Tuple[str, dict]
         """
         # sanitize the DICOM dataset
         sanitized_dicom_dict, valid = sanitize_dicom_dataset(
@@ -508,8 +512,8 @@ class DicomSingleVolumeInfoBase:
         """
         Generates diagnostic information about the DICOM image.
 
-        Returns:
-            msg (str): Diagnostic information as a formatted string.
+        :return: Diagnostic information about the DICOM image.
+        :rtype: str
         """
         volume_info: str = json.dumps(
             self.get_primary_volume_info(0), indent=4, sort_keys=True

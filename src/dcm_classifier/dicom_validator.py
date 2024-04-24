@@ -39,8 +39,8 @@ class DicomValidatorBase:
         """
         Initialize the DicomValidatorBase.
 
-        Args:
-            single_volume_info (DicomSingleVolumeInfoBase): An instance of DicomSingleVolumeInfoBase containing information about a single DICOM volume.
+        :param single_volume_info: An instance of DicomSingleVolumeInfoBase containing information about a single DICOM volume.
+        :type single_volume_info: DicomSingleVolumeInfoBase
         """
         self.single_volume_info: DicomSingleVolumeInfoBase = single_volume_info
         self._validation_failure_reports: list[str] = list()
@@ -49,8 +49,8 @@ class DicomValidatorBase:
         """
         Append a validation failure message to the internal list.
 
-        Args:
-            msg (str): A validation failure message to append.
+        :param msg: A validation failure message to append.
+        :type msg: str
         """
         if msg not in self._validation_failure_reports:
             self._validation_failure_reports.append(msg)
@@ -59,11 +59,10 @@ class DicomValidatorBase:
         """
         Generate a validation report as a formatted string.
 
-        Args:
-            verbose_reporting (bool): If True, includes verbose information in the report.
-
-        Returns:
-            str: A formatted validation report string.
+        :param verbose_reporting: If True, includes verbose information in the report.
+        :type verbose_reporting: bool
+        :return: A formatted validation report string.
+        :rtype: str
         """
         msg: str = ""
         if len(self._validation_failure_reports) > 0:
@@ -101,9 +100,8 @@ class DicomValidatorBase:
         """
         Write the validation report to a file or print it.
 
-        Args:
-            report_filename_to_append (Optional[Path]): The filename to write the report to.
-            If None, the report will be printed to the console.
+        :param report_filename_to_append: The filename to write the report to. If None, the report will be printed to the console.
+        :type report_filename_to_append: Path | None
         """
         msg: str = self.generate_validation_report_str()
 
@@ -117,7 +115,7 @@ class DicomValidatorBase:
         """
         Perform validation checks on the DICOM volume.
 
-        Returns:
-            bool: True if the volume passes all validation criteria, false otherwise.
+        :return: True if the volume passes all validation criteria, false otherwise.
+        :rtype: bool
         """
         return True
