@@ -379,6 +379,10 @@ class ImageTypeClassifierBase:
             modality = volume.get_volume_modality().replace("LOW_PROBABILITY_", "")
 
             self.series.set_series_modality(modality)
+            bval = volume.get_volume_bvalue()
+            if bval > 0 and modality not in ["tracew", "adc", "fa", "eadc", "dwig"]:
+                self._update_diffusion_series_modality()
+
             self.series.set_modality_probabilities(volume.get_modality_probabilities())
             self.series.set_acquisition_plane(volume.get_acquisition_plane())
             self.series.set_is_isotropic(volume.get_is_isotropic())
