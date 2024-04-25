@@ -235,6 +235,72 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         ) in self.series_dictionary.items():
             self.inferer.set_series(series_object)
             self.inferer.run_inference()
+        self.fixup_adjacent_series()
+
+    def fixup_adjacent_series(self):
+        # Fix up case where adjacent volumes make up a family of tracew images and one of them is a bvalue=0 image
+        for current_series_number, series_obj in self.get_study_dictionary().items():
+            if series_obj.get_volume_list()[
+                0
+            ].get_volume_bvalue() == 0 and series_obj.get_series_modality() not in [
+                "tracew",
+                "adc",
+                "fa",
+                "eadc",
+                "dwig",
+            ]:
+                for (
+                    adjacent_series_number,
+                    adjacent_series_obj,
+                ) in self.get_study_dictionary().items():
+                    if adjacent_series_number != current_series_number:
+                        list_of_candidate_adjacent = [
+                            int(current_series_number + 1),
+                            int(current_series_number - 1),
+                        ]
+                        if adjacent_series_number in list_of_candidate_adjacent:
+                            if adjacent_series_obj.get_series_modality() == "tracew":
+                                # if an adjacent image is a tracew image, and has same physical space as
+                                # the current image then assume it is also a tracew image
+                                itk_volume = series_obj.get_volume_list()[
+                                    0
+                                ].get_itk_image()
+                                itk_adjacent_volume = (
+                                    adjacent_series_obj.get_volume_list()[
+                                        0
+                                    ].get_itk_image()
+                                )
+
+                                same_size: bool = (
+                                    itk_volume.GetLargestPossibleRegion().GetSize()
+                                    == itk_adjacent_volume.GetLargestPossibleRegion().GetSize()
+                                )
+                                same_space: bool = (
+                                    itk_volume.GetSpacing()
+                                    == itk_adjacent_volume.GetSpacing()
+                                )
+                                same_origin: bool = (
+                                    itk_volume.GetOrigin()
+                                    == itk_adjacent_volume.GetOrigin()
+                                )
+                                same_direction: bool = (
+                                    itk_volume.GetDirection()
+                                    == itk_adjacent_volume.GetDirection()
+                                )
+
+                                if (
+                                    same_size
+                                    and same_space
+                                    and same_origin
+                                    and same_direction
+                                ):
+                                    series_obj.set_series_modality("tracew")
+                                else:
+                                    print(
+                                        f"Adjacent series {adjacent_series_number} does not have same physical space as {current_series_number}"
+                                    )
+                                    print(itk_volume)
+                                    print(itk_adjacent_volume)
 
     def validate(self) -> None:
         pass
