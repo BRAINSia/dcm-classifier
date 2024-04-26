@@ -25,6 +25,7 @@ from copy import deepcopy
 
 from typing import Any
 import pydicom
+
 from .utility_functions import (
     get_bvalue,
     FImageType,
@@ -33,6 +34,8 @@ from .utility_functions import (
     get_coded_dictionary_elements,
     sanitize_dicom_dataset,
     get_diffusion_gradient_direction,
+    get_dcm_scaling_info,
+    apply_scaling_to_image,
 )
 from .dicom_config import (
     required_DICOM_fields,
@@ -310,9 +313,14 @@ class DicomSingleVolumeInfoBase:
             return_dict[return_key] = value
         return return_dict
 
-    def get_itk_image(self) -> FImageType:
+    def get_itk_image(self, apply_dcm_scaling_info: bool = True) -> FImageType:
         """
-        Get the ITK image associated with the DICOM volume.
+            Get the ITK image associated with the DICOM volume.
+            If no image is available, it will be read from the DICOM files
+            and optionally scaled based on the apply_dcm_scaling_info value.
+
+        Args:
+            apply_dcm_scaling_info (bool, optional): A flag indicating whether to apply the scaling information from the DICOM header to the ITK image. Defaults to True.
 
         Returns:
             FImageType: The ITK image of the DICOM volume with pixel type itk.F (float).
@@ -321,7 +329,13 @@ class DicomSingleVolumeInfoBase:
             self.itk_image = itk_read_from_dicomfn_list(
                 self.get_one_volume_dcm_filenames()
             )
-
+            if apply_dcm_scaling_info:
+                rescale_slope, rescale_intercept = get_dcm_scaling_info(
+                    self.get_one_volume_dcm_filenames()
+                )
+                self.itk_image = apply_scaling_to_image(
+                    self.itk_image, rescale_slope, rescale_intercept
+                )
         return self.itk_image
 
     def get_series_uid(self) -> str:
