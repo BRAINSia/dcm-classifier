@@ -776,6 +776,17 @@ def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) ->
 def check_two_images_have_same_physical_space(
     img1: FImageType, img2: FImageType
 ) -> bool:
+    """
+    Check if two images have the same physical space.
+
+    :param img1: The first image.
+    :type img1: FImageType
+    :param img2: The second image.
+    :type img2: FImageType
+    :return: True if the images have the same physical space, False otherwise.
+    :rtype: bool
+
+    """
     same_size: bool = (
         img1.GetLargestPossibleRegion().GetSize()
         == img2.GetLargestPossibleRegion().GetSize()
