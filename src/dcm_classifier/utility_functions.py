@@ -771,3 +771,17 @@ def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) ->
     for index in range(0, len(number_list)):
         named_list.append((name + "_" + str(index), number_list[index]))
     return named_list
+
+
+def check_two_images_have_same_physical_space(
+    img1: FImageType, img2: FImageType
+) -> bool:
+    same_size: bool = (
+        img1.GetLargestPossibleRegion().GetSize()
+        == img2.GetLargestPossibleRegion().GetSize()
+    )
+    same_space: bool = img1.GetSpacing() == img2.GetSpacing()
+    same_origin: bool = img1.GetOrigin() == img2.GetOrigin()
+    same_direction: bool = img1.GetDirection() == img2.GetDirection()
+
+    return same_size and same_space and same_origin and same_direction
