@@ -22,6 +22,7 @@ import itk
 from .dicom_volume import DicomSingleVolumeInfoBase
 from .dicom_series import DicomSingleSeries
 from .image_type_inference import ImageTypeClassifierBase
+from .utility_functions import check_two_images_have_same_physical_space
 
 
 class ProcessOneDicomStudyToVolumesMappingBase:
@@ -271,29 +272,13 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                                     ].get_itk_image()
                                 )
 
-                                same_size: bool = (
-                                    itk_volume.GetLargestPossibleRegion().GetSize()
-                                    == itk_adjacent_volume.GetLargestPossibleRegion().GetSize()
-                                )
-                                same_space: bool = (
-                                    itk_volume.GetSpacing()
-                                    == itk_adjacent_volume.GetSpacing()
-                                )
-                                same_origin: bool = (
-                                    itk_volume.GetOrigin()
-                                    == itk_adjacent_volume.GetOrigin()
-                                )
-                                same_direction: bool = (
-                                    itk_volume.GetDirection()
-                                    == itk_adjacent_volume.GetDirection()
+                                same_physical_space: bool = (
+                                    check_two_images_have_same_physical_space(
+                                        itk_volume, itk_adjacent_volume
+                                    )
                                 )
 
-                                if (
-                                    same_size
-                                    and same_space
-                                    and same_origin
-                                    and same_direction
-                                ):
+                                if same_physical_space:
                                     series_obj.set_series_modality("tracew")
                                 else:
                                     print(
