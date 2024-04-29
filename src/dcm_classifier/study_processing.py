@@ -239,6 +239,15 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         self.fixup_adjacent_series()
 
     def fixup_adjacent_series(self):
+        """
+        Fix up adjacent series that are part of the same family of images.
+
+        This method iterates through the DICOM series stored in the class's series_dictionary
+        and fixes up cases where adjacent series are part of the same family of images. It
+        checks for cases where a bvalue=0 image is part of a family of tracew images and
+        updates the series modality to "tracew" for the adjacent series.
+
+        """
         # Fix up case where adjacent volumes make up a family of tracew images and one of them is a bvalue=0 image
         for current_series_number, series_obj in self.get_study_dictionary().items():
             if series_obj.get_volume_list()[
