@@ -3,8 +3,6 @@ on:
   pull_request:
     branches:
       - "main"
-    paths:
-      - ".github/workflows/push_to_main.yml"
 jobs:
   push_to_main:
     runs-on: ubuntu-latest
