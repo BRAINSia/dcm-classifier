@@ -4,10 +4,17 @@ on:
     branches:
       - "main"
 jobs:
-  push_to_main:
+  pr_to_main:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          lfs: true  # Ensure LFS files are checked out
+
+      - name: Install Git LFS
+        run: git lfs install
+
       - name: Set up Python 3.10.12
         uses: actions/setup-python@v2
         with:
@@ -25,6 +32,8 @@ jobs:
       - name: Run tests
         working-directory: ./tests
         run: pytest
+         # git lfs fetch --all
+          #pytest
 
 #          export PYTHONPATH="${PYTHONPATH}:$(dirname $(pwd))"
 
