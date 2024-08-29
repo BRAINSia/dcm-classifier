@@ -223,6 +223,30 @@ def test_dcm_vol_no_contrast(no_contrast_file_path):
         assert series.get_volume_list()[0].get_contrast_agent() == "None"
 
 
+def test_dataset_value_set_to_none(get_data_dir):
+    file_path = get_data_dir.parent / "empty_data_fields"
+    assert file_path.exists()
+
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=file_path, inferer=inferer
+    )
+    study.run_inference()
+
+    series = study.get_study_dictionary().get(1)
+
+    assert series.get_has_contrast() is False
+
+    assert series.get_volume_list()[0].get_volume_modality() == "gret2star"
+    assert (
+        series.get_volume_list()[0].get_volume_dictionary()["ContrastBolusAgent"]
+        == "None"
+    )
+    assert (
+        series.get_volume_list()[0].get_volume_dictionary()["InversionTime"] == "-12345"
+    )
+    assert series.get_volume_list()[0].get_volume_dictionary()["SAR"] == "-12345"
+
+
 def test_t1w_dcm_volume_modality(mock_volume_study):
     for series_num, series in mock_volume_study.get_study_dictionary().items():
         for volume in series.get_volume_list():
