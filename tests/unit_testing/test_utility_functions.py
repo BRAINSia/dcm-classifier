@@ -15,6 +15,7 @@ from dcm_classifier.utility_functions import (
     convert_array_to_index_value,
     get_coded_dictionary_elements,
     get_bvalue,
+    validate_numerical_dataset_element,
 )
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
@@ -329,6 +330,17 @@ def test_get_gradient_direction(get_data_dir):
         get_diffusion_gradient_direction(ds_w_grad), ds_w_grad[(0x0019, 0x100E)].value
     ):
         assert elem[0] == elem[1]
+
+
+def test_validating_numerical_dataset():
+    element = validate_numerical_dataset_element("1.0")
+    assert element == "1.0"
+
+    element = validate_numerical_dataset_element("None")
+    assert element == -12345
+
+    element = validate_numerical_dataset_element(None)
+    assert element == -12345
 
 
 def test_is_integer():
