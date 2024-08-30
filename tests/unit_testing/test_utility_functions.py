@@ -322,13 +322,17 @@ def test_get_gradient_direction(get_data_dir):
 
     # testing gradient direction
     grad_dir = get_data_dir.parent / "anonymized_dwi_series" / "DICOM"
-    grad = list(grad_dir.rglob("*.dcm"))[0]
-    ds_w_grad = pydicom.dcmread(grad)
+    grad = (
+        grad_dir
+        / "1.3.12.2.1107.5.1.4.91493331060615608073226796366526631566-2-4-j1vatm.dcm"
+    )
+
+    ds_w_grad = pydicom.dcmread(grad.as_posix())
 
     # ensure each element in the diffusion gradient direction is equal to the value in the DICOM header
-    for elem in zip(
-        get_diffusion_gradient_direction(ds_w_grad), ds_w_grad[(0x0019, 0x100E)].value
-    ):
+    dataset_grad = ds_w_grad[0x0019100E].value
+
+    for elem in zip(get_diffusion_gradient_direction(ds_w_grad), dataset_grad):
         assert elem[0] == elem[1]
 
 
