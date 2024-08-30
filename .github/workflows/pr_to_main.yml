@@ -13,7 +13,9 @@ jobs:
           lfs: true  # Ensure LFS files are checked out
 
       - name: Install Git LFS
-        run: git lfs install
+        run: |
+          git lfs install
+          git lfs pull
 
       - name: Set up Python 3.10.12
         uses: actions/setup-python@v2
@@ -31,7 +33,7 @@ jobs:
 
       - name: Run tests
         working-directory: ./tests
-        run: pytest
+        run: pytest -rP
          # git lfs fetch --all
           #pytest
 
