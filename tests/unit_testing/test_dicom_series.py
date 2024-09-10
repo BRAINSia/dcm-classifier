@@ -204,3 +204,15 @@ def test_dcm_series_has_contrast(contrast_file_path):
 
     for series_number, series in study.series_dictionary.items():
         assert series.get_has_contrast() is True
+
+
+def test_image_is_perfusion(perfusion_file_path, contrast_file_path):
+    assert perfusion_file_path.exists()
+
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=perfusion_file_path, inferer=inferer
+    )
+    study.run_inference()
+
+    for series_number, series in study.series_dictionary.items():
+        assert series.get_series_modality() == "perfusion"
