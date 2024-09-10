@@ -128,6 +128,11 @@ def no_contrast_file_path():
 
 
 @pytest.fixture(scope="session")
+def perfusion_file_path():
+    return testing_dicom_dir / "perfusion_data"
+
+
+@pytest.fixture(scope="session")
 def mock_series_study():
     return study
 
