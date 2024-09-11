@@ -354,6 +354,10 @@ class ImageTypeClassifierBase:
                 )
                 volume.set_volume_modality(modality)
                 volume.set_modality_probabilities(pd.DataFrame(full_outputs, index=[0]))
+                """Override PERFUSION data"""
+                # TODO: This is temporary fix and should be removed when the model is retrained with PERFUSION data and class
+                if volume.get_volume_dictionary()["ImageType_PERFUSION"] == 1:
+                    volume.set_volume_modality("perfusion")
             else:
                 # if features are not validated, set values to defaults
                 volume.set_acquisition_plane("INVALID")
@@ -429,10 +433,3 @@ class ImageTypeClassifierBase:
                     self.series.set_series_modality(
                         self.series.get_volume_list()[0].get_volume_modality()
                     )
-
-        """Override PERFUSION data"""
-        # TODO: This is temporary fix and should be removed when the model is retrained with PERFUSION data and class
-        for volume in self.series.get_volume_list():
-            if volume.get_volume_dictionary()["ImageType_PERFUSION"] == 1:
-                self.series.set_series_modality("perfusion")
-                break
