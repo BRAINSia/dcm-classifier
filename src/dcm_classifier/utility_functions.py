@@ -719,7 +719,10 @@ def get_coded_dictionary_elements(
                 dataset_dictionary["ImageType_EADC"] = 0
 
             throw_away: int = len("ImageType_")
-            for feature in image_type_features + ["ImageType_PERFUSION"]:
+            for feature in image_type_features + [
+                "ImageType_PERFUSION",
+                "ImageType_MOSAIC",
+            ]:
                 # Note: this is a temporary fix to perfusion but does not include all cases
                 # TODO: create a dataset containing perfusion data to retrain the model from scratch
                 if feature[throw_away:].lower() in lower_value_str:
