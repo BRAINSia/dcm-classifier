@@ -75,7 +75,7 @@ class DicomSingleVolumeInfoBase:
 
     """
 
-    def __init__(self, one_volume_dcm_filenames: list[Path | str]) -> None:
+    def __init__(self, one_volume_dcm_filenames: list[Path | str], json_file: str = None) -> None:
         """
         Initializes a DicomSingleVolumeInfoBase instance with a list of DICOM file paths.
 
@@ -95,9 +95,16 @@ class DicomSingleVolumeInfoBase:
 
         _first_filename_for_volume: Path = self.one_volume_dcm_filenames[0]
         # print(f"USING REFERENCE VOLUME:  {_first_filename_for_volume} for pydicom info")
-        self._pydicom_info: pydicom.Dataset = pydicom.dcmread(
-            _first_filename_for_volume, stop_before_pixels=True, force=True
-        )
+        self.json_file = json_file
+        if not self.json_file:
+            self._pydicom_info: pydicom.Dataset = pydicom.dcmread(
+                _first_filename_for_volume, stop_before_pixels=True, force=True
+            )
+        else:
+            # TODO: Should we go back to pydicom from the json file?
+            pydicom_ds: pydicom.Dataset = pydicom.Dataset()
+            json_dicom_data = json.loads(_first_filename_for_volume.read_text())
+            self._pydicom_info: pydicom.Dataset = pydicom_ds.from_json(json_dicom_data)
 
         # set diffusion information
         self.bvalue = get_bvalue(self._pydicom_info, round_to_nearst_10=True)
@@ -462,6 +469,7 @@ class DicomSingleVolumeInfoBase:
             ro_dataset=self._pydicom_info,
             required_info_list=required_DICOM_fields,
             optional_info_list=optional_DICOM_fields,
+            json_file=self.json_file,
         )
         # if the dataset is not valid, mark as INVALID and return an empty dictionary
         if not valid:

@@ -365,6 +365,7 @@ def sanitize_dicom_dataset(
     ro_dataset: pydicom.Dataset,
     required_info_list: list[str],
     optional_info_list: list[str],
+    json_file: str = None,
 ) -> tuple[dict, bool]:
     """
     Validates the DICOM fields in the DICOM header to ensure all required fields are present.
@@ -384,7 +385,10 @@ def sanitize_dicom_dataset(
     """
     dataset_dictionary: dict[str, Any] = dict()
     dataset = deepcopy(ro_dataset)  # DO NOT MODIFY THE INPUT DATASET!
-    dicom_filename: Path = dataset.filename
+    if not json_file:
+        dicom_filename: Path = dataset.filename
+    else:
+        dicom_filename: Path = Path(json_file)
     dataset_dictionary["FileName"]: str = dicom_filename
     dataset = pydicom.Dataset(dataset)  # DO NOT MODIFY THE INPUT DATASET!
     dataset.remove_private_tags()

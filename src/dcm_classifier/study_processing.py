@@ -115,6 +115,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         search_series: dict[str, int] | None = None,
         inferer: ImageTypeClassifierBase | None = None,
         raise_error_on_failure: bool = False,
+        use_json: bool = False,
     ) -> None:
         """
         Initialize an instance of ProcessOneDicomStudyToVolumesMappingBase.
@@ -136,6 +137,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             print(f"ERROR:  {self.study_directory} is not pathlike")
         self.raise_error_on_failure: bool = raise_error_on_failure
         self.search_series: dict[str, int] | None = search_series
+        self.use_json: bool = use_json
         self.series_dictionary: dict[int, DicomSingleSeries] = (
             self.__identify_single_volumes(self.study_directory)
         )
@@ -319,48 +321,62 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             >>> series_mapping = study.__identify_single_volumes(study_directory_path)
             >>> series_info = series_mapping.get(1)  # Retrieve information for series number 1
         """
-        namesGenerator = itk.GDCMSeriesFileNames.New()
-        namesGenerator.SetUseSeriesDetails(True)
-        namesGenerator.SetLoadPrivateTags(True)
-        namesGenerator.SetRecursive(True)
-        for (
-            bvalue_restrictions
-        ) in (
-            ProcessOneDicomStudyToVolumesMappingBase.series_restrictions_list_dwi_subvolumes
-        ):
-            namesGenerator.AddSeriesRestriction(bvalue_restrictions)
-        # namesGenerator.AddSeriesRestriction("0008|0021")  # Date restriction
-        # namesGenerator.AddSeriesRestriction("0020|0013") # For testing, SeriesInstance results in images with 1 value
-        namesGenerator.SetGlobalWarningDisplay(False)
-        namesGenerator.SetDirectory(study_directory.as_posix())
-
-        seriesUID = namesGenerator.GetSeriesUIDs()
-
-        if len(seriesUID) < 1:
-            msg: str = f"No DICOMs in: {study_directory} (__identify_single_volumes)"
-            if self.raise_error_on_failure:
-                raise FileNotFoundError(msg)
-            else:
-                print(
-                    f"No readable dicoms DICOMs in: {study_directory} (__identify_single_volumes)"
-                )
-        else:
-            print(
-                f"The directory: {study_directory} contains {len(seriesUID)} DICOM sub-volumes"
-            )
-        # print(f"Contains the following {len(seriesUID)} DICOM Series: ")
-        # for uid in seriesUID:
-        #     print(uid)
-
         volumes_dictionary: dict[int, DicomSingleSeries] = dict()
 
-        for seriesIdentifier in seriesUID:
-            # print("Reading: " + seriesIdentifier)
-            subseries_filenames: list[str] = namesGenerator.GetFileNames(
-                seriesIdentifier
-            )
+        if not self.use_json:
+            namesGenerator = itk.GDCMSeriesFileNames.New()
+            namesGenerator.SetUseSeriesDetails(True)
+            namesGenerator.SetLoadPrivateTags(True)
+            namesGenerator.SetRecursive(True)
+            for (
+                bvalue_restrictions
+            ) in (
+                ProcessOneDicomStudyToVolumesMappingBase.series_restrictions_list_dwi_subvolumes
+            ):
+                namesGenerator.AddSeriesRestriction(bvalue_restrictions)
+            # namesGenerator.AddSeriesRestriction("0008|0021")  # Date restriction
+            # namesGenerator.AddSeriesRestriction("0020|0013") # For testing, SeriesInstance results in images with 1 value
+            namesGenerator.SetGlobalWarningDisplay(False)
+            namesGenerator.SetDirectory(study_directory.as_posix())
+
+            seriesUID = namesGenerator.GetSeriesUIDs()
+
+            if len(seriesUID) < 1:
+                msg: str = f"No DICOMs in: {study_directory} (__identify_single_volumes)"
+                if self.raise_error_on_failure:
+                    raise FileNotFoundError(msg)
+                else:
+                    print(
+                        f"No readable dicoms DICOMs in: {study_directory} (__identify_single_volumes)"
+                    )
+            else:
+                print(
+                    f"The directory: {study_directory} contains {len(seriesUID)} DICOM sub-volumes"
+                )
+            # print(f"Contains the following {len(seriesUID)} DICOM Series: ")
+            # for uid in seriesUID:
+            #     print(uid)
+
+            for seriesIdentifier in seriesUID:
+                # print("Reading: " + seriesIdentifier)
+                subseries_filenames: list[str] = namesGenerator.GetFileNames(
+                    seriesIdentifier
+                )
+                subseries_info: DicomSingleVolumeInfoBase = DicomSingleVolumeInfoBase(
+                    one_volume_dcm_filenames=subseries_filenames
+                )
+                sn = subseries_info.get_series_number()
+                if sn not in volumes_dictionary:
+                    volumes_dictionary[sn] = DicomSingleSeries(series_number=sn)
+                volumes_dictionary[sn].add_volume_to_series(subseries_info)
+        else:
+            series_filenames = list(study_directory.glob("*.json"))
+            try:
+                json_file = series_filenames[0]
+            except IndexError:
+                json_file = None
             subseries_info: DicomSingleVolumeInfoBase = DicomSingleVolumeInfoBase(
-                one_volume_dcm_filenames=subseries_filenames
+                one_volume_dcm_filenames=series_filenames, json_file=json_file
             )
             sn = subseries_info.get_series_number()
             if sn not in volumes_dictionary:
