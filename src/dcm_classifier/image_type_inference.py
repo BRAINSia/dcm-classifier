@@ -433,6 +433,6 @@ class ImageTypeClassifierBase:
         """Override PERFUSION data"""
         # TODO: This is temporary fix and should be removed when the model is retrained with PERFUSION data and class
         for volume in self.series.get_volume_list():
-            if volume.get_volume_dictionary()["ImageType_PERFUSION"] == 1:
+            if volume.get_volume_dictionary().get("ImageType_PERFUSION", 0) == 1:
                 self.series.set_series_modality("perfusion")
                 break
