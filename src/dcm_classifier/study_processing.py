@@ -15,14 +15,18 @@
 #    limitations under the License.
 #
 #  =========================================================================
-
+from collections import defaultdict
 from pathlib import Path, PurePath
 import itk
+import pydicom
 
 from .dicom_volume import DicomSingleVolumeInfoBase
 from .dicom_series import DicomSingleSeries
 from .image_type_inference import ImageTypeClassifierBase
-from .utility_functions import check_two_images_have_same_physical_space
+from .utility_functions import (
+    check_two_images_have_same_physical_space,
+    parse_acquisition_datetime,
+)
 
 
 class ProcessOneDicomStudyToVolumesMappingBase:
@@ -354,52 +358,188 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         volumes_dictionary: dict[int, DicomSingleSeries] = dict()
 
+        # TODO Paralellize this loop to speed up the process NOT A PRIORTY
         for seriesIdentifier in seriesUID:
-            # print("Reading: " + seriesIdentifier)
+            # Get all filenames belonging to the current sub-series
             subseries_filenames: list[str] = namesGenerator.GetFileNames(
                 seriesIdentifier
             )
-            subseries_info: DicomSingleVolumeInfoBase = DicomSingleVolumeInfoBase(
-                one_volume_dcm_filenames=subseries_filenames
+
+            # Use our pydicom-based splitter to handle multi-volume logic
+            sub_volumes = self._identify_and_split_sub_volumes_pydicom(
+                subseries_filenames
             )
-            sn = subseries_info.get_series_number()
-            if sn not in volumes_dictionary:
-                volumes_dictionary[sn] = DicomSingleSeries(series_number=sn)
-            volumes_dictionary[sn].add_volume_to_series(subseries_info)
 
-            # reader = itk.ImageSeriesReader[ImageType].New()
-            # dicomIO = itk.GDCMImageIO.New()
-            # reader.SetImageIO(dicomIO)
-            # reader.SetFileNames(fileNames)
-            # reader.ForceOrthogonalDirectionOff()
-            #
-            # writer = itk.ImageFileWriter[ImageType].New()
-            # outFileName = os.path.join(dirName, seriesIdentifier + ".nrrd")
-            # if args.output_image:
-            #     outFileName = args.output_image
-            # writer.SetFileName(outFileName)
-            # writer.UseCompressionOn()
-            # writer.SetInput(reader.GetOutput())
-            # print("Writing: " + outFileName)
-            # writer.Update()
-        # import json
-        # msg=json.dumps(volumes_dictionary, indent=2)
-        # print(msg)
-        # volumes_dictionary = collections.defaultdict(list)
-        # for _slice_loc, slice_list in slice_location_dictionary.items():
-        #     for index in range(0, len(slice_list)):
-        #         volumes_dictionary[index].append(slice_list[index])
+            # Organize these sub-volumes by their SeriesNumber
+            for volume_obj in sub_volumes:
+                sn = volume_obj.get_series_number()
+                if sn not in volumes_dictionary:
+                    volumes_dictionary[sn] = DicomSingleSeries(series_number=sn)
+                volumes_dictionary[sn].add_volume_to_series(volume_obj)
 
+        # Optionally filter to only the user-requested series numbers
         if self.search_series is not None:
-            cadidate_series_numbers: list[int] = [
+            candidate_series_numbers: list[int] = [
                 int(x) for x in self.search_series.values()
             ]
-
-            series_numbers_to_remove: list[int] = list()
-            for series_number in volumes_dictionary.keys():
-                if series_number not in cadidate_series_numbers:
-                    series_numbers_to_remove.append(series_number)
+            series_numbers_to_remove: list[int] = [
+                sn
+                for sn in volumes_dictionary.keys()
+                if sn not in candidate_series_numbers
+            ]
             for series_number in series_numbers_to_remove:
                 del volumes_dictionary[series_number]
             del series_numbers_to_remove
         return volumes_dictionary
+
+    def _identify_and_split_sub_volumes_pydicom(
+        self, subseries_filenames: list[str]
+    ) -> list[DicomSingleVolumeInfoBase]:
+        """
+        Identify and split multi-volume DICOM sub-series into separate volumes using pydicom.
+        This approach primarily uses unique ImagePositionPatient entries to detect
+        when multiple volumes are present (e.g. repeated slices over time or b-values).
+
+        Steps:
+            1) Read minimal header info for each file (stop_before_pixels=True).
+            2) Collect ImagePositionPatient for each file to determine the number of unique slice positions.
+            3) Sort the files (by InstanceNumber or any stable criterion).
+            4) If (# unique positions) < (# total files), assume multiple volumes and slice up accordingly.
+            5) Return a list of DicomSingleVolumeInfoBase objects.
+
+        :param subseries_filenames: List of DICOM file paths from one sub-series.
+        :return: A list of DicomSingleVolumeInfoBase objects, each representing a 3D volume.
+
+        ASSUMPTIONS:
+
+        -- All subvolumes have the same number of slices and same ImagePositionPatient values.
+
+        Need to handle the case where position "0" is taken for all sub volumes before moving to the next position.
+        Currently this would results in Non valid values for the position.
+
+        Create a data dict with each
+
+        dict[IPP_tuple,list[dict[str, any]]] = {
+        IPP_tuple: [
+                {
+                "filename": str,
+                "acquisition_date_time": datetime,
+                "acquisition_time": str,
+                "instance_number": int
+                },
+                ...
+            ]
+        }
+        for each key in the dict
+            -- sort the list by DateTime Object that we create, instance_number, acquisition_number
+            -- Sanity check that all have the same number of slices (Unless Mosaic which will be handled seperatly)
+
+        For number of slices you have pull that index value off and create the DICOMSingleVolumeInfoBase object
+
+        return the list of DICOMSingleVolumeInfoBase objects
+
+        """
+        if not subseries_filenames:
+            return []
+
+        INVALID_NUMERICAL_VALUE = -12345
+        file_info_dict = defaultdict(list)
+
+        try:
+            for dcm_file in subseries_filenames:
+                try:
+                    ds = pydicom.dcmread(dcm_file, stop_before_pixels=True)
+
+                    # Validate ImagePositionPatient
+                    img_position = ds.get("ImagePositionPatient")
+                    if img_position is None:
+                        if self.raise_error_on_failure:
+                            raise ValueError(
+                                f"ImagePositionPatient not found in {dcm_file}"
+                            )
+                        else:
+                            print(
+                                f"Warning: ImagePositionPatient not found in {dcm_file}. Using default positioning."
+                            )
+                            img_position = [
+                                0,
+                                0,
+                                len(file_info_dict),
+                            ]  # Create synthetic position
+
+                    ipp_key = tuple(img_position)
+
+                    # Safe extraction of metadata with fallback values
+                    acquisition_date_time = parse_acquisition_datetime(ds)
+                    acquisition_number = int(
+                        ds.get("AcquisitionNumber", INVALID_NUMERICAL_VALUE)
+                    )
+                    inst_number = int(ds.get("InstanceNumber", INVALID_NUMERICAL_VALUE))
+
+                    file_info_dict[ipp_key].append(
+                        {
+                            "acquisition_date_time": acquisition_date_time,
+                            "acquisition_number": acquisition_number,
+                            "instance_number": inst_number,
+                            "filename": dcm_file,
+                        }
+                    )
+
+                except Exception as file_error:
+                    if self.raise_error_on_failure:
+                        raise
+                    else:
+                        print(f"Error processing file {dcm_file}: {file_error}")
+                        # If error processing a single file, continue with others
+                        continue
+
+            # Sort files within each position group
+            for ipp_key, file_info in file_info_dict.items():
+                file_info.sort(
+                    key=lambda x: (
+                        x["acquisition_date_time"],
+                        x["acquisition_number"],
+                        x["instance_number"],
+                    )
+                )
+
+            # Volume splitting logic
+            num_unique_positions = len(file_info_dict)
+            num_files = len(subseries_filenames)
+
+            if 0 < num_unique_positions < num_files:
+                num_volumes = num_files // num_unique_positions
+
+                if num_volumes * num_unique_positions != num_files:
+                    if self.raise_error_on_failure:
+                        raise ValueError(
+                            f"Inconsistent volume splitting: {num_files} files, {num_unique_positions} positions"
+                        )
+                    else:
+                        print(
+                            f"Warning: Detected {num_volumes} sub-volumes. "
+                            f"Total files: {num_files}, Unique positions: {num_unique_positions}."
+                        )
+
+                # Create volume objects
+                sub_volume_info_list: list[DicomSingleVolumeInfoBase] = []
+                for i in range(num_volumes):
+                    sub_volume_filenames = [
+                        file_info_dict[ipp_key][i]["filename"]
+                        for ipp_key in file_info_dict.keys()
+                    ]
+                    sub_volume_info_list.append(
+                        DicomSingleVolumeInfoBase(
+                            one_volume_dcm_filenames=sub_volume_filenames
+                        )
+                    )
+                return sub_volume_info_list
+
+        except Exception as global_error:
+            if self.raise_error_on_failure:
+                raise
+            else:
+                print(f"Error in volume splitting: {global_error}")
+
+        # Default to single volume if all else fails
+        return [DicomSingleVolumeInfoBase(one_volume_dcm_filenames=subseries_filenames)]
