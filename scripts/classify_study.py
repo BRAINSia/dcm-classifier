@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import shutil
 import sys
 from typing import Any
 import pandas as pd
@@ -53,6 +54,13 @@ def main():
         default=None,
         help="Path to the directory where the NIFTI files are stored for each volume",
     )
+    parser.add_argument(
+        "-o",
+        "--output",
+        required=False,
+        default=None,
+        help="Path to the output the newly organized dicom data",
+    )
 
     args = parser.parse_args()
 
@@ -61,6 +69,10 @@ def main():
         import itk
 
         nifti_dir.mkdir(parents=True, exist_ok=True)
+
+    output_dir: Path | None = Path(args.output) if args.output else None
+    if output_dir:
+        output_dir.mkdir(parents=True, exist_ok=True)
 
     print(description)
 
@@ -139,6 +151,23 @@ def main():
                 )
                 itk_image = volume.get_itk_image()
                 itk.imwrite(itk_image, nifti_dir / image_file_name)
+            if output_dir is not None:
+                bvalue_suffix: str = (
+                    f"_b{volume.get_volume_bvalue()}"
+                    if volume.get_volume_bvalue() >= 0
+                    else ""
+                )
+                dcm_output_dir_name: str = (
+                    f"{series_number:04}_{volume.get_volume_index():03}"
+                    f"_{volume.get_series_modality()}{bvalue_suffix}"
+                )
+                output_dir_path: Path = output_dir / dcm_output_dir_name
+                output_dir_path.mkdir(parents=True, exist_ok=True)
+                for dcm_file in volume.one_volume_dcm_filenames:
+                    output_file_path: Path = output_dir_path / dcm_file.name
+                    print(f"Copying {dcm_file} to {output_file_path}")
+                    shutil.copy(dcm_file, output_file_path, follow_symlinks=True)
+                    # shutil.move(dcm_file, output_file_path)
 
     df: pd.DataFrame = pd.DataFrame(list_of_dictionaries)
     df.sort_values(by=["Series#", "Vol.#"], inplace=True)
