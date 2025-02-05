@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import shutil
 import sys
 from typing import Any
 import pandas as pd
@@ -25,6 +26,35 @@ def generate_separator(column_width):
 
 def generate_row(*args, column_width):
     return "| " + " | ".join(arg.ljust(column_width) for arg in args) + " |"
+
+
+def organize_dicom_files(study: ProcessOneDicomStudyToVolumesMappingBase, organized_dir: Path) -> None:
+    """
+    Organize the DICOM files into a directory structure that is more human-readable.
+     For example, organize by series number and volume number.
+
+    :param study: The study object containing the DICOM files
+    :param organized_dir: The directory to store the organized DICOM files
+
+    :return: None
+    """
+    organized_dir.mkdir(parents=True, exist_ok=True)
+
+    for series_number, series in study.series_dictionary.items():
+        study_uid = series.get_study_uid()
+        study_dir = organized_dir / study_uid
+        study_dir.mkdir(parents=True, exist_ok=True)
+
+        series_uid = series.get_series_uid()
+        series_dir = study_dir / series_uid
+        series_dir.mkdir(parents=True, exist_ok=True)
+
+        for volume in series.get_volume_list():
+            for file_path in volume.get_volume_dictionary()["list_of_ordered_volume_files"]:
+                file_name = file_path.name
+                output_dir = series_dir / str(series_number) / "DICOM" / file_name
+                output_dir.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(file_path, output_dir)
 
 
 def main():
@@ -53,6 +83,13 @@ def main():
         default=None,
         help="Path to the directory where the NIFTI files are stored for each volume",
     )
+    parser.add_argument(
+        "-o",
+        "--organized_dir",
+        required=False,
+        default=None,
+        help="Path to the directory where the organized DICOM files are stored",
+    )
 
     args = parser.parse_args()
 
@@ -76,6 +113,10 @@ def main():
     list_of_inputs: list[dict[str, Any]] = []
     list_of_probabilities: list[pd.DataFrame] = []
     list_of_dictionaries: list[dict[str, str]] = []
+
+    if args.organized_dir is not None:
+        organized_dir: Path = Path(args.organized_dir)
+        organize_dicom_files(study, organized_dir)
 
     for series_number, series in study.series_dictionary.items():
         for index, volume in enumerate(series.get_volume_list()):
