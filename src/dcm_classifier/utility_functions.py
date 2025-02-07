@@ -30,7 +30,7 @@ from numpy import ndarray
 from pydicom.dataset import Dataset
 from pydicom.multival import MultiValue
 from .dicom_config import inference_features as features
-
+from datetime import datetime
 
 FImageType = itk.Image[itk.F, 3]
 UCImageType = itk.Image[itk.UC, 3]
@@ -854,3 +854,55 @@ def check_two_images_have_same_physical_space(
     same_direction: bool = img1.GetDirection() == img2.GetDirection()
 
     return same_size and same_space and same_origin and same_direction
+
+
+def parse_acquisition_datetime(ds: pydicom.Dataset) -> datetime:
+    """
+    Parse acquisition datetime with robust fallback strategies.
+
+    Returns a consistent datetime object, using a fixed reference datetime
+    when no valid datetime can be extracted.
+
+    Args:
+        ds (pydicom.Dataset): DICOM dataset
+
+    Returns:
+        datetime: Parsed or default datetime
+    """
+    # Reference datetime for sorting when no valid datetime is found
+    # Dont love the double defaults but I like it better than having default values as strings
+    DEFAULT_DATE = "19000101"  # YYYYMMDD
+    DEFAULT_TIME = "000000"  # HHMMSS.FFFFFF
+    DEFAULT_DATETIME = datetime(1900, 1, 1, 0, 0, 0)
+
+    try:
+        # Try AcquisitionDateTime first
+        if hasattr(ds, "AcquisitionDateTime") and ds.AcquisitionDateTime:
+            # https://dicom.nema.org/dicom/2013/output/chtml/part05/sect_6.2.html#:~:text=A%20string%20of%20characters%20of,would%20represent%20August%2022%2C%201993.
+            # A concatenated date-time character string in the format:
+            #
+            # YYYYMMDDHHMMSS.FFFFFF&ZZXX
+            # FFFFFF = Fractional Second contains a fractional part of a second as small as 1 millionth of a second (range "000000" - "999999").
+            #
+            # &ZZXX is an optional suffix for offset from Coordinated Universal Time (UTC), where & = "+" or "-", and ZZ = Hours and XX = Minutes of offset.
+            return datetime.strptime(str(ds.AcquisitionDateTime), "%Y%m%d%H%M%S")
+
+        # Try combination of Date and Time
+        date_str = (
+            str(ds.AcquisitionDate) if hasattr(ds, "AcquisitionDate") else DEFAULT_DATE
+        )
+        time_str = (
+            str(ds.AcquisitionTime) if hasattr(ds, "AcquisitionTime") else DEFAULT_TIME
+        )
+
+        # Pad or truncate to ensure correct format
+        date_str = date_str.ljust(8, "0")[:8]
+        time_str = time_str.ljust(6, "0")[:6]
+
+        try:
+            return datetime.strptime(f"{date_str}{time_str}", "%Y%m%d%H%M%S")
+        except ValueError:
+            return DEFAULT_DATETIME
+
+    except Exception:
+        return DEFAULT_DATETIME
