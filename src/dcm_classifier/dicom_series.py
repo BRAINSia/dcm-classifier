@@ -257,6 +257,16 @@ class DicomSingleSeries:
 
         return info_dict
 
+    def get_dicom_field_by_name(self, field_name) -> str:
+        """
+        Get the elment f"{field_name}" from the reference DICOM file (i.e. the first file found).
+        This should be the same for all volumes and is picked from the first volume.
+
+        :return: The series f"{field_name}" value.
+        :rtype: str
+        """
+        return self.volume_info_list[0].get_dicom_field_by_name(field_name)
+
     def get_series_uid(self) -> str:
         """
         Get the series instance UID of the DICOM series.

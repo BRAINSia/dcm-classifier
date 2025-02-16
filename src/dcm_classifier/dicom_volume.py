@@ -327,6 +327,16 @@ class DicomSingleVolumeInfoBase:
 
         return self.itk_image
 
+    def get_dicom_field_by_name(self, field_name) -> str:
+        """
+        Get the elment f"{field_name}" from the reference DICOM file (i.e. the first file found).
+        This should be the same for all volumes and is picked from the first volume.
+
+        :return: The series f"{field_name}" value.
+        :rtype: str
+        """
+        return self._pydicom_info.get(field_name, f"UNKNOWN_{field_name}")
+
     def get_series_uid(self) -> str:
         """
         Get the Series Instance UID of the DICOM volume.
