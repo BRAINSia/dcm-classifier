@@ -68,6 +68,7 @@ optional_DICOM_fields: list[str] = [
     "InversionTime",
     "VariableFlipAngleFlag",
     "AcquisitionTime",
+    "SeriesDescription",  # Not trustworthy, but sometimes useful
 ]
 
 inference_features: list[str] = [
