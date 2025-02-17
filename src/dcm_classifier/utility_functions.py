@@ -636,6 +636,13 @@ def sanitize_dicom_dataset(
                 dataset_dictionary[field] = validate_numerical_dataset_element(
                     dataset_value
                 )
+        else:
+            if field not in dataset:
+                # field is not present, set to default value
+                dataset_dictionary[field] = f"Unknown{field}"
+            else:
+                # field is present, set to value
+                dataset_dictionary[field] = dataset_value
 
     # Warn the user if there are INVALID_VALUE fields
     if len(missing_fields) > 0:
