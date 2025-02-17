@@ -13,6 +13,7 @@ inference_model_path = list(
 )[0]
 
 
+# this test is meant to ensure no dicom fields are changed when putting them into the volumes dictionary after sanitizing
 def test_all_fields_dont_change():
     all_fields_path: Path = (
         current_file_path.parent
@@ -46,10 +47,17 @@ def test_all_fields_dont_change():
 
             for field in all_fields:
                 assert field in volume.get_volume_dictionary()
-                if isinstance(ds[field].value, pydicom.dataelem.RawDataElement):
-                    e = pydicom.dataelem.DataElement_from_raw(ds[field].value)
+                try:
+                    field_value = ds[field].value
+                except KeyError:
+                    raise KeyError(
+                        f"Field {field} not found in DICOM dataset for series {series_num}"
+                    )
+
+                if isinstance(field_value, pydicom.dataelem.RawDataElement):
+                    e = pydicom.dataelem.DataElement_from_raw(field_value)
                 else:
-                    e = ds[field].value
+                    e = field_value
 
                 # if element is a list, check each element
                 if type(e) is pydicom.multival.MultiValue:
