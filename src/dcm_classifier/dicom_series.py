@@ -262,6 +262,9 @@ class DicomSingleSeries:
         Get the elment f"{field_name}" from the reference DICOM file (i.e. the first file found).
         This should be the same for all volumes and is picked from the first volume.
 
+        The Keyword elements from https://github.com/pydicom/pydicom/blob/main/src/pydicom/_dicom_dict.py
+        can be queried as field_name in this function.
+
         :return: The series f"{field_name}" value.
         :rtype: str
         """
