@@ -8,6 +8,7 @@ import pytest
 from dcm_classifier.utility_functions import FImageType
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
+from deprecation import DeprecatedWarning
 
 current_file_path = Path(__file__).parent
 inference_model_path = list(
@@ -18,18 +19,21 @@ inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_
 
 
 def test_get_series_uid(mock_volumes):
-    series_uid = DicomSingleVolumeInfoBase(mock_volumes[0]).get_series_uid()
-    assert series_uid == "1.2.276.0.7230010.3.1.3.168456204.6074.1606326635.433425"
+    with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
+        series_uid = DicomSingleVolumeInfoBase(mock_volumes[0]).get_series_uid()
+        assert series_uid == "1.2.276.0.7230010.3.1.3.168456204.6074.1606326635.433425"
 
 
 def test_get_series_number(mock_volumes):
-    series_number = DicomSingleVolumeInfoBase(mock_volumes[0]).get_series_number()
-    assert series_number == 700
+    with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
+        series_number = DicomSingleVolumeInfoBase(mock_volumes[0]).get_series_number()
+        assert series_number == 700
 
 
 def test_get_study_uid(mock_volumes):
-    study_uid = DicomSingleVolumeInfoBase(mock_volumes[0]).get_study_uid()
-    assert study_uid == "1.2.276.0.7230010.3.1.2.168456204.6074.1606326635.433364"
+    with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
+        study_uid = DicomSingleVolumeInfoBase(mock_volumes[0]).get_study_uid()
+        assert study_uid == "1.2.276.0.7230010.3.1.2.168456204.6074.1606326635.433364"
 
 
 def test_get_b_value(mock_volumes):
@@ -48,11 +52,12 @@ def test_primary_volume_info(mock_volumes):
 
 
 def test_get_series_pixel_spacing(mock_volumes):
-    pixel_spacing = DicomSingleVolumeInfoBase(
-        mock_volumes[0]
-    ).get_series_pixel_spacing()
-    assert isinstance(pixel_spacing, str)
-    assert pixel_spacing == "[0.9375, 0.9375]"
+    with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
+        pixel_spacing = DicomSingleVolumeInfoBase(
+            mock_volumes[0]
+        ).get_series_pixel_spacing()
+        assert isinstance(pixel_spacing, str)
+        assert pixel_spacing == "[0.9375, 0.9375]"
 
 
 # sad path, validate is False due to sentinel b-value seen in test above
