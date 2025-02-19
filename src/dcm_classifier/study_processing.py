@@ -367,7 +367,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             # Organize these sub-volumes by their SeriesNumber
             sn: int = -1
             for volume_obj in sub_volumes:
-                sn = volume_obj.get_series_number()
+                sn = int(volume_obj.get_dicom_field_by_name("SeriesNumber"))
                 if sn not in volumes_dictionary:
                     volumes_dictionary[sn] = DicomSingleSeries(series_number=sn)
                 volumes_dictionary[sn].add_volume_to_series(volume_obj)
