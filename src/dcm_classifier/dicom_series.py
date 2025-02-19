@@ -280,6 +280,9 @@ class DicomSingleSeries:
         Get the series instance UID of the DICOM series.
         This should be the same for all volumes and is picked from the first volume.
 
+        .. deprecated:: 0.9.6
+         This method is deprecated. Use get_dicom_field_by_name instead.
+
         :return: The series instance UID.
         :rtype: str
         """
@@ -293,6 +296,9 @@ class DicomSingleSeries:
         """
         Get the Study Instance UID of the DICOM series.
         This should be the same for all volumes and is picked from the first volume.
+
+        .. deprecated:: 0.9.6
+         This method is deprecated. Use get_dicom_field_by_name instead.
 
         :return: The Study Instance UID.
         :rtype: str
