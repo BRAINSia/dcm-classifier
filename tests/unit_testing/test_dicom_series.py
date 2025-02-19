@@ -5,7 +5,7 @@ from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMapping
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
 import pydicom
-
+from deprecation import DeprecatedWarning
 
 current_file_path = Path(__file__).parent.resolve()
 inference_model_path = list(
@@ -68,9 +68,15 @@ def test_all_fields_dont_change():
 
 
 def test_get_series_and_study_uid(mock_tracew_series):
-    for series in mock_tracew_series:
-        assert series.get_series_uid() == "2.25.200346831984180887422376003959445101633"
-        assert series.get_study_uid() == "2.25.106736773675271926686056457127502108539"
+    with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
+        for series in mock_tracew_series:
+            assert (
+                series.get_series_uid()
+                == "2.25.200346831984180887422376003959445101633"
+            )
+            assert (
+                series.get_study_uid() == "2.25.106736773675271926686056457127502108539"
+            )
 
 
 def test_series_modality_probabilities(mock_t1_series):
