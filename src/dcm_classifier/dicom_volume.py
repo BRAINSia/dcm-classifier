@@ -22,7 +22,7 @@ from pathlib import Path
 import pandas as pd
 import json
 from copy import deepcopy
-
+from deprecation import deprecated
 from typing import Any
 import pydicom
 from .utility_functions import (
@@ -125,6 +125,10 @@ class DicomSingleVolumeInfoBase:
             self.volume_info_dict,
         ) = self._make_one_study_info_mapping_from_filelist()
 
+    @deprecated(
+        deprecated_in="0.9.6",
+        details="Use generic `get_dicom_field_by_name(field_name='SeriesDescription')` instead of `get_volume_series_description()`",
+    )
     def get_volume_series_description(self) -> str:
         """
         Get the Series Description of the DICOM volume.
@@ -205,13 +209,11 @@ class DicomSingleVolumeInfoBase:
         """
         Retrieves the contrast agent of the DICOM data.
 
-        :return: The contrast agent.
+        :return: The contrast agent if available.
         :rtype: str
         """
         if self.get_has_contrast():
-            return self._pydicom_info.get(
-                "ContrastBolusAgent", "UNKNOWN_ContrastBolusAgent"
-            )
+            return self.get_dicom_field_by_name(field_name="ContrastBolusAgent")
         else:
             return "None"
 
@@ -340,6 +342,10 @@ class DicomSingleVolumeInfoBase:
         """
         return self._pydicom_info.get(field_name, f"UNKNOWN_{field_name}")
 
+    @deprecated(
+        deprecated_in="0.9.6",
+        details="Use generic `get_dicom_field_by_name(field_name='SeriesInstanceUID')` instead of `get_series_uid()`",
+    )
     def get_series_uid(self) -> str:
         """
         Get the Series Instance UID of the DICOM volume.
@@ -349,6 +355,10 @@ class DicomSingleVolumeInfoBase:
         """
         return self._pydicom_info.get("SeriesInstanceUID", "UNKNOWN_SeriesInstanceUID")
 
+    @deprecated(
+        deprecated_in="0.9.6",
+        details="Use generic `get_dicom_field_by_name(field_name='StudyInstanceUID')` instead of `get_study_uid()`",
+    )
     def get_study_uid(self) -> str:
         """
         Get the Study Instance UID of the DICOM volume.
@@ -358,6 +368,10 @@ class DicomSingleVolumeInfoBase:
         """
         return self._pydicom_info.get("StudyInstanceUID", "UNKNOWN_StudyInstanceUID")
 
+    @deprecated(
+        deprecated_in="0.9.6",
+        details="Use generic `get_dicom_field_by_name(field_name='PixelSpacing')` instead of `get_series_pixel_spacing()`",
+    )
     def get_series_pixel_spacing(self) -> str:
         """
         Get the pixel spacing of the DICOM series.
@@ -409,6 +423,10 @@ class DicomSingleVolumeInfoBase:
         """
         return self.bvalue
 
+    @deprecated(
+        deprecated_in="0.9.6",
+        details="Use generic `get_dicom_field_by_name(field_name='SeriesNumber')` instead of `get_series_number()`",
+    )
     def get_series_number(self) -> int:
         """
         Get the Series Number of the DICOM volume.
@@ -480,7 +498,7 @@ class DicomSingleVolumeInfoBase:
         if not valid:
             self.set_volume_modality("INVALID")
             self.set_acquisition_plane("INVALID")
-            return self.get_study_uid, dict()
+            return self.get_dicom_field_by_name(field_name="StudyInstanceUID"), dict()
 
         volume_info_dict: dict[str, Any] = get_coded_dictionary_elements(
             sanitized_dicom_dict
@@ -489,7 +507,7 @@ class DicomSingleVolumeInfoBase:
 
         # ensure the volume_info_dict is not empty
         if not volume_info_dict:
-            return self.get_study_uid, dict()
+            return self.get_dicom_field_by_name(field_name="StudyInstanceUID"), dict()
 
         # add features related to b-values and diffusion
         bvalue_current_dicom: int = int(self.get_volume_bvalue())
@@ -519,7 +537,9 @@ class DicomSingleVolumeInfoBase:
         # add list of dicom files for the volume
         volume_info_dict["list_of_ordered_volume_files"] = self.one_volume_dcm_filenames
 
-        return self.get_study_uid, deepcopy(volume_info_dict)
+        return self.get_dicom_field_by_name(field_name="StudyInstanceUID"), deepcopy(
+            volume_info_dict
+        )
 
     def get_image_diagnostics(self) -> str:
         """

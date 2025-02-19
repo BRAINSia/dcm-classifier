@@ -15,6 +15,7 @@
 #    limitations under the License.
 #
 #  =========================================================================
+from deprecation import deprecated
 
 from .dicom_volume import DicomSingleVolumeInfoBase
 import pandas as pd
@@ -270,6 +271,10 @@ class DicomSingleSeries:
         """
         return self.volume_info_list[0].get_dicom_field_by_name(field_name)
 
+    @deprecated(
+        deprecated_in="0.9.6",
+        details="Use generic `get_dicom_field_by_name(field_name='SeriesInstanceUID')` instead of `get_series_uid()`",
+    )
     def get_series_uid(self) -> str:
         """
         Get the series instance UID of the DICOM series.
@@ -280,6 +285,10 @@ class DicomSingleSeries:
         """
         return self.volume_info_list[0].get_series_uid()
 
+    @deprecated(
+        deprecated_in="0.9.6",
+        details="Use generic `get_dicom_field_by_name(field_name='StudyInstanceUID')` instead of `get_study_uid()`",
+    )
     def get_study_uid(self) -> str:
         """
         Get the Study Instance UID of the DICOM series.
