@@ -133,6 +133,9 @@ class DicomSingleVolumeInfoBase:
         """
         Get the Series Description of the DICOM volume.
 
+        .. deprecated:: 0.9.6
+         This is a deprecated method. Use get_dicom_field_by_name instead.
+
         :return: The Series Description.
         :rtype: str
         """
@@ -331,7 +334,7 @@ class DicomSingleVolumeInfoBase:
 
     def get_dicom_field_by_name(self, field_name) -> str:
         """
-        Get the elment f"{field_name}" from the reference DICOM file (i.e. the first file found).
+        Get the element f"{field_name}" from the reference DICOM file (i.e. the first file found).
         This should be the same for all volumes and is picked from the first volume.
 
         The Keyword elements from https://github.com/pydicom/pydicom/blob/main/src/pydicom/_dicom_dict.py
@@ -350,6 +353,9 @@ class DicomSingleVolumeInfoBase:
         """
         Get the Series Instance UID of the DICOM volume.
 
+        .. deprecated:: 0.9.6
+         This is a deprecated method. Use get_dicom_field_by_name instead.
+
         :return: The Series Instance UID.
         :rtype: str
         """
@@ -363,6 +369,9 @@ class DicomSingleVolumeInfoBase:
         """
         Get the Study Instance UID of the DICOM volume.
 
+        .. deprecated:: 0.9.6
+         This is a deprecated method. Use get_dicom_field_by_name instead.
+
         :return: The Study Instance UID.
         :rtype: str
         """
@@ -375,6 +384,9 @@ class DicomSingleVolumeInfoBase:
     def get_series_pixel_spacing(self) -> str:
         """
         Get the pixel spacing of the DICOM series.
+
+        .. deprecated:: 0.9.6
+         This is a deprecated method. Use get_dicom_field_by_name instead.
 
         Returns:
             str: The pixel spacing as a string.
@@ -430,6 +442,9 @@ class DicomSingleVolumeInfoBase:
     def get_series_number(self) -> int:
         """
         Get the Series Number of the DICOM volume.
+
+        .. deprecated:: 0.9.6
+         This is a deprecated method. Use get_dicom_field_by_name instead.
 
         :return: The Series Number.
         :rtype: int
