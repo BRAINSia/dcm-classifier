@@ -327,12 +327,6 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         namesGenerator.SetUseSeriesDetails(True)
         namesGenerator.SetLoadPrivateTags(True)
         namesGenerator.SetRecursive(True)
-        for (
-            bvalue_restrictions
-        ) in (
-            ProcessOneDicomStudyToVolumesMappingBase.series_restrictions_list_dwi_subvolumes
-        ):
-            namesGenerator.AddSeriesRestriction(bvalue_restrictions)
         # namesGenerator.AddSeriesRestriction("0008|0021")  # Date restriction
         # namesGenerator.AddSeriesRestriction("0020|0013") # For testing, SeriesInstance results in images with 1 value
         namesGenerator.SetGlobalWarningDisplay(False)
