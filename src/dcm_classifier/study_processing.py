@@ -350,7 +350,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 )
         else:
             print(
-                f"The directory: {study_directory} contains {len(seriesUID)} DICOM sub-volumes"
+                f"The directory: {study_directory} contains {len(seriesUID)} DICOM series"
             )
         # print(f"Contains the following {len(seriesUID)} DICOM Series: ")
         # for uid in seriesUID:
@@ -371,11 +371,13 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             )
 
             # Organize these sub-volumes by their SeriesNumber
+            sn: int = -1
             for volume_obj in sub_volumes:
                 sn = volume_obj.get_series_number()
                 if sn not in volumes_dictionary:
                     volumes_dictionary[sn] = DicomSingleSeries(series_number=sn)
                 volumes_dictionary[sn].add_volume_to_series(volume_obj)
+            print(f"\t{sn} has {len(sub_volumes)} subvolumes")
 
         # Optionally filter to only the user-requested series numbers
         if self.search_series is not None:
