@@ -4,8 +4,17 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dcm_classifier"
-version = '0.9.5'
+version = '0.9.6'
 # Change Log -- Summary of key changes
+# v0.9.6 -- 2025-02-21 (git log --pretty=%s  v0.9.5..HEAD)
+#       ENH: deprecation warning checks added to series and volume dicom field getter tests
+#       DOC: updates to docstrings for deprecated functions
+#       ADD: added deprecation decorators to non-specific dicom field getters
+#       ENH: Remove redundant subvolume splitting
+#       DOC: Improve diagnostics output specificity
+#       DOC: Provided enhanced documentation for valid field_names
+#       BUG: fix optional field sanitization using a general existence check
+#       ENH: updated test for ensuring dicom fields dont change to include SeriesDescription
 # v0.9.5 -- 2025-02-15 (git log --pretty=%s  v0.9.4..HEAD)
 #       ENH: Secondary sub volume splitting with robust slice ordering
 #       ENH: Script for processing multiple studies
