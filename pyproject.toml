@@ -95,6 +95,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
+    "deprecation>=2.1.0",
     "itk>=5.3.0",
     "itk-core>=5.3.0",
     "itk-filtering>=5.3.0",
