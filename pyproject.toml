@@ -4,8 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dcm_classifier"
-version = '0.9.6'
+version = '0.9.7'
 # Change Log -- Summary of key changes
+# v0.9.7 -- 2025-03-01 (git log --pretty=%s  v0.9.6..HEAD)
+#       BUG: added missing deprecation dependency to pyproject dependencies
+#       ENH: update tag version to 0.9.6
 # v0.9.6 -- 2025-02-21 (git log --pretty=%s  v0.9.5..HEAD)
 #       ENH: deprecation warning checks added to series and volume dicom field getter tests
 #       DOC: updates to docstrings for deprecated functions
