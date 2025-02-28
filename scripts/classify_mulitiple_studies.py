@@ -105,7 +105,9 @@ def process_single_study(
             except AttributeError:
                 current_dict["Bvalue"] = "None"
             try:
-                current_dict["SeriesDesc"] = volume.get_volume_series_description()
+                current_dict["SeriesDesc"] = volume.get_dicom_field_by_name(
+                    "SeriesDescription"
+                )
             except AttributeError:
                 current_dict["SeriesDesc"] = "None"
 
