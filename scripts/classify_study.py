@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import shutil
 import sys
 from typing import Any
@@ -12,6 +13,7 @@ from pathlib import Path
 try:
     from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
     from dcm_classifier.image_type_inference import ImageTypeClassifierBase
+    from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 except Exception as e:
     print(f"Missing module import {e}")
     print(
@@ -61,6 +63,13 @@ def main():
         default=None,
         help="Path to the output the newly organized dicom data",
     )
+    parser.add_argument(
+        "-j",
+        "--json",
+        required=False,
+        default=None,
+        help="Path to the output json file",
+    )
 
     args = parser.parse_args()
 
@@ -88,45 +97,141 @@ def main():
     list_of_inputs: list[dict[str, Any]] = []
     list_of_probabilities: list[pd.DataFrame] = []
     list_of_dictionaries: list[dict[str, str]] = []
+    session_dictionary: dict[str, Any] = {}
 
     for series_number, series in study.series_dictionary.items():
         for index, volume in enumerate(series.get_volume_list()):
+            invalid_volume: bool = False
             current_dict: dict[str, str] = ordered_dict()
             current_dict["Series#"] = str(series_number)
+            dict_entry_name: str | None = None
+            dictionary = {}
+
+            # Volume Index
             try:
-                current_dict["Vol.#"] = str(volume.get_volume_index())
+                vol_index: str = str(volume.get_volume_index())
+                current_dict["Vol.#"] = vol_index
+                dict_entry_name: str = f"{series_number}_{vol_index}"
             except AttributeError:
                 current_dict["Vol.#"] = "None"
+
+            # Volume Modality
             try:
-                current_dict["Volume Modality"] = str(volume.get_volume_modality())
+                vol_modality: str = str(volume.get_volume_modality())
+                current_dict["Volume Modality"] = vol_modality
+                if vol_modality != "INVALID":
+                    dictionary["VolumeModality"] = vol_modality
+                else:
+                    invalid_volume = True
             except AttributeError:
                 current_dict["Volume Modality"] = "None"
+                dictionary = {}
+
+            # Series Modality
             try:
-                current_dict["Series Modality"] = str(series.get_series_modality())
+                series_modality: str = str(series.get_series_modality())
+                current_dict["Series Modality"] = series_modality
+                dictionary["SeriesModality"] = series_modality if dictionary else {}
             except AttributeError:
                 current_dict["Series Modality"] = "None"
+                dictionary = {}
+
+            # Acquisition Plane
             try:
-                current_dict["Acq.Plane"] = str(volume.get_acquisition_plane())
+                acq_plane: str = str(volume.get_acquisition_plane())
+                current_dict["Acq.Plane"] = acq_plane
+                dictionary["AcqPlane"] = acq_plane if dictionary else {}
             except AttributeError:
                 current_dict["Acq.Plane"] = "None"
+                dictionary = {}
+
+            # Isotropic
             try:
-                current_dict["Isotropic"] = str(volume.get_is_isotropic())
+                isotropic: str = str(volume.get_is_isotropic())
+                current_dict["Isotropic"] = isotropic
+                dictionary["Isotropic"] = isotropic if dictionary else {}
             except AttributeError:
                 current_dict["Isotropic"] = "None"
+                dictionary["Isotropic"] = "None"
+
+            # Modality Probabilities
             vol_probabilities = volume.get_modality_probabilities()
+            for col in vol_probabilities.columns:
+                # current_dict[col] = str(vol_probabilities[col].values[0])
+                if "SeriesNumber" in col or "CODE" in col:
+                    continue
+                dictionary[col] = (
+                    str(vol_probabilities[col].values[0]) if dictionary else {}
+                )
             print(vol_probabilities.to_string(index=False))
+
+            # Bvalue
             try:
-                current_dict["Bvalue"] = str(volume.get_volume_bvalue())
+                bval = str(volume.get_volume_bvalue())
+                current_dict["Bvalue"] = bval
+                dictionary["Bvalue"] = bval if dictionary else {}
             except AttributeError:
                 current_dict["Bvalue"] = "None"
+                dictionary["Bvalue"] = "None"
+
+            # Series Description
             try:
-                current_dict["SeriesDesc"] = volume.get_dicom_field_by_name(
+                series_description: str = volume.get_dicom_field_by_name(
                     "SeriesDescription"
+                )
+                current_dict["SeriesDesc"] = series_description
+                dictionary["SeriesDescription"] = (
+                    series_description if dictionary else {}
                 )
             except AttributeError:
                 current_dict["SeriesDesc"] = "None"
+                dictionary["SeriesDescription"] = "None"
+
+            # Contrast Agent
+            try:
+                contrast = volume.get_has_contrast()
+                dictionary["Contrast"] = str(contrast) if dictionary else {}
+
+                if contrast:
+                    contrast_agent = volume.get_contrast_agent()
+                    # current_dict["ContrastAgent"] = contrast_agent
+                    dictionary["ContrastAgent"] = contrast_agent if dictionary else {}
+                else:
+                    # current_dict["Contrast"] = "None"
+                    dictionary["Contrast"] = "None"
+            except AttributeError:
+                # current_dict["Contrast"] = "None"
+                dictionary["Contrast"] = "None"
+
+            # Pixel Spacing
+            try:
+                pixel_spacing = volume.get_dicom_field_by_name("PixelSpacing")
+                # current_dict["PixelSpacing"] = pixel_spacing
+                dictionary["PixelSpacing_0"] = (
+                    str(pixel_spacing[0]) if dictionary else {}
+                )
+                dictionary["PixelSpacing_1"] = (
+                    str(pixel_spacing[1]) if dictionary else {}
+                )
+            except AttributeError:
+                # current_dict["PixelSpacing"] = "None"
+                dictionary["PixelSpacing_0"] = "None"
+                dictionary["PixelSpacing_1"] = "None"
+
+            for field in required_DICOM_fields + optional_DICOM_fields:
+                if field in ["PixelSpacing", "ImageType"]:
+                    continue
+                try:
+                    value = volume.get_dicom_field_by_name(field)
+                    # current_dict[field] = str(value)
+                    dictionary[field] = str(value) if dictionary else {}
+                except AttributeError:
+                    # current_dict[field] = "None"
+                    dictionary[field] = "None"
+
             inputs_df: dict[str, Any] = volume.get_volume_dictionary()
             current_dict["ImageType"] = str(inputs_df.get("ImageType", "Unknown"))
+            dictionary["ImageType"] = str(inputs_df.get("ImageType", "Unknown"))
             for unwanted in [
                 "FileName",
                 "StudyInstanceUID",
@@ -170,6 +275,17 @@ def main():
                     print(f"Copying {dcm_file} to {output_file_path}")
                     shutil.copy(dcm_file, output_file_path, follow_symlinks=True)
                     # shutil.move(dcm_file, output_file_path)
+            if dict_entry_name is not None:
+                session_dictionary[dict_entry_name] = (
+                    dictionary if not invalid_volume else {}  # set to empty if invalid
+                )
+
+    json_output_dict: dict[str, Any] = {str(args.session_directory): session_dictionary}
+
+    # save the dictionary to a file
+    if args.json is not None:
+        with open(args.json, "w") as f:
+            json.dump(json_output_dict, f, indent=4)
 
     df: pd.DataFrame = pd.DataFrame(list_of_dictionaries)
     df.sort_values(by=["Series#", "Vol.#"], inplace=True)
