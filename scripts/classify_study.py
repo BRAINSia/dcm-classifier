@@ -30,6 +30,40 @@ def generate_row(*args, column_width):
     return "| " + " | ".join(arg.ljust(column_width) for arg in args) + " |"
 
 
+def get_new_base_name(
+    series_number: int,
+    bvalue_name_str: str,
+    series_modality: str,
+    *,
+    volume_index: int = -1,
+) -> str:
+
+    if volume_index >= 0:
+        return f"seriesnum-{series_number:04}_volidx-{volume_index:03}_{bvalue_name_str}_{series_modality}"
+    return f"seriesnum-{series_number:04}_{bvalue_name_str}_{series_modality}"
+
+
+def get_dicom_bvalue_name_str(series) -> str:
+    """
+    Extracts and returns a b-value string formatted as bvalue-b50b400b800
+    from all volumes in a series.
+    """
+    # TODO maybe make this check only even allow for b-values to be included if it is a valid series modality like "DWI"
+    bvals = []
+    for vol in series.get_volume_list():
+        try:
+            val = int(vol.get_volume_bvalue())
+            if val >= 0:
+                bvals.append(val)
+        except Exception:
+            continue
+    unique_sorted = sorted(set(bvals))
+    if unique_sorted:
+        return "bvalue-" + "b".join(str(b) for b in unique_sorted)
+    else:
+        return ""
+
+
 def main():
     # Set up argparse
     description = (
@@ -100,6 +134,9 @@ def main():
     session_dictionary: dict[str, Any] = {}
 
     for series_number, series in study.series_dictionary.items():
+        series_modality = str(series.get_series_modality())
+        bvalue_name_str = get_dicom_bvalue_name_str(series)
+        # Volume-level loop for metadata and nifti output
         for index, volume in enumerate(series.get_volume_list()):
             invalid_volume: bool = False
             current_dict: dict[str, str] = ordered_dict()
@@ -107,7 +144,6 @@ def main():
             dict_entry_name: str | None = None
             dictionary = {}
 
-            # Volume Index
             try:
                 vol_index: str = str(volume.get_volume_index())
                 current_dict["Vol.#"] = vol_index
@@ -115,7 +151,6 @@ def main():
             except AttributeError:
                 current_dict["Vol.#"] = "None"
 
-            # Volume Modality
             try:
                 vol_modality: str = str(volume.get_volume_modality())
                 current_dict["Volume Modality"] = vol_modality
@@ -127,16 +162,9 @@ def main():
                 current_dict["Volume Modality"] = "None"
                 dictionary = {}
 
-            # Series Modality
-            try:
-                series_modality: str = str(series.get_series_modality())
-                current_dict["Series Modality"] = series_modality
-                dictionary["SeriesModality"] = series_modality if dictionary else {}
-            except AttributeError:
-                current_dict["Series Modality"] = "None"
-                dictionary = {}
+            current_dict["Series Modality"] = series_modality
+            dictionary["SeriesModality"] = series_modality if dictionary else {}
 
-            # Acquisition Plane
             try:
                 acq_plane: str = str(volume.get_acquisition_plane())
                 current_dict["Acq.Plane"] = acq_plane
@@ -145,7 +173,6 @@ def main():
                 current_dict["Acq.Plane"] = "None"
                 dictionary = {}
 
-            # Isotropic
             try:
                 isotropic: str = str(volume.get_is_isotropic())
                 current_dict["Isotropic"] = isotropic
@@ -154,10 +181,8 @@ def main():
                 current_dict["Isotropic"] = "None"
                 dictionary["Isotropic"] = "None"
 
-            # Modality Probabilities
             vol_probabilities = volume.get_modality_probabilities()
             for col in vol_probabilities.columns:
-                # current_dict[col] = str(vol_probabilities[col].values[0])
                 if "SeriesNumber" in col or "CODE" in col:
                     continue
                 dictionary[col] = (
@@ -165,7 +190,6 @@ def main():
                 )
             print(vol_probabilities.to_string(index=False))
 
-            # Bvalue
             try:
                 bval = str(volume.get_volume_bvalue())
                 current_dict["Bvalue"] = bval
@@ -174,7 +198,6 @@ def main():
                 current_dict["Bvalue"] = "None"
                 dictionary["Bvalue"] = "None"
 
-            # Series Description
             try:
                 series_description: str = volume.get_dicom_field_by_name(
                     "SeriesDescription"
@@ -187,20 +210,15 @@ def main():
                 current_dict["SeriesDesc"] = "None"
                 dictionary["SeriesDescription"] = "None"
 
-            # Contrast Agent
             try:
                 contrast = volume.get_has_contrast()
                 dictionary["Contrast"] = str(contrast) if dictionary else {}
-
                 if contrast:
                     contrast_agent = volume.get_contrast_agent()
-                    # current_dict["ContrastAgent"] = contrast_agent
                     dictionary["ContrastAgent"] = contrast_agent if dictionary else {}
                 else:
-                    # current_dict["Contrast"] = "None"
                     dictionary["Contrast"] = "None"
             except AttributeError:
-                # current_dict["Contrast"] = "None"
                 dictionary["Contrast"] = "None"
 
             # Pixel Spacing
@@ -242,39 +260,48 @@ def main():
                     inputs_df.pop(unwanted)
 
             list_of_inputs.append(inputs_df)
-
-            prob_df: pd.DataFrame = volume.get_modality_probabilities()
-            list_of_probabilities.append(prob_df)
+            list_of_probabilities.append(volume.get_modality_probabilities())
             list_of_dictionaries.append(current_dict)
             if nifti_dir is not None:
-                bvalue_suffix: str = (
-                    f"_b{volume.get_volume_bvalue()}"
-                    if volume.get_volume_bvalue() >= 0
-                    else ""
-                )
-                image_file_name: str = (
-                    f"{series_number:04}_{volume.get_volume_index():03}"
-                    f"_{volume.get_series_modality()}{bvalue_suffix}.nii.gz"
-                )
+                nifti_file_base_name = get_new_base_name(
+                    series_number,
+                    bvalue_name_str,
+                    series_modality,
+                    volume_index=index,
+                )  # THIS HAS to have the volume index to be unique or you will overwrite
+                image_file_name: str = f"{nifti_file_base_name}.nii.gz"
                 itk_image = volume.get_itk_image()
                 itk.imwrite(itk_image, nifti_dir / image_file_name)
+
+                # Make output directory once per series
             if output_dir is not None:
-                bvalue_suffix: str = (
-                    f"_b{volume.get_volume_bvalue()}"
-                    if volume.get_volume_bvalue() >= 0
-                    else ""
-                )
-                dcm_output_dir_name: str = (
-                    f"{series_number:04}_{volume.get_volume_index():03}"
-                    f"_{volume.get_series_modality()}{bvalue_suffix}"
-                )
+                # TODO Allow for changing this to be a per volume output
+                SPLIT_DCM_OUTPUT_BY_VOLUME = False
+                if SPLIT_DCM_OUTPUT_BY_VOLUME:
+                    dcm_output_dir_name: str = get_new_base_name(
+                        series_number,
+                        bvalue_name_str,
+                        series_modality,
+                        volume_index=index,
+                    )
+                else:
+                    dcm_output_dir_name: str = get_new_base_name(
+                        series_number,
+                        bvalue_name_str,
+                        series_modality,
+                    )
+                # TODO Allow for changing this via command line
                 output_dir_path: Path = output_dir / dcm_output_dir_name
                 output_dir_path.mkdir(parents=True, exist_ok=True)
                 for dcm_file in volume.one_volume_dcm_filenames:
                     output_file_path: Path = output_dir_path / dcm_file.name
                     print(f"Copying {dcm_file} to {output_file_path}")
+                    if output_file_path.exists():
+                        print(f"File {output_file_path} already exists, skipping")
+                        raise FileExistsError(
+                            f"File {output_file_path} already exists"
+                        )  # TODO Handle this more gracefully
                     shutil.copy(dcm_file, output_file_path, follow_symlinks=True)
-                    # shutil.move(dcm_file, output_file_path)
             if dict_entry_name is not None:
                 session_dictionary[dict_entry_name] = (
                     dictionary if not invalid_volume else {}  # set to empty if invalid
