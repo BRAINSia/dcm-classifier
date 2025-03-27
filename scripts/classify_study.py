@@ -31,16 +31,39 @@ def generate_row(*args, column_width):
 
 
 def get_new_base_name(
+    user_prefix: str,
     series_number: int,
     bvalue_name_str: str,
     series_modality: str,
     *,
     volume_index: int = -1,
 ) -> str:
+    """
+    The Goal of this function is to create a new base name for the output files that provide a standardized interface.
+    Stealing the idea from bids we should be able to easily create a dictionary from the name of the file.
+    key-value pairs are separated by underscores, and the key, values are separated by dashes.
+    The "image type" is the last location and doesn't have a KEY associated with it.
+    It is assumed
+
+    Args:
+        user_prefix:
+        series_number:
+        bvalue_name_str:
+        series_modality:
+        volume_index:
+
+    Returns:
+
+    """
+    if "_" not in user_prefix[-1] and user_prefix != "":
+        user_prefix += "_"  # Add an underscore if it is missing
+    # TODO Make sure this is robust enough to handle all cases
 
     if volume_index >= 0:
-        return f"seriesnum-{series_number:04}_volidx-{volume_index:03}_{bvalue_name_str}_{series_modality}"
-    return f"seriesnum-{series_number:04}_{bvalue_name_str}_{series_modality}"
+        return f"{user_prefix}seriesnum-{series_number:05}_volidx-{volume_index:03}_{bvalue_name_str}_{series_modality}"
+    return (
+        f"{user_prefix}seriesnum-{series_number:05}_{bvalue_name_str}_{series_modality}"
+    )
 
 
 def get_dicom_bvalue_name_str(series) -> str:
@@ -104,9 +127,15 @@ def main():
         default=None,
         help="Path to the output json file",
     )
+    parser.add_argument(
+        "--prefix",
+        default="",
+        help="Prefix to add to the output file names for Nifti or the prefix to add to the output directory for dicom files",
+        required=False,
+    )
 
     args = parser.parse_args()
-
+    prefix = args.prefix
     nifti_dir: Path | None = Path(args.nifti_dir) if args.nifti_dir else None
     if nifti_dir:
         import itk
@@ -264,6 +293,7 @@ def main():
             list_of_dictionaries.append(current_dict)
             if nifti_dir is not None:
                 nifti_file_base_name = get_new_base_name(
+                    prefix,
                     series_number,
                     bvalue_name_str,
                     series_modality,
@@ -279,6 +309,7 @@ def main():
                 SPLIT_DCM_OUTPUT_BY_VOLUME = False
                 if SPLIT_DCM_OUTPUT_BY_VOLUME:
                     dcm_output_dir_name: str = get_new_base_name(
+                        prefix,
                         series_number,
                         bvalue_name_str,
                         series_modality,
@@ -286,6 +317,7 @@ def main():
                     )
                 else:
                     dcm_output_dir_name: str = get_new_base_name(
+                        prefix,
                         series_number,
                         bvalue_name_str,
                         series_modality,
