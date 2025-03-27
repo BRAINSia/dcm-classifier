@@ -60,9 +60,9 @@ def get_new_base_name(
     # TODO Make sure this is robust enough to handle all cases
 
     if volume_index >= 0:
-        return f"{user_prefix}seriesnum-{series_number:05}_volidx-{volume_index:03}_{bvalue_name_str}_{series_modality}"
+        return f"{user_prefix}seriesnum-{series_number:05}_volidx-{volume_index:03}_{bvalue_name_str}{series_modality}"
     return (
-        f"{user_prefix}seriesnum-{series_number:05}_{bvalue_name_str}_{series_modality}"
+        f"{user_prefix}seriesnum-{series_number:05}_{bvalue_name_str}{series_modality}"
     )
 
 
@@ -82,7 +82,7 @@ def get_dicom_bvalue_name_str(series) -> str:
             continue
     unique_sorted = sorted(set(bvals))
     if unique_sorted:
-        return "bvalue-" + "b".join(str(b) for b in unique_sorted)
+        return "bvalue-" + "b" + "b".join(str(b) for b in unique_sorted) + "_"
     else:
         return ""
 
@@ -133,6 +133,11 @@ def main():
         help="Prefix to add to the output file names for Nifti or the prefix to add to the output directory for dicom files",
         required=False,
     )
+    parser.add_argument(
+        "--move",
+        action="store_true",
+        help="Move the original DICOM files rather than copying them",
+    )  # TODO Maybe don't need this option in the future but need it for Bot currently
 
     args = parser.parse_args()
     prefix = args.prefix
@@ -329,11 +334,18 @@ def main():
                     output_file_path: Path = output_dir_path / dcm_file.name
                     print(f"Copying {dcm_file} to {output_file_path}")
                     if output_file_path.exists():
-                        print(f"File {output_file_path} already exists, skipping")
-                        raise FileExistsError(
-                            f"File {output_file_path} already exists"
-                        )  # TODO Handle this more gracefully
-                    shutil.copy(dcm_file, output_file_path, follow_symlinks=True)
+                        if output_file_path.absolute() != dcm_file.absolute():
+                            print(f"File {output_file_path} already exists, skipping")
+                            raise FileExistsError(
+                                f"File {output_file_path} already exists"
+                            )  # TODO Handle this more gracefully
+                    else:
+                        if args.move:
+                            shutil.move(dcm_file, output_file_path)
+                        else:
+                            shutil.copy(
+                                dcm_file, output_file_path, follow_symlinks=True
+                            )
             if dict_entry_name is not None:
                 session_dictionary[dict_entry_name] = (
                     dictionary if not invalid_volume else {}  # set to empty if invalid
