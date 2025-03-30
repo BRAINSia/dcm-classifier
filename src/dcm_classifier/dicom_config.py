@@ -57,8 +57,6 @@ optional_DICOM_fields: list[str] = [
     "ImageType",  # Not required
     "Manufacturer",  # Not required
     "ContrastBolusAgent",  # "(0x0018, 0x0010)"
-    "Diffusionb-value",  # Not required
-    "Diffusionb-valueMax",  # Not required
     "EchoNumbers",
     "EchoTrainLength",
     "ScanningSequence",
@@ -73,6 +71,12 @@ optional_DICOM_fields: list[str] = [
     "AcquisitionTime",
     "SeriesDescription",  # Not trustworthy, but sometimes useful
 ]
+
+# # These are not part of the DICOM dictionary.
+# optional_INFO_fields: list[str] = [
+#     "Diffusionb-value",  # Not required -- NOT A DICOM FIELD !!!
+#     "Diffusionb-valueMax",  # Not required -- NOT A DICOM FIELD!!!
+# ]
 
 inference_features: list[str] = [
     "Diffusionb-valueBool",
