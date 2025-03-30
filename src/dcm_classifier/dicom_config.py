@@ -16,6 +16,9 @@
 #
 #  =========================================================================
 
+from pydicom import config
+
+config.INVALID_KEY_BEHAVIOR = "RAISE"
 
 """
 Dicom Configuration:
