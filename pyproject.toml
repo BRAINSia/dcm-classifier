@@ -4,8 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dcm_classifier"
-version = '0.9.7'
+version = '0.9.8'
 # Change Log -- Summary of key changes
+# v0.9.8 -- 2025-03-31 (git log --pretty=%s  v0.9.7..HEAD)
+#       BUG: Fix warning errors due to testing non-dicom element tags
+#       BUG: Throw error on INVALID_KEY_BEHAVIOR
+#       ENH: added additional json output flag
+#       ENH: changed deprecated get_series_desc. method to general get_dicom_field_by_name method
+#       ENH: update tag version to 0.9.7
 # v0.9.7 -- 2025-03-01 (git log --pretty=%s  v0.9.6..HEAD)
 #       BUG: added missing deprecation dependency to pyproject dependencies
 #       ENH: update tag version to 0.9.6
