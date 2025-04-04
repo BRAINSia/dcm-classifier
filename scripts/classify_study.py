@@ -116,13 +116,13 @@ def main():
                 current_dict["Vol.#"] = "None"
 
             # Volume Modality
+            vol_modality: str = "INVALID"
             try:
-                vol_modality: str = str(volume.get_volume_modality())
+                vol_modality = str(volume.get_volume_modality())
                 current_dict["Volume Modality"] = vol_modality
-                if vol_modality != "INVALID":
-                    dictionary["VolumeModality"] = vol_modality
-                else:
+                if vol_modality == "INVALID":
                     invalid_volume = True
+                dictionary["VolumeModality"] = vol_modality
             except AttributeError:
                 current_dict["Volume Modality"] = "None"
                 dictionary = {}
@@ -131,7 +131,7 @@ def main():
             try:
                 series_modality: str = str(series.get_series_modality())
                 current_dict["Series Modality"] = series_modality
-                dictionary["SeriesModality"] = series_modality if dictionary else {}
+                dictionary["SeriesModality"] = series_modality
             except AttributeError:
                 current_dict["Series Modality"] = "None"
                 dictionary = {}
@@ -140,7 +140,7 @@ def main():
             try:
                 acq_plane: str = str(volume.get_acquisition_plane())
                 current_dict["Acq.Plane"] = acq_plane
-                dictionary["AcqPlane"] = acq_plane if dictionary else {}
+                dictionary["AcqPlane"] = acq_plane
             except AttributeError:
                 current_dict["Acq.Plane"] = "None"
                 dictionary = {}
@@ -149,22 +149,27 @@ def main():
             try:
                 isotropic: str = str(volume.get_is_isotropic())
                 current_dict["Isotropic"] = isotropic
-                dictionary["Isotropic"] = isotropic if dictionary else {}
+                dictionary["Isotropic"] = isotropic
             except AttributeError:
                 current_dict["Isotropic"] = "None"
                 dictionary["Isotropic"] = "None"
 
             # Modality Probabilities
             vol_probabilities = volume.get_modality_probabilities()
-            for col in vol_probabilities.columns:
-                # current_dict[col] = str(vol_probabilities[col].values[0])
-                if "SeriesNumber" in col or "CODE" in col:
-                    continue
-                dictionary[col] = (
-                    str(vol_probabilities[col].values[0]) if dictionary else {}
-                )
-            print(vol_probabilities.to_string(index=False))
-
+            if not invalid_volume:
+                modality_probability_dict = {}
+                for col in vol_probabilities.columns:
+                    # current_dict[col] = str(vol_probabilities[col].values[0])
+                    if "SeriesNumber" in col or "CODE" in col:
+                        continue
+                    modality_probability_dict[col] = str(
+                        vol_probabilities[col].values[0]
+                    )
+                dictionary["ModalityProbabilities"] = modality_probability_dict
+                print(vol_probabilities.to_string(index=False))
+            else:
+                # current_dict["Modality Probabilities"] = "None"
+                dictionary["ModalityProbabilities"] = "invalid_volume"
             # Bvalue
             try:
                 bval = str(volume.get_volume_bvalue())
@@ -276,9 +281,7 @@ def main():
                     shutil.copy(dcm_file, output_file_path, follow_symlinks=True)
                     # shutil.move(dcm_file, output_file_path)
             if dict_entry_name is not None:
-                session_dictionary[dict_entry_name] = (
-                    dictionary if not invalid_volume else {}  # set to empty if invalid
-                )
+                session_dictionary[dict_entry_name] = dictionary
 
     json_output_dict: dict[str, Any] = {str(args.session_directory): session_dictionary}
 
