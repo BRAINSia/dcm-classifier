@@ -4,8 +4,17 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dcm_classifier"
-version = '0.9.8'
+version = '0.9.9'
 # Change Log -- Summary of key changes
+# v0.9.9 -- 2025-04-15 (git log --pretty=%s  v0.9.8..HEAD)
+#       ADD: added test for simple classify study on empty directory
+#       BUG: fixed key error in simple classify study when no dicoms are found
+#       ADD: added testing for classify support function
+#       ENH: Resolve circular dependancies by using separate module.
+#       ENH: Force sorting of json keys during dump
+#       ENH: Update to allow programatic calling simple_classify_study
+#       ENH: updated package version number to 0.9.8
+#       ENH: added check list to pr request template to ensure package versioning is maintained
 # v0.9.8 -- 2025-03-31 (git log --pretty=%s  v0.9.7..HEAD)
 #       BUG: Fix warning errors due to testing non-dicom element tags
 #       BUG: Throw error on INVALID_KEY_BEHAVIOR
