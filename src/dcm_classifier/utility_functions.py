@@ -19,6 +19,7 @@
 from pathlib import Path
 from typing import Any
 import collections
+
 import pydicom
 from copy import deepcopy
 import itk
@@ -26,10 +27,13 @@ import warnings
 import tempfile
 import numpy as np
 import numbers
+
 from numpy import ndarray
 from pydicom.dataset import Dataset
 from pydicom.multival import MultiValue
-from .dicom_config import inference_features as features
+from .dicom_config import (
+    inference_features as features,
+)
 from datetime import datetime
 
 FImageType = itk.Image[itk.F, 3]
