@@ -230,12 +230,19 @@ def simple_classify_study(
     if json_dumppath is not None:
         with open(json_dumppath, "w") as f:
             json.dump(json_output_dict, f, indent=4, sort_keys=True)
-    df: pd.DataFrame = pd.DataFrame(list_of_dictionaries)
-    df.sort_values(by=["Series#", "Vol.#"], inplace=True)
-    table_msg: str = tabulate.tabulate(
-        df, headers="keys", tablefmt="psql", showindex=False
-    )
-    print(table_msg)
+
+    if len(list_of_dictionaries) > 0:  # Check if the list is not empty
+        df: pd.DataFrame = pd.DataFrame(list_of_dictionaries)
+        try:
+            df.sort_values(by=["Series#", "Vol.#"], inplace=True)
+            table_msg: str = tabulate.tabulate(
+                df, headers="keys", tablefmt="psql", showindex=False
+            )
+            print(table_msg)
+        except KeyError:
+            print("No series found in the study.")
+    else:
+        print("No series found in the study.")
     # all_inputs_df: pd.DataFrame = pd.DataFrame(list_of_inputs)
     # inputs_msg: str = tabulate.tabulate(
     #     all_inputs_df, headers="keys", tablefmt="psql", showindex=False
