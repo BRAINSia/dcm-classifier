@@ -110,3 +110,23 @@ def test_classify_study_with_file_creation(get_data_dir):
 
     # cleanup
     shutil.rmtree(testing_output_dir)
+
+
+def test_classify_study_with_no_readable_dicoms(get_data_dir, capsys):
+    testing_session_directory = get_data_dir.parent / "empty_directory"
+
+    if not testing_output_dir.exists():
+        testing_output_dir.mkdir(parents=True)
+
+    if not (testing_output_dir / "json").exists():
+        (testing_output_dir / "json").mkdir(parents=True)
+
+    simple_classify_study(
+        session_directory=testing_session_directory,
+    )
+
+    # check that 'No series found in the study.' message is printed
+    captured = capsys.readouterr()
+    assert (
+        "No series found in the study." in captured.out
+    ), "Should print 'No series found in the study.' message."
