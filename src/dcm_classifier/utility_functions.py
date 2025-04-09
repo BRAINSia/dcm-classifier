@@ -1146,7 +1146,7 @@ def simple_classify_study(
     # save the dictionary to a file
     if json_dumppath is not None:
         with open(json_dumppath, "w") as f:
-            json.dump(json_output_dict, f, indent=4)
+            json.dump(json_output_dict, f, indent=4, sort_keys=True)
     df: pd.DataFrame = pd.DataFrame(list_of_dictionaries)
     df.sort_values(by=["Series#", "Vol.#"], inplace=True)
     table_msg: str = tabulate.tabulate(
