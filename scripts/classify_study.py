@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from dcm_classifier.utility_functions import simple_classify_study
+from dcm_classifier.classify_support import simple_classify_study
 
 try:
     from dcm_classifier.image_type_inference import ImageTypeClassifierBase
