@@ -205,7 +205,9 @@ def test_dcm_series_no_contrast(no_contrast_file_path):
     study.run_inference()
 
     for series_number, series in study.series_dictionary.items():
-        assert series.get_has_contrast() is False
+        assert (
+            series.get_has_contrast() is False
+        ), f"File {series.get_volume_list()[0].get_one_volume_dcm_filenames()[0].name} came back with contrast"
 
 
 def test_dcm_series_has_contrast(contrast_file_path):
