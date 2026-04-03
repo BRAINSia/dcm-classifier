@@ -3,6 +3,7 @@ import shutil
 
 import pydicom
 import pytest
+from pydicom.uid import SecondaryCaptureImageStorage, generate_uid
 
 from dcm_classifier.image_type_inference import (
     ImageTypeClassifierBase,
@@ -123,3 +124,26 @@ def test_split_orders_files_by_instance_number(get_data_dir, tmp_path):
         for f in volume.one_volume_dcm_filenames
     ]
     assert instance_numbers == sorted(instance_numbers)
+
+
+@pytest.mark.parametrize("mr_sop_class_only", [False, True])
+def test_mr_sop_class_only_skips_non_mr_series(
+    contrast_file_path, tmp_path, mr_sop_class_only
+):
+    mr_file = next(contrast_file_path.rglob("*.dcm"))
+    shutil.copy(mr_file, tmp_path / "mr.dcm")
+    ds = pydicom.dcmread(mr_file)
+    ds.SOPClassUID = SecondaryCaptureImageStorage
+    ds.file_meta.MediaStorageSOPClassUID = SecondaryCaptureImageStorage
+    ds.SOPInstanceUID = generate_uid()
+    ds.file_meta.MediaStorageSOPInstanceUID = ds.SOPInstanceUID
+    ds.SeriesInstanceUID = generate_uid()
+    ds.SeriesNumber = 99
+    ds.save_as(tmp_path / "secondary_capture.dcm")
+
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        tmp_path, mr_sop_class_only=mr_sop_class_only
+    )
+    mr_series_number = int(pydicom.dcmread(mr_file).SeriesNumber)
+    assert mr_series_number in study.series_dictionary
+    assert (99 in study.series_dictionary) is not mr_sop_class_only

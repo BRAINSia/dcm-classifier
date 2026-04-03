@@ -26,6 +26,7 @@ from .image_type_inference import ImageTypeClassifierBase
 from .utility_functions import (
     check_two_images_have_same_physical_space,
     parse_acquisition_datetime,
+    is_mr_sop_class,
 )
 
 
@@ -119,6 +120,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         search_series: dict[str, int] | None = None,
         inferer: ImageTypeClassifierBase | None = None,
         raise_error_on_failure: bool = False,
+        mr_sop_class_only: bool = False,
     ) -> None:
         """
         Initialize an instance of ProcessOneDicomStudyToVolumesMappingBase.
@@ -129,6 +131,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         :param study_directory: str | Path: The path to the DICOM study directory.
         :param search_series: Optional[Dict[str, int]]: A dictionary of series to search within the study.
         :param inferer: Optional[ImageTypeClassifierBase]: An image type classifier for inference.
+        :param mr_sop_class_only: bool: Optional. Only process series whose first file has an MR SOP Class UID.
 
         """
         if ProcessOneDicomStudyToVolumesMappingBase._is_pathlike_object(
@@ -141,7 +144,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         self.raise_error_on_failure: bool = raise_error_on_failure
         self.search_series: dict[str, int] | None = search_series
         self.series_dictionary: dict[int, DicomSingleSeries] = (
-            self.__identify_single_volumes(self.study_directory)
+            self.__identify_single_volumes(self.study_directory, mr_sop_class_only)
         )
         self.inferer: ImageTypeClassifierBase | None = inferer
 
@@ -296,6 +299,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
     def __identify_single_volumes(
         self,
         study_directory: Path,
+        mr_sop_class_only: bool = False,
     ) -> dict[int, DicomSingleSeries]:
         """
         Identify and map single volumes within the DICOM study directory.
@@ -306,6 +310,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         :param study_directory: The path to the DICOM study directory.
         :type study_directory: Path
+
+        :param mr_sop_class_only: Optional. Only retrieve series whose first file has an MR SOP Class UID.
+        :type mr_sop_class_only: bool
 
         :return: A dictionary mapping series numbers to DicomSingleSeries objects.
         :rtype: dict[int, DicomSingleSeries]
@@ -346,9 +353,6 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             print(
                 f"The directory: {study_directory} contains {len(seriesUID)} DICOM series"
             )
-        # print(f"Contains the following {len(seriesUID)} DICOM Series: ")
-        # for uid in seriesUID:
-        #     print(uid)
 
         volumes_dictionary: dict[int, DicomSingleSeries] = dict()
 
@@ -358,6 +362,17 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             subseries_filenames: list[str] = namesGenerator.GetFileNames(
                 seriesIdentifier
             )
+
+            if (
+                mr_sop_class_only
+                and subseries_filenames
+                and not is_mr_sop_class(
+                    pydicom.dcmread(
+                        subseries_filenames[0], stop_before_pixels=True, force=True
+                    )
+                )
+            ):
+                continue
 
             # Use our pydicom-based splitter to handle multi-volume logic
             sub_volumes = self._identify_and_split_sub_volumes_pydicom(

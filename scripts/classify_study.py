@@ -56,6 +56,11 @@ def main():
         default=None,
         help="Path to the output json file",
     )
+    parser.add_argument(
+        "--mr_sop_class_only",
+        action="store_true",
+        help="Only process series whose first file has an MR SOP Class UID",
+    )
 
     args = parser.parse_args()
     nifti_dir: Path | None = Path(args.nifti_dir) if args.nifti_dir else None
@@ -69,7 +74,12 @@ def main():
     print(description)
 
     simple_classify_study(
-        session_directory, inferer, json_dumppath, output_dir, nifti_dir
+        session_directory,
+        inferer,
+        json_dumppath,
+        output_dir,
+        nifti_dir,
+        mr_sop_class_only=args.mr_sop_class_only,
     )
 
 
