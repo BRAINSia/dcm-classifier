@@ -223,10 +223,7 @@ class ImageTypeClassifierBase:
             return False
 
         # check if the volume has contrast
-        if (
-            "none" not in feature_dict[field].lower()
-            and feature_dict[field] != "-12345"
-        ):
+        if "none" not in feature_dict[field].lower():
             return True
         return False
 

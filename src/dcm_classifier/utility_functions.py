@@ -766,7 +766,15 @@ def get_coded_dictionary_elements(
                 else:
                     dataset_dictionary[feature] = 0
         elif name == "ContrastBolusAgent":
-            no_contrast_list = ["none", "no", "no contrast", "no_contrast", "n", ""]
+            no_contrast_list = [
+                "none",
+                "no",
+                "no contrast",
+                "no_contrast",
+                "n",
+                "",
+                "-12345",
+            ]
             if str(value).lower() in no_contrast_list:
                 dataset_dictionary["ContrastBolusAgent"] = "None"
             else:
