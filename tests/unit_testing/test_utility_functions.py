@@ -16,6 +16,7 @@ from dcm_classifier.utility_functions import (
     get_coded_dictionary_elements,
     get_bvalue,
     validate_numerical_dataset_element,
+    is_mr_sop_class,
 )
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
 from pathlib import Path
@@ -351,6 +352,16 @@ def test_is_integer():
     assert is_integer("1") is True
     assert is_integer("test") is False
     assert is_integer("1.0") is False
+
+
+def test_is_mr_sop_class(contrast_file_path):
+    dcm_header_info = pydicom.dcmread(
+        list(contrast_file_path.rglob("*.dcm"))[0], stop_before_pixels=True
+    )
+    assert is_mr_sop_class(dcm_header_info)
+
+    dcm_header_info.SOPClassUID = pydicom.uid.CTImageStorage
+    assert not is_mr_sop_class(dcm_header_info)
 
 
 def test_conv_arr_to_index_val():
