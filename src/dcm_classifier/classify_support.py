@@ -18,6 +18,7 @@ def simple_classify_study(
     json_dumppath: Path | None = None,
     output_dir: Path | None = None,
     nifti_dir: Path | None = None,
+    mr_sop_class_only: bool = False,
 ) -> dict[str, Any]:
     """
 
@@ -27,6 +28,7 @@ def simple_classify_study(
         json_dumppath: Path to the output json file
         output_dir: Path to the output the newly organized dicom data or None to avoid organizing dicom data
         nifti_dir: Path to the directory where the NIFTI files are stored for each volume
+        mr_sop_class_only: Only process series whose first file has an MR SOP Class UID
 
     Returns:
 
