@@ -21,6 +21,12 @@ from typing import Any
 import collections
 
 import pydicom
+from pydicom.uid import (
+    MRImageStorage,
+    EnhancedMRImageStorage,
+    EnhancedMRColorImageStorage,
+    LegacyConvertedEnhancedMRImageStorage,
+)
 from copy import deepcopy
 import itk
 import warnings
@@ -129,6 +135,15 @@ def is_integer(s: Any) -> bool:
         return True
     except Exception:
         return False
+
+
+def is_mr_sop_class(dicom_header_info: Dataset):
+    return dicom_header_info.SOPClassUID in [
+        MRImageStorage,
+        EnhancedMRImageStorage,
+        EnhancedMRColorImageStorage,
+        LegacyConvertedEnhancedMRImageStorage,
+    ]
 
 
 def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> float:
