@@ -437,6 +437,8 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         """
         if not subseries_filenames:
             return []
+        # Sort to prevent differences between operating systems
+        subseries_filenames = sorted(subseries_filenames)
 
         INVALID_NUMERICAL_VALUE = -12345
         file_info_dict = defaultdict(list)
