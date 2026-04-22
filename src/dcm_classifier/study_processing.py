@@ -437,33 +437,24 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         """
         if not subseries_filenames:
             return []
+        # Name order keeps the fallback single volume independent of the OS.
+        subseries_filenames = sorted(subseries_filenames)
 
         INVALID_NUMERICAL_VALUE = -12345
         file_info_dict = defaultdict(list)
 
         try:
+            file_records = []
             for dcm_file in subseries_filenames:
                 try:
                     ds = pydicom.dcmread(dcm_file, stop_before_pixels=True)
 
                     # Validate ImagePositionPatient
                     img_position = ds.get("ImagePositionPatient")
-                    if img_position is None:
-                        if self.raise_error_on_failure:
-                            raise ValueError(
-                                f"ImagePositionPatient not found in {dcm_file}"
-                            )
-                        else:
-                            print(
-                                f"Warning: ImagePositionPatient not found in {dcm_file}. Using default positioning."
-                            )
-                            img_position = [
-                                0,
-                                0,
-                                len(file_info_dict),
-                            ]  # Create synthetic position
-
-                    ipp_key = tuple(img_position)
+                    if img_position is None and self.raise_error_on_failure:
+                        raise ValueError(
+                            f"ImagePositionPatient not found in {dcm_file}"
+                        )
 
                     # Safe extraction of metadata with fallback values
                     acquisition_date_time = parse_acquisition_datetime(ds)
@@ -472,13 +463,16 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                     )
                     inst_number = int(ds.get("InstanceNumber", INVALID_NUMERICAL_VALUE))
 
-                    file_info_dict[ipp_key].append(
-                        {
-                            "acquisition_date_time": acquisition_date_time,
-                            "acquisition_number": acquisition_number,
-                            "instance_number": inst_number,
-                            "filename": dcm_file,
-                        }
+                    file_records.append(
+                        (
+                            img_position,
+                            {
+                                "acquisition_date_time": acquisition_date_time,
+                                "acquisition_number": acquisition_number,
+                                "instance_number": inst_number,
+                                "filename": dcm_file,
+                            },
+                        )
                     )
 
                 except Exception as file_error:
@@ -488,6 +482,22 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                         print(f"Error processing file {dcm_file}: {file_error}")
                         # If error processing a single file, continue with others
                         continue
+
+            # InstanceNumber, not file system order, sets the slice order.
+            file_records.sort(
+                key=lambda r: (r[1]["instance_number"], str(r[1]["filename"]))
+            )
+            for img_position, file_info in file_records:
+                if img_position is None:
+                    print(
+                        f"Warning: ImagePositionPatient not found in {file_info['filename']}. Using default positioning."
+                    )
+                    img_position = [
+                        0,
+                        0,
+                        len(file_info_dict),
+                    ]  # Create synthetic position
+                file_info_dict[tuple(img_position)].append(file_info)
 
             # Sort files within each position group
             for ipp_key, file_info in file_info_dict.items():
