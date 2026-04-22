@@ -1,3 +1,7 @@
+import random
+import shutil
+
+import pydicom
 import pytest
 
 from dcm_classifier.image_type_inference import (
@@ -102,3 +106,20 @@ def test_un_pathlike_dir():
 # validate() is not implemented yet and only returns None
 def test_validate(mock_volume_study):
     assert mock_volume_study.validate() is None
+
+
+def test_split_orders_files_by_instance_number(get_data_dir, tmp_path):
+    for dcm_file in (get_data_dir / "9").rglob("*.dcm"):
+        instance_number = int(pydicom.dcmread(dcm_file).InstanceNumber)
+        shutil.copy(dcm_file, tmp_path / f"slice.{instance_number}.dcm")
+    files = [str(f) for f in tmp_path.glob("*.dcm")]
+    random.Random(0).shuffle(files)
+
+    study = ProcessOneDicomStudyToVolumesMappingBase(tmp_path)
+    (volume,) = study._identify_and_split_sub_volumes_pydicom(files)
+
+    instance_numbers = [
+        int(pydicom.dcmread(f, stop_before_pixels=True).InstanceNumber)
+        for f in volume.one_volume_dcm_filenames
+    ]
+    assert instance_numbers == sorted(instance_numbers)
