@@ -144,7 +144,7 @@ pythonpath = [
 # silences warnings about missing config.py and config-3.py files
 # pytest-cov breaks code python debugger addopts = "--cov "
 testpaths = [
-    "tests/unit_testing"
+    "tests"
 ]
 
 [tool.coverage.run]

@@ -26,7 +26,7 @@ repos:
         args: [ --fix ]
       # exclude: ^noexcluded_dirs/
   - repo: https://github.com/psf/black
-    # need to keep version for black in .pre-commit-config.yaml, requirements_dev.txt, and .github/workflows/*.yml
+    # need to keep version for black in .pre-commit-config.yaml and requirements_dev.txt
     rev: 24.2.0
     hooks:
       - id: black
