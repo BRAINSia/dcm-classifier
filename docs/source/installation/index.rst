@@ -11,6 +11,8 @@ The dcm-classifier package is available on PyPi and can be installed using pip u
 
     pip install dcm-classifier
 
+dcm-classifier requires Python 3.12 or later.
+
 This option will install all the necessary dependencies for the package to run. For more control, we recommend cloning the repository and installing the package in development mode.
 
 Cloning the Repository

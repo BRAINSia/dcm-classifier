@@ -107,9 +107,12 @@ authors = [
 ]
 description = "This is a consolidation of work from NAMIC efforts primarily at the University of Iowa."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
 ]
 dependencies = [
@@ -160,7 +163,7 @@ directory = "coverage_html_report"
 
 [tool.black]
 line-length = 88
-target-version = ['py310', 'py311']
+target-version = ["py312"]
 include = '\.pyi?$'
 extend-exclude = '''
 /(
