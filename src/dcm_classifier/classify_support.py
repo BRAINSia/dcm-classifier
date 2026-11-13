@@ -8,8 +8,15 @@ import pandas as pd
 import tabulate
 
 from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
+from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+
+
+def _classification_failure_reason(volume: DicomSingleVolumeInfoBase) -> str:
+    if not volume.get_volume_dictionary():
+        return "Required DICOM fields are missing or invalid"
+    return "Inference features are missing or invalid"
 
 
 def simple_classify_study(
@@ -67,57 +74,57 @@ def simple_classify_study(
             try:
                 vol_modality: str = str(volume.get_volume_modality())
                 current_dict["Volume Modality"] = vol_modality
-                if vol_modality != "INVALID":
-                    dictionary["VolumeModality"] = vol_modality
-                else:
-                    invalid_volume = True
+                invalid_volume = vol_modality == "INVALID"
             except AttributeError:
+                vol_modality = "None"
                 current_dict["Volume Modality"] = "None"
-                dictionary = {}
+            dictionary["VolumeModality"] = vol_modality
+            if invalid_volume:
+                dictionary["ClassificationFailureReason"] = (
+                    _classification_failure_reason(volume)
+                )
 
             # Series Modality
             try:
                 series_modality: str = str(series.get_series_modality())
                 current_dict["Series Modality"] = series_modality
-                dictionary["SeriesModality"] = series_modality if dictionary else {}
+                dictionary["SeriesModality"] = series_modality
             except AttributeError:
                 current_dict["Series Modality"] = "None"
-                dictionary = {}
+                dictionary["SeriesModality"] = "None"
 
             # Acquisition Plane
             try:
                 acq_plane: str = str(volume.get_acquisition_plane())
                 current_dict["Acq.Plane"] = acq_plane
-                dictionary["AcqPlane"] = acq_plane if dictionary else {}
+                dictionary["AcqPlane"] = acq_plane
             except AttributeError:
                 current_dict["Acq.Plane"] = "None"
-                dictionary = {}
+                dictionary["AcqPlane"] = "None"
 
             # Isotropic
             try:
                 isotropic: str = str(volume.get_is_isotropic())
                 current_dict["Isotropic"] = isotropic
-                dictionary["Isotropic"] = isotropic if dictionary else {}
+                dictionary["Isotropic"] = isotropic
             except AttributeError:
                 current_dict["Isotropic"] = "None"
                 dictionary["Isotropic"] = "None"
 
             # Modality Probabilities
             vol_probabilities = volume.get_modality_probabilities()
-            for col in vol_probabilities.columns:
-                # current_dict[col] = str(vol_probabilities[col].values[0])
-                if "SeriesNumber" in col or "CODE" in col:
-                    continue
-                dictionary[col] = (
-                    str(vol_probabilities[col].values[0]) if dictionary else {}
-                )
+            if not invalid_volume:
+                for col in vol_probabilities.columns:
+                    if "SeriesNumber" in col or "CODE" in col:
+                        continue
+                    dictionary[col] = str(vol_probabilities[col].values[0])
             print(vol_probabilities.to_string(index=False))
 
             # Bvalue
             try:
                 bval = str(volume.get_volume_bvalue())
                 current_dict["Bvalue"] = bval
-                dictionary["Bvalue"] = bval if dictionary else {}
+                dictionary["Bvalue"] = bval
             except AttributeError:
                 current_dict["Bvalue"] = "None"
                 dictionary["Bvalue"] = "None"
@@ -128,9 +135,7 @@ def simple_classify_study(
                     "SeriesDescription"
                 )
                 current_dict["SeriesDesc"] = series_description
-                dictionary["SeriesDescription"] = (
-                    series_description if dictionary else {}
-                )
+                dictionary["SeriesDescription"] = series_description
             except AttributeError:
                 current_dict["SeriesDesc"] = "None"
                 dictionary["SeriesDescription"] = "None"
@@ -138,31 +143,22 @@ def simple_classify_study(
             # Contrast Agent
             try:
                 contrast = volume.get_has_contrast()
-                dictionary["Contrast"] = str(contrast) if dictionary else {}
-
                 if contrast:
-                    contrast_agent = volume.get_contrast_agent()
-                    # current_dict["ContrastAgent"] = contrast_agent
-                    dictionary["ContrastAgent"] = contrast_agent if dictionary else {}
+                    dictionary["Contrast"] = str(contrast)
+                    dictionary["ContrastAgent"] = volume.get_contrast_agent()
                 else:
-                    # current_dict["Contrast"] = "None"
                     dictionary["Contrast"] = "None"
             except AttributeError:
-                # current_dict["Contrast"] = "None"
                 dictionary["Contrast"] = "None"
 
             # Pixel Spacing
             try:
                 pixel_spacing = volume.get_dicom_field_by_name("PixelSpacing")
-                # current_dict["PixelSpacing"] = pixel_spacing
-                dictionary["PixelSpacing_0"] = (
-                    str(pixel_spacing[0]) if dictionary else {}
-                )
-                dictionary["PixelSpacing_1"] = (
-                    str(pixel_spacing[1]) if dictionary else {}
-                )
+                if isinstance(pixel_spacing, str):
+                    pixel_spacing = [pixel_spacing, pixel_spacing]
+                dictionary["PixelSpacing_0"] = str(pixel_spacing[0])
+                dictionary["PixelSpacing_1"] = str(pixel_spacing[1])
             except AttributeError:
-                # current_dict["PixelSpacing"] = "None"
                 dictionary["PixelSpacing_0"] = "None"
                 dictionary["PixelSpacing_1"] = "None"
 
@@ -171,10 +167,8 @@ def simple_classify_study(
                     continue
                 try:
                     value = volume.get_dicom_field_by_name(field)
-                    # current_dict[field] = str(value)
-                    dictionary[field] = str(value) if dictionary else {}
+                    dictionary[field] = str(value)
                 except AttributeError:
-                    # current_dict[field] = "None"
                     dictionary[field] = "None"
 
             inputs_df: dict[str, Any] = volume.get_volume_dictionary()
@@ -222,11 +216,8 @@ def simple_classify_study(
                     output_file_path: Path = output_dir_path / dcm_file.name
                     print(f"Copying {dcm_file} to {output_file_path}")
                     shutil.copy(dcm_file, output_file_path, follow_symlinks=True)
-                    # shutil.move(dcm_file, output_file_path)
             if dict_entry_name is not None:
-                session_dictionary[dict_entry_name] = (
-                    dictionary if not invalid_volume else {}  # set to empty if invalid
-                )
+                session_dictionary[dict_entry_name] = dictionary
     json_output_dict: dict[str, Any] = {str(session_directory): session_dictionary}
     # save the dictionary to a file
     if json_dumppath is not None:

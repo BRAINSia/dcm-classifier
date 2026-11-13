@@ -2,8 +2,14 @@ import json
 import shutil
 from pathlib import Path
 
+import pydicom
+import pytest
 
-from dcm_classifier.classify_support import simple_classify_study
+
+from dcm_classifier.classify_support import (
+    _classification_failure_reason,
+    simple_classify_study,
+)
 
 current_file_path = Path(__file__).resolve()
 testing_output_dir = current_file_path.parent.parent / "testing_data" / "outputs"
@@ -130,3 +136,35 @@ def test_classify_study_with_no_readable_dicoms(get_data_dir, capsys):
     assert (
         "No series found in the study." in captured.out
     ), "Should print 'No series found in the study.' message."
+
+
+def test_classify_study_json_keeps_invalid_volume(contrast_file_path, tmp_path):
+    ds = pydicom.dcmread(next(contrast_file_path.rglob("*.dcm")))
+    del ds.FlipAngle
+    ds.save_as(tmp_path / "missing_flip_angle.dcm")
+
+    session = simple_classify_study(session_directory=tmp_path)
+    (volume,) = session[str(tmp_path)].values()
+
+    assert volume["VolumeModality"] == "INVALID"
+    assert (
+        volume["ClassificationFailureReason"]
+        == "Required DICOM fields are missing or invalid"
+    )
+    assert volume["StudyInstanceUID"] == str(ds.StudyInstanceUID)
+    assert not any(key.startswith("GUESS_ONNX") for key in volume)
+
+
+@pytest.mark.parametrize(
+    "volume_dictionary, reason",
+    [
+        ({}, "Required DICOM fields are missing or invalid"),
+        ({"EchoTime": 3.69}, "Inference features are missing or invalid"),
+    ],
+)
+def test_classification_failure_reason(volume_dictionary, reason):
+    class StubVolume:
+        def get_volume_dictionary(self):
+            return volume_dictionary
+
+    assert _classification_failure_reason(StubVolume()) == reason
