@@ -40,6 +40,8 @@ Users have the ability to simply pip install the package which will install the 
 
 `$ pip install dcm-classifier`
 
+dcm-classifier requires Python 3.12 or later.
+
 **Clone the repository**
 
 If you prefer to clone the git repository:
