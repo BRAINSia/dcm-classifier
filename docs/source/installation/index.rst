@@ -30,7 +30,7 @@ Developers will likely want to set up a python virtual environment with the nece
     cd dcm-classifier
     python3 -m venv venv
     source venv/bin/activate
-    pip install -r requirements-dev.txt
+    pip install -r requirements_dev.txt
 
 For Users:
 
