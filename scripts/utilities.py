@@ -89,10 +89,7 @@ def remove_rows_with_duplicate_values(
     Returns:
         pd.DataFrame: the dataframe, which is also saved when save_to_excel is True and outpath is given
     """
-    if isinstance(input_frame, str):
-        df = pd.read_excel(input_frame)
-    else:
-        df = input_frame
+    df = pd.read_excel(input_frame) if isinstance(input_frame, str) else input_frame
 
     try:
         df = df[~df.duplicated(removal_features, keep="first")]
