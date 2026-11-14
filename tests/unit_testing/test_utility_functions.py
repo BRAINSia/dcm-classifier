@@ -303,7 +303,9 @@ def test_get_gradient_direction(get_data_dir):
     # ensure each element in the diffusion gradient direction is equal to the value in the DICOM header
     dataset_grad = ds_w_grad[0x0019100E].value
 
-    for elem in zip(get_diffusion_gradient_direction(ds_w_grad), dataset_grad):
+    for elem in zip(
+        get_diffusion_gradient_direction(ds_w_grad), dataset_grad, strict=False
+    ):
         assert elem[0] == elem[1]
 
 
