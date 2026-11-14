@@ -13,7 +13,7 @@ def organize_data_to_bids(df_path: str, output_dir: str):
     df = pd.read_excel(df_path)
     subs = []
     all_sess = []
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         series_num = row["SeriesNumber"]
         print(Path(row["FileName"]))
         sub = Path(row["FileName"]).parent.parent.parent.name.split("_")[0]
@@ -37,11 +37,11 @@ def organize_data_to_bids(df_path: str, output_dir: str):
         if len(sess) == 0:
             sess = [random.randint(30000000, 99999999)]
         # for each session, create a session dir
-        for i in sess:
-            if i not in all_sess:
-                all_sess.append(i)
-                os.system(f"mkdir -p {output_dir}/sub-{sub}/ses-{int(i)}")
-                print(f"mkdir -p {output_dir}/sub-{sub}/ses-{int(i)}")
+        for session in sess:
+            if session not in all_sess:
+                all_sess.append(session)
+                os.system(f"mkdir -p {output_dir}/sub-{sub}/ses-{int(session)}")
+                print(f"mkdir -p {output_dir}/sub-{sub}/ses-{int(session)}")
 
         # try to get a current session
         try:
