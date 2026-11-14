@@ -196,7 +196,6 @@ directory = "coverage_html_report"
 
 [tool.ruff]
 line-length = 88
-target-version = "py312"
 extend-exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
