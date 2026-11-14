@@ -162,8 +162,9 @@ def test_unusable_series_number_reads_as_missing(get_data_dir, file_name):
     with pytest.warns(UserWarning, match="SeriesNumber"):
         volume = DicomSingleVolumeInfoBase([dicom_path.as_posix()])
 
-    with pytest.warns(DeprecationWarning):
-        assert volume.get_series_number() == MISSING_VALUE
+    with pytest.warns(DeprecationWarning, match="get_dicom_field_by_name"):
+        series_number = volume.get_series_number()
+    assert series_number == MISSING_VALUE
 
 
 def test_get_volume_index(mock_tracew_series):
