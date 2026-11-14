@@ -356,10 +356,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             msg: str = f"No DICOMs in: {study_directory} (__identify_single_volumes)"
             if self.raise_error_on_failure:
                 raise FileNotFoundError(msg)
-            else:
-                print(
-                    f"No readable dicoms DICOMs in: {study_directory} (__identify_single_volumes)"
-                )
+            print(
+                f"No readable dicoms DICOMs in: {study_directory} (__identify_single_volumes)"
+            )
         else:
             print(
                 f"The directory: {study_directory} contains {len(seriesUID)} DICOM series"
@@ -521,10 +520,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 except Exception as file_error:
                     if self.raise_error_on_failure:
                         raise
-                    else:
-                        print(f"Error processing file {dcm_file}: {file_error}")
-                        # If error processing a single file, continue with others
-                        continue
+                    print(f"Error processing file {dcm_file}: {file_error}")
+                    # If error processing a single file, continue with others
+                    continue
 
             # InstanceNumber, not file system order, sets the slice order.
             file_records.sort(
@@ -564,11 +562,10 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                         raise ValueError(
                             f"Inconsistent volume splitting: {num_files} files, {num_unique_positions} positions"
                         )
-                    else:
-                        print(
-                            f"Warning: Detected {num_volumes} sub-volumes. "
-                            f"Total files: {num_files}, Unique positions: {num_unique_positions}."
-                        )
+                    print(
+                        f"Warning: Detected {num_volumes} sub-volumes. "
+                        f"Total files: {num_files}, Unique positions: {num_unique_positions}."
+                    )
 
                 # Create volume objects
                 sub_volume_info_list: list[DicomSingleVolumeInfoBase] = []
@@ -587,8 +584,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         except Exception as global_error:
             if self.raise_error_on_failure:
                 raise
-            else:
-                print(f"Error in volume splitting: {global_error}")
+            print(f"Error in volume splitting: {global_error}")
 
         # Default to single volume if all else fails
         return [DicomSingleVolumeInfoBase(one_volume_dcm_filenames=subseries_filenames)]
