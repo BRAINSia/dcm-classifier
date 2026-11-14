@@ -38,6 +38,7 @@ from numpy import ndarray
 from pydicom.dataset import Dataset
 from pydicom.multival import MultiValue
 from .dicom_config import (
+    MISSING_VALUE,
     inference_features as features,
 )
 from datetime import datetime
@@ -222,7 +223,7 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
                 try:
                     value = dicom_element.value[0] % large_number_modulo_for_GE
                 except TypeError:
-                    return -12345
+                    return MISSING_VALUE
             elif v == private_tags_map["Siemens_historical"]:
                 # This is not supported yet
                 continue
@@ -238,27 +239,27 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
                     print(
                         f"UNKNOWN CONVERSION OF VR={dicom_element.VR}: {type(dicom_element.value)} len={len(dicom_element.value)} ==> {value}"
                     )
-                    return -12345
+                    return MISSING_VALUE
             # print(f"Found BValue at {v} for {k}, {value} of type {dicom_element.VR}")
             if value is None:
                 # Field exists without value, USE DEFAULT
-                return -12345
+                return MISSING_VALUE
             try:
                 result = float(value)
                 if result > 5000:
-                    return -12345
+                    return MISSING_VALUE
             except ValueError:
                 print(
                     f"UNKNOWN CONVERSION OF VR={dicom_element.VR}: {type(dicom_element.value)} len={len(dicom_element.value)} ==> {dicom_element.value} to float"
                 )
-                return -12345
+                return MISSING_VALUE
             except Exception as e:
                 print(f"UNKNOWN IDENTIFICATION OF BVALUE: {e}")
-                return -12345
+                return MISSING_VALUE
             if round_to_nearst_10:
                 result = round(result / 10.0) * 10
             return result
-    return -12345
+    return MISSING_VALUE
 
 
 def ensure_magnitude_of_1(vector: np.ndarray) -> bool:
@@ -424,16 +425,16 @@ def sanitize_dicom_dataset(
     for field in required_info_list:
         if field not in dataset:
             # RepetitionTime and EchoTime might not be present in ADC images.
-            # Therefore, if they are missing, set them to -12345
+            # Therefore, if they are missing, set them to MISSING_VALUE
             if field == "RepetitionTime" or field == "EchoTime":
-                dataset_dictionary[field] = -12345
+                dataset_dictionary[field] = MISSING_VALUE
             else:
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
         elif field == "EchoTime" or field == "RepetitionTime":
             if dataset[field].value is None or str(dataset[field].value) == "":
                 # ADC sequences may not have EchoTime
-                dataset_dictionary[field] = -12345
+                dataset_dictionary[field] = MISSING_VALUE
             elif not is_number(dataset[field].value):
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
@@ -479,14 +480,12 @@ def sanitize_dicom_dataset(
 
     # set the default values for optional dicom fields
     for field in optional_info_list:
-        DEFAULT_VALUE = -12345
-        dataset_dictionary[field] = (
-            DEFAULT_VALUE  # Every optional field will be set to the default -12345 and will be overriden if present and valid
-        )
+        # Every optional field starts as MISSING_VALUE and is overridden if present and valid
+        dataset_dictionary[field] = MISSING_VALUE
         try:
             dataset_value = dataset[field].value
         except Exception:
-            dataset_value = DEFAULT_VALUE
+            dataset_value = MISSING_VALUE
 
         if field == "SAR":
             if field not in dataset or not is_number(dataset_value):
@@ -495,7 +494,7 @@ def sanitize_dicom_dataset(
                 # SAR impact on the patient for the derived image.
                 # SAR Calculated whole body Specific Absorption Rate in watts/kilogram.
                 # indicate that there is no SAR for the computed image
-                _default_inferred_value = DEFAULT_VALUE
+                _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
@@ -527,13 +526,13 @@ def sanitize_dicom_dataset(
         elif field == "ContrastBolusAgent":
             if field not in dataset or dataset_value is None:
                 # The contrast is required but is empty if unknown but also may not be in every dataset
-                dataset_dictionary[field] = DEFAULT_VALUE
+                dataset_dictionary[field] = MISSING_VALUE
             else:
                 dataset_dictionary[field] = dataset_value
         elif field == "EchoNumbers":
             if field not in dataset:
                 # EchoNumber(s) is not a required field, it can be unknown
-                _default_inferred_value = DEFAULT_VALUE
+                _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
@@ -545,7 +544,7 @@ def sanitize_dicom_dataset(
         elif field == "EchoTrainLength":
             if field not in dataset:
                 # EchoTrainLength is not a required field, it can be unknown
-                _default_inferred_value = DEFAULT_VALUE
+                _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
@@ -587,7 +586,7 @@ def sanitize_dicom_dataset(
         elif field == "dBdt":
             if field not in dataset:
                 # dBdt is not a required field, it can be unknown
-                _default_inferred_value = DEFAULT_VALUE
+                _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
@@ -599,7 +598,7 @@ def sanitize_dicom_dataset(
         elif field == "ImagingFrequency":
             if field not in dataset:
                 # ImagingFrequency is not a required field, it can be unknown
-                _default_inferred_value = DEFAULT_VALUE
+                _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
@@ -621,7 +620,7 @@ def sanitize_dicom_dataset(
         elif field == "NumberOfAverages":
             if field not in dataset:
                 # NumberOfAverages is not a required field, it can be unknown
-                _default_inferred_value = DEFAULT_VALUE
+                _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
@@ -633,7 +632,7 @@ def sanitize_dicom_dataset(
         elif field == "InversionTime":
             if field not in dataset:
                 # InversionTime is not a required field, it can be unknown
-                _default_inferred_value = DEFAULT_VALUE
+                _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
@@ -697,7 +696,7 @@ def validate_numerical_dataset_element(element: str | None) -> str | float:
         float(element)
         return element
     except Exception:
-        return -12345
+        return MISSING_VALUE
 
 
 # organize required features
@@ -801,7 +800,7 @@ def get_coded_dictionary_elements(
                 "no_contrast",
                 "n",
                 "",
-                "-12345",
+                str(MISSING_VALUE),
             ]
             if str(value).lower() in no_contrast_list:
                 dataset_dictionary["ContrastBolusAgent"] = "None"

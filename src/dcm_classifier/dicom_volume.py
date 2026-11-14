@@ -35,6 +35,7 @@ from .utility_functions import (
     get_diffusion_gradient_direction,
 )
 from .dicom_config import (
+    MISSING_VALUE,
     required_DICOM_fields,
     optional_DICOM_fields,
 )
@@ -113,7 +114,7 @@ class DicomSingleVolumeInfoBase:
         self.volume_modality: str = "INVALID"
         self.series_modality: str = "INVALID"
         self.modality_probability: pd.DataFrame | None = None
-        self.average_slice_spacing = -12345.0
+        self.average_slice_spacing = float(MISSING_VALUE)
         self.acquisition_plane: str = "UNKNOWN"
         self.is_isotropic: bool = False
         self.has_contrast: bool = False
@@ -320,7 +321,7 @@ class DicomSingleVolumeInfoBase:
         return_dict["vol_index"] = vol_index
         for refkey, return_key in fields_to_copy.items():
             value = ref_vol_info.get(refkey, "")
-            if str(value) == "-12345":
+            if str(value) == str(MISSING_VALUE):
                 value = ""
 
             if isinstance(value, float):
@@ -462,14 +463,16 @@ class DicomSingleVolumeInfoBase:
 
         """
         try:
-            series_number_int: int = int(self._pydicom_info.get("SeriesNumber", -12345))
+            series_number_int: int = int(
+                self._pydicom_info.get("SeriesNumber", MISSING_VALUE)
+            )
             return series_number_int
         except Exception as e:
             if "SeriesNumber" not in self._pydicom_info:
                 print("SeriesNumber not found in DICOM file")
             else:
                 print(f"Can not convert to int {self._pydicom_info.SeriesNumber}: {e}")
-        return -12345
+        return MISSING_VALUE
 
     def get_volume_index(self) -> int | None:
         """
@@ -539,7 +542,7 @@ class DicomSingleVolumeInfoBase:
         bvalue_current_dicom: int = int(self.get_volume_bvalue())
         volume_info_dict["Diffusionb-value"] = bvalue_current_dicom
         volume_info_dict["Diffusionb-valueBool"] = (
-            0 if bvalue_current_dicom == -12345 else 1
+            0 if bvalue_current_dicom == MISSING_VALUE else 1
         )
         volume_info_dict["has_b0"] = 1 if bvalue_current_dicom == 0 else 0
         volume_info_dict["has_pos_b0"] = 1 if bvalue_current_dicom > 0 else 0

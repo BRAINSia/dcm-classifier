@@ -20,6 +20,9 @@ from pydicom import config
 
 config.INVALID_KEY_BEHAVIOR = "RAISE"
 
+# Stands in for a numeric DICOM value that is absent or unusable.
+MISSING_VALUE: int = -12345
+
 """
 Dicom Configuration:
 

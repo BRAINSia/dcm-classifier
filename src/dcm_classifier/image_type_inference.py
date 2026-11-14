@@ -16,7 +16,7 @@
 #
 #  =========================================================================
 
-from .dicom_config import inference_features
+from .dicom_config import MISSING_VALUE, inference_features
 from .dicom_series import DicomSingleSeries
 from .utility_functions import (
     infer_diffusion_from_gradient,
@@ -554,7 +554,7 @@ class ImageTypeClassifierBase:
             ]
             unique_bvals = list(set(bvals))
             if len(unique_modalities) == 1:
-                if -12345 not in unique_bvals:
+                if MISSING_VALUE not in unique_bvals:
                     self._update_diffusion_series_modality()
                 else:
                     self.series.set_series_modality(
@@ -570,7 +570,7 @@ class ImageTypeClassifierBase:
                 # TODO: get more data for testing
                 elif "tracew" in unique_modalities:
                     self.series.set_series_modality("tracew")
-                elif -12345 not in unique_bvals:
+                elif MISSING_VALUE not in unique_bvals:
                     self._update_diffusion_series_modality()
                 else:
                     # if other scenarios are not met, we set the modality to the first volume's modality
