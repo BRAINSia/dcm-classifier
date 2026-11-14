@@ -403,9 +403,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 int(x) for x in self.search_series.values()
             ]
             series_numbers_to_remove: list[int] = [
-                sn
-                for sn in volumes_dictionary.keys()
-                if sn not in candidate_series_numbers
+                sn for sn in volumes_dictionary if sn not in candidate_series_numbers
             ]
             for series_number in series_numbers_to_remove:
                 del volumes_dictionary[series_number]
@@ -573,7 +571,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 for i in range(num_volumes):
                     sub_volume_filenames = [
                         file_info_dict[ipp_key][i]["filename"]
-                        for ipp_key in file_info_dict.keys()
+                        for ipp_key in file_info_dict
                     ]
                     sub_volume_info_list.append(
                         DicomSingleVolumeInfoBase(

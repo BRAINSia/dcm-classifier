@@ -220,6 +220,7 @@ extend-select = [
     "SIM103",  # needless-bool
     "SIM108",  # if-else-block-instead-of-if-exp
     "SIM114",  # if-with-same-arms
+    "SIM118",  # in-dict-keys
     # Rule families recommended by the Scientific Python guide.
     "ARG",  # flake8-unused-arguments
     "B",  # flake8-bugbear
@@ -287,7 +288,6 @@ ignore = [
     "RUF005",  # collection-literal-concatenation (4)
     "RUF012",  # mutable-class-default (1)
     "SIM102",  # collapsible-if (1)
-    "SIM118",  # in-dict-keys (7)
     "TRY003",  # raise-vanilla-args (15)
     "TRY004",  # type-check-without-type-error (5)
     "TRY201",  # verbose-raise (1)
