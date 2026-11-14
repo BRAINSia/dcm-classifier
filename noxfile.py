@@ -25,8 +25,7 @@ def lint(session: nox.Session) -> None:
 def tests(session: nox.Session) -> None:
     """Run the test suite against the installed package."""
     session.install(".", *nox.project.dependency_groups(PYPROJECT, "test"))
-    # An empty pythonpath makes pytest import the installed package, not src/.
-    session.run("pytest", "-o", "pythonpath=", *session.posargs)
+    session.run("pytest", *session.posargs)
 
 
 @nox.session(python="3.13", reuse_venv=True)

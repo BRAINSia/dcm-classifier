@@ -79,7 +79,7 @@ training = [
 [dependency-groups]
 test = [
     "coverage[toml]>=7.3.2",
-    "pytest>=8",
+    "pytest>=9",
 ]
 docs = [
     "myst-parser>=4.0",
@@ -101,10 +101,10 @@ dcm-classify-study = "dcm_classifier.classify_study:main"
 [tool.hatchling.data]
 include = ["models/ova_rf_classifier.onnx"]
 
-[tool.pytest.ini_options]
-minversion = "8"
-addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
-xfail_strict = true
+[tool.pytest]
+minversion = "9.0"
+addopts = ["-ra", "--showlocals"]
+strict = true
 log_level = "INFO"
 log_cli_level = "INFO"
 filterwarnings = [
@@ -112,16 +112,7 @@ filterwarnings = [
     # Raised by ITK's SWIG bindings at import; as an error it crashes Python.
     "ignore:builtin type swig:DeprecationWarning",
 ]
-pythonpath = [
-  "src",
-  "src/dcm_classifier"
-]
-# NOTE tests/__init__.py is empty.  passing it as the config files
-# silences warnings about missing config.py and config-3.py files
-# pytest-cov breaks code python debugger addopts = "--cov "
-testpaths = [
-    "tests"
-]
+testpaths = ["tests"]
 
 [tool.coverage.run]
 omit = [
