@@ -1,5 +1,7 @@
 # Introduction
 
+<!-- SPHINX-START -->
+
 An MRI session produces many DICOM series, and most automated analysis tools need specific ones: a T1-weighted volume, a FLAIR, the diffusion series and its ADC map. Picking those series by hand is slow and error-prone, and it keeps a pipeline from running unattended in a clinical setting. The DICOM header's free-text fields, such as `SeriesDescription`, cannot be relied on to make the choice: the standard does not constrain them, and vendors fill them differently.
 
 `dcm_classifier` makes that selection automatic. It reads well-characterized acquisition fields from the DICOM header, such as echo time, repetition time, flip angle, and image orientation, and identifies each volume's image modality and acquisition plane. It reads headers only, so it works with any DICOM-conforming MRI scanner, whatever the manufacturer or model.
@@ -33,6 +35,8 @@ Additionally, please reference the citations located in the [citations directory
 
 - Michal Brzus, Jamie Kaminski, Trevor Viohl, Joel Bruss, Daniel Tranel, Aaron D. Boes, Hans J. Johnson, "Rapid, automated prediction of post-stroke cognitive impairment for ischemic stroke," Proc. SPIE 13407, Medical Imaging 2025: Computer-Aided Diagnosis, 134071Y (2025); https://doi.org/10.1117/12.3047488
 - Michal Brzus, Joseph Griffis, Cavan J. Riley, Joel Bruss, Carrie Shea, Hans J. Johnson, Aaron D. Boes, "A Clinical Neuroimaging Platform for Rapid, Automated Lesion Detection and Personalized Post-Stroke Outcome Prediction," medRxiv (2025); https://doi.org/10.1101/2025.05.09.25327310
+
+<!-- SPHINX-END -->
 
 # Instructions
 
