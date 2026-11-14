@@ -52,7 +52,7 @@ def test_all_fields_dont_change():
                     field_value = ds[field].value
                 except KeyError:
                     msg = f"Field {field} not found in DICOM dataset for series {series_num}"
-                    raise KeyError(msg)
+                    raise KeyError(msg) from None
 
                 if isinstance(field_value, pydicom.dataelem.RawDataElement):
                     e = pydicom.dataelem.DataElement_from_raw(field_value)
