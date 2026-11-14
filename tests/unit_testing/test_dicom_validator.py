@@ -3,7 +3,7 @@ from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
 from pathlib import Path
 
 
-def test_volume_validation(mock_volume_study, mock_volumes):
+def test_volume_validation(mock_volumes):
     validator = DicomValidatorBase(DicomSingleVolumeInfoBase(mock_volumes[0]))
     validator.append_to_validation_failure_reports("testing")
     validator.append_to_validation_failure_reports("This is a TEST")

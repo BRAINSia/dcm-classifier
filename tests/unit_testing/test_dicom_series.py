@@ -216,7 +216,7 @@ def test_dcm_series_has_contrast(contrast_file_path):
         assert series.get_has_contrast() is True
 
 
-def test_image_is_perfusion(perfusion_file_path, contrast_file_path):
+def test_image_is_perfusion(perfusion_file_path):
     assert perfusion_file_path.exists()
 
     study = ProcessOneDicomStudyToVolumesMappingBase(

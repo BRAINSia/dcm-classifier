@@ -214,27 +214,19 @@ class DicomSingleSeries:
 
     def add_volume_to_series(self, new_volume: DicomSingleVolumeInfoBase) -> None:
         """
-        Add a DicomSingleVolumeInfoBase object to the series. List containing subvolumes within the series is sorted
-        and maintained based on bvalues similar to dcm2niix tool.
+        Add a DicomSingleVolumeInfoBase object to the series. Volumes keep the order in which they are added.
 
         :param new_volume: The volume information to add.
         :type new_volume: DicomSingleVolumeInfoBase
         """
         new_volume.set_parent_series(self)
         self.volume_info_list.append(new_volume)
-        # Sort subvolumes
         self.organize_volumes()
 
     def organize_volumes(self) -> None:
         """
-        Organize the subvolumes within the series based on acquisition time.
+        Assign each subvolume its index within the series, in the order the subvolumes were added.
         """
-        # AcquisitionTime is an optional field, this might need to be changed in the future
-        sorted(
-            self.volume_info_list,
-            key=lambda x: x.get_volume_dictionary().get("AcquisitionTime", "000000.00"),
-        )
-        # assign the index to each volume
         for index, volume in enumerate(self.volume_info_list):
             volume.set_volume_index(index)
 
