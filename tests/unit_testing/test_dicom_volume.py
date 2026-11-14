@@ -17,6 +17,11 @@ inference_model_path = next(
     iter(Path(__file__).parent.parent.parent.rglob("models/rf_classifier.onnx"))
 )
 
+# The mock volumes have no SliceThickness, which the library reports.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:(?s).*Required DICOM fields.*SliceThickness:UserWarning"
+)
+
 inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
 
 

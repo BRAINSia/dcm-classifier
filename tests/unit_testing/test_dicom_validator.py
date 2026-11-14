@@ -1,7 +1,14 @@
 from pathlib import Path
 
+import pytest
+
 from dcm_classifier.dicom_validator import DicomValidatorBase
 from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
+
+# The mock volumes have no SliceThickness, which the library reports.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:(?s).*Required DICOM fields.*SliceThickness:UserWarning"
+)
 
 
 def test_volume_validation(mock_volumes):

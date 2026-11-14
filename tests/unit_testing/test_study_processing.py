@@ -147,11 +147,17 @@ def test_unusable_series_number_does_not_stop_the_study(
     valid_file = next((get_data_dir / "9").rglob("*.dcm"))
     shutil.copy(valid_file, tmp_path / "valid.dcm")
 
-    with pytest.warns(UserWarning, match=f"SeriesNumber is missing.*{file_name}"):
+    with (
+        pytest.warns(UserWarning, match="Required DICOM fields"),
+        pytest.warns(UserWarning, match=f"SeriesNumber is missing.*{file_name}"),
+    ):
         study = ProcessOneDicomStudyToVolumesMappingBase(
             tmp_path, inferer=ImageTypeClassifierBase()
         )
-    study.run_inference()
+    with pytest.warns(
+        UserWarning, match=f"Missing features for SeriesNumber {MISSING_VALUE}"
+    ):
+        study.run_inference()
 
     assert set(study.series_dictionary) == {9, MISSING_VALUE}
     (volume,) = study.series_dictionary[MISSING_VALUE].get_volume_list()
@@ -163,7 +169,10 @@ def test_unusable_series_number_does_not_stop_the_study(
 def test_unusable_series_number_raises_when_errors_are_requested(tmp_path, file_name):
     shutil.copy(invalid_fields_directory / file_name, tmp_path / file_name)
 
-    with pytest.raises(ValueError, match=f"SeriesNumber is missing.*{file_name}"):
+    with (
+        pytest.warns(UserWarning, match="Required DICOM fields"),
+        pytest.raises(ValueError, match=f"SeriesNumber is missing.*{file_name}"),
+    ):
         ProcessOneDicomStudyToVolumesMappingBase(tmp_path, raise_error_on_failure=True)
 
 

@@ -143,7 +143,11 @@ def test_classify_study_json_keeps_invalid_volume(contrast_file_path, tmp_path):
     del ds.FlipAngle
     ds.save_as(tmp_path / "missing_flip_angle.dcm")
 
-    session = simple_classify_study(session_directory=tmp_path)
+    with (
+        pytest.warns(UserWarning, match="Required DICOM fields"),
+        pytest.warns(UserWarning, match="Missing features"),
+    ):
+        session = simple_classify_study(session_directory=tmp_path)
     (volume,) = session[str(tmp_path)].values()
 
     assert volume["VolumeModality"] == "INVALID"
