@@ -22,7 +22,7 @@ def _classification_failure_reason(volume: DicomSingleVolumeInfoBase) -> str:
 
 def simple_classify_study(
     session_directory: Path | None = None,
-    inferer: ImageTypeClassifierBase = ImageTypeClassifierBase(),
+    inferer: ImageTypeClassifierBase | None = None,
     json_dumppath: Path | None = None,
     output_dir: Path | None = None,
     nifti_dir: Path | None = None,
@@ -32,7 +32,7 @@ def simple_classify_study(
 
     Args:
         session_directory: Path to the patient session directory with dicom data
-        inferer: Path to the model used for image type inference
+        inferer: Classifier used for image type inference, created when omitted
         json_dumppath: Path to the output json file
         output_dir: Path to the output the newly organized dicom data or None to avoid organizing dicom data
         nifti_dir: Path to the directory where the NIFTI files are stored for each volume
@@ -41,6 +41,8 @@ def simple_classify_study(
     Returns:
 
     """
+    if inferer is None:
+        inferer = ImageTypeClassifierBase()
     if nifti_dir:
         nifti_dir.mkdir(parents=True, exist_ok=True)
     if output_dir:
