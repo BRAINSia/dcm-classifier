@@ -21,7 +21,7 @@ rcParams.update({"figure.autolayout": True})
 plt.rcParams.update({"font.size": 7})
 
 # features currently used for training
-feautures = [
+training_features = [
     "Diffusionb-valueBool",
     "Echo Time",
     "Echo Train Length",
@@ -83,7 +83,7 @@ def generate_training_data(input_dataframe: str):
     df = pd.read_excel(input_dataframe)
     # Consolidate DataFrame operations
     df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
-    df = df[[*feautures, "label"]]
+    df = df[[*training_features, "label"]]
     # Keep only rows where 'label' matches keys in imagetype_to_integer_mapping
     df = df[df["label"].isin(imagetype_to_integer_mapping.keys())]
 
@@ -388,7 +388,7 @@ def inference_on_all_data(model_filename: str, model_df: str, out_file: str):
     e_inputs = df.loc[:, ~df.columns.str.contains("^Unnamed")]
     # drop the FileName column
     e_inputs = e_inputs.drop(columns=["FileName", "label"])
-    e_inputs = e_inputs[feautures]
+    e_inputs = e_inputs[training_features]
     # # ensure there are no empty or Nan values
     # e_inputs.fillna({col: 0 if "Type" in col else -12345 for col in df.columns}, inplace=True)
     x = e_inputs.to_numpy().astype("float32")
@@ -443,7 +443,7 @@ def inference_metric_test(model_filename: str, model_df: str, out_file: str, fea
     print(e_inputs.shape)
     # drop the FileName column
     e_inputs = e_inputs.drop(columns=["FileName", "label", "label_encoded"])
-    e_inputs = e_inputs[feautures]
+    e_inputs = e_inputs[training_features]
 
     # Add missing features if needed
     for feature in features:

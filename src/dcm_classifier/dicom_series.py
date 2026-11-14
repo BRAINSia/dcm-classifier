@@ -263,7 +263,7 @@ class DicomSingleSeries:
 
     def get_dicom_field_by_name(self, field_name) -> str:
         """
-        Get the elment f"{field_name}" from the reference DICOM file (i.e. the first file found).
+        Get the element f"{field_name}" from the reference DICOM file (i.e. the first file found).
         This should be the same for all volumes and is picked from the first volume.
 
         The Keyword elements from https://github.com/pydicom/pydicom/blob/main/src/pydicom/_dicom_dict.py

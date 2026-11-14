@@ -17,7 +17,7 @@ def organize_data_to_bids(df_path: str, output_dir: str):
         series_num = row["SeriesNumber"]
         print(Path(row["FileName"]))
         sub = Path(row["FileName"]).parent.parent.parent.name.split("_")[0]
-        # pad subject with 0s at the begining to make it 5 digits and create subject dir
+        # pad subject with 0s at the beginning to make it 5 digits and create subject dir
         # sub = sub.zfill(5)
         if sub not in subs:
             subs.append(sub)

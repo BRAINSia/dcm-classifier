@@ -358,7 +358,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         volumes_dictionary: dict[int, DicomSingleSeries] = {}
 
-        # TODO Paralellize this loop to speed up the process NOT A PRIORTY
+        # TODO Parallelize this loop to speed up the process NOT A PRIORITY
         for seriesIdentifier in seriesUID:
             # Get all filenames belonging to the current sub-series
             subseries_filenames: list[str] = namesGenerator.GetFileNames(
@@ -465,7 +465,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         }
         for each key in the dict
             -- sort the list by DateTime Object that we create, instance_number, acquisition_number
-            -- Sanity check that all have the same number of slices (Unless Mosaic which will be handled seperatly)
+            -- Sanity check that all have the same number of slices (Unless Mosaic which will be handled separately)
 
         For number of slices you have pull that index value off and create the DICOMSingleVolumeInfoBase object
 

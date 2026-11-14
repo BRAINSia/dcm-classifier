@@ -47,10 +47,10 @@ def compute_tracew_adc_from_diffusion(
         itk_im_list = bval_volumes_dict[bval]
         arr_list = [itk.GetArrayFromImage(itk_im) for itk_im in itk_im_list]
         avg_arr = np.average(np.array(arr_list), axis=0)
-        # TODO: If this is a mozaic image as well, it might have mutliple slices that also need to be averaged
+        # TODO: If this is a mozaic image as well, it might have multiple slices that also need to be averaged
         # Seems to be multiple volumes per volume????
         # TODO: We should ideally check for mosaic and convert it to volume inside the itk_read_from_dicomfn_list function
-        # TODO: Additionally, order of averaging (withing channels of subvolume and subvolumes) might matter
+        # TODO: Additionally, order of averaging (within channels of subvolume and subvolumes) might matter
         if avg_arr.shape[0] < 10:
             avg_arr = np.average(avg_arr, axis=0, keepdims=True)
             print(f"XXXXX avg_avg_arr shape: {avg_arr.shape}")
