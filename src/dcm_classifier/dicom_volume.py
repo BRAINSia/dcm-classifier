@@ -525,7 +525,7 @@ class DicomSingleVolumeInfoBase:
         if not valid:
             self.set_volume_modality("INVALID")
             self.set_acquisition_plane("INVALID")
-            return self.get_dicom_field_by_name(field_name="StudyInstanceUID"), dict()
+            return self.get_dicom_field_by_name(field_name="StudyInstanceUID"), {}
 
         volume_info_dict: dict[str, Any] = get_coded_dictionary_elements(
             sanitized_dicom_dict
@@ -534,7 +534,7 @@ class DicomSingleVolumeInfoBase:
 
         # ensure the volume_info_dict is not empty
         if not volume_info_dict:
-            return self.get_dicom_field_by_name(field_name="StudyInstanceUID"), dict()
+            return self.get_dicom_field_by_name(field_name="StudyInstanceUID"), {}
 
         # add features related to b-values and diffusion
         bvalue_current_dicom: int = int(self.get_volume_bvalue())

@@ -170,7 +170,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         :return: A list of dictionaries containing primary volume information.
         :rtype: list[dict[str, str]]
         """
-        list_of_volume_info_dictionaries: list[dict[str, str]] = list()
+        list_of_volume_info_dictionaries: list[dict[str, str]] = []
         for series_object in self.series_dictionary.values():
             for vol_index, subseries_vol_info in enumerate(
                 series_object.volume_info_list
@@ -357,7 +357,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 f"The directory: {study_directory} contains {len(seriesUID)} DICOM series"
             )
 
-        volumes_dictionary: dict[int, DicomSingleSeries] = dict()
+        volumes_dictionary: dict[int, DicomSingleSeries] = {}
 
         # TODO Paralellize this loop to speed up the process NOT A PRIORTY
         for seriesIdentifier in seriesUID:

@@ -57,7 +57,7 @@ class DicomSingleSeries:
 
         """
         self.series_number: int = series_number
-        self.volume_info_list: list[DicomSingleVolumeInfoBase] = list()
+        self.volume_info_list: list[DicomSingleVolumeInfoBase] = []
         self.series_modality: str = "INVALID"
         self.modality_probability: pd.DataFrame | None = None
         self.acquisition_plane: str = "UNKNOWN"

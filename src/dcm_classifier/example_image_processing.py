@@ -119,7 +119,7 @@ def compute_adc_from_multi_b_values(
     :rtype: FImageType
     """
 
-    list_of_log_images: list[FImageType] = list()
+    list_of_log_images: list[FImageType] = []
     small_offset_for_ln_computation: float = 1e-6
     for curr_raw_image in list_of_raw_bimages:
         non_zero_positive_shift: FImageType = add_const_to_itk_images(
@@ -137,7 +137,7 @@ def compute_adc_from_multi_b_values(
     n_time_sum_scaled_images: FImageType = multiply_itk_images(sum_of_scaled_images, N)
 
     sum_of_images: FImageType = add_list_of_images(list_of_log_images)
-    scaled_sums: list[FImageType] = list()
+    scaled_sums: list[FImageType] = []
     for current_bvalue in list_of_bvalues:
         scaled_sum = multiply_itk_images(sum_of_images, current_bvalue)
         scaled_sums.append(scaled_sum)
@@ -266,7 +266,7 @@ def compare_RGB_slices(refr_slice_fn: Path, test_slice_fn: Path) -> (int, dict):
 
     """
 
-    images_dict: dict[FImageType] = dict()
+    images_dict: dict[FImageType] = {}
     refr_slice = itk.imread(filename=refr_slice_fn, pixel_type=itk.F)
     test_slice = itk.imread(filename=test_slice_fn, pixel_type=itk.F)
     cif = itk.ComparisonImageFilter[FImageType, FImageType].New(
@@ -313,7 +313,7 @@ def compare_3d_float_images(
 
     """
 
-    images_dict: dict[FImageType] = dict()
+    images_dict: dict[FImageType] = {}
     images_dict["refr"] = itk.imread(filename=refr_fn, pixel_type=itk.F)
     images_dict["test"] = itk.imread(filename=test_fn, pixel_type=itk.F)
 
@@ -650,7 +650,7 @@ def scaled_by_bvalue_images(
 
     """
 
-    scaled_by_bvalue_list: list[FImageType] = list()
+    scaled_by_bvalue_list: list[FImageType] = []
     for index, image in enumerate(list_of_images):
         scaled_im: FImageType = multiply_itk_images(image, list_of_bvalues[index])
         scaled_by_bvalue_list.append(scaled_im)

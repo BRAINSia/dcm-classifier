@@ -118,7 +118,7 @@ mult_series_dir: Path = (
 
 def test_multiple_series_UID():
     assert mult_series_dir.exists()
-    vol = list()
+    vol = []
     for file in mult_series_dir.iterdir():
         vol.append(file)
 
@@ -137,7 +137,7 @@ def test_diff_grad_dir():
 
 def test_unknown_in_image_type():
     assert dicom_file_dir.exists()
-    vol = list()
+    vol = []
     for file in dicom_file_dir.iterdir():
         if "noImgType" in file.stem:
             vol.append(file)
@@ -149,7 +149,7 @@ def test_unknown_in_image_type():
 
 def test_no_series_number():
     assert dicom_file_dir.exists()
-    vol = list()
+    vol = []
     for file in dicom_file_dir.iterdir():
         if "noSeriesNum" in file.stem:
             vol.append(file)
@@ -162,7 +162,7 @@ def test_no_series_number():
 
 def test_no_echo_time():
     assert dicom_file_dir.exists()
-    vol = list()
+    vol = []
     for file in dicom_file_dir.iterdir():
         if "noEchoTime" in file.stem:
             vol.append(file)
@@ -175,7 +175,7 @@ def test_no_echo_time():
 
 def test_no_pixel_bandwidth():
     assert dicom_file_dir.exists()
-    vol = list()
+    vol = []
     for file in dicom_file_dir.iterdir():
         if "noPixelBW" in file.stem:
             vol.append(file)
@@ -188,7 +188,7 @@ def test_no_pixel_bandwidth():
 
 def test_empty_bvalue():
     assert dicom_file_dir.exists()
-    vol = list()
+    vol = []
     for file in dicom_file_dir.iterdir():
         if "emptyBValue" in file.stem:
             vol.append(file)
@@ -203,7 +203,7 @@ def test_invalid_fields():
     file_dir = dicom_file_dir.parent
 
     assert file_dir.exists()
-    vol = list()
+    vol = []
     for file in file_dir.iterdir():
         if "no_valid" in file.stem:
             vol.append(file)
