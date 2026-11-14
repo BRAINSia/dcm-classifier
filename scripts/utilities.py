@@ -35,7 +35,8 @@ def combine_all_excel_files(
                 elif file_extension == ".xls":
                     df = pd.read_excel(file.read())
                 else:
-                    raise ValueError(f"Unknown file extension {file_extension}")
+                    msg = f"Unknown file extension {file_extension}"
+                    raise ValueError(msg)
 
                 all_dataframes.append(df)
 

@@ -495,9 +495,8 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                     # Validate ImagePositionPatient
                     img_position = ds.get("ImagePositionPatient")
                     if img_position is None and self.raise_error_on_failure:
-                        raise ValueError(
-                            f"ImagePositionPatient not found in {dcm_file}"
-                        )
+                        msg = f"ImagePositionPatient not found in {dcm_file}"
+                        raise ValueError(msg)
 
                     # Safe extraction of metadata with fallback values
                     acquisition_date_time = parse_acquisition_datetime(ds)
@@ -558,9 +557,8 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
                 if num_volumes * num_unique_positions != num_files:
                     if self.raise_error_on_failure:
-                        raise ValueError(
-                            f"Inconsistent volume splitting: {num_files} files, {num_unique_positions} positions"
-                        )
+                        msg = f"Inconsistent volume splitting: {num_files} files, {num_unique_positions} positions"
+                        raise ValueError(msg)
                     print(
                         f"Warning: Detected {num_volumes} sub-volumes. "
                         f"Total files: {num_files}, Unique positions: {num_unique_positions}."

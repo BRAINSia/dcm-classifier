@@ -81,9 +81,8 @@ class DicomSingleSeries:
         :type modality: str
         """
         if not isinstance(modality, str):
-            raise ValueError(
-                f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."
-            )
+            msg = f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."
+            raise ValueError(msg)
         self.series_modality = modality
 
     def get_series_modality(self) -> str:
@@ -110,10 +109,11 @@ class DicomSingleSeries:
             not isinstance(modality_probability, pd.DataFrame)
             and modality_probability is not None
         ):
-            raise ValueError(
+            msg = (
                 "ERROR: Can only set_modality_probabilities with a pd.DataFrame."
                 f"Got type(modality_probability) = {type(modality_probability)}."
             )
+            raise ValueError(msg)
         self.modality_probability = modality_probability
 
     def get_modality_probabilities(self) -> pd.DataFrame | None:
@@ -133,10 +133,11 @@ class DicomSingleSeries:
         :type isotropic: bool
         """
         if not isinstance(isotropic, bool):
-            raise ValueError(
+            msg = (
                 "ERROR: Can only set_is_isotropic with a pd.DataFrame."
                 f"Got type(isotropic) = {type(isotropic)}."
             )
+            raise ValueError(msg)
         self.is_isotropic = isotropic
 
     def get_is_isotropic(self) -> bool:
@@ -156,10 +157,11 @@ class DicomSingleSeries:
         :type contrast: bool
         """
         if not isinstance(contrast, bool):
-            raise ValueError(
+            msg = (
                 "ERROR: Can only set_has_contrast with a pd.DataFrame."
                 f"Got type(contrast) = {type(contrast)}."
             )
+            raise ValueError(msg)
         self.has_contrast = contrast
 
     def get_has_contrast(self) -> bool:
@@ -189,10 +191,11 @@ class DicomSingleSeries:
 
         """
         if not isinstance(acquisition_plane, str):
-            raise ValueError(
+            msg = (
                 "ERROR: Can only set_acquisition_plane with a str."
                 f"Got type(acquisition_plane) = {type(acquisition_plane)}."
             )
+            raise ValueError(msg)
         self.acquisition_plane = acquisition_plane
 
     def get_acquisition_plane(self) -> str:

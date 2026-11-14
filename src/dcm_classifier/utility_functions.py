@@ -81,9 +81,8 @@ def itk_read_from_dicomfn_list(
         namesGenerator.SetDirectory(tmp_symlink_dir_path.as_posix())
         seriesUID_list = namesGenerator.GetSeriesUIDs()
         if len(seriesUID_list) < 1:
-            raise FileNotFoundError(
-                f"No DICOMs in: {tmp_symlink_dir_path.as_posix()} (itk_read_from_dicomfn_list)"
-            )
+            msg = f"No DICOMs in: {tmp_symlink_dir_path.as_posix()} (itk_read_from_dicomfn_list)"
+            raise FileNotFoundError(msg)
         if len(seriesUID_list) > 1:
             msg: str = (
                 f"Too many series in DICOMs in: {tmp_symlink_dir_path.as_posix()}"

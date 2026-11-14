@@ -196,7 +196,8 @@ class ImageTypeClassifierBase:
         if num_threads is None:
             num_threads = allowed_cpu_count()
         if num_threads is not None and num_threads < 1:
-            raise ValueError(f"num_threads must be at least 1, got {num_threads}")
+            msg = f"num_threads must be at least 1, got {num_threads}"
+            raise ValueError(msg)
         self.num_threads: int | None = num_threads
         self._inference_session: Any = None
         self._inference_session_model_filename: Path | None = None

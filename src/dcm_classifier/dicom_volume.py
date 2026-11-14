@@ -149,9 +149,8 @@ class DicomSingleVolumeInfoBase:
         :type modality: str
         """
         if not isinstance(modality, str):
-            raise ValueError(
-                f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."
-            )
+            msg = f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."
+            raise ValueError(msg)
         self.volume_modality = modality
 
     def get_volume_modality(self) -> str:
@@ -261,10 +260,11 @@ class DicomSingleVolumeInfoBase:
             not isinstance(modality_probability, pd.DataFrame)
             and modality_probability is not None
         ):
-            raise ValueError(
+            msg = (
                 "ERROR: Can only set_modality_probabilities with a pd.DataFrame."
                 f"Got type(modality_probability) = {type(modality_probability)}."
             )
+            raise ValueError(msg)
         self.modality_probability = modality_probability
 
     def get_modality_probabilities(self) -> pd.DataFrame | None:
