@@ -1,0 +1,55 @@
+"""Development tasks. Run `nox -l` to list them and `nox` for the defaults."""
+
+from pathlib import Path
+
+import nox
+
+nox.needs_version = ">=2025.2.9"
+nox.options.default_venv_backend = "uv|virtualenv"
+nox.options.sessions = ["lint", "tests"]
+
+PYPROJECT = nox.project.load_toml("pyproject.toml")
+ROOT = Path(__file__).parent
+
+
+@nox.session
+def lint(session: nox.Session) -> None:
+    """Run the pre-commit hooks on every file."""
+    session.install("pre-commit")
+    session.run(
+        "pre-commit", "run", "--all-files", "--show-diff-on-failure", *session.posargs
+    )
+
+
+@nox.session
+def tests(session: nox.Session) -> None:
+    """Run the test suite against the installed package."""
+    session.install(".", *nox.project.dependency_groups(PYPROJECT, "test"))
+    # An empty pythonpath makes pytest import the installed package, not src/.
+    session.run("pytest", "-o", "pythonpath=", *session.posargs)
+
+
+@nox.session(python="3.13", reuse_venv=True)
+def docs(session: nox.Session) -> None:
+    """Build the Sphinx documentation into docs/_build/html."""
+    session.install(".", "-r", "docs/requirements-docs.txt")
+    session.run(
+        "sphinx-build",
+        "-b",
+        "html",
+        "docs/source",
+        "docs/_build/html",
+        *session.posargs,
+    )
+
+
+@nox.session
+def build(session: nox.Session) -> None:
+    """Build the source distribution and wheel into dist/."""
+    session.install("build", "twine")
+    dist = ROOT / "dist"
+    if dist.exists():
+        for item in dist.iterdir():
+            item.unlink()
+    session.run("python", "-m", "build")
+    session.run("twine", "check", "dist/*")
