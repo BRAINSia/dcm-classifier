@@ -63,8 +63,8 @@ jobs:
           # Sphinx 9.2 needs Python 3.13; the package is tested on 3.12 and 3.14.
           python-version: "3.13"
           activate-environment: true
-          cache-dependency-glob: docs/requirements-docs.txt
-      - run: uv pip install . -r docs/requirements-docs.txt
+          cache-dependency-glob: pyproject.toml
+      - run: uv pip install . --group docs
       - run: python -m sphinx -W --keep-going -b html docs/source docs/_build/html
 
   lowest-dependencies:
