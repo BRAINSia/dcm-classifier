@@ -88,7 +88,7 @@ def truncate_column_names(df: pd.DataFrame, max_length: int) -> pd.DataFrame | N
 def parse_column_headers(
     header_dataframe: pd.DataFrame,
     input_file: (str | Path) | pd.DataFrame,
-    output_path: str | Path = None,
+    output_path: str | Path | None = None,
     save_to_excel: bool = True,
 ) -> pd.DataFrame:
     index_field = "FileName"

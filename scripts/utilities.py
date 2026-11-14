@@ -76,7 +76,9 @@ removal_features = [
 
 
 def remove_rows_with_duplicate_values(
-    input_frame: str | pd.DataFrame, outpath: str = None, save_to_excel: bool = True
+    input_frame: str | pd.DataFrame,
+    outpath: str | None = None,
+    save_to_excel: bool = True,
 ) -> pd.DataFrame:
     """
     Remove rows with duplicate values from a pandas dataframe
