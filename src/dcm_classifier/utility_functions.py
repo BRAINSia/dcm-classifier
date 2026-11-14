@@ -448,14 +448,7 @@ def sanitize_dicom_dataset(
                 vprint(f"Missing required {field} value {dicom_filename}")
             else:
                 dataset_dictionary[field] = dataset[field].value
-        elif field == "PixelBandwidth":
-            if not is_number(dataset[field].value):
-                dataset_dictionary[field] = INVALID_VALUE
-                missing_fields.append(field)
-                vprint(f"Missing required {field} value {dicom_filename}")
-            else:
-                dataset_dictionary[field] = dataset[field].value
-        elif field == "SliceThickness":
+        elif field == "PixelBandwidth" or field == "SliceThickness":
             if not is_number(dataset[field].value):
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
