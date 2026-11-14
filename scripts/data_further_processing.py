@@ -98,10 +98,10 @@ def prepare_study(
 
     problems: list[str] = []
     for series_number, series in study.series_dictionary.items():
-        series_uid: str = series.get_series_uid()
+        series_uid: str = series.get_dicom_field_by_name("SeriesInstanceUID")
         output_directory: Path = (
             output_base_directory
-            / series.get_study_uid()
+            / series.get_dicom_field_by_name("StudyInstanceUID")
             / f"{series_number}_{series_uid}"
         )
         if output_directory.exists():
