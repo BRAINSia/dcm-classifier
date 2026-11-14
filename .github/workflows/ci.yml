@@ -50,6 +50,12 @@ jobs:
       - run: uv pip install . --group test
       - run: python -m coverage run -m pytest
       - run: python -m coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
+      - run: python -m coverage xml
+      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          files: coverage.xml
+          flags: ${{ matrix.os }}-py${{ matrix.python-version }}
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   docs:
     runs-on: ubuntu-24.04
