@@ -217,6 +217,7 @@ extend-select = [
     "PERF401",  # manual-list-comprehension
     "PERF402",  # manual-list-copy
     "PIE808",  # unnecessary-range-start
+    "PLC0415",  # import-outside-top-level
     "PLR1714",  # repeated-equality-comparison
     "PLR5501",  # collapsible-else-if
     "PLW2901",  # redefined-loop-name
@@ -288,7 +289,6 @@ ignore = [
     "ARG001",  # unused-function-argument (7)
     "B008",  # function-call-in-default-argument (1)
     "BLE001",  # blind-except (17)
-    "PLC0415",  # import-outside-top-level (3)
     "PLW0603",  # global-statement (1)
     "TRY003",  # raise-vanilla-args (15)
     "TRY004",  # type-check-without-type-error (5)

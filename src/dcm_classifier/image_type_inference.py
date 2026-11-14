@@ -238,7 +238,7 @@ class ImageTypeClassifierBase:
             self._inference_session is None
             or self._inference_session_model_filename != model_filename
         ):
-            import onnxruntime as rt
+            import onnxruntime as rt  # noqa: PLC0415  # loaded on first use, not on import
 
             options = rt.SessionOptions()
             # 0 lets ONNX Runtime choose the thread count.
