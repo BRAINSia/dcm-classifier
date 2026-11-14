@@ -15,9 +15,11 @@ _How do you use this new functionality? (if applicable)_
 
 <!-- _What items should be checked before this PR is considered complete?_ -->
 
-- [ ] Tag your last commit.
-- [ ] Update the package version in `pyproject.toml` (e.g., to 0.9.8).
-- [ ] Update the changelog in `pyproject.toml` to reflect your changes.
+- [ ] `nox` (the lint and tests sessions) passes locally.
+- [ ] New behavior has a test.
+
+The version comes from git tags, and releases are made from GitHub
+releases; a pull request does not change either.
 
 # Testing
 

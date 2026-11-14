@@ -53,3 +53,16 @@ Where the prefix is one of the following:
 ### Pull Requests
 
 Pull requests should be made against the `main` branch. Use the pull request template provided in the repository to ensure all necessary information is included. For testing changes, please refer to the [README](README.md) file. Additionally, tests will be run automatically on the pull request to ensure the changes do not break the package.
+
+### Releasing
+
+The package version comes from the nearest `v*` git tag, through
+`hatch-vcs`; nothing in the source states it. To release:
+
+1. Draft a GitHub release on `main` with a new tag such as `v0.10.0`,
+   and let GitHub generate the notes.
+2. Publish the release. The `CD` workflow builds the sdist and wheel,
+   attests them, and uploads them to PyPI through trusted publishing.
+
+The workflow builds and inspects the distributions on every pull request
+as well, so a packaging problem shows up before a release.
