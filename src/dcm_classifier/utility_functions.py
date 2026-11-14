@@ -114,9 +114,10 @@ def is_number(s: Any) -> bool:
     """
     try:
         float(s)
-        return True
     except Exception:
         return False
+    else:
+        return True
 
 
 def is_integer(s: Any) -> bool:
@@ -133,9 +134,10 @@ def is_integer(s: Any) -> bool:
     """
     try:
         int(s)
-        return True
     except Exception:
         return False
+    else:
+        return True
 
 
 def is_mr_sop_class(dicom_header_info: Dataset) -> bool:
@@ -683,9 +685,10 @@ def validate_numerical_dataset_element(element: str | None) -> str | float:
     """
     try:
         float(element)
-        return element
     except Exception:
         return MISSING_VALUE
+    else:
+        return element
 
 
 # organize required features

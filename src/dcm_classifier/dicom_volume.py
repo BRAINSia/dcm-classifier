@@ -464,13 +464,14 @@ class DicomSingleVolumeInfoBase:
             series_number_int: int = int(
                 self._pydicom_info.get("SeriesNumber", MISSING_VALUE)
             )
-            return series_number_int
         except Exception as e:
             if "SeriesNumber" not in self._pydicom_info:
                 print("SeriesNumber not found in DICOM file")
             else:
                 print(f"Can not convert to int {self._pydicom_info.SeriesNumber}: {e}")
-        return MISSING_VALUE
+            return MISSING_VALUE
+        else:
+            return series_number_int
 
     def get_volume_index(self) -> int | None:
         """
