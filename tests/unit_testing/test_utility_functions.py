@@ -1,25 +1,27 @@
+from pathlib import Path
+
 import numpy as np
 import pydicom
 import pytest
-from dcm_classifier.example_image_processing import slugify, rglob_for_singular_result
+
+from dcm_classifier.dicom_config import optional_DICOM_fields, required_DICOM_fields
+from dcm_classifier.example_image_processing import rglob_for_singular_result, slugify
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 from dcm_classifier.utility_functions import (
-    vprint,
-    get_diffusion_gradient_direction,
-    convert_array_to_min_max,
-    sanitize_dicom_dataset,
-    itk_read_from_dicomfn_list,
-    is_integer,
-    ensure_magnitude_of_1,
     convert_array_to_index_value,
-    get_coded_dictionary_elements,
+    convert_array_to_min_max,
+    ensure_magnitude_of_1,
     get_bvalue,
-    validate_numerical_dataset_element,
+    get_coded_dictionary_elements,
+    get_diffusion_gradient_direction,
+    is_integer,
     is_mr_sop_class,
+    itk_read_from_dicomfn_list,
+    sanitize_dicom_dataset,
+    validate_numerical_dataset_element,
+    vprint,
 )
-from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
-from pathlib import Path
 
 relative_testing_data_path: Path = Path(__file__).parent.parent / "testing_data"
 current_file_path: Path = Path(__file__).parent

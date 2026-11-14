@@ -15,21 +15,21 @@
 #    limitations under the License.
 #
 #  =========================================================================
+import warnings
 from collections import defaultdict
 from pathlib import Path, PurePath
-import warnings
 
 import itk
 import pydicom
 
 from .dicom_config import MISSING_VALUE
-from .dicom_volume import DicomSingleVolumeInfoBase
 from .dicom_series import DicomSingleSeries
+from .dicom_volume import DicomSingleVolumeInfoBase
 from .image_type_inference import ImageTypeClassifierBase
 from .utility_functions import (
     check_two_images_have_same_physical_space,
-    parse_acquisition_datetime,
     is_mr_sop_class,
+    parse_acquisition_datetime,
 )
 
 

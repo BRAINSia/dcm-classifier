@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+
 import numpy as np
 from dicomanonymizer.simpledicomanonymizer import anonymize_dicom_file, generate_actions
 from pydicom import dcmread
-
 
 custom_private_tags = [
     (0x0018, 0x9075),

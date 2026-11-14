@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 # fields found and their corresponding action
 fields: list[list[str]] = [
     ["Image Type", "one_hot_encoding_from_array"],

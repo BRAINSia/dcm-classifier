@@ -1,12 +1,13 @@
+import random
 import re
-import pytest
 from pathlib import Path
 
-from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+import pytest
 from pydicom import Dataset
 from pydicom.dataset import FileMetaDataset
-import random
+
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
+from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 
 # Previous code for generating mock volumes from botimage
 adjacent_testing_data_path: Path = Path(__file__).parent / "testing_data"

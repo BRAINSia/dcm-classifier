@@ -1,19 +1,19 @@
 import random
 import shutil
+from pathlib import Path
 
 import pydicom
 import pytest
 from pydicom.uid import SecondaryCaptureImageStorage, generate_uid
 
+from dcm_classifier.dicom_config import MISSING_VALUE, inference_features
 from dcm_classifier.image_type_inference import (
     ImageTypeClassifierBase,
     imagetype_to_integer_mapping,
 )
-from dcm_classifier.dicom_config import MISSING_VALUE, inference_features
 from dcm_classifier.study_processing import (
     ProcessOneDicomStudyToVolumesMappingBase,
 )
-from pathlib import Path
 
 relative_testing_data_path: Path = Path(__file__).parent.parent / "testing_data"
 

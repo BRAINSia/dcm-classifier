@@ -1,6 +1,8 @@
 from pathlib import Path
+
 import pandas as pd
 import pydicom
+
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 
 

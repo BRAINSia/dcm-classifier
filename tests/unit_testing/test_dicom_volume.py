@@ -1,15 +1,16 @@
+from collections import OrderedDict
 from pathlib import Path
+
+import pytest
+from deprecation import DeprecatedWarning
 
 from dcm_classifier.dicom_config import MISSING_VALUE
 from dcm_classifier.dicom_volume import (
     DicomSingleVolumeInfoBase,
 )
-from collections import OrderedDict
-import pytest
-from dcm_classifier.utility_functions import FImageType
-from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
-from deprecation import DeprecatedWarning
+from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+from dcm_classifier.utility_functions import FImageType
 
 current_file_path = Path(__file__).parent
 inference_model_path = list(
