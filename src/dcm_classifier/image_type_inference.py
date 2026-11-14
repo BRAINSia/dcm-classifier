@@ -201,14 +201,13 @@ class ImageTypeClassifierBase:
         self.num_threads: int | None = num_threads
         self._inference_session: Any = None
         self._inference_session_model_filename: Path | None = None
+        self.classification_model_filename: Path
         if classification_model_filename is None:
             self.classification_model_filename = (
                 dcm_classifier_path / "models" / "ova_rf_classifier.onnx"
             )
         else:
-            self.classification_model_filename: str | Path = Path(
-                classification_model_filename
-            )
+            self.classification_model_filename = Path(classification_model_filename)
         self.classification_feature_list: list[str] = classification_feature_list
         self.imagetype_to_int_map: dict[str, int] = image_type_map
         self.int_to_imagetype_map: dict[int, str] = self.get_int_to_type_map()
@@ -259,7 +258,7 @@ class ImageTypeClassifierBase:
         """
         return self.min_probability_threshold
 
-    def get_int_to_type_map(self) -> dict:
+    def get_int_to_type_map(self) -> dict[int, str]:
         """
         Get the integer to image type mapping.
 
@@ -274,12 +273,19 @@ class ImageTypeClassifierBase:
         check if the series is a diffusion series. If so, the series modality is overridden to dwig.
         This function is called during inference
         """
-        volume_list = self.series.get_volume_list()
+        series = self._require_series()
+        volume_list = series.get_volume_list()
         first_dcm_per_volume = [
             volume.get_one_volume_dcm_filenames()[0] for volume in volume_list
         ]
         diff_modality = infer_diffusion_from_gradient(first_dcm_per_volume)
-        self.series.set_series_modality(diff_modality)
+        series.set_series_modality(diff_modality)
+
+    def _require_series(self) -> DicomSingleSeries:
+        if self.series is None:
+            msg = "No series is set; call set_series first."
+            raise AttributeError(msg)
+        return self.series
 
     def check_if_diffusion(self) -> None:  # pragma: no cover
         msg = "This method check_if_diffusion is deprecated, use  update_diffusion_series_modality instead."
@@ -297,7 +303,7 @@ class ImageTypeClassifierBase:
         self.series_number = series.get_series_number()
         self.info_dict = self.series.get_series_info_dict()
 
-    def infer_acquisition_plane(self, feature_dict: dict | None = None) -> str:
+    def infer_acquisition_plane(self, feature_dict: dict[str, Any]) -> str:
         """
         Infer the acquisition plane based on DICOM information and image properties.
 
@@ -327,7 +333,7 @@ class ImageTypeClassifierBase:
             return "sag"
         return "cor"
 
-    def infer_isotropic(self, feature_dict: dict | None = None) -> bool | None:
+    def infer_isotropic(self, feature_dict: dict[str, Any]) -> bool | None:
         """
         Infer the acquisition plane based on DICOM information and image properties.
 
@@ -352,7 +358,7 @@ class ImageTypeClassifierBase:
         thickness = float(feature_dict["SliceThickness"])
         return bool(np.allclose(spacing, thickness, rtol=0.1))
 
-    def infer_contrast(self, feature_dict: dict | None = None) -> bool:
+    def infer_contrast(self, feature_dict: dict[str, Any]) -> bool:
         """
         Infer whether the image has contrast based on DICOM information and image properties.
 
@@ -371,7 +377,9 @@ class ImageTypeClassifierBase:
         # check if the volume has contrast
         return "none" not in feature_dict[field].lower()
 
-    def infer_modality(self, feature_dict: dict | None = None) -> (str, pd.DataFrame):
+    def infer_modality(
+        self, feature_dict: dict[str, Any]
+    ) -> tuple[str, pd.DataFrame | None]:
         """
         Infer the modality (image type) of the DICOM series based on a feature dictionary.
 
@@ -403,7 +411,7 @@ class ImageTypeClassifierBase:
         full_outputs["SeriesNumber"] = [self.series_number]
         model_inputs: pd.DataFrame = e_inputs.reindex(columns=inference_features)
         try:
-            numeric_inputs: np.array = model_inputs.astype(np.float32).to_numpy()
+            numeric_inputs: np.ndarray = model_inputs.astype(np.float32).to_numpy()
         except ValueError:
             # Short circuit if the inputs are not sufficient for inference
             full_outputs["GUESS_ONNX"] = ["InvalidDicomInputs"]
@@ -428,9 +436,7 @@ class ImageTypeClassifierBase:
             full_outputs[class_name] = [class_probability]
 
         del col_index, class_probability, col_name, class_name
-        image_type: str = full_outputs.iloc[
-            0, full_outputs.columns.get_loc("GUESS_ONNX")
-        ]
+        image_type: str = full_outputs["GUESS_ONNX"].iloc[0]
         if max(probability_onx[0].values()) < self.min_probability_threshold:
             image_type = f"LOW_PROBABILITY_{image_type}"
 
@@ -443,8 +449,13 @@ class ImageTypeClassifierBase:
         This method performs image type classification and acquisition plane inference based on the provided features.
 
         """
+        series = self._require_series()
+        info_dict = self.info_dict
+        if info_dict is None:
+            msg = "No series is set; call set_series first."
+            raise AttributeError(msg)
 
-        def validate_features(input_dict: dict) -> bool:
+        def validate_features(input_dict: dict[str, Any]) -> bool:
             """
             Validate the presence of required features in the input feature dictionary.
 
@@ -466,24 +477,24 @@ class ImageTypeClassifierBase:
             if len(missing_features) > 0:
                 warnings.warn(
                     f"Missing features for SeriesNumber {self.series_number}: {missing_features}\n"
-                    f"Series contains: {self.series.volume_info_list[0].get_one_volume_dcm_filenames()}",
+                    f"Series contains: {series.volume_info_list[0].get_one_volume_dcm_filenames()}",
                     stacklevel=2,
                 )
                 return False
             return True
 
         # classify volumes
-        for volume in self.series.get_volume_list():
+        for volume in series.get_volume_list():
             features_validated: bool = validate_features(volume.get_volume_dictionary())
             if features_validated:
                 acquisition_plane: str = self.infer_acquisition_plane(
                     feature_dict=volume.get_volume_dictionary()
                 )
                 volume.set_acquisition_plane(acquisition_plane)
-                isotropic = self.infer_isotropic(feature_dict=self.info_dict)
+                isotropic = self.infer_isotropic(feature_dict=info_dict)
                 volume.set_is_isotropic(isotropic)
 
-                contrast = self.infer_contrast(feature_dict=self.info_dict)
+                contrast = self.infer_contrast(feature_dict=info_dict)
                 volume.set_has_contrast(contrast)
 
                 modality, full_outputs = self.infer_modality(
@@ -504,71 +515,65 @@ class ImageTypeClassifierBase:
         """
         # if there is only a single volume in the series, the series modality and acquisition plane are set to the
         # volume's modality and acquisition plane
-        if len(self.series.get_volume_list()) == 1:
-            volume = self.series.get_volume_list()[0]
+        if len(series.get_volume_list()) == 1:
+            volume = series.get_volume_list()[0]
             modality = volume.get_volume_modality().replace("LOW_PROBABILITY_", "")
 
-            self.series.set_series_modality(modality)
+            series.set_series_modality(modality)
             bval = volume.get_volume_bvalue()
             if bval > 0 and modality not in ["tracew", "adc", "fa", "eadc", "dwig"]:
                 self._update_diffusion_series_modality()
 
-            self.series.set_modality_probabilities(volume.get_modality_probabilities())
-            self.series.set_acquisition_plane(volume.get_acquisition_plane())
-            self.series.set_is_isotropic(volume.get_is_isotropic())
-            self.series.set_has_contrast(volume.get_has_contrast())
+            series.set_modality_probabilities(volume.get_modality_probabilities())
+            series.set_acquisition_plane(volume.get_acquisition_plane())
+            series.set_is_isotropic(volume.get_is_isotropic())  # type: ignore[arg-type]
+            series.set_has_contrast(volume.get_has_contrast())
         else:
             # for acquisition plane we assume as volumes in series have the same acquisition plane
             # similarly we propagate the isotropic and contrast
-            self.series.set_acquisition_plane(
-                self.series.get_volume_list()[0].get_acquisition_plane()
+            series.set_acquisition_plane(
+                series.get_volume_list()[0].get_acquisition_plane()
             )
-            self.series.set_is_isotropic(
-                self.series.get_volume_list()[0].get_is_isotropic()
-            )
-            self.series.set_has_contrast(
-                self.series.get_volume_list()[0].get_has_contrast()
-            )
+            series.set_is_isotropic(series.get_volume_list()[0].get_is_isotropic())  # type: ignore[arg-type]
+            series.set_has_contrast(series.get_volume_list()[0].get_has_contrast())
 
             # get all modalities from the series
             modalities = [
                 volume.get_volume_modality().replace("LOW_PROBABILITY_", "")
-                for volume in self.series.get_volume_list()
+                for volume in series.get_volume_list()
             ]
             unique_modalities = list(set(modalities))
 
             # get all bvalues in the series
-            bvals = [
-                volume.get_volume_bvalue() for volume in self.series.get_volume_list()
-            ]
+            bvals = [volume.get_volume_bvalue() for volume in series.get_volume_list()]
             unique_bvals = list(set(bvals))
             if len(unique_modalities) == 1:
                 if MISSING_VALUE not in unique_bvals:
                     self._update_diffusion_series_modality()
                 else:
-                    self.series.set_series_modality(
-                        self.series.get_volume_list()[0].get_volume_modality()
+                    series.set_series_modality(
+                        series.get_volume_list()[0].get_volume_modality()
                     )
             elif "pd" in unique_modalities and "t2w" in unique_modalities:
-                self.series.set_series_modality("PDT2")
+                series.set_series_modality("PDT2")
             # DWI series usually contains b0 and dwig gradient volumes
             elif "dwig" in unique_modalities:
                 self._update_diffusion_series_modality()
             # TRACEW series often contains b0 and tracew volumes
             # TODO: get more data for testing
             elif "tracew" in unique_modalities:
-                self.series.set_series_modality("tracew")
+                series.set_series_modality("tracew")
             elif MISSING_VALUE not in unique_bvals:
                 self._update_diffusion_series_modality()
             else:
                 # if other scenarios are not met, we set the modality to the first volume's modality
-                self.series.set_series_modality(
-                    self.series.get_volume_list()[0].get_volume_modality()
+                series.set_series_modality(
+                    series.get_volume_list()[0].get_volume_modality()
                 )
 
         """Override PERFUSION data"""
         # TODO: This is temporary fix and should be removed when the model is retrained with PERFUSION data and class
-        for volume in self.series.get_volume_list():
+        for volume in series.get_volume_list():
             if volume.get_volume_dictionary().get("ImageType_PERFUSION", 0) == 1:
-                self.series.set_series_modality("perfusion")
+                series.set_series_modality("perfusion")
                 break
