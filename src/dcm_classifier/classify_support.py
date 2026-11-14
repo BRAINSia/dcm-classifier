@@ -57,7 +57,7 @@ def simple_classify_study(
     list_of_dictionaries: list[dict[str, str]] = []
     session_dictionary: dict[str, Any] = {}
     for series_number, series in study.series_dictionary.items():
-        for index, volume in enumerate(series.get_volume_list()):
+        for volume in series.get_volume_list():
             invalid_volume: bool = False
             current_dict: dict[str, str] = ordered_dict()
             current_dict["Series#"] = str(series_number)

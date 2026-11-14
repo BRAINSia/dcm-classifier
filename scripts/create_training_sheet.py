@@ -103,7 +103,7 @@ def parse_column_headers(
     input_df = input_df[not_na]
     new_data_frame = input_df[[index_field]]
 
-    for index, row in header_dataframe.iterrows():
+    for _, row in header_dataframe.iterrows():
         current_header = row["header_name"][:max_header_length]
 
         if "keep" in row["action"]:

@@ -180,7 +180,7 @@ def generate_dicom_dataframe(
     for ses_dir in session_dirs:
         study = ProcessOneDicomStudyToVolumesMappingBase(study_directory=ses_dir)
         for series in study.series_dictionary.values():
-            for index, volume in enumerate(series.volume_info_list):
+            for volume in series.volume_info_list:
                 ds = pydicom.dcmread(
                     volume.one_volume_dcm_filenames[0], stop_before_pixels=True
                 )
