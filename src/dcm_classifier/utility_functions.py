@@ -872,7 +872,7 @@ def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) ->
         raise e
 
     named_list = list()
-    for index in range(0, len(number_list)):
+    for index in range(len(number_list)):
         named_list.append((name + "_" + str(index), number_list[index]))
     return named_list
 
