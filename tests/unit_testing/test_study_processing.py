@@ -11,6 +11,7 @@ from dcm_classifier.image_type_inference import (
 )
 from dcm_classifier.dicom_config import inference_features
 from dcm_classifier.study_processing import (
+    MISSING_SERIES_NUMBER,
     ProcessOneDicomStudyToVolumesMappingBase,
 )
 from pathlib import Path
@@ -146,6 +147,42 @@ def test_non_mosaic_series_is_not_flagged(get_data_dir, recwarn):
     (series,) = study.series_dictionary.values()
     assert not series.get_is_mosaic()
     assert not any("mosaic" in str(w.message) for w in recwarn)
+
+
+invalid_fields_directory: Path = (
+    relative_testing_data_path
+    / "anonymized_testing_data"
+    / "invalid_data"
+    / "invalid_fields"
+)
+
+
+@pytest.mark.parametrize("file_name", ["noSeriesNum.dcm", "invalidSeriesNum.dcm"])
+def test_unusable_series_number_does_not_stop_the_study(
+    get_data_dir, tmp_path, file_name
+):
+    shutil.copy(invalid_fields_directory / file_name, tmp_path / file_name)
+    valid_file = next((get_data_dir / "9").rglob("*.dcm"))
+    shutil.copy(valid_file, tmp_path / "valid.dcm")
+
+    with pytest.warns(UserWarning, match=f"SeriesNumber is missing.*{file_name}"):
+        study = ProcessOneDicomStudyToVolumesMappingBase(
+            tmp_path, inferer=ImageTypeClassifierBase()
+        )
+    study.run_inference()
+
+    assert set(study.series_dictionary) == {9, MISSING_SERIES_NUMBER}
+    (volume,) = study.series_dictionary[MISSING_SERIES_NUMBER].get_volume_list()
+    assert volume.get_volume_modality() == "INVALID"
+    assert study.series_dictionary[9].get_series_modality() != "INVALID"
+
+
+@pytest.mark.parametrize("file_name", ["noSeriesNum.dcm", "invalidSeriesNum.dcm"])
+def test_unusable_series_number_raises_when_errors_are_requested(tmp_path, file_name):
+    shutil.copy(invalid_fields_directory / file_name, tmp_path / file_name)
+
+    with pytest.raises(ValueError, match=f"SeriesNumber is missing.*{file_name}"):
+        ProcessOneDicomStudyToVolumesMappingBase(tmp_path, raise_error_on_failure=True)
 
 
 def test_split_does_not_depend_on_bvalue_tags(get_data_dir, tmp_path):

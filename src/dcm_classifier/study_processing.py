@@ -31,6 +31,8 @@ from .utility_functions import (
     is_mr_sop_class,
 )
 
+MISSING_SERIES_NUMBER: int = -12345
+
 
 class ProcessOneDicomStudyToVolumesMappingBase:
     """
@@ -392,7 +394,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             # Organize these sub-volumes by their SeriesNumber
             sn: int = -1
             for volume_obj in sub_volumes:
-                sn = int(volume_obj.get_dicom_field_by_name("SeriesNumber"))
+                sn = self._series_number_of(volume_obj)
                 if sn not in volumes_dictionary:
                     volumes_dictionary[sn] = DicomSingleSeries(series_number=sn)
                 volumes_dictionary[sn].add_volume_to_series(volume_obj)
@@ -412,6 +414,26 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 del volumes_dictionary[series_number]
             del series_numbers_to_remove
         return volumes_dictionary
+
+    def _series_number_of(self, volume: DicomSingleVolumeInfoBase) -> int:
+        """
+        Get the SeriesNumber a volume is filed under.
+
+        :param volume: The volume to file.
+        :return: The SeriesNumber, or MISSING_SERIES_NUMBER when it is absent or not an integer.
+        :raises ValueError: If the SeriesNumber is unusable and raise_error_on_failure is set.
+        """
+        try:
+            return int(volume.get_dicom_field_by_name("SeriesNumber"))
+        except (TypeError, ValueError):
+            message = (
+                "SeriesNumber is missing or not an integer in "
+                f"{volume.get_one_volume_dcm_filenames()[0]}"
+            )
+            if self.raise_error_on_failure:
+                raise ValueError(message) from None
+            warnings.warn(f"{message}; filed under series {MISSING_SERIES_NUMBER}")
+            return MISSING_SERIES_NUMBER
 
     def _identify_and_split_sub_volumes_pydicom(
         self, subseries_filenames: list[str]

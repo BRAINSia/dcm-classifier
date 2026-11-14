@@ -46,21 +46,31 @@ def test_writes_json_and_nifti_per_sub_volume(get_data_dir, tmp_path):
         assert sub_volume["ImageType"].removeprefix("LOW_PROBABILITY_") == best_class
 
 
-def test_failing_study_does_not_stop_the_batch(get_data_dir, tmp_path, capsys):
+def test_failing_study_does_not_stop_the_batch(
+    get_data_dir, tmp_path, capsys, monkeypatch
+):
     studies_directory = tmp_path / "studies"
-    studies_directory.mkdir()
-    (studies_directory / "a_invalid_study").symlink_to(
-        get_data_dir.parent / "invalid_data"
-    )
+    (studies_directory / "a_failing_study").mkdir(parents=True)
     (studies_directory / "b_tracew_study").symlink_to(get_data_dir / "5")
     output_directory = tmp_path / "output"
+    prepare_study = data_further_processing.prepare_study
+
+    def fail_on_first_study(study_directory, *args):
+        if study_directory.name == "a_failing_study":
+            raise RuntimeError("unreadable study")
+        return prepare_study(study_directory, *args)
+
+    monkeypatch.setattr(data_further_processing, "prepare_study", fail_on_first_study)
 
     with pytest.raises(SystemExit, match="1 studies, series, or sub-volumes"):
         data_further_processing.main(
             ["-d", str(studies_directory), "-o", str(output_directory)]
         )
 
-    assert "a_invalid_study could not be prepared" in capsys.readouterr().out
+    assert (
+        "a_failing_study could not be prepared: unreadable study"
+        in capsys.readouterr().out
+    )
     assert len(list(output_directory.rglob("*.json"))) == 1
 
 
