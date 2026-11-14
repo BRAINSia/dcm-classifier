@@ -198,6 +198,7 @@ extend-exclude = ["*.ipynb"]
 [tool.ruff.lint]
 extend-select = [
     # Rules adopted one per commit, named so each stays enforced.
+    "B028",  # no-explicit-stacklevel
     "B905",  # zip-without-explicit-strict
     "C416",  # unnecessary-comprehension
     "EM101",  # raw-string-in-exception
@@ -256,7 +257,6 @@ ignore = [
     "ARG005",  # unused-lambda-argument (3)
     "B007",  # unused-loop-control-variable (19)
     "B008",  # function-call-in-default-argument (1)
-    "B028",  # no-explicit-stacklevel (4)
     "B904",  # raise-without-from-inside-except (1)
     "BLE001",  # blind-except (17)
     "C408",  # unnecessary-collection-call (28)

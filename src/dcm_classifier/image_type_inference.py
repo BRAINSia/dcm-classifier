@@ -468,7 +468,8 @@ class ImageTypeClassifierBase:
             if len(missing_features) > 0:
                 warnings.warn(
                     f"Missing features for SeriesNumber {self.series_number}: {missing_features}\n"
-                    f"Series contains: {self.series.volume_info_list[0].get_one_volume_dcm_filenames()}"
+                    f"Series contains: {self.series.volume_info_list[0].get_one_volume_dcm_filenames()}",
+                    stacklevel=2,
                 )
                 return False
             return True
