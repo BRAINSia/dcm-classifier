@@ -164,6 +164,10 @@ include = ["models/ova_rf_classifier.onnx"]
 
 [tool.pytest.ini_options]
 minversion = "8"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+log_level = "INFO"
+log_cli_level = "INFO"
 pythonpath = [
   "src",
   "src/dcm_classifier"
