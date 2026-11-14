@@ -667,7 +667,8 @@ def sanitize_dicom_dataset(
     if len(missing_fields) > 0:
         print(f"\n\n\n{missing_fields}\n\n\n")
         warnings.warn(
-            f"\nWARNING: Required DICOM fields: {missing_fields} in {dicom_filename} are missing or have invalid values.\n"
+            f"\nWARNING: Required DICOM fields: {missing_fields} in {dicom_filename} are missing or have invalid values.\n",
+            stacklevel=2,
         )
         return dataset_dictionary, False
 

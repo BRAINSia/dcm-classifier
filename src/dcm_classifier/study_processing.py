@@ -155,7 +155,8 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                     f"SeriesNumber {series_number} in {self.study_directory} contains "
                     "Siemens mosaic images. "
                     "Mosaic images are not unpacked into slices, so the geometry and "
-                    "classification of this series may be wrong."
+                    "classification of this series may be wrong.",
+                    stacklevel=2,
                 )
         self.inferer: ImageTypeClassifierBase | None = inferer
 
@@ -430,7 +431,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             )
             if self.raise_error_on_failure:
                 raise ValueError(message) from None
-            warnings.warn(f"{message}; filed under series {MISSING_VALUE}")
+            warnings.warn(
+                f"{message}; filed under series {MISSING_VALUE}", stacklevel=2
+            )
             return MISSING_VALUE
 
     def _identify_and_split_sub_volumes_pydicom(
