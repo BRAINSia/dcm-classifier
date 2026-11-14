@@ -163,7 +163,7 @@ dcm-classify-study = "dcm_classifier.classify_study:main"
 include = ["models/ova_rf_classifier.onnx"]
 
 [tool.pytest.ini_options]
-minversion = "7.2"
+minversion = "8"
 pythonpath = [
   "src",
   "src/dcm_classifier"
@@ -190,14 +190,12 @@ source = [
 [tool.coverage.html]
 directory = "coverage_html_report"
 
-[tool.black]
+[tool.ruff]
 line-length = 88
-target-version = ["py312"]
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  # The following are specific to Black, you probably don't want those.
-  tests/data
-  | profiling
-)/
-'''
+target-version = "py312"
+extend-exclude = ["*.ipynb"]
+
+[tool.ruff.lint]
+# The rules enforced before ruff 0.17 widened its defaults, plus UP for the
+# rewrites pyupgrade used to make.
+select = ["E4", "E7", "E9", "F", "UP"]
