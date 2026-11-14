@@ -253,7 +253,7 @@ if __name__ == "__main__":
     model: Path = Path(args.model)
     out = args.out
 
-    path_dirs = sorted(list(glob(f"{dicom_path}/*")))
+    path_dirs = sorted(glob(f"{dicom_path}/*"))
     ses_dirs = [x for x in path_dirs if Path(x).is_dir()]
     if not model.exists():
         print(f"Model {model} does not exist")

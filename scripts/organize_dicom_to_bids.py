@@ -27,13 +27,11 @@ def organize_data_to_bids(df_path: str, output_dir: str):
         # get all unique sessions (dates) corresponding to SeriesInstanceUID
         sess = list(
             set(
-                list(
-                    df[df["StudyInstanceUID"] == row["StudyInstanceUID"]][
-                        "InstanceCreationDate"
-                    ]
-                    .dropna()
-                    .values
-                )
+                df[df["StudyInstanceUID"] == row["StudyInstanceUID"]][
+                    "InstanceCreationDate"
+                ]
+                .dropna()
+                .values
             )
         )
         # if no session number, generate a random one
@@ -67,7 +65,7 @@ if __name__ == "__main__":
     # generate big dicom dataframe
     dicom_path = "/localscratch/Users/mbrzus/Stroke_Data/IOWA_STROKE_RETRO_DICOM_NEW"
     out = "../data/new_IowaStrokeRetro.xlsx"
-    ses_dirs = sorted(list(glob(f"{dicom_path}/XY*")))
+    ses_dirs = sorted(glob(f"{dicom_path}/XY*"))
     generate_dicom_dataframe(session_dirs=ses_dirs, output_file=out)
 
     # make new dir for organized dicom data

@@ -200,6 +200,7 @@ extend-select = [
     # Rules adopted one per commit, named so each stays enforced.
     "B028",  # no-explicit-stacklevel
     "B905",  # zip-without-explicit-strict
+    "C414",  # unnecessary-double-cast-or-process
     "C416",  # unnecessary-comprehension
     "EM101",  # raw-string-in-exception
     "I001",  # unsorted-imports
@@ -260,7 +261,6 @@ ignore = [
     "B904",  # raise-without-from-inside-except (1)
     "BLE001",  # blind-except (17)
     "C408",  # unnecessary-collection-call (28)
-    "C414",  # unnecessary-double-cast-or-process (4)
     "EM102",  # f-string-in-exception (13)
     "EXE001",  # shebang-not-executable (6)
     "PD002",  # pandas-use-of-inplace-argument (11)
