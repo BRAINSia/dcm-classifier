@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from io import StringIO
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -237,7 +238,7 @@ def train_model(x1, x2, y1, y2, use_dt):
     onx = convert_sklearn(
         clf, name="RandomForestImageTypeClassifier", initial_types=initial_type
     )
-    with open(model_filename, "wb") as f:
+    with Path(model_filename).open("wb") as f:
         f.write(onx.SerializeToString())
 
 

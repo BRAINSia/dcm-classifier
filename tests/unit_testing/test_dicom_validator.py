@@ -34,7 +34,7 @@ def test_write_validation_report(mock_volumes):
     assert test_report_path.exists()
     assert test_report_path.is_file()
 
-    with open(test_report_path) as f:
+    with Path(test_report_path).open() as f:
         msg = f.read()
         assert "testing" in msg
         assert "This is a TEST" in msg

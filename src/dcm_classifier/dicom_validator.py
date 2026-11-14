@@ -107,7 +107,7 @@ class DicomValidatorBase:
         if report_filename_to_append is None:
             print(f"{msg}")
         else:
-            with open(report_filename_to_append, "a") as vfid:
+            with Path(report_filename_to_append).open("a") as vfid:
                 vfid.write(f"{msg}\n")
 
     def validate(self) -> bool:

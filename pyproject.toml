@@ -224,6 +224,7 @@ extend-select = [
     "PT031",  # pytest-warns-with-multiple-statements
     "PTH100",  # os-path-abspath
     "PTH110",  # os-path-exists
+    "PTH123",  # builtin-open
     "PTH207",  # glob
     "RET504",  # unnecessary-assign
     "RET505",  # superfluous-else-return
@@ -287,7 +288,6 @@ ignore = [
     "PLW0603",  # global-statement (1)
     "PT011",  # pytest-raises-too-broad (10)
     "PT030",  # pytest-warns-too-broad (1)
-    "PTH123",  # builtin-open (11)
     "RUF005",  # collection-literal-concatenation (4)
     "TRY003",  # raise-vanilla-args (15)
     "TRY004",  # type-check-without-type-error (5)

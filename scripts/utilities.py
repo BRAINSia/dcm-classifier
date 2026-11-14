@@ -28,7 +28,7 @@ def combine_all_excel_files(
                 continue
             print(f"Processing {excel_file}")
 
-            with open(excel_file, "rb") as file:
+            with Path(excel_file).open("rb") as file:
                 file_extension = excel_file.suffix
                 if file_extension == ".xlsx":
                     df = pd.read_excel(file.read(), engine="openpyxl")
