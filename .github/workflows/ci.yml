@@ -83,3 +83,14 @@ jobs:
           cache-suffix: lowest
       - run: uv pip install --resolution lowest-direct . --group test
       - run: python -m pytest
+
+  # The one check branch protection needs to require.
+  pass:
+    if: always()
+    needs: [pre-commit, tests, docs, lowest-dependencies]
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
+        with:
+          jobs: ${{ toJSON(needs) }}
