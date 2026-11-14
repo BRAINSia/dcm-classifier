@@ -209,6 +209,7 @@ extend-select = [
     "RET508",  # superfluous-else-break
     "RUF059",  # unused-unpacked-variable
     "SIM101",  # duplicate-isinstance-call
+    "SIM108",  # if-else-block-instead-of-if-exp
     "SIM114",  # if-with-same-arms
     # Rule families recommended by the Scientific Python guide.
     "ARG",  # flake8-unused-arguments
@@ -286,7 +287,6 @@ ignore = [
     "RUF015",  # unnecessary-iterable-allocation-for-first-element (7)
     "SIM102",  # collapsible-if (1)
     "SIM103",  # needless-bool (4)
-    "SIM108",  # if-else-block-instead-of-if-exp (1)
     "SIM118",  # in-dict-keys (7)
     "TRY003",  # raise-vanilla-args (15)
     "TRY004",  # type-check-without-type-error (5)
