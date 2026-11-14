@@ -78,7 +78,7 @@ def generate_training_data(label_dataframe: str, dicom_dataframe: str, name: str
     df = pd.merge(dicom_df, label_df, on="SeriesInstanceUID")
     pima = pd.DataFrame(df[input_output_training_columns])
 
-    pima["Orientation"].replace(plane_to_integer_mapping, inplace=True)
+    pima["Orientation"] = pima["Orientation"].replace(plane_to_integer_mapping)
     pima["Orientation"] = pima["Orientation"].astype(int)
     pima["Orientation"] = pima["Orientation"].astype("category")
 
@@ -250,9 +250,9 @@ def inference_on_all_data(model_filename: str):
 
     df = pd.read_excel("../training_outputs/model_generation_df_plane.xlsx")
     e_inputs = pd.DataFrame(df[plane_cols])
-    e_inputs.fillna(-1000000, inplace=True)
-    e_inputs.replace(np.nan, -1000000, inplace=True)
-    e_inputs.replace("nan", -1000000, inplace=True)
+    e_inputs = e_inputs.fillna(-1000000)
+    e_inputs = e_inputs.replace(np.nan, -1000000)
+    e_inputs = e_inputs.replace("nan", -1000000)
 
     sess = rt.InferenceSession(model_filename)
     input_name = sess.get_inputs()[0].name

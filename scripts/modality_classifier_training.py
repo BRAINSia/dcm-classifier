@@ -87,15 +87,15 @@ def generate_training_data(input_dataframe: str):
 
     # Normalize the data
     df["label_encoded"] = df["label"].map(imagetype_to_integer_mapping)
-    df.fillna({col: 0 if "Type" in col else -12345 for col in df.columns}, inplace=True)
+    df = df.fillna({col: 0 if "Type" in col else -12345 for col in df.columns})
 
     # # Strip whitespace from string columns
     # str_cols = df.select_dtypes(include=["object"])
     # df[str_cols.columns] = str_cols.apply(lambda x: x.str.strip())
 
     # Replace infinite values with NaN and drop rows with NaN values
-    df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    df.dropna(inplace=True)
+    df = df.replace([np.inf, -np.inf], np.nan)
+    df = df.dropna()
 
     # Extract features and labels
     y = df["label_encoded"].astype("int32").to_numpy()
