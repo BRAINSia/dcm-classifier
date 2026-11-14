@@ -296,7 +296,7 @@ class ImageTypeClassifierBase:
         self.series_number = series.get_series_number()
         self.info_dict = self.series.get_series_info_dict()
 
-    def infer_acquisition_plane(self, feature_dict: dict = None) -> str:
+    def infer_acquisition_plane(self, feature_dict: dict | None = None) -> str:
         """
         Infer the acquisition plane based on DICOM information and image properties.
 
@@ -326,7 +326,7 @@ class ImageTypeClassifierBase:
             return "sag"
         return "cor"
 
-    def infer_isotropic(self, feature_dict: dict = None) -> bool | None:
+    def infer_isotropic(self, feature_dict: dict | None = None) -> bool | None:
         """
         Infer the acquisition plane based on DICOM information and image properties.
 
@@ -351,7 +351,7 @@ class ImageTypeClassifierBase:
         thickness = float(feature_dict["SliceThickness"])
         return bool(np.allclose(spacing, thickness, rtol=0.1))
 
-    def infer_contrast(self, feature_dict: dict = None) -> bool:
+    def infer_contrast(self, feature_dict: dict | None = None) -> bool:
         """
         Infer whether the image has contrast based on DICOM information and image properties.
 
@@ -370,7 +370,7 @@ class ImageTypeClassifierBase:
         # check if the volume has contrast
         return "none" not in feature_dict[field].lower()
 
-    def infer_modality(self, feature_dict: dict = None) -> (str, pd.DataFrame):
+    def infer_modality(self, feature_dict: dict | None = None) -> (str, pd.DataFrame):
         """
         Infer the modality (image type) of the DICOM series based on a feature dictionary.
 
