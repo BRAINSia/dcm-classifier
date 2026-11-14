@@ -349,9 +349,7 @@ class ImageTypeClassifierBase:
         # check if the volume is isotropic
         spacing = np.array(feature_dict["PixelSpacing"])
         thickness = float(feature_dict["SliceThickness"])
-        if np.allclose(spacing, thickness, rtol=0.1):
-            return True
-        return False
+        return bool(np.allclose(spacing, thickness, rtol=0.1))
 
     def infer_contrast(self, feature_dict: dict = None) -> bool:
         """
@@ -370,9 +368,7 @@ class ImageTypeClassifierBase:
             return False
 
         # check if the volume has contrast
-        if "none" not in feature_dict[field].lower():
-            return True
-        return False
+        return "none" not in feature_dict[field].lower()
 
     def infer_modality(self, feature_dict: dict = None) -> (str, pd.DataFrame):
         """
