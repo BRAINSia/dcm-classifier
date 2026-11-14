@@ -427,12 +427,12 @@ def sanitize_dicom_dataset(
         if field not in dataset:
             # RepetitionTime and EchoTime might not be present in ADC images.
             # Therefore, if they are missing, set them to MISSING_VALUE
-            if field == "RepetitionTime" or field == "EchoTime":
+            if field in {"RepetitionTime", "EchoTime"}:
                 dataset_dictionary[field] = MISSING_VALUE
             else:
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
-        elif field == "EchoTime" or field == "RepetitionTime":
+        elif field in {"EchoTime", "RepetitionTime"}:
             if dataset[field].value is None or str(dataset[field].value) == "":
                 # ADC sequences may not have EchoTime
                 dataset_dictionary[field] = MISSING_VALUE
@@ -449,7 +449,7 @@ def sanitize_dicom_dataset(
                 vprint(f"Missing required {field} value {dicom_filename}")
             else:
                 dataset_dictionary[field] = dataset[field].value
-        elif field == "PixelBandwidth" or field == "SliceThickness":
+        elif field in {"PixelBandwidth", "SliceThickness"}:
             if not is_number(dataset[field].value):
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)

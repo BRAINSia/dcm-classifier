@@ -120,7 +120,7 @@ def cgroup_cpu_quota(
             quota = _read_cgroup_cpu_quota(directory)
             if quota is not None:
                 quotas.append(quota)
-            if directory == hierarchy_root or directory == directory.parent:
+            if directory in (hierarchy_root, directory.parent):
                 break
             directory = directory.parent
     return min(quotas) if quotas else None
