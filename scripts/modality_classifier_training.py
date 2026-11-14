@@ -602,7 +602,7 @@ if __name__ == "__main__":
     # Feature importance analysis
     data_file = "data.xlsx"
     x, y, cols = generate_training_data(data_file)
-    importances_all = train(x, y, cols)
+    train(x, y, cols)
 
     # # find least important features to remove
     # zero_values_names = importances_all[importances_all == 0].index

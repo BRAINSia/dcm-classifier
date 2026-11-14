@@ -153,19 +153,19 @@ def data_set_to_dict(ds):
         key: str = elem.name
         if key in phi_tags:
             continue
-        value: str | None = None
         try:
-            value = str(elem.value).strip()
-        except Exception as _e:
-            pass
-        if value is not None or value == "":
+            value: str = str(elem.value).strip()
+        except Exception as e:
+            print(f"Skipping DICOM element {key}, its value cannot be read: {e}")
+            continue
+        if value != "":
             information[key] = value
     return information
 
 
 def generate_dicom_dataframe(
     session_dirs: list, output_file: str | None, save_to_excel: bool = True
-) -> None | pd.DataFrame:
+) -> pd.DataFrame | None:
     """
     Generate a dataframe from DICOM data
 
@@ -175,7 +175,7 @@ def generate_dicom_dataframe(
         save_to_excel: bool: whether to save the dataframe to an excel file
 
     Returns:
-        None | pd.DataFrame: if save_to_excel is True, None is returned, otherwise the dataframe is returned
+        pd.DataFrame | None: the dataframe, which is also saved when save_to_excel is True, or None when no DICOM data is found
     """
     dfs = [pd.DataFrame.from_dict({})]
     for ses_dir in session_dirs:
@@ -210,10 +210,9 @@ def generate_dicom_dataframe(
 
         if save_to_excel:
             df.to_excel(output_file, index=False)
-        else:
-            return df
-    else:
-        print(f"NO MR DICOM DATA FOUND IN {session_dirs}")
+        return df
+    print(f"NO MR DICOM DATA FOUND IN {session_dirs}")
+    return None
 
 
 if __name__ == "__main__":
