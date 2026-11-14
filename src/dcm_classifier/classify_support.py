@@ -2,7 +2,7 @@ import json
 import shutil
 from collections import OrderedDict as ordered_dict
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import itk
 import pandas as pd
@@ -21,7 +21,7 @@ def _classification_failure_reason(volume: DicomSingleVolumeInfoBase) -> str:
 
 
 def simple_classify_study(
-    session_directory: Path | None = None,
+    session_directory: str | Path,
     inferer: ImageTypeClassifierBase | None = None,
     json_dumppath: Path | None = None,
     output_dir: Path | None = None,
@@ -54,7 +54,7 @@ def simple_classify_study(
     )
     study.run_inference()
     list_of_inputs: list[dict[str, Any]] = []
-    list_of_probabilities: list[pd.DataFrame] = []
+    list_of_probabilities: list[pd.DataFrame | None] = []
     list_of_dictionaries: list[dict[str, str]] = []
     session_dictionary: dict[str, Any] = {}
     for series_number, series in study.series_dictionary.items():
@@ -69,7 +69,7 @@ def simple_classify_study(
             try:
                 vol_index: str = str(volume.get_volume_index())
                 current_dict["Vol.#"] = vol_index
-                dict_entry_name: str = f"{series_number}_{vol_index}"
+                dict_entry_name = f"{series_number}_{vol_index}"
             except AttributeError:
                 current_dict["Vol.#"] = "None"
 
@@ -116,12 +116,13 @@ def simple_classify_study(
 
             # Modality Probabilities
             vol_probabilities = volume.get_modality_probabilities()
-            if not invalid_volume:
-                for col in vol_probabilities.columns:
-                    if "SeriesNumber" in col or "CODE" in col:
-                        continue
-                    dictionary[col] = str(vol_probabilities[col].to_numpy()[0])
-            print(vol_probabilities.to_string(index=False))
+            if vol_probabilities is not None:
+                if not invalid_volume:
+                    for col in vol_probabilities.columns:
+                        if "SeriesNumber" in col or "CODE" in col:
+                            continue
+                        dictionary[col] = str(vol_probabilities[col].to_numpy()[0])
+                print(vol_probabilities.to_string(index=False))
 
             # Bvalue
             try:
@@ -156,7 +157,9 @@ def simple_classify_study(
 
             # Pixel Spacing
             try:
-                pixel_spacing = volume.get_dicom_field_by_name("PixelSpacing")
+                pixel_spacing: str | list[str] = volume.get_dicom_field_by_name(
+                    "PixelSpacing"
+                )
                 if isinstance(pixel_spacing, str):
                     pixel_spacing = [pixel_spacing, pixel_spacing]
                 dictionary["PixelSpacing_0"] = str(pixel_spacing[0])
@@ -188,7 +191,7 @@ def simple_classify_study(
 
             list_of_inputs.append(inputs_df)
 
-            prob_df: pd.DataFrame = volume.get_modality_probabilities()
+            prob_df: pd.DataFrame | None = volume.get_modality_probabilities()
             list_of_probabilities.append(prob_df)
             list_of_dictionaries.append(current_dict)
             if nifti_dir is not None:
@@ -204,7 +207,7 @@ def simple_classify_study(
                 itk_image = volume.get_itk_image()
                 itk.imwrite(itk_image, nifti_dir / image_file_name)
             if output_dir is not None:
-                bvalue_suffix: str = (
+                bvalue_suffix = (
                     f"_b{volume.get_volume_bvalue()}"
                     if volume.get_volume_bvalue() >= 0
                     else ""
@@ -231,8 +234,9 @@ def simple_classify_study(
         df: pd.DataFrame = pd.DataFrame(list_of_dictionaries)
         try:
             df = df.sort_values(by=["Series#", "Vol.#"])
+            # tabulate accepts a DataFrame, but its stubs do not say so.
             table_msg: str = tabulate.tabulate(
-                df, headers="keys", tablefmt="psql", showindex=False
+                cast("Any", df), headers="keys", tablefmt="psql", showindex=False
             )
             print(table_msg)
         except KeyError:
