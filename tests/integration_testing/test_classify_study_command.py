@@ -36,6 +36,8 @@ def test_command_is_installed_with_the_package():
     try:
         installed = distribution("dcm_classifier")
     except PackageNotFoundError:
+        installed = None
+    if installed is None:
         pytest.skip("dcm_classifier is imported from source, not installed")
     commands = {
         entry_point.name: entry_point.value

@@ -188,24 +188,6 @@ def train(x: np.array, y: np.array, columns, samples_per_class=800):
     y_pred = clf.predict(x_test)
     print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
 
-    # Save the first three trees of the Random Forrest Classifier for analysis
-    # import graphviz
-    #
-    # for i in range(3):
-    #     tree = clf.estimators_[i]
-    #     dot_data = export_graphviz(
-    #         tree,
-    #         feature_names=feautures,
-    #         filled=True,
-    #         max_depth=7,
-    #         impurity=False,
-    #         proportion=True,
-    #     )
-    #     # graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
-    #     # graph.write_png(f"../training_outputs/rf_estimator_{i}.png")
-    #     graph = graphviz.Source(dot_data, format="png")
-    #     graph.render(filename=f"./rf_estimator_{i}")
-
     # Compute confusion matrix
     cm = confusion_matrix(y_test, y_pred)
     # Calculating accuracy for each class
