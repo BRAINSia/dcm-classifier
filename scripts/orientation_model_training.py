@@ -204,7 +204,7 @@ def train_model(x1, x2, y1, y2, use_dt):
 
     # Generate figures to analyze the trained model
     # https://scikit-learn.org/stable/auto_examples/text/plot_document_classification_20newsgroups.html#sphx-glr-auto-examples-text-plot-document-classification-20newsgroups-py
-    fig, ax = plt.subplots(figsize=(10, 5))
+    _fig, ax = plt.subplots(figsize=(10, 5))
     ConfusionMatrixDisplay.from_predictions(y_test, y_pred, ax=ax)
     ax.xaxis.set_ticklabels(plane_to_integer_mapping.keys())
     ax.yaxis.set_ticklabels(plane_to_integer_mapping.keys())
