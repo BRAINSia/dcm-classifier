@@ -289,7 +289,7 @@ class DicomSingleSeries:
         :return: The series instance UID.
         :rtype: str
         """
-        return self.volume_info_list[0].get_series_uid()
+        return self.get_dicom_field_by_name("SeriesInstanceUID")
 
     @deprecated(
         deprecated_in="0.9.6",
@@ -306,4 +306,4 @@ class DicomSingleSeries:
         :return: The Study Instance UID.
         :rtype: str
         """
-        return self.volume_info_list[0].get_study_uid()
+        return self.get_dicom_field_by_name("StudyInstanceUID")

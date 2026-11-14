@@ -84,7 +84,7 @@ class DicomValidatorBase:
     {"!" * 60}
     Identified image type: {self.single_volume_info.get_volume_modality()}-{self.single_volume_info.get_acquisition_plane()}
     Identified bvalue: {self.single_volume_info.get_volume_bvalue()}
-    Identified SeriesNumber: {self.single_volume_info.get_series_number()}
+    Identified SeriesNumber: {self.single_volume_info.get_dicom_field_by_name("SeriesNumber")}
 
     Failure Messages:
     {validation_failure_listing}
