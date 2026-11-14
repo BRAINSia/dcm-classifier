@@ -319,14 +319,6 @@ class ImageTypeClassifierBase:
         :return: A string representing the inferred acquisition plane ("iso" for isotropic, "ax" for axial, "sag" for sagittal and "cor" for coronal).
         :rtype: str
         """
-        # check if the volume was invalidated
-        for field in [
-            "ImageOrientationPatient_0",
-            "ImageOrientationPatient_5",
-        ]:
-            if field == "INVALID_VALUE":
-                return "INVALID"
-
         if float(feature_dict["ImageOrientationPatient_5"]) <= 0.5:
             return "ax"
         if float(feature_dict["ImageOrientationPatient_0"]) <= 0.707:
