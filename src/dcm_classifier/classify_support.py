@@ -47,7 +47,9 @@ def simple_classify_study(
     if output_dir:
         output_dir.mkdir(parents=True, exist_ok=True)
     study = ProcessOneDicomStudyToVolumesMappingBase(
-        study_directory=session_directory, inferer=inferer
+        study_directory=session_directory,
+        inferer=inferer,
+        mr_sop_class_only=mr_sop_class_only,
     )
     study.run_inference()
     list_of_inputs: list[dict[str, Any]] = []
