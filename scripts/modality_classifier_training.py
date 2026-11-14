@@ -83,7 +83,7 @@ def generate_training_data(input_dataframe: str):
     df = pd.read_excel(input_dataframe)
     # Consolidate DataFrame operations
     df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
-    df = df[feautures + ["label"]]
+    df = df[[*feautures, "label"]]
     # Keep only rows where 'label' matches keys in imagetype_to_integer_mapping
     df = df[df["label"].isin(imagetype_to_integer_mapping.keys())]
 

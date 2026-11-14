@@ -230,6 +230,7 @@ extend-select = [
     "RET505",  # superfluous-else-return
     "RET506",  # superfluous-else-raise
     "RET508",  # superfluous-else-break
+    "RUF005",  # collection-literal-concatenation
     "RUF012",  # mutable-class-default
     "RUF013",  # implicit-optional
     "RUF015",  # unnecessary-iterable-allocation-for-first-element
@@ -288,7 +289,6 @@ ignore = [
     "PLW0603",  # global-statement (1)
     "PT011",  # pytest-raises-too-broad (10)
     "PT030",  # pytest-warns-too-broad (1)
-    "RUF005",  # collection-literal-concatenation (4)
     "TRY003",  # raise-vanilla-args (15)
     "TRY004",  # type-check-without-type-error (5)
     "TRY300",  # try-consider-else (4)
