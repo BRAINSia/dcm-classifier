@@ -7,13 +7,6 @@ updates:
     groups:
       actions:
         patterns: ["*"]
-  - package-ecosystem: pip
-    directory: /docs
-    schedule:
-      interval: monthly
-    groups:
-      docs:
-        patterns: ["*"]
   - package-ecosystem: pre-commit
     directory: /
     schedule:

@@ -32,7 +32,7 @@ def tests(session: nox.Session) -> None:
 @nox.session(python="3.13", reuse_venv=True)
 def docs(session: nox.Session) -> None:
     """Build the Sphinx documentation into docs/_build/html."""
-    session.install(".", "-r", "docs/requirements-docs.txt")
+    session.install(".", *nox.project.dependency_groups(PYPROJECT, "docs"))
     session.run(
         "sphinx-build",
         "-b",
