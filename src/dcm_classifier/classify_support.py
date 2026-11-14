@@ -4,6 +4,7 @@ from collections import OrderedDict as ordered_dict
 from pathlib import Path
 from typing import Any
 
+import itk
 import pandas as pd
 import tabulate
 
@@ -41,8 +42,6 @@ def simple_classify_study(
 
     """
     if nifti_dir:
-        import itk
-
         nifti_dir.mkdir(parents=True, exist_ok=True)
     if output_dir:
         output_dir.mkdir(parents=True, exist_ok=True)

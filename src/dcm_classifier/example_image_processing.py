@@ -1,4 +1,5 @@
 import re
+import shutil
 import unicodedata
 from pathlib import Path
 
@@ -248,8 +249,6 @@ def cmd_exists(cmd):
     :return: True if the command exists, False otherwise.
     :rtype: bool
     """
-    import shutil
-
     return shutil.which(cmd) is not None
 
 
