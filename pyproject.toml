@@ -1,5 +1,6 @@
 [build-system]
-requires = ["hatchling"]
+# 1.26 reads the SPDX license and license-files fields.
+requires = ["hatchling>=1.26"]
 build-backend = "hatchling.build"
 
 [project]
@@ -10,15 +11,34 @@ authors = [
   { name="Hans Johnson", email="hans-johnson@uiowa.edu" },
   { name="Cavan Riley", email="cavan-riley@uiowa.edu" },
 ]
-description = "This is a consolidation of work from NAMIC efforts primarily at the University of Iowa."
+description = "Identify the modality and acquisition plane of DICOM MR series from their header fields."
 readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
+keywords = [
+    "DICOM",
+    "MRI",
+    "classification",
+    "image modality",
+    "acquisition plane",
+    "sequence selection",
+    "machine learning",
+]
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
-    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Typing :: Typed",
 ]
 dependencies = [
     "deprecation>=2.1.0",
@@ -35,6 +55,13 @@ dependencies = [
     "python-gdcm>=3.0.22", # NOTE: python-gdcm replaces pylibjpeg for plugin support for pydicom
     "tabulate>=0.9.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/BRAINSia/dcm-classifier"
+Documentation = "https://dcm-classifier.readthedocs.io"
+"Bug Tracker" = "https://github.com/BRAINSia/dcm-classifier/issues"
+Changelog = "https://github.com/BRAINSia/dcm-classifier/releases"
+Paper = "https://doi.org/10.1117/12.3006568"
 
 [project.optional-dependencies]
 # Needed by the model training scripts and the tutorial notebooks in scripts/.
