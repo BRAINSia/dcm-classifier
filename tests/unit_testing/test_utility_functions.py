@@ -135,10 +135,7 @@ def test_diff_grad_dir():
 
 def test_unknown_in_image_type():
     assert dicom_file_dir.exists()
-    vol = []
-    for file in dicom_file_dir.iterdir():
-        if "noImgType" in file.stem:
-            vol.append(file)
+    vol = [file for file in dicom_file_dir.iterdir() if "noImgType" in file.stem]
 
     f = pydicom.dcmread(vol[0])
     ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
@@ -147,10 +144,7 @@ def test_unknown_in_image_type():
 
 def test_no_series_number():
     assert dicom_file_dir.exists()
-    vol = []
-    for file in dicom_file_dir.iterdir():
-        if "noSeriesNum" in file.stem:
-            vol.append(file)
+    vol = [file for file in dicom_file_dir.iterdir() if "noSeriesNum" in file.stem]
 
     f = pydicom.dcmread(vol[0])
     ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
@@ -160,10 +154,7 @@ def test_no_series_number():
 
 def test_no_echo_time():
     assert dicom_file_dir.exists()
-    vol = []
-    for file in dicom_file_dir.iterdir():
-        if "noEchoTime" in file.stem:
-            vol.append(file)
+    vol = [file for file in dicom_file_dir.iterdir() if "noEchoTime" in file.stem]
 
     f = pydicom.dcmread(vol[0])
     ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
@@ -173,10 +164,7 @@ def test_no_echo_time():
 
 def test_no_pixel_bandwidth():
     assert dicom_file_dir.exists()
-    vol = []
-    for file in dicom_file_dir.iterdir():
-        if "noPixelBW" in file.stem:
-            vol.append(file)
+    vol = [file for file in dicom_file_dir.iterdir() if "noPixelBW" in file.stem]
 
     f = pydicom.dcmread(vol[0])
     ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
@@ -186,10 +174,7 @@ def test_no_pixel_bandwidth():
 
 def test_empty_bvalue():
     assert dicom_file_dir.exists()
-    vol = []
-    for file in dicom_file_dir.iterdir():
-        if "emptyBValue" in file.stem:
-            vol.append(file)
+    vol = [file for file in dicom_file_dir.iterdir() if "emptyBValue" in file.stem]
 
     f = pydicom.dcmread(vol[0])
     bval = get_bvalue(f)
@@ -201,10 +186,7 @@ def test_invalid_fields():
     file_dir = dicom_file_dir.parent
 
     assert file_dir.exists()
-    vol = []
-    for file in file_dir.iterdir():
-        if "no_valid" in file.stem:
-            vol.append(file)
+    vol = [file for file in file_dir.iterdir() if "no_valid" in file.stem]
 
     f = pydicom.dcmread(vol[0])
     ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]

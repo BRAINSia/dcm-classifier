@@ -252,9 +252,7 @@ class DicomSingleSeries:
                 0
             ].get_volume_bvalue()
         else:
-            bvals = []
-            for volume in self.volume_info_list:
-                bvals.append(volume.get_volume_bvalue())
+            bvals = [volume.get_volume_bvalue() for volume in self.volume_info_list]
             info_dict["Diffusionb-valueSet"] = list(set(bvals))
             info_dict["Diffusionb-valueCount"] = len(list(set(bvals)))
             info_dict["Diffusionb-valueMax"] = max(bvals)

@@ -860,10 +860,7 @@ def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) ->
         )
         raise
 
-    named_list = []
-    for index in range(len(number_list)):
-        named_list.append((name + "_" + str(index), number_list[index]))
-    return named_list
+    return [(f"{name}_{index}", value) for index, value in enumerate(number_list)]
 
 
 def check_two_images_have_same_physical_space(

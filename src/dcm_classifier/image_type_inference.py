@@ -458,10 +458,11 @@ class ImageTypeClassifierBase:
             :rtype: bool
 
             """
-            missing_features = []
-            for feature in self.classification_feature_list:
-                if feature not in input_dict:
-                    missing_features.append(feature)
+            missing_features = [
+                feature
+                for feature in self.classification_feature_list
+                if feature not in input_dict
+            ]
             if len(missing_features) > 0:
                 warnings.warn(
                     f"Missing features for SeriesNumber {self.series_number}: {missing_features}\n"
