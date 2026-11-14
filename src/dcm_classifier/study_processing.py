@@ -22,6 +22,7 @@ import warnings
 import itk
 import pydicom
 
+from .dicom_config import MISSING_VALUE
 from .dicom_volume import DicomSingleVolumeInfoBase
 from .dicom_series import DicomSingleSeries
 from .image_type_inference import ImageTypeClassifierBase
@@ -30,8 +31,6 @@ from .utility_functions import (
     parse_acquisition_datetime,
     is_mr_sop_class,
 )
-
-MISSING_SERIES_NUMBER: int = -12345
 
 
 class ProcessOneDicomStudyToVolumesMappingBase:
@@ -420,7 +419,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         Get the SeriesNumber a volume is filed under.
 
         :param volume: The volume to file.
-        :return: The SeriesNumber, or MISSING_SERIES_NUMBER when it is absent or not an integer.
+        :return: The SeriesNumber, or MISSING_VALUE when it is absent or not an integer.
         :raises ValueError: If the SeriesNumber is unusable and raise_error_on_failure is set.
         """
         try:
@@ -432,8 +431,8 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             )
             if self.raise_error_on_failure:
                 raise ValueError(message) from None
-            warnings.warn(f"{message}; filed under series {MISSING_SERIES_NUMBER}")
-            return MISSING_SERIES_NUMBER
+            warnings.warn(f"{message}; filed under series {MISSING_VALUE}")
+            return MISSING_VALUE
 
     def _identify_and_split_sub_volumes_pydicom(
         self, subseries_filenames: list[str]
@@ -487,7 +486,6 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         # Name order makes the read order, and the error fallback, OS independent.
         subseries_filenames = sorted(subseries_filenames)
 
-        INVALID_NUMERICAL_VALUE = -12345
         file_info_dict = defaultdict(list)
 
         try:
@@ -505,10 +503,8 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
                     # Safe extraction of metadata with fallback values
                     acquisition_date_time = parse_acquisition_datetime(ds)
-                    acquisition_number = int(
-                        ds.get("AcquisitionNumber", INVALID_NUMERICAL_VALUE)
-                    )
-                    inst_number = int(ds.get("InstanceNumber", INVALID_NUMERICAL_VALUE))
+                    acquisition_number = int(ds.get("AcquisitionNumber", MISSING_VALUE))
+                    inst_number = int(ds.get("InstanceNumber", MISSING_VALUE))
 
                     file_records.append(
                         (

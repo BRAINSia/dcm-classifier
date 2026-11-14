@@ -9,9 +9,8 @@ from dcm_classifier.image_type_inference import (
     ImageTypeClassifierBase,
     imagetype_to_integer_mapping,
 )
-from dcm_classifier.dicom_config import inference_features
+from dcm_classifier.dicom_config import MISSING_VALUE, inference_features
 from dcm_classifier.study_processing import (
-    MISSING_SERIES_NUMBER,
     ProcessOneDicomStudyToVolumesMappingBase,
 )
 from pathlib import Path
@@ -171,8 +170,8 @@ def test_unusable_series_number_does_not_stop_the_study(
         )
     study.run_inference()
 
-    assert set(study.series_dictionary) == {9, MISSING_SERIES_NUMBER}
-    (volume,) = study.series_dictionary[MISSING_SERIES_NUMBER].get_volume_list()
+    assert set(study.series_dictionary) == {9, MISSING_VALUE}
+    (volume,) = study.series_dictionary[MISSING_VALUE].get_volume_list()
     assert volume.get_volume_modality() == "INVALID"
     assert study.series_dictionary[9].get_series_modality() != "INVALID"
 
