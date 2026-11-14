@@ -484,7 +484,8 @@ class ImageTypeClassifierBase:
                 )
                 volume.set_acquisition_plane(acquisition_plane)
                 isotropic = self.infer_isotropic(feature_dict=info_dict)
-                volume.set_is_isotropic(isotropic)
+                # Unknown spacing is reported as not isotropic, as for an invalid volume.
+                volume.set_is_isotropic(isotropic is True)
 
                 contrast = self.infer_contrast(feature_dict=info_dict)
                 volume.set_has_contrast(contrast)
@@ -518,7 +519,7 @@ class ImageTypeClassifierBase:
 
             series.set_modality_probabilities(volume.get_modality_probabilities())
             series.set_acquisition_plane(volume.get_acquisition_plane())
-            series.set_is_isotropic(volume.get_is_isotropic())  # type: ignore[arg-type]
+            series.set_is_isotropic(volume.get_is_isotropic())
             series.set_has_contrast(volume.get_has_contrast())
         else:
             # for acquisition plane we assume as volumes in series have the same acquisition plane
@@ -526,7 +527,7 @@ class ImageTypeClassifierBase:
             series.set_acquisition_plane(
                 series.get_volume_list()[0].get_acquisition_plane()
             )
-            series.set_is_isotropic(series.get_volume_list()[0].get_is_isotropic())  # type: ignore[arg-type]
+            series.set_is_isotropic(series.get_volume_list()[0].get_is_isotropic())
             series.set_has_contrast(series.get_volume_list()[0].get_has_contrast())
 
             # get all modalities from the series

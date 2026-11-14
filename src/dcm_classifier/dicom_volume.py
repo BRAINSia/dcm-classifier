@@ -122,7 +122,7 @@ class DicomSingleVolumeInfoBase:
         self.modality_probability: pd.DataFrame | None = None
         self.average_slice_spacing = float(MISSING_VALUE)
         self.acquisition_plane: str = "UNKNOWN"
-        self.is_isotropic: bool | None = False
+        self.is_isotropic: bool = False
         self.has_contrast: bool = False
         self.itk_image: FImageType | None = None
 
@@ -179,7 +179,7 @@ class DicomSingleVolumeInfoBase:
             raise AttributeError(msg)
         return self.parent_series.get_series_modality()
 
-    def set_is_isotropic(self, isotropic: bool | None) -> None:
+    def set_is_isotropic(self, isotropic: bool) -> None:
         """
         Sets the isotropic flag of the DICOM data.
 
@@ -188,7 +188,7 @@ class DicomSingleVolumeInfoBase:
         """
         self.is_isotropic = isotropic
 
-    def get_is_isotropic(self) -> bool | None:
+    def get_is_isotropic(self) -> bool:
         """
         Retrieves the isotropic flag of the DICOM data.
 
