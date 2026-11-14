@@ -281,9 +281,8 @@ class ImageTypeClassifierBase:
         self.series.set_series_modality(diff_modality)
 
     def check_if_diffusion(self) -> None:  # pragma: no cover
-        raise NotImplementedError(
-            "This method check_if_diffusion is deprecated, use  update_diffusion_series_modality instead."
-        )
+        msg = "This method check_if_diffusion is deprecated, use  update_diffusion_series_modality instead."
+        raise NotImplementedError(msg)
 
     def set_series(self, series: DicomSingleSeries) -> None:
         """
