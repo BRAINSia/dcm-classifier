@@ -30,7 +30,9 @@ Developers will likely want to set up a python virtual environment with the nece
     cd dcm-classifier
     python3 -m venv venv
     source venv/bin/activate
-    pip install -r requirements_dev.txt
+    pip install -e ".[training]" --group dev
+
+The ``--group`` option needs pip 25.1 or newer.
 
 For Users:
 
@@ -39,7 +41,7 @@ Users will want to set up a virtual environment with the necessary dependencies.
     cd dcm-classifier
     python3 -m venv venv
     source venv/bin/activate
-    pip install -r requirements.txt
+    pip install .
 
 
 Tutorials

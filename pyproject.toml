@@ -131,6 +131,31 @@ dependencies = [
     "tabulate>=0.9.0",
 ]
 
+[project.optional-dependencies]
+# Needed by the model training scripts and the tutorial notebooks in scripts/.
+training = [
+    "dicom-anonymizer>=1.0.11",
+    "jupyter>=1.0.0",
+    "jupyterlab>=4.1.3",
+    "matplotlib>=3.8.2",
+    "openpyxl>=3.1.2",
+    "scikit-learn>=1.4.0",
+    "scipy>=1.12.0",
+    "skl2onnx>=1.16.0",
+]
+
+[dependency-groups]
+test = [
+    "coverage[toml]>=7.3.2",
+    "pytest>=8",
+]
+dev = [
+    { include-group = "test" },
+    "build>=1.2.0",
+    "pre-commit>=3.6.0",
+    "twine>=5.0.0",
+]
+
 [project.scripts]
 dcm-classify-study = "dcm_classifier.classify_study:main"
 
