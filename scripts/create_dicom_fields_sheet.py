@@ -1,5 +1,4 @@
 import sys
-from glob import glob
 from pathlib import Path
 
 import pandas as pd
@@ -253,8 +252,12 @@ if __name__ == "__main__":
     model: Path = Path(args.model)
     out = args.out
 
-    path_dirs = sorted(glob(f"{dicom_path}/*"))
-    ses_dirs = [x for x in path_dirs if Path(x).is_dir()]
+    # Hidden entries are skipped.
+    ses_dirs = sorted(
+        str(x)
+        for x in Path(dicom_path).iterdir()
+        if x.is_dir() and not x.name.startswith(".")
+    )
     if not model.exists():
         print(f"Model {model} does not exist")
         sys.exit(255)
