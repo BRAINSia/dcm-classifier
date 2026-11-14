@@ -131,6 +131,9 @@ dependencies = [
     "tabulate>=0.9.0",
 ]
 
+[project.scripts]
+dcm-classify-study = "dcm_classifier.classify_study:main"
+
 [tool.hatchling.data]
 include = ["models/ova_rf_classifier.onnx"]
 
