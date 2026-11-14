@@ -39,7 +39,7 @@ def compute_tracew_adc_from_diffusion(
         else:
             bval_volumes_dict[bval] = [itk_image]
 
-    bval_list = sorted(list(bval_volumes_dict.keys()))
+    bval_list = sorted(bval_volumes_dict.keys())
     # average the volumes with the same b-value
     bval_avg_vol_dict = {}
     for bval in bval_list:
