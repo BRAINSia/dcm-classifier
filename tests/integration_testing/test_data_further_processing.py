@@ -57,7 +57,8 @@ def test_failing_study_does_not_stop_the_batch(
 
     def fail_on_first_study(study_directory, *args):
         if study_directory.name == "a_failing_study":
-            raise RuntimeError("unreadable study")
+            msg = "unreadable study"
+            raise RuntimeError(msg)
         return prepare_study(study_directory, *args)
 
     monkeypatch.setattr(data_further_processing, "prepare_study", fail_on_first_study)
