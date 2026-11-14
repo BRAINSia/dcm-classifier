@@ -2,12 +2,15 @@ import random
 import re
 from pathlib import Path
 
+import pydicom
 import pytest
 from pydicom import Dataset
 from pydicom.dataset import FileMetaDataset
 
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+
+PYDICOM_MAJOR_VERSION = int(pydicom.__version__.split(".")[0])
 
 # Previous code for generating mock volumes from botimage
 adjacent_testing_data_path: Path = Path(__file__).parent / "testing_data"
@@ -164,12 +167,18 @@ def mock_volumes():
             for j in range(1, len(volume_datasets), 2):
                 ds = Dataset.from_json(volume_datasets[j])
                 ds.file_meta = FileMetaDataset.from_json(volume_datasets[j - 1])
-                ds.is_little_endian = True
-                ds.is_implicit_VR = False
-                ds.save_as(
-                    f"{output_path}/volume_{i}/test_dcm_{(j - 1) / 2}.dcm",
-                    write_like_original=False,
-                )
+                file_name = f"{output_path}/volume_{i}/test_dcm_{(j - 1) / 2}.dcm"
+                if PYDICOM_MAJOR_VERSION >= 3:
+                    ds.save_as(
+                        file_name,
+                        implicit_vr=False,
+                        little_endian=True,
+                        enforce_file_format=True,
+                    )
+                else:
+                    ds.is_little_endian = True
+                    ds.is_implicit_VR = False
+                    ds.save_as(file_name, write_like_original=False)
 
     # paths where mock volumes will be written to and read in from
 
