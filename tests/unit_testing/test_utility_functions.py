@@ -118,9 +118,7 @@ mult_series_dir: Path = (
 
 def test_multiple_series_UID():
     assert mult_series_dir.exists()
-    vol = []
-    for file in mult_series_dir.iterdir():
-        vol.append(file)
+    vol = list(mult_series_dir.iterdir())
 
     with pytest.raises(AssertionError) as ex:
         itk_read_from_dicomfn_list(vol)
