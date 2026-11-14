@@ -523,7 +523,8 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             subseries_filenames = [r[1]["filename"] for r in file_records] + [
                 f for f in subseries_filenames if str(f) not in read_filenames
             ]
-            for img_position, file_info in file_records:
+            for recorded_position, file_info in file_records:
+                img_position = recorded_position
                 if img_position is None:
                     print(
                         f"Warning: ImagePositionPatient not found in {file_info['filename']}. Using default positioning."
