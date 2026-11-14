@@ -436,7 +436,7 @@ class ImageTypeClassifierBase:
 
         return image_type, full_outputs
 
-    def run_inference(self):
+    def run_inference(self) -> None:
         """
         Run image type inference for the specified DICOM series or volumes.
 
