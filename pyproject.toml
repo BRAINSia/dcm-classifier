@@ -200,6 +200,7 @@ extend-select = [
     # Rules adopted one per commit, named so each stays enforced.
     "PIE808",  # unnecessary-range-start
     "PLR5501",  # collapsible-else-if
+    "RET505",  # superfluous-else-return
     "RET506",  # superfluous-else-raise
     "RET508",  # superfluous-else-break
     "SIM114",  # if-with-same-arms
@@ -277,7 +278,6 @@ ignore = [
     "PTH123",  # builtin-open (11)
     "PTH207",  # glob (2)
     "RET504",  # unnecessary-assign (4)
-    "RET505",  # superfluous-else-return (7)
     "RUF005",  # collection-literal-concatenation (4)
     "RUF012",  # mutable-class-default (1)
     "RUF013",  # implicit-optional (6)

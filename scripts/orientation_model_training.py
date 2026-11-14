@@ -43,19 +43,17 @@ plane_cols = [
 def acquisition_plane_decision_tree2(a, t1, t2):
     if a[5] <= t1:
         return 0
-    elif a[0] <= t2:
+    if a[0] <= t2:
         return 2
-    else:
-        return 1
+    return 1
 
 
 def acquisition_plane_decision_tree(a, t1, t2):
     if a[5] <= t1:
         return 0
-    elif a[1] <= t2:
+    if a[1] <= t2:
         return 1
-    else:
-        return 2
+    return 2
 
 
 def generate_training_data(label_dataframe: str, dicom_dataframe: str, name: str):
