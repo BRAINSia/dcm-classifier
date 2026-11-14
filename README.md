@@ -1,6 +1,8 @@
 # Introduction
 
-In this work, we developed a robust, easily extensible classification framework that extracts key features from well-characterized DICOM header fields for identifying image modality and acquisition plane. Our tool is crucial for eliminating error-prone human interaction and allowing automatization, increasing imaging applications' reliability and efficiency. We used Random Forrest and Decision Tree algorithms to determine the image modality and orientation. We trained on header meta-data of over 49000 scan volumes from multiple studies and achieved over 99% prediction accuracy on image modality and acquisition plane classification.
+An MRI session produces many DICOM series, and most automated analysis tools need specific ones: a T1-weighted volume, a FLAIR, the diffusion series and its ADC map. Picking those series by hand is slow and error-prone, and it keeps a pipeline from running unattended in a clinical setting.
+
+`dcm_classifier` makes that selection automatic. It extracts key features from well-characterized DICOM header fields and identifies each volume's image modality and acquisition plane. It reads headers only, so it works with any DICOM-conforming MRI scanner, whatever the manufacturer or model. A random forest model determines the image modality, and a decision tree determines the acquisition plane. Trained on the header metadata of over 49,000 scan volumes from multiple studies, it classifies both with over 99% accuracy.
 
 This project was supported by several funding sources including:
 
@@ -19,6 +21,13 @@ Please reference the manuscript:
 `Michal Brzus, Cavan J. Riley, Joel Bruss, Aaron Boes, Randall Jones, Hans J. Johnson, "DICOM sequence selection for medical imaging applications," Proc. SPIE 12931, Medical Imaging 2024: Imaging Informatics for Healthcare, Research, and Applications, 1293108 (2 April 2024); https://doi.org/10.1117/12.3006568`
 
 Additionally, please reference the citations located in the [citations directory](https://github.com/BRAINSia/dcm-classifier/tree/main/citations)
+
+## Used in
+
+`dcm_classifier` selects the input series for these automated stroke pipelines:
+
+- Michal Brzus, Jamie Kaminski, Trevor Viohl, Joel Bruss, Daniel Tranel, Aaron D. Boes, Hans J. Johnson, "Rapid, automated prediction of post-stroke cognitive impairment for ischemic stroke," Proc. SPIE 13407, Medical Imaging 2025: Computer-Aided Diagnosis, 134071Y (2025); https://doi.org/10.1117/12.3047488
+- Michal Brzus, Joseph Griffis, Cavan J. Riley, Joel Bruss, Carrie Shea, Hans J. Johnson, Aaron D. Boes, "A Clinical Neuroimaging Platform for Rapid, Automated Lesion Detection and Personalized Post-Stroke Outcome Prediction," medRxiv (2025); https://doi.org/10.1101/2025.05.09.25327310
 
 # Instructions
 
