@@ -46,9 +46,9 @@ def test_classify_study_json(get_data_dir):
         baseline_json_content = json.load(f)
 
     # Compare the JSON content with the baseline, ignoring the first line and comparing only values
-    assert list(json_content.values()) == list(
-        baseline_json_content.values()
-    ), "JSON content values should match the baseline except for the first line."
+    assert list(json_content.values()) == list(baseline_json_content.values()), (
+        "JSON content values should match the baseline except for the first line."
+    )
 
     # cleanup
     shutil.rmtree(testing_output_dir)
@@ -90,9 +90,9 @@ def test_classify_study_with_file_creation(get_data_dir):
     ]
 
     for file_name in example_file_names:
-        assert (
-            sub_output_dir / file_name
-        ).exists(), f"Output directory should have a subdirectory for {file_name}."
+        assert (sub_output_dir / file_name).exists(), (
+            f"Output directory should have a subdirectory for {file_name}."
+        )
 
     # now we do the same but for the nifti directory
     nifti_dir = testing_output_dir / "nifti"
@@ -111,9 +111,9 @@ def test_classify_study_with_file_creation(get_data_dir):
     ]
 
     for file_name in nifti_file_names:
-        assert (
-            nifti_dir / file_name
-        ).exists(), f"Expected nifti file {file_name} should have been created."
+        assert (nifti_dir / file_name).exists(), (
+            f"Expected nifti file {file_name} should have been created."
+        )
 
     # cleanup
     shutil.rmtree(testing_output_dir)
@@ -134,9 +134,9 @@ def test_classify_study_with_no_readable_dicoms(get_data_dir, capsys):
 
     # check that 'No series found in the study.' message is printed
     captured = capsys.readouterr()
-    assert (
-        "No series found in the study." in captured.out
-    ), "Should print 'No series found in the study.' message."
+    assert "No series found in the study." in captured.out, (
+        "Should print 'No series found in the study.' message."
+    )
 
 
 def test_classify_study_json_keeps_invalid_volume(contrast_file_path, tmp_path):
