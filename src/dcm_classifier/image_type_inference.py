@@ -271,7 +271,7 @@ class ImageTypeClassifierBase:
     def _update_diffusion_series_modality(self) -> None:
         """
         After processing and file organization into volumes and series is completed, this function is called to
-        check if the series is a diffusion series. If so, the series modality is overriden to dwig.
+        check if the series is a diffusion series. If so, the series modality is overridden to dwig.
         This function is called during inference
         """
         volume_list = self.series.get_volume_list()

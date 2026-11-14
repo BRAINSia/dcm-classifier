@@ -92,7 +92,7 @@ class DicomSingleVolumeInfoBase:
             msg = "No file names provided list"
             raise ValueError(msg)
 
-        # The ro_user_supplied_dcm_filenames should never be overriden after initialization
+        # The ro_user_supplied_dcm_filenames should never be overridden after initialization
         # it is needed for repeated validation calls
         self.ro_user_supplied_dcm_filenames = list(self.one_volume_dcm_filenames)
 

@@ -31,7 +31,7 @@ plane_to_integer_mapping = {
 }
 
 # modify columns to exclude the orientation
-# the decision tree for acqusition plane (in create_labels.py) takes care of that
+# the decision tree for acquisition plane (in create_labels.py) takes care of that
 plane_cols = [
     "ImageOrientationPatient_0",
     "ImageOrientationPatient_1",
@@ -124,7 +124,7 @@ def train_model(x1, x2, y1, y2, use_dt):
     else:
         print("Using Random Forest Classifier")
         clf = RandomForestClassifier(n_estimators=100, max_depth=3, random_state=99)
-    # Train Decision Tree Classifer
+    # Train Decision Tree Classifier
     clf = clf.fit(x_train, y_train)
 
     # Predict the response for test dataset
