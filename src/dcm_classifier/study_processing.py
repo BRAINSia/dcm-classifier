@@ -17,6 +17,8 @@
 #  =========================================================================
 from collections import defaultdict
 from pathlib import Path, PurePath
+import warnings
+
 import itk
 import pydicom
 
@@ -146,6 +148,14 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         self.series_dictionary: dict[int, DicomSingleSeries] = (
             self.__identify_single_volumes(self.study_directory, mr_sop_class_only)
         )
+        for series_number, series in self.series_dictionary.items():
+            if series.get_is_mosaic():
+                warnings.warn(
+                    f"SeriesNumber {series_number} in {self.study_directory} contains "
+                    "Siemens mosaic images. "
+                    "Mosaic images are not unpacked into slices, so the geometry and "
+                    "classification of this series may be wrong."
+                )
         self.inferer: ImageTypeClassifierBase | None = inferer
 
     def get_list_of_primary_volume_info(self) -> list[dict[str, str]]:

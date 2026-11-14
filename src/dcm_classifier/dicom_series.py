@@ -170,6 +170,15 @@ class DicomSingleSeries:
         """
         return self.has_contrast
 
+    def get_is_mosaic(self) -> bool:
+        """
+        Reports whether any volume of the series is a Siemens mosaic.
+
+        :return: True if the series contains a mosaic volume.
+        :rtype: bool
+        """
+        return any(volume.get_is_mosaic() for volume in self.volume_info_list)
+
     def set_acquisition_plane(self, acquisition_plane: str) -> None:
         """
         Set the acquisition plane of the DICOM series.

@@ -84,6 +84,10 @@ or pass the path to a separate model
 
 The same command is available from a source checkout as `python3 scripts/classify_study.py`.
 
+### Limitations
+
+Siemens mosaic images, which tile many slices into one image, are not unpacked into slices. A series whose `ImageType` contains `MOSAIC` is still classified, but its geometry and classification may be wrong. Such a series raises a warning when the study is loaded, and `get_is_mosaic()` on the series or volume returns `True`. Convert mosaic data to one slice per file before classification when the result matters.
+
 ### Testing
 
 Testing in the dcm-classifier package is done using pytest. To run the tests, navigate to the root directory of the package
