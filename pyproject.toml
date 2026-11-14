@@ -196,6 +196,5 @@ target-version = "py312"
 extend-exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
-# The rules enforced before ruff 0.17 widened its defaults, plus UP for the
-# rewrites pyupgrade used to make.
+# Explicit, because ruff's wider default rule set is not adopted here.
 select = ["E4", "E7", "E9", "F", "UP"]
