@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pydicom
 import pytest
+from pydicom.uid import SecondaryCaptureImageStorage, generate_uid
 
 
 from dcm_classifier.classify_support import (
@@ -153,6 +154,31 @@ def test_classify_study_json_keeps_invalid_volume(contrast_file_path, tmp_path):
     )
     assert volume["StudyInstanceUID"] == str(ds.StudyInstanceUID)
     assert not any(key.startswith("GUESS_ONNX") for key in volume)
+
+
+@pytest.mark.parametrize("mr_sop_class_only", [False, True])
+def test_classify_study_mr_sop_class_only(
+    contrast_file_path, tmp_path, mr_sop_class_only
+):
+    mr_file = next(contrast_file_path.rglob("*.dcm"))
+    shutil.copy(mr_file, tmp_path / "mr.dcm")
+    ds = pydicom.dcmread(mr_file)
+    mr_series_number = int(ds.SeriesNumber)
+    ds.SOPClassUID = SecondaryCaptureImageStorage
+    ds.file_meta.MediaStorageSOPClassUID = SecondaryCaptureImageStorage
+    ds.SOPInstanceUID = generate_uid()
+    ds.file_meta.MediaStorageSOPInstanceUID = ds.SOPInstanceUID
+    ds.SeriesInstanceUID = generate_uid()
+    ds.SeriesNumber = 99
+    ds.save_as(tmp_path / "secondary_capture.dcm")
+
+    session = simple_classify_study(
+        session_directory=tmp_path, mr_sop_class_only=mr_sop_class_only
+    )
+    series_numbers = {int(key.split("_")[0]) for key in session[str(tmp_path)]}
+
+    expected = {mr_series_number} if mr_sop_class_only else {mr_series_number, 99}
+    assert series_numbers == expected
 
 
 @pytest.mark.parametrize(
