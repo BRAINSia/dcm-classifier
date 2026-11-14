@@ -59,7 +59,7 @@ def test_no_limit_leaves_thread_count_to_onnxruntime(no_cpu_limits):
 
 
 def test_cpu_affinity_limits_thread_count(no_cpu_limits, monkeypatch):
-    monkeypatch.setattr(os, "sched_getaffinity", lambda pid: {0, 1, 2}, raising=False)
+    monkeypatch.setattr(os, "sched_getaffinity", lambda _pid: {0, 1, 2}, raising=False)
     assert allowed_cpu_count() == 3
     inferer = ImageTypeClassifierBase(
         classification_model_filename=inference_model_path
@@ -71,7 +71,7 @@ def test_cpu_affinity_limits_thread_count(no_cpu_limits, monkeypatch):
 @pytest.mark.parametrize("variable", cpu_limit_variables)
 def test_environment_variable_limits_thread_count(no_cpu_limits, monkeypatch, variable):
     monkeypatch.setattr(
-        os, "sched_getaffinity", lambda pid: set(range(48)), raising=False
+        os, "sched_getaffinity", lambda _pid: set(range(48)), raising=False
     )
     monkeypatch.setenv(variable, "4")
     assert allowed_cpu_count() == 4
@@ -90,7 +90,7 @@ def test_nested_omp_num_threads_uses_outer_level(no_cpu_limits, monkeypatch):
 
 def test_smallest_limit_wins(no_cpu_limits, monkeypatch):
     monkeypatch.setattr(
-        os, "sched_getaffinity", lambda pid: set(range(8)), raising=False
+        os, "sched_getaffinity", lambda _pid: set(range(8)), raising=False
     )
     monkeypatch.setattr(image_type_inference, "cgroup_cpu_quota", lambda: 1.5)
     monkeypatch.setenv("SLURM_CPUS_PER_TASK", "6")
