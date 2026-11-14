@@ -1,6 +1,7 @@
+from pathlib import Path
+
 from dcm_classifier.dicom_validator import DicomValidatorBase
 from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
-from pathlib import Path
 
 
 def test_volume_validation(mock_volumes):

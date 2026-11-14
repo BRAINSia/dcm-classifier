@@ -1,13 +1,13 @@
 import re
 import unicodedata
-import itk
 from pathlib import Path
 
+import itk
 import numpy as np
 import pydicom
-from .utility_functions import get_bvalue, itk_read_from_dicomfn_list
-from .dicom_series import DicomSingleSeries
 
+from .dicom_series import DicomSingleSeries
+from .utility_functions import get_bvalue, itk_read_from_dicomfn_list
 
 FImageType = itk.Image[itk.F, 3]
 TracewImageType = itk.Image[itk.F, 4]

@@ -7,7 +7,7 @@ from typing import Any
 import pandas as pd
 import tabulate
 
-from dcm_classifier.dicom_config import required_DICOM_fields, optional_DICOM_fields
+from dcm_classifier.dicom_config import optional_DICOM_fields, required_DICOM_fields
 from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase

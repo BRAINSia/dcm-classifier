@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-from create_dicom_fields_sheet import generate_dicom_dataframe
-from glob import glob
-import random
 import os
-import pandas as pd
+import random
+from glob import glob
 from pathlib import Path
+
+import pandas as pd
+from create_dicom_fields_sheet import generate_dicom_dataframe
 
 
 def organize_data_to_bids(df_path: str, output_dir: str):

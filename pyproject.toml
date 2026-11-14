@@ -198,6 +198,7 @@ extend-exclude = ["*.ipynb"]
 [tool.ruff.lint]
 extend-select = [
     # Rules adopted one per commit, named so each stays enforced.
+    "I001",  # unsorted-imports
     "PIE808",  # unnecessary-range-start
     "PLR5501",  # collapsible-else-if
     "RET505",  # superfluous-else-return
@@ -257,7 +258,6 @@ ignore = [
     "EM101",  # raw-string-in-exception (3)
     "EM102",  # f-string-in-exception (13)
     "EXE001",  # shebang-not-executable (6)
-    "I001",  # unsorted-imports (27)
     "PD002",  # pandas-use-of-inplace-argument (11)
     "PD011",  # pandas-use-of-dot-values (2)
     "PD015",  # pandas-use-of-pd-merge (4)

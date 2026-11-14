@@ -1,12 +1,11 @@
 import sys
+from glob import glob
 from pathlib import Path
 
 import pandas as pd
-from glob import glob
-from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
-
 import pydicom
 
+from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 
 phi_tags = (
     "Acquisition Date",

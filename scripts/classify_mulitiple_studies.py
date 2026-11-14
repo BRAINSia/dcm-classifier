@@ -35,15 +35,16 @@ Optional Arguments:
 import argparse
 import shutil
 import sys
-import pandas as pd
-import tabulate
 from collections import OrderedDict as ordered_dict
 from pathlib import Path
+
+import pandas as pd
+import tabulate
 from itk import imwrite
 
 try:
-    from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
     from dcm_classifier.image_type_inference import ImageTypeClassifierBase
+    from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 except Exception as e:
     print(f"Missing module import {e}")
     print(

@@ -6,7 +6,6 @@ import pydicom
 import pytest
 from pydicom.uid import SecondaryCaptureImageStorage, generate_uid
 
-
 from dcm_classifier.classify_support import (
     _classification_failure_reason,
     simple_classify_study,

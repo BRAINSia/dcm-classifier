@@ -1,7 +1,7 @@
 import re
-import pandas as pd
 from pathlib import Path
 
+import pandas as pd
 from training_config import header_df
 
 max_header_length: int = 34

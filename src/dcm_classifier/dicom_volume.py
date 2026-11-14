@@ -17,27 +17,28 @@
 #  =========================================================================
 
 import collections
-from pathlib import Path
-
-import pandas as pd
 import json
 from copy import deepcopy
-from deprecation import deprecated
+from pathlib import Path
 from typing import Any
+
+import pandas as pd
 import pydicom
-from .utility_functions import (
-    get_bvalue,
-    FImageType,
-    itk_read_from_dicomfn_list,
-    vprint,
-    get_coded_dictionary_elements,
-    sanitize_dicom_dataset,
-    get_diffusion_gradient_direction,
-)
+from deprecation import deprecated
+
 from .dicom_config import (
     MISSING_VALUE,
-    required_DICOM_fields,
     optional_DICOM_fields,
+    required_DICOM_fields,
+)
+from .utility_functions import (
+    FImageType,
+    get_bvalue,
+    get_coded_dictionary_elements,
+    get_diffusion_gradient_direction,
+    itk_read_from_dicomfn_list,
+    sanitize_dicom_dataset,
+    vprint,
 )
 
 

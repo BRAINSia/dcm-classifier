@@ -1,22 +1,19 @@
-import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
+import numpy as np
 import onnxruntime as rt
+import pandas as pd
+from matplotlib import rcParams
 from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
-
 from sklearn import metrics
-from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.metrics import (
-    confusion_matrix,
-    accuracy_score,
     ConfusionMatrixDisplay,
+    accuracy_score,
     classification_report,
+    confusion_matrix,
 )
-
+from sklearn.model_selection import GridSearchCV, StratifiedKFold, train_test_split
 
 rcParams.update({"figure.autolayout": True})
 plt.rcParams.update({"font.size": 7})

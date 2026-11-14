@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
 
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-from sklearn import metrics
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split  # Import train_test_split function
-from sklearn.tree import DecisionTreeClassifier  # Import Decision Tree Classifier
-from sklearn.metrics import ConfusionMatrixDisplay, classification_report
-from sklearn.tree import export_graphviz
-
 from io import StringIO
+
+import matplotlib.pyplot as plt
+import numpy as np
+import onnxruntime as rt
+import pandas as pd
 
 # from IPython.display import Image
 import pydotplus
 from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
-import onnxruntime as rt
+from sklearn import metrics
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import ConfusionMatrixDisplay, classification_report
+from sklearn.model_selection import train_test_split  # Import train_test_split function
+from sklearn.tree import (
+    DecisionTreeClassifier,  # Import Decision Tree Classifier
+    export_graphviz,
+)
 
 from .create_dicom_fields_sheet.py import make_unique_ordered_list
-
 
 # overwrite objects for new data modalities
 plane_to_integer_mapping = {

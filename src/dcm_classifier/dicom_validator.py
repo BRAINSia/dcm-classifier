@@ -16,11 +16,10 @@
 #
 #  =========================================================================
 
-from .dicom_volume import DicomSingleVolumeInfoBase
-
+import json
 from pathlib import Path
 
-import json
+from .dicom_volume import DicomSingleVolumeInfoBase
 
 
 class DicomValidatorBase:

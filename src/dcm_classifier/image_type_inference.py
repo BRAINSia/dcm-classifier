@@ -16,21 +16,21 @@
 #
 #  =========================================================================
 
+import contextlib
+import math
+import os
+import warnings
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import pandas as pd
+
 from .dicom_config import MISSING_VALUE, inference_features
 from .dicom_series import DicomSingleSeries
 from .utility_functions import (
     infer_diffusion_from_gradient,
 )
-from pathlib import Path
-import contextlib
-import math
-import os
-import warnings
-
-import numpy as np
-import pandas as pd
-
-from typing import Any
 
 imagetype_to_integer_mapping = {
     "t1w": 0,

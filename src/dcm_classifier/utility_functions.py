@@ -16,32 +16,34 @@
 #
 #  =========================================================================
 
+import collections
+import numbers
+import tempfile
+import warnings
+from copy import deepcopy
+from datetime import datetime
 from pathlib import Path
 from typing import Any
-import collections
 
-import pydicom
-from pydicom.uid import (
-    MRImageStorage,
-    EnhancedMRImageStorage,
-    EnhancedMRColorImageStorage,
-    LegacyConvertedEnhancedMRImageStorage,
-)
-from copy import deepcopy
 import itk
-import warnings
-import tempfile
 import numpy as np
-import numbers
-
+import pydicom
 from numpy import ndarray
 from pydicom.dataset import Dataset
 from pydicom.multival import MultiValue
+from pydicom.uid import (
+    EnhancedMRColorImageStorage,
+    EnhancedMRImageStorage,
+    LegacyConvertedEnhancedMRImageStorage,
+    MRImageStorage,
+)
+
 from .dicom_config import (
     MISSING_VALUE,
+)
+from .dicom_config import (
     inference_features as features,
 )
-from datetime import datetime
 
 FImageType = itk.Image[itk.F, 3]
 UCImageType = itk.Image[itk.UC, 3]

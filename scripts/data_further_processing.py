@@ -24,9 +24,9 @@ from typing import Any
 import itk
 
 try:
-    from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
-    from dcm_classifier.image_type_inference import ImageTypeClassifierBase
     from dcm_classifier.dicom_config import inference_features
+    from dcm_classifier.image_type_inference import ImageTypeClassifierBase
+    from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 except Exception as e:
     print(f"Missing module import {e}")
     print(
