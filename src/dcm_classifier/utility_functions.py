@@ -20,11 +20,11 @@ import collections
 import numbers
 import tempfile
 import warnings
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import itk
 import numpy as np
@@ -46,8 +46,9 @@ from .dicom_config import (
     inference_features as features,
 )
 
-FImageType = itk.Image[itk.F, 3]
-UCImageType = itk.Image[itk.UC, 3]
+# Also ITK template arguments at run time, which a lazy `type` alias cannot be.
+FImageType: TypeAlias = itk.Image[itk.F, 3]  # noqa: UP040
+UCImageType: TypeAlias = itk.Image[itk.UC, 3]  # noqa: UP040
 
 
 def itk_read_from_dicomfn_list(
@@ -85,9 +86,7 @@ def itk_read_from_dicomfn_list(
             msg = f"No DICOMs in: {tmp_symlink_dir_path.as_posix()} (itk_read_from_dicomfn_list)"
             raise FileNotFoundError(msg)
         if len(seriesUID_list) > 1:
-            msg: str = (
-                f"Too many series in DICOMs in: {tmp_symlink_dir_path.as_posix()}"
-            )
+            msg = f"Too many series in DICOMs in: {tmp_symlink_dir_path.as_posix()}"
             raise AssertionError(msg)
 
         seriesIdentifier = seriesUID_list[0]
@@ -210,12 +209,7 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
     for v in private_tags_map.values():
         if v in dicom_header_info:
             # ensure safe extraction of the dicom element
-            if isinstance(dicom_header_info[v], pydicom.dataelem.RawDataElement):
-                dicom_element = pydicom.dataelem.convert_raw_data_element(
-                    dicom_header_info[v]
-                )
-            else:
-                dicom_element = dicom_header_info[v]
+            dicom_element = dicom_header_info[v]
 
             # This decoding of bvalues follows the NAMIC conventions defined at
             # https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
@@ -307,12 +301,7 @@ def get_diffusion_gradient_direction(
     for v in private_tags_map.values():
         if v in dicom_header_info:
             # ensure safe extraction of the dicom element
-            if isinstance(dicom_header_info[v], pydicom.dataelem.RawDataElement):
-                gradient_direction_element = pydicom.dataelem.convert_raw_data_element(
-                    dicom_header_info[v]
-                )
-            else:
-                gradient_direction_element = dicom_header_info[v]
+            gradient_direction_element = dicom_header_info[v]
             if v == private_tags_map["Siemens"]:
                 gradient_direction_raw = gradient_direction_element.value
                 if (
@@ -394,7 +383,7 @@ def sanitize_dicom_dataset(
     ro_dataset: pydicom.Dataset,
     required_info_list: list[str],
     optional_info_list: list[str],
-) -> tuple[dict, bool]:
+) -> tuple[dict[str, Any], bool]:
     """
     Validates the DICOM fields in the DICOM header to ensure all required fields are present.
 
@@ -414,7 +403,7 @@ def sanitize_dicom_dataset(
     dataset_dictionary: dict[str, Any] = {}
     dataset = deepcopy(ro_dataset)  # DO NOT MODIFY THE INPUT DATASET!
     dicom_filename: Path = dataset.filename
-    dataset_dictionary["FileName"]: str = dicom_filename
+    dataset_dictionary["FileName"] = dicom_filename
     dataset = pydicom.Dataset(dataset)  # DO NOT MODIFY THE INPUT DATASET!
     dataset.remove_private_tags()
     INVALID_VALUE = "INVALID_VALUE"
@@ -486,7 +475,7 @@ def sanitize_dicom_dataset(
                 # SAR impact on the patient for the derived image.
                 # SAR Calculated whole body Specific Absorption Rate in watts/kilogram.
                 # indicate that there is no SAR for the computed image
-                _default_inferred_value = MISSING_VALUE
+                _default_inferred_value: int | str = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
                 vprint(
                     f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
@@ -684,6 +673,8 @@ def validate_numerical_dataset_element(element: str | None) -> str | float:
     :return: The element as a float if it can be converted, otherwise the element as a string.
     :rtype: str | float
     """
+    if element is None:
+        return MISSING_VALUE
     try:
         float(element)
     except Exception:
@@ -708,7 +699,7 @@ scanning_variant_features: list[str] = [
 
 
 def get_coded_dictionary_elements(
-    dicom_sanitized_dataset: dict,
+    dicom_sanitized_dataset: dict[str, Any],
 ) -> dict[str, Any]:
     """
     Extract specific information from a DICOM fields dataset and create a coded dictionary with extracted features.
@@ -764,7 +755,7 @@ def get_coded_dictionary_elements(
                 dataset_dictionary[vv[0]] = float(vv[1])
         elif name == "Manufacturer":
             lower_manufacturer_string: str = str(value).lower()
-            throw_away: int = len("Manufacturer_")
+            throw_away = len("Manufacturer_")
             for feature in manufacturer_features:
                 if feature[throw_away:].lower() in lower_manufacturer_string:
                     dataset_dictionary[feature] = 1
@@ -772,7 +763,7 @@ def get_coded_dictionary_elements(
                     dataset_dictionary[feature] = 0
         elif name == "ScanningSequence":
             lower_scanning_sequence_string: str = str(value).lower()
-            throw_away: int = len("ScanningSequence_")
+            throw_away = len("ScanningSequence_")
             for feature in scanning_sequence_features:
                 if feature[throw_away:].lower() in lower_scanning_sequence_string:
                     dataset_dictionary[feature] = 1
@@ -780,7 +771,7 @@ def get_coded_dictionary_elements(
                     dataset_dictionary[feature] = 0
         elif name == "SequenceVariant":
             lower_sequence_variant_string: str = str(value).lower()
-            throw_away: int = len("SequenceVariant_")
+            throw_away = len("SequenceVariant_")
             for feature in scanning_variant_features:
                 if feature[throw_away:].lower() in lower_sequence_variant_string:
                     dataset_dictionary[feature] = 1
@@ -810,7 +801,9 @@ def get_coded_dictionary_elements(
     return dataset_dictionary
 
 
-def convert_array_to_min_max(name: str, value_list: list[int]) -> list:
+def convert_array_to_min_max(
+    name: str, value_list: list[int]
+) -> list[tuple[str, float]]:
     """
     Compute the minimum and maximum values of a DICOM array field.
 
@@ -832,7 +825,9 @@ def convert_array_to_min_max(name: str, value_list: list[int]) -> list:
     return [(name + "Min", list_min), (name + "Max", list_max)]
 
 
-def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) -> list:
+def convert_array_to_index_value(
+    name: str, value_list: MultiValue[Any] | ndarray | str
+) -> list[tuple[str, float]]:
     """
     Takes a DICOM array and expands it to an indexed list of values.
 
@@ -846,11 +841,11 @@ def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) ->
     :rtype: list
     """
     # If value is a multi-value field, then break it apart
-    multi_value_list = value_list
+    multi_value_list: Iterable[Any] = value_list
     if isinstance(value_list, pydicom.multival.MultiValue):
         multi_value_list = tuple(value_list)
     # Some dicom have a string representation of the arrays
-    elif "/" in value_list:
+    elif isinstance(value_list, str) and "/" in value_list:
         multi_value_list = value_list.split("/")
     del value_list
 

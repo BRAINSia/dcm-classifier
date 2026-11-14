@@ -217,7 +217,6 @@ ignore_missing_imports = true
 module = [
     "dcm_classifier.example_image_processing",  # 58
     "dcm_classifier.image_type_inference",  # 48
-    "dcm_classifier.utility_functions",  # 30
 ]
 ignore_errors = true
 
