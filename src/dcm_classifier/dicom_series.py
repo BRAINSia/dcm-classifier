@@ -18,8 +18,8 @@
 from typing import Any
 
 import pandas as pd
-from deprecation import deprecated
 
+from ._deprecation import deprecated
 from .dicom_volume import DicomSingleVolumeInfoBase
 
 
@@ -81,7 +81,7 @@ class DicomSingleSeries:
         :type modality: str
         """
         if not isinstance(modality, str):
-            msg = f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."
+            msg = f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."  # type: ignore[unreachable]
             raise ValueError(msg)
         self.series_modality = modality
 
@@ -92,8 +92,6 @@ class DicomSingleSeries:
         :return: The modality of the series.
         :rtype: str
         """
-        if self.series_modality is None:
-            return "INVALID"
         return self.series_modality
 
     def set_modality_probabilities(
@@ -109,7 +107,7 @@ class DicomSingleSeries:
             not isinstance(modality_probability, pd.DataFrame)
             and modality_probability is not None
         ):
-            msg = (
+            msg = (  # type: ignore[unreachable]
                 "ERROR: Can only set_modality_probabilities with a pd.DataFrame."
                 f"Got type(modality_probability) = {type(modality_probability)}."
             )
@@ -133,7 +131,7 @@ class DicomSingleSeries:
         :type isotropic: bool
         """
         if not isinstance(isotropic, bool):
-            msg = (
+            msg = (  # type: ignore[unreachable]
                 "ERROR: Can only set_is_isotropic with a pd.DataFrame."
                 f"Got type(isotropic) = {type(isotropic)}."
             )
@@ -157,7 +155,7 @@ class DicomSingleSeries:
         :type contrast: bool
         """
         if not isinstance(contrast, bool):
-            msg = (
+            msg = (  # type: ignore[unreachable]
                 "ERROR: Can only set_has_contrast with a pd.DataFrame."
                 f"Got type(contrast) = {type(contrast)}."
             )
@@ -191,7 +189,7 @@ class DicomSingleSeries:
 
         """
         if not isinstance(acquisition_plane, str):
-            msg = (
+            msg = (  # type: ignore[unreachable]
                 "ERROR: Can only set_acquisition_plane with a str."
                 f"Got type(acquisition_plane) = {type(acquisition_plane)}."
             )
@@ -261,7 +259,7 @@ class DicomSingleSeries:
 
         return info_dict
 
-    def get_dicom_field_by_name(self, field_name) -> str:
+    def get_dicom_field_by_name(self, field_name: str) -> str:
         """
         Get the element f"{field_name}" from the reference DICOM file (i.e. the first file found).
         This should be the same for all volumes and is picked from the first volume.
