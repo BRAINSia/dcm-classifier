@@ -153,7 +153,7 @@ def process_single_study(
     # Create a DataFrame for the single study
     print(f"Finished processing study at: {session_directory}")
     df_study: pd.DataFrame = pd.DataFrame(list_of_dictionaries)
-    df_study.sort_values(by=["Series#", "Vol.#"], inplace=True)
+    df_study = df_study.sort_values(by=["Series#", "Vol.#"])
 
     # Print a nice summary table
     table_msg: str = tabulate.tabulate(
@@ -250,7 +250,7 @@ def main() -> None:
 
     # Concatenate all results into one master DataFrame
     master_df = pd.concat(all_studies_df_list, ignore_index=True)
-    master_df.sort_values(by=["StudyPathName", "Series#", "Vol.#"], inplace=True)
+    master_df = master_df.sort_values(by=["StudyPathName", "Series#", "Vol.#"])
 
     # Save the master DataFrame to CSV
     master_df.to_csv(results_csv, index=False)
@@ -258,7 +258,7 @@ def main() -> None:
 
     # Optionally, print the master summary to console
     printable_df = master_df.copy()
-    printable_df.drop(columns=["StudyPath"], inplace=True)
+    printable_df = printable_df.drop(columns=["StudyPath"])
 
     table_msg: str = tabulate.tabulate(
         printable_df,

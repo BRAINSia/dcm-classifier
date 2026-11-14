@@ -229,7 +229,7 @@ def simple_classify_study(
     if len(list_of_dictionaries) > 0:  # Check if the list is not empty
         df: pd.DataFrame = pd.DataFrame(list_of_dictionaries)
         try:
-            df.sort_values(by=["Series#", "Vol.#"], inplace=True)
+            df = df.sort_values(by=["Series#", "Vol.#"])
             table_msg: str = tabulate.tabulate(
                 df, headers="keys", tablefmt="psql", showindex=False
             )
