@@ -281,18 +281,16 @@ extend-select = [
     "UP",  # pyupgrade
 ]
 ignore = [
-    # Accepted.
     "PLR09",  # Too many <...>
     "PLR2004",  # Magic value used in comparison
     "T201",  # `print` found; printing is how the command line tools report
-    # Parked so the rule list could be adopted with lint passing.
-    # Each line is removed by the commit that fixes that rule.
-    "ARG001",  # unused-function-argument (7)
-    "BLE001",  # blind-except (17)
-    "PLW0603",  # global-statement (1)
-    "TRY003",  # raise-vanilla-args (15)
-    "TRY004",  # type-check-without-type-error (5)
-    "TRY301",  # raise-within-try (2)
+    "TRY301",  # the splitter's handler re-raises or reports what it raises
+    # Fixing these changes what callers see, so each needs a decision first.
+    "ARG001",  # unused arguments are part of public and callback signatures
+    "BLE001",  # broad handlers report an unreadable file and carry on
+    "PLW0603",  # module-level state in a training script
+    "TRY003",  # messages would move into custom exception classes
+    "TRY004",  # TypeError for wrong types changes the exceptions raised
 ]
 
 [tool.ruff.lint.per-file-ignores]
