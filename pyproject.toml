@@ -115,16 +115,18 @@ filterwarnings = [
 testpaths = ["tests"]
 
 [tool.coverage.run]
+source_pkgs = ["dcm_classifier"]
+relative_files = true
+# sys.monitoring is faster; it supports line coverage from Python 3.12.
+core = "sysmon"
+disable_warnings = ["no-sysmon"]
 omit = [
     "**/__init__.py",
-    "scripts/**",
-    "models/**",
-    "tests/**",
     "**/example_image_processing.py",
-    ]
-source = [
-    "src/dcm_classifier"
 ]
+
+[tool.coverage.report]
+show_missing = true
 
 [tool.coverage.html]
 directory = "coverage_html_report"
