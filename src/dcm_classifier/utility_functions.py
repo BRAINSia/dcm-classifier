@@ -408,7 +408,7 @@ def sanitize_dicom_dataset(
     :raises ValueError: Raises an exception if any required fields are missing.
 
     """
-    dataset_dictionary: dict[str, Any] = dict()
+    dataset_dictionary: dict[str, Any] = {}
     dataset = deepcopy(ro_dataset)  # DO NOT MODIFY THE INPUT DATASET!
     dicom_filename: Path = dataset.filename
     dataset_dictionary["FileName"]: str = dicom_filename
@@ -727,7 +727,7 @@ def get_coded_dictionary_elements(
         elif value == "INVALID_VALUE":
             # Return a completely empty dictionary if any required values are missing from image
             # This should likely be more robust in the future
-            return dict()
+            return {}
         elif name == "ImageType":
             lower_value_str: str = str(value).lower()
             if "adc" in lower_value_str:
@@ -859,7 +859,7 @@ def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) ->
         )
         raise e
 
-    named_list = list()
+    named_list = []
     for index in range(len(number_list)):
         named_list.append((name + "_" + str(index), number_list[index]))
     return named_list

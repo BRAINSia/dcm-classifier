@@ -42,7 +42,7 @@ class DicomValidatorBase:
         :type single_volume_info: DicomSingleVolumeInfoBase
         """
         self.single_volume_info: DicomSingleVolumeInfoBase = single_volume_info
-        self._validation_failure_reports: list[str] = list()
+        self._validation_failure_reports: list[str] = []
 
     def append_to_validation_failure_reports(self, msg: str) -> None:
         """

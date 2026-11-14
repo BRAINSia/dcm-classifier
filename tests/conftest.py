@@ -185,10 +185,10 @@ def mock_volumes():
         and t2w_volume_dir_path.exists()
         and other_volume_dir_path.exists()
     ):
-        adc_volumes = list()
-        dwi_volumes = list()
-        t2w_volumes = list()
-        other_volumes = list()
+        adc_volumes = []
+        dwi_volumes = []
+        t2w_volumes = []
+        other_volumes = []
 
         mock_data_file: Path = adjacent_testing_data_path / "mock_data.txt"
 

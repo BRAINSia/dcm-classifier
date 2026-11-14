@@ -82,7 +82,7 @@ def test_get_invalid_vol_itk_image(mock_volumes):
 def test_get_itk_image(get_data_dir):
     dicom_file_dir = get_data_dir / "1" / "DICOM"
     assert dicom_file_dir.exists()
-    vol = list()
+    vol = []
     for file in dicom_file_dir.iterdir():
         vol.append(file)
 

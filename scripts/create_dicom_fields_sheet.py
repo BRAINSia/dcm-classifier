@@ -145,7 +145,7 @@ def make_unique_ordered_list(seq):
 
 
 def data_set_to_dict(ds):
-    information = dict()
+    information = {}
     for elem in ds:
         if elem.VR in ["SQ", "OB", "OW", "OF", "UT", "UN"]:
             continue
