@@ -205,6 +205,7 @@ extend-select = [
     "PIE808",  # unnecessary-range-start
     "PLR5501",  # collapsible-else-if
     "PT006",  # pytest-parametrize-names-wrong-type
+    "PT018",  # pytest-composite-assertion
     "RET505",  # superfluous-else-return
     "RET506",  # superfluous-else-raise
     "RET508",  # superfluous-else-break
@@ -273,7 +274,6 @@ ignore = [
     "PLW0603",  # global-statement (1)
     "PLW2901",  # redefined-loop-name (2)
     "PT011",  # pytest-raises-too-broad (10)
-    "PT018",  # pytest-composite-assertion (3)
     "PT030",  # pytest-warns-too-broad (1)
     "PT031",  # pytest-warns-with-multiple-statements (5)
     "PTH100",  # os-path-abspath (1)
