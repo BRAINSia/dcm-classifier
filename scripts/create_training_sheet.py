@@ -2,7 +2,7 @@ import re
 import pandas as pd
 from pathlib import Path
 
-from scripts.training_config import header_df
+from training_config import header_df
 
 max_header_length: int = 34
 
