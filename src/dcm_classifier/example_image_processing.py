@@ -34,7 +34,7 @@ def compute_tracew_adc_from_diffusion(
         bval = volume.get_volume_bvalue()
         dcm_files = volume.get_one_volume_dcm_filenames()
         itk_image = itk_read_from_dicomfn_list(dcm_files)
-        if bval in bval_volumes_dict.keys():
+        if bval in bval_volumes_dict:
             bval_volumes_dict[bval].append(itk_image)
         else:
             bval_volumes_dict[bval] = [itk_image]

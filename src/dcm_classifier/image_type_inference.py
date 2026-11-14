@@ -343,7 +343,7 @@ class ImageTypeClassifierBase:
             "PixelSpacing_1",
             "SliceThickness",
         ]:
-            if field not in feature_dict.keys():
+            if field not in feature_dict:
                 return None
 
         # check if the volume is isotropic
@@ -364,7 +364,7 @@ class ImageTypeClassifierBase:
         # check if the volume was invalidated
 
         field = "ContrastBolusAgent"
-        if field not in feature_dict.keys():
+        if field not in feature_dict:
             return False
 
         # check if the volume has contrast
@@ -459,7 +459,7 @@ class ImageTypeClassifierBase:
             """
             missing_features = []
             for feature in self.classification_feature_list:
-                if feature not in input_dict.keys():
+                if feature not in input_dict:
                     missing_features.append(feature)
             if len(missing_features) > 0:
                 warnings.warn(
