@@ -126,6 +126,28 @@ def test_split_orders_files_by_instance_number(get_data_dir, tmp_path):
     assert instance_numbers == sorted(instance_numbers)
 
 
+def test_mosaic_series_is_flagged_with_a_warning(get_data_dir):
+    dwi_directory = get_data_dir.parent / "anonymized_dwi_series"
+
+    with pytest.warns(UserWarning, match="Siemens mosaic") as caught:
+        study = ProcessOneDicomStudyToVolumesMappingBase(dwi_directory)
+
+    (mosaic_warning,) = (w for w in caught if "mosaic" in str(w.message))
+    assert f"SeriesNumber 2 in {dwi_directory}" in str(mosaic_warning.message)
+
+    series = study.series_dictionary[2]
+    assert series.get_is_mosaic()
+    assert all(volume.get_is_mosaic() for volume in series.get_volume_list())
+
+
+def test_non_mosaic_series_is_not_flagged(get_data_dir, recwarn):
+    study = ProcessOneDicomStudyToVolumesMappingBase(get_data_dir / "5")
+
+    (series,) = study.series_dictionary.values()
+    assert not series.get_is_mosaic()
+    assert not any("mosaic" in str(w.message) for w in recwarn)
+
+
 def test_split_does_not_depend_on_bvalue_tags(get_data_dir, tmp_path):
     """Anonymization can remove the b-value tags (issue #68)."""
     tracew_directory = get_data_dir / "5"

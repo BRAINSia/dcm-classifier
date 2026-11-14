@@ -208,6 +208,17 @@ class DicomSingleVolumeInfoBase:
         """
         return self.has_contrast
 
+    def get_is_mosaic(self) -> bool:
+        """
+        Reports whether the ImageType of the volume marks it as a Siemens mosaic.
+
+        A mosaic file tiles many slices into one image, which this package does not unpack.
+
+        :return: True if the volume is a mosaic.
+        :rtype: bool
+        """
+        return self.volume_info_dict.get("ImageType_MOSAIC", 0) == 1
+
     def get_contrast_agent(self) -> str:
         """
         Retrieves the contrast agent of the DICOM data.
