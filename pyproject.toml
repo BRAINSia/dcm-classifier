@@ -216,7 +216,6 @@ ignore_missing_imports = true
 # Each module is removed by the commit that types it.
 module = [
     "dcm_classifier.example_image_processing",  # 58
-    "dcm_classifier.image_type_inference",  # 48
 ]
 ignore_errors = true
 
