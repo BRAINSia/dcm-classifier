@@ -224,7 +224,7 @@ def train_model(x1, x2, y1, y2, use_dt):
             rounded=True,
             special_characters=True,
             feature_names=plane_cols,
-            class_names=[x for x in plane_to_integer_mapping.keys()],
+            class_names=list(plane_to_integer_mapping.keys()),
         )
         graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
         graph.write_png("../training_outputs/test_plane.png")

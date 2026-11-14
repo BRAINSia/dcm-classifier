@@ -199,6 +199,7 @@ extend-exclude = ["*.ipynb"]
 extend-select = [
     # Rules adopted one per commit, named so each stays enforced.
     "B905",  # zip-without-explicit-strict
+    "C416",  # unnecessary-comprehension
     "I001",  # unsorted-imports
     "PIE808",  # unnecessary-range-start
     "PLR5501",  # collapsible-else-if
@@ -254,7 +255,6 @@ ignore = [
     "BLE001",  # blind-except (17)
     "C408",  # unnecessary-collection-call (28)
     "C414",  # unnecessary-double-cast-or-process (4)
-    "C416",  # unnecessary-comprehension (1)
     "EM101",  # raw-string-in-exception (3)
     "EM102",  # f-string-in-exception (13)
     "EXE001",  # shebang-not-executable (6)
