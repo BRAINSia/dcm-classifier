@@ -159,7 +159,7 @@ def test_no_cgroup_filesystem(tmp_path):
 
 @pytest.mark.parametrize("num_threads", [0, -1])
 def test_non_positive_thread_count_is_rejected(num_threads):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="num_threads must be at least 1"):
         ImageTypeClassifierBase(
             classification_model_filename=inference_model_path,
             num_threads=num_threads,

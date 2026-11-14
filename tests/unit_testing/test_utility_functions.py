@@ -321,9 +321,8 @@ def test_is_mr_sop_class(contrast_file_path):
 
 def test_conv_arr_to_index_val():
     arr = "yes//this//is//a//test"
-    with pytest.raises(ValueError) as ex:
+    with pytest.raises(ValueError, match="could not convert string to float"):
         convert_array_to_index_value("test", arr)
-    assert "could not convert string to float" in str(ex.value)
 
 
 def test_get_invalid_coded_dictionary():
