@@ -323,10 +323,9 @@ class ImageTypeClassifierBase:
 
         if float(feature_dict["ImageOrientationPatient_5"]) <= 0.5:
             return "ax"
-        elif float(feature_dict["ImageOrientationPatient_0"]) <= 0.707:
+        if float(feature_dict["ImageOrientationPatient_0"]) <= 0.707:
             return "sag"
-        else:
-            return "cor"
+        return "cor"
 
     def infer_isotropic(self, feature_dict: dict = None) -> bool | None:
         """

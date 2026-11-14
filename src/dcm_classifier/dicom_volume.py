@@ -226,8 +226,7 @@ class DicomSingleVolumeInfoBase:
         """
         if self.get_has_contrast():
             return self.get_dicom_field_by_name(field_name="ContrastBolusAgent")
-        else:
-            return "None"
+        return "None"
 
     def set_parent_series(self, series) -> None:
         """
