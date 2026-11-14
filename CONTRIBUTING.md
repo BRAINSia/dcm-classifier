@@ -35,10 +35,13 @@ After making your changes, create a pull request against the main branch of the 
 ### Commit Messages
 
 Commit messages should follow the format of:
+
 ```
 Prefix: commit message
 ```
+
 Where the prefix is one of the following:
+
 - BUG: Fix for runtime crash or incorrect result
 - COMP: Compiler error or warning fix
 - DOC: Documentation change
