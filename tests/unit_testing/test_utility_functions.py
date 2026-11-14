@@ -269,40 +269,8 @@ def test_run_inference_validate_features(get_data_dir):
     study.run_inference()
 
     for series_num, series in study.series_dictionary.items():
-        # print(
-        #     ImageTypeClassifierBase.infer_modality(
-        #         series.get_volume_list()[0].get_volume_dictionary()
-        #     )
-        # )
         for vol in series.get_volume_list():
             assert vol.get_volume_modality() == "INVALID"
-
-
-# def test_invalid_fields():
-#     assert dicom_file_dir.exists()
-#     vol = list()
-#     for file in dicom_file_dir.iterdir():
-#         if "invalid" in file.stem:
-#             vol.append(file)
-#
-#     # Tests dicom file with an empty series number field
-#     f = pydicom.dcmread(vol[0])
-#     ds_dict = None
-#     with pytest.raises(TypeError) as ex:
-#         ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
-#     assert "not 'NoneType'" in str(ex.value)
-#
-#     # Tests dicom file with an empty echo time field
-#     f = pydicom.dcmread(vol[1])
-#     with pytest.raises(TypeError) as ex:
-#         ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
-#     assert "not 'NoneType'" in str(ex.value)
-#
-#     # Tests dicom file with an empty pixel bandwidth field
-#     f = pydicom.dcmread(vol[2])
-#     with pytest.raises(TypeError) as ex:
-#         ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
-#     assert "not 'NoneType'" in str(ex.value)
 
 
 def test_unit_vector():

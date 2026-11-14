@@ -41,18 +41,6 @@ def test_get_list_of_primary_volume_info(get_data_dir):
     assert len(volume_info_dictionaries) == 16
 
 
-# @pytest.mark.skip(reason="Need to add public data")
-# def test_get_list_of_primary_volume_info():
-#     test_data_dicom_dir: str = "XXXX"
-#     study_path = relative_testing_data_path / test_data_dicom_dir
-#
-#     study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(study_path)
-#     volume_info_dictionaries = (
-#         study_to_volume_mapping_base.get_list_of_primary_volume_info()
-#     )
-#     assert len(volume_info_dictionaries) == 13
-
-
 def test_get_study_dictionary_and_set_inferer():
     study_path = (
         relative_testing_data_path / "anonymized_testing_data" / "anonymized_data"
@@ -87,11 +75,6 @@ def test_get_study_dictionary_and_set_inferer():
         == imagetype_to_integer_mapping
     )
     assert study_to_volume_mapping_base.inferer.min_probability_threshold == 0.4
-
-
-# @pytest.mark.skip(reason="Not implemented yet")
-# def test_run_inference():
-#     pass
 
 
 def test_un_pathlike_dir():

@@ -10,7 +10,6 @@ from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 
 # Previous code for generating mock volumes from botimage
 adjacent_testing_data_path: Path = Path(__file__).parent / "testing_data"
-current_file_path: Path = Path(__file__).parent
 inference_model_path = list(
     Path(__file__).parent.parent.rglob("models/rf_classifier.onnx")
 )[0]
