@@ -325,12 +325,11 @@ def get_diffusion_gradient_direction(
                     gradient_direction = np.array(gradient_direction_raw)
 
                 break
-            else:
-                try:
-                    gradient_direction = np.array(gradient_direction_element.value)
-                    break
-                except TypeError:
-                    gradient_direction = None
+            try:
+                gradient_direction = np.array(gradient_direction_element.value)
+                break
+            except TypeError:
+                gradient_direction = None
 
     # ensure that the gradient direction is a 3D vector
     if gradient_direction is not None:

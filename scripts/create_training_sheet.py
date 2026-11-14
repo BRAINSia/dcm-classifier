@@ -54,8 +54,7 @@ def one_hot_encoding_from_str_col(
                     if manufacturer in value.lower():
                         replace_dict[value] = manufacturer
                         break
-                    else:
-                        replace_dict[value] = "other"
+                    replace_dict[value] = "other"
 
         # frame[col_name].replace(replace_dict, inplace=True)
         frame[col_name] = frame[col_name].replace(replace_dict)
