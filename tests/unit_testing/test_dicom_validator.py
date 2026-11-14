@@ -12,7 +12,8 @@ def test_volume_validation(mock_volumes):
     report = validator.generate_validation_report_str(verbose_reporting=True)
     assert report is not None
     assert "Failure Messages:" in report
-    assert "testing" in report and "This is a TEST" in report
+    assert "testing" in report
+    assert "This is a TEST" in report
 
 
 # Always going to pass, `validate()` returns True
@@ -35,7 +36,8 @@ def test_write_validation_report(mock_volumes):
 
     with open(test_report_path) as f:
         msg = f.read()
-        assert "testing" in msg and "This is a TEST" in msg
+        assert "testing" in msg
+        assert "This is a TEST" in msg
 
     test_report_path.unlink(missing_ok=True)
 
@@ -46,4 +48,5 @@ def test_write_validation_report_append(mock_volumes, capsys):
     validator.write_validation_report(None)
     captured = capsys.readouterr()
     print(captured.out)
-    assert "testing" in captured.out and "Identified bvalue: -12345" in captured.out
+    assert "testing" in captured.out
+    assert "Identified bvalue: -12345" in captured.out
