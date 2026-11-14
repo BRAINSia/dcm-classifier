@@ -147,7 +147,10 @@ def test_no_series_number():
     vol = [file for file in dicom_file_dir.iterdir() if "noSeriesNum" in file.stem]
 
     f = pydicom.dcmread(vol[0])
-    ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
+    with pytest.warns(UserWarning, match="Required DICOM fields"):
+        ds_dict = sanitize_dicom_dataset(
+            f, required_DICOM_fields, optional_DICOM_fields
+        )[0]
 
     assert ds_dict["SeriesNumber"] == "INVALID_VALUE"
 
@@ -167,7 +170,10 @@ def test_no_pixel_bandwidth():
     vol = [file for file in dicom_file_dir.iterdir() if "noPixelBW" in file.stem]
 
     f = pydicom.dcmread(vol[0])
-    ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
+    with pytest.warns(UserWarning, match="Required DICOM fields"):
+        ds_dict = sanitize_dicom_dataset(
+            f, required_DICOM_fields, optional_DICOM_fields
+        )[0]
 
     assert ds_dict["PixelBandwidth"] == "INVALID_VALUE"
 
@@ -189,7 +195,10 @@ def test_invalid_fields():
     vol = [file for file in file_dir.iterdir() if "no_valid" in file.stem]
 
     f = pydicom.dcmread(vol[0])
-    ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
+    with pytest.warns(UserWarning, match="Required DICOM fields"):
+        ds_dict = sanitize_dicom_dataset(
+            f, required_DICOM_fields, optional_DICOM_fields
+        )[0]
 
     # Convert all values to strings
     ds_dict = {str(field): str(value) for field, value in ds_dict.items()}
@@ -227,6 +236,10 @@ def test_invalid_fields():
             assert ds_dict[field] in invalid_fields
 
 
+@pytest.mark.filterwarnings(
+    "ignore:SeriesNumber 2 .* Siemens mosaic:UserWarning",
+    "ignore:Missing features for SeriesNumber 2:UserWarning",
+)
 def test_run_inference_validate_features(get_data_dir):
     dwi_directory = get_data_dir.parent / "anonymized_dwi_series"
     assert dwi_directory.exists()

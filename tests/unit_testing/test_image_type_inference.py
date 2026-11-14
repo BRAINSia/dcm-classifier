@@ -166,6 +166,10 @@ def test_non_positive_thread_count_is_rejected(num_threads):
         )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:SeriesNumber 2 .* Siemens mosaic:UserWarning",
+    "ignore:Missing features for SeriesNumber 2:UserWarning",
+)
 def test_session_is_reused_across_inference_calls():
     inferer = ImageTypeClassifierBase(
         classification_model_filename=inference_model_path, num_threads=1

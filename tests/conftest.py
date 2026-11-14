@@ -1,5 +1,6 @@
 import random
 import re
+import warnings
 from pathlib import Path
 
 import pydicom
@@ -64,10 +65,16 @@ adc_series = [study.series_dictionary.get(6)]
 tracew_series = [study.series_dictionary.get(5)]
 
 
-dwi_study = ProcessOneDicomStudyToVolumesMappingBase(
-    study_directory=(testing_dicom_dir / "anonymized_dwi_series"), inferer=inferer
-)
-dwi_study.run_inference()
+# The DWI test series is a Siemens mosaic that lacks EchoTime and PixelBandwidth.
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", "SeriesNumber 2 .* Siemens mosaic", UserWarning)
+    warnings.filterwarnings(
+        "ignore", "Missing features for SeriesNumber 2", UserWarning
+    )
+    dwi_study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=(testing_dicom_dir / "anonymized_dwi_series"), inferer=inferer
+    )
+    dwi_study.run_inference()
 
 
 @pytest.fixture(scope="session")
