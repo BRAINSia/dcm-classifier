@@ -1,3 +1,7 @@
+ci:
+  autoupdate_commit_msg: "COMP: Update pre-commit hooks"
+  autofix_commit_msg: "STYLE: Apply pre-commit fixes"
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
