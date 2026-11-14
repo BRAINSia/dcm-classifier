@@ -20,6 +20,7 @@ from typing import Any
 import pandas as pd
 
 from ._deprecation import deprecated
+from ._validation import require_type
 from .dicom_volume import DicomSingleVolumeInfoBase
 
 
@@ -80,9 +81,7 @@ class DicomSingleSeries:
         :param modality: The modality of the series.
         :type modality: str
         """
-        if not isinstance(modality, str):
-            msg = f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."  # type: ignore[unreachable]
-            raise ValueError(msg)
+        require_type(modality, str, "set_modality")
         self.series_modality = modality
 
     def get_series_modality(self) -> str:
@@ -103,15 +102,10 @@ class DicomSingleSeries:
         :param modality_probability: A DataFrame containing modality probabilities.
         :type modality_probability: pd.DataFrame
         """
-        if (
-            not isinstance(modality_probability, pd.DataFrame)
-            and modality_probability is not None
-        ):
-            msg = (  # type: ignore[unreachable]
-                "ERROR: Can only set_modality_probabilities with a pd.DataFrame."
-                f"Got type(modality_probability) = {type(modality_probability)}."
+        if modality_probability is not None:
+            require_type(
+                modality_probability, pd.DataFrame, "set_modality_probabilities"
             )
-            raise ValueError(msg)
         self.modality_probability = modality_probability
 
     def get_modality_probabilities(self) -> pd.DataFrame | None:
@@ -130,12 +124,7 @@ class DicomSingleSeries:
         :param isotropic: The isotropic flag to be set.
         :type isotropic: bool
         """
-        if not isinstance(isotropic, bool):
-            msg = (  # type: ignore[unreachable]
-                "ERROR: Can only set_is_isotropic with a pd.DataFrame."
-                f"Got type(isotropic) = {type(isotropic)}."
-            )
-            raise ValueError(msg)
+        require_type(isotropic, bool, "set_is_isotropic")
         self.is_isotropic = isotropic
 
     def get_is_isotropic(self) -> bool:
@@ -154,12 +143,7 @@ class DicomSingleSeries:
         :param contrast: The contrast flag to be set.
         :type contrast: bool
         """
-        if not isinstance(contrast, bool):
-            msg = (  # type: ignore[unreachable]
-                "ERROR: Can only set_has_contrast with a pd.DataFrame."
-                f"Got type(contrast) = {type(contrast)}."
-            )
-            raise ValueError(msg)
+        require_type(contrast, bool, "set_has_contrast")
         self.has_contrast = contrast
 
     def get_has_contrast(self) -> bool:
@@ -188,12 +172,7 @@ class DicomSingleSeries:
         :type acquisition_plane: str
 
         """
-        if not isinstance(acquisition_plane, str):
-            msg = (  # type: ignore[unreachable]
-                "ERROR: Can only set_acquisition_plane with a str."
-                f"Got type(acquisition_plane) = {type(acquisition_plane)}."
-            )
-            raise ValueError(msg)
+        require_type(acquisition_plane, str, "set_acquisition_plane")
         self.acquisition_plane = acquisition_plane
 
     def get_acquisition_plane(self) -> str:

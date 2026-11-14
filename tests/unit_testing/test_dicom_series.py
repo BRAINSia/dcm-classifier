@@ -54,10 +54,7 @@ def test_all_fields_dont_change():
                     msg = f"Field {field} not found in DICOM dataset for series {series_num}"
                     raise KeyError(msg) from None
 
-                if isinstance(field_value, pydicom.dataelem.RawDataElement):
-                    e = pydicom.dataelem.convert_raw_data_element(field_value)
-                else:
-                    e = field_value
+                e = field_value
 
                 # if element is a list, check each element
                 if type(e) is pydicom.multival.MultiValue:
@@ -86,7 +83,7 @@ def test_series_modality_probabilities(mock_t1_series):
 
 def test_set_invalid_series_modality(mock_tracew_series):
     for series in mock_tracew_series:
-        with pytest.raises(ValueError, match="Can only set_modality with a string"):
+        with pytest.raises(ValueError, match="Can only set_modality with a str"):
             series.set_series_modality(4)
 
 
@@ -94,7 +91,7 @@ def test_set_invalid_series_modality_probabilities(mock_tracew_series):
     for series in mock_tracew_series:
         with pytest.raises(
             ValueError,
-            match=r"Can only set_modality_probabilities with a pd\.DataFrame",
+            match=r"Can only set_modality_probabilities with a DataFrame",
         ):
             series.set_modality_probabilities(4)
 

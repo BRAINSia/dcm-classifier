@@ -26,6 +26,7 @@ import pandas as pd
 import pydicom
 
 from ._deprecation import deprecated
+from ._validation import require_type
 from .dicom_config import (
     MISSING_VALUE,
     optional_DICOM_fields,
@@ -154,9 +155,7 @@ class DicomSingleVolumeInfoBase:
         :param modality: The modality information to be set.
         :type modality: str
         """
-        if not isinstance(modality, str):
-            msg = f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."  # type: ignore[unreachable]
-            raise ValueError(msg)
+        require_type(modality, str, "set_modality")
         self.volume_modality = modality
 
     def get_volume_modality(self) -> str:
@@ -265,15 +264,10 @@ class DicomSingleVolumeInfoBase:
         :param modality_probability: The modality probabilities to be set.
         :type modality_probability: pd.DataFrame
         """
-        if (
-            not isinstance(modality_probability, pd.DataFrame)
-            and modality_probability is not None
-        ):
-            msg = (  # type: ignore[unreachable]
-                "ERROR: Can only set_modality_probabilities with a pd.DataFrame."
-                f"Got type(modality_probability) = {type(modality_probability)}."
+        if modality_probability is not None:
+            require_type(
+                modality_probability, pd.DataFrame, "set_modality_probabilities"
             )
-            raise ValueError(msg)
         self.modality_probability = modality_probability
 
     def get_modality_probabilities(self) -> pd.DataFrame | None:
