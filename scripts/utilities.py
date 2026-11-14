@@ -115,13 +115,12 @@ def identify_unusable_cols(frame: pd.DataFrame) -> list[str]:
         list[str]: list of columns that can be removed
     """
     df = frame
-    droppable_cols = []
     length = len(df)
-    for col in df.columns:
-        if (df[col].count() / length) <= 0.05 or df[col].nunique() < 2:
-            droppable_cols.append(col)
-
-    return droppable_cols
+    return [
+        col
+        for col in df.columns
+        if (df[col].count() / length) <= 0.05 or df[col].nunique() < 2
+    ]
 
 
 def merge_labels_and_training_data(
