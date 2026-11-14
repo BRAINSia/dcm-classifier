@@ -384,8 +384,7 @@ def slugify(
     if not allow_uppercase:
         value = value.lower()
     value = re.sub(r"[^\w\s-]", "", value)
-    final_value = re.sub(r"[-\s]+", "-", value).strip("-_")
-    return final_value
+    return re.sub(r"[-\s]+", "-", value).strip("-_")
 
 
 def get_min_max(inputImage: FImageType) -> (float, float):

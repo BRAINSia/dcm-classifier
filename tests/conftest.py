@@ -264,11 +264,9 @@ def default_image_type_classifier_base():
         Path(__file__).parents[2] / "models" / "rf_classifier.onnx"
     )
 
-    image_type_classifier_base = ImageTypeClassifierBase(
+    return ImageTypeClassifierBase(
         classification_model_filename=default_classification_model_filename,
         classification_feature_list=modality_columns,
         image_type_map=imagetype_to_integer_mapping,
         min_probability_threshold=0.4,
     )
-
-    return image_type_classifier_base
