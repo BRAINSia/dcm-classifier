@@ -196,5 +196,104 @@ target-version = "py312"
 extend-exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
-# Explicit, because ruff's wider default rule set is not adopted here.
-select = ["E4", "E7", "E9", "F", "UP"]
+extend-select = [
+    # Rules adopted one per commit, named so each stays enforced.
+    # Rule families recommended by the Scientific Python guide.
+    "ARG",  # flake8-unused-arguments
+    "B",  # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "EM",  # flake8-errmsg
+    "EXE",  # flake8-executable
+    "FURB",  # refurb
+    "G",  # flake8-logging-format
+    "I",  # isort
+    "ICN",  # flake8-import-conventions
+    "ISC",  # flake8-implicit-str-concat
+    "LOG",  # flake8-logging
+    "NPY",  # NumPy specific rules
+    "PD",  # pandas-vet
+    "PERF",  # perflint
+    "PGH",  # pygrep-hooks
+    "PL",  # pylint
+    "PT",  # flake8-pytest-style
+    "PTH",  # flake8-use-pathlib
+    "PYI",  # flake8-pyi
+    "Q",  # flake8-quotes
+    "RET",  # flake8-return
+    "RSE",  # flake8-raise
+    "RUF",  # Ruff-specific
+    "SIM",  # flake8-simplify
+    "SLOT",  # flake8-slots
+    "T10",  # flake8-debugger
+    "T20",  # flake8-print
+    "TC",  # flake8-type-checking
+    "TRY",  # tryceratops
+    "UP",  # pyupgrade
+]
+ignore = [
+    # Accepted.
+    "PLR09",  # Too many <...>
+    "PLR2004",  # Magic value used in comparison
+    "T201",  # `print` found; printing is how the command line tools report
+    # Parked so the rule list could be adopted with lint passing.
+    # Each line is removed by the commit that fixes that rule.
+    "ARG001",  # unused-function-argument (7)
+    "ARG005",  # unused-lambda-argument (3)
+    "B007",  # unused-loop-control-variable (19)
+    "B008",  # function-call-in-default-argument (1)
+    "B028",  # no-explicit-stacklevel (4)
+    "B904",  # raise-without-from-inside-except (1)
+    "B905",  # zip-without-explicit-strict (1)
+    "BLE001",  # blind-except (17)
+    "C408",  # unnecessary-collection-call (28)
+    "C414",  # unnecessary-double-cast-or-process (4)
+    "C416",  # unnecessary-comprehension (1)
+    "EM101",  # raw-string-in-exception (3)
+    "EM102",  # f-string-in-exception (13)
+    "EXE001",  # shebang-not-executable (6)
+    "I001",  # unsorted-imports (27)
+    "PD002",  # pandas-use-of-inplace-argument (11)
+    "PD011",  # pandas-use-of-dot-values (2)
+    "PD015",  # pandas-use-of-pd-merge (4)
+    "PERF102",  # incorrect-dict-iterator (15)
+    "PERF401",  # manual-list-comprehension (10)
+    "PERF402",  # manual-list-copy (2)
+    "PIE808",  # unnecessary-range-start (1)
+    "PLC0415",  # import-outside-top-level (3)
+    "PLR1714",  # repeated-equality-comparison (4)
+    "PLR5501",  # collapsible-else-if (7)
+    "PLW0603",  # global-statement (1)
+    "PLW2901",  # redefined-loop-name (2)
+    "PT006",  # pytest-parametrize-names-wrong-type (1)
+    "PT011",  # pytest-raises-too-broad (10)
+    "PT018",  # pytest-composite-assertion (3)
+    "PT030",  # pytest-warns-too-broad (1)
+    "PT031",  # pytest-warns-with-multiple-statements (5)
+    "PTH100",  # os-path-abspath (1)
+    "PTH110",  # os-path-exists (1)
+    "PTH123",  # builtin-open (11)
+    "PTH207",  # glob (2)
+    "RET504",  # unnecessary-assign (4)
+    "RET505",  # superfluous-else-return (7)
+    "RET506",  # superfluous-else-raise (4)
+    "RET508",  # superfluous-else-break (2)
+    "RUF005",  # collection-literal-concatenation (4)
+    "RUF012",  # mutable-class-default (1)
+    "RUF013",  # implicit-optional (6)
+    "RUF015",  # unnecessary-iterable-allocation-for-first-element (7)
+    "RUF059",  # unused-unpacked-variable (1)
+    "SIM101",  # duplicate-isinstance-call (1)
+    "SIM102",  # collapsible-if (1)
+    "SIM103",  # needless-bool (4)
+    "SIM108",  # if-else-block-instead-of-if-exp (1)
+    "SIM114",  # if-with-same-arms (1)
+    "SIM118",  # in-dict-keys (7)
+    "TRY003",  # raise-vanilla-args (15)
+    "TRY004",  # type-check-without-type-error (5)
+    "TRY201",  # verbose-raise (1)
+    "TRY300",  # try-consider-else (4)
+    "TRY301",  # raise-within-try (2)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["T20"]
