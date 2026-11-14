@@ -126,6 +126,38 @@ def test_split_orders_files_by_instance_number(get_data_dir, tmp_path):
     assert instance_numbers == sorted(instance_numbers)
 
 
+def test_split_does_not_depend_on_bvalue_tags(get_data_dir, tmp_path):
+    """Anonymization can remove the b-value tags (issue #68)."""
+    tracew_directory = get_data_dir / "5"
+    siemens_bvalue_tags = [(0x0019, 0x100C), (0x0029, 0x1010)]
+    for dcm_file in tracew_directory.rglob("*.dcm"):
+        ds = pydicom.dcmread(dcm_file)
+        for tag in siemens_bvalue_tags:
+            if tag in ds:
+                del ds[tag]
+        # The Siemens sequence name also encodes the b-value, "ep_b1000t".
+        ds.SequenceName = "ep_b"
+        ds.save_as(tmp_path / dcm_file.name)
+
+    def volumes_as_file_name_sets(study_directory: Path) -> tuple[set, set]:
+        study = ProcessOneDicomStudyToVolumesMappingBase(study_directory)
+        (series,) = study.series_dictionary.values()
+        volumes = series.get_volume_list()
+        file_name_sets = {
+            frozenset(Path(f).name for f in volume.get_one_volume_dcm_filenames())
+            for volume in volumes
+        }
+        return file_name_sets, {volume.get_volume_bvalue() for volume in volumes}
+
+    original_volumes, original_bvalues = volumes_as_file_name_sets(tracew_directory)
+    stripped_volumes, stripped_bvalues = volumes_as_file_name_sets(tmp_path)
+
+    assert original_bvalues == {0, 1000}
+    assert stripped_bvalues == {-12345}
+    assert len(original_volumes) == 2
+    assert stripped_volumes == original_volumes
+
+
 @pytest.mark.parametrize("mr_sop_class_only", [False, True])
 def test_mr_sop_class_only_skips_non_mr_series(
     contrast_file_path, tmp_path, mr_sop_class_only
