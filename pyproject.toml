@@ -245,6 +245,7 @@ extend-select = [
     "SIM114",  # if-with-same-arms
     "SIM118",  # in-dict-keys
     "TRY201",  # verbose-raise
+    "TRY300",  # try-consider-else
     # Rule families recommended by the Scientific Python guide.
     "ARG",  # flake8-unused-arguments
     "B",  # flake8-bugbear
@@ -291,7 +292,6 @@ ignore = [
     "PLW0603",  # global-statement (1)
     "TRY003",  # raise-vanilla-args (15)
     "TRY004",  # type-check-without-type-error (5)
-    "TRY300",  # try-consider-else (4)
     "TRY301",  # raise-within-try (2)
 ]
 
