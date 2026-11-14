@@ -218,3 +218,18 @@ def test_infer_acquisition_plane(row_x, column_z, plane):
         "ImageOrientationPatient_5": column_z,
     }
     assert ImageTypeClassifierBase().infer_acquisition_plane(features) == plane
+
+
+def test_unknown_isotropy_is_reported_as_not_isotropic(get_data_dir, monkeypatch):
+    inferer = ImageTypeClassifierBase(
+        classification_model_filename=inference_model_path, num_threads=1
+    )
+    monkeypatch.setattr(inferer, "infer_isotropic", lambda **_: None)
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        study_directory=get_data_dir, inferer=inferer
+    )
+    study.run_inference()
+    for series in study.series_dictionary.values():
+        assert series.get_is_isotropic() is False
+        for volume in series.get_volume_list():
+            assert volume.get_is_isotropic() is False
