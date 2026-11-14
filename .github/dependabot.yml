@@ -4,6 +4,8 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns: ["*"]
@@ -11,6 +13,8 @@ updates:
     directory: /docs
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     groups:
       docs:
         patterns: ["*"]
@@ -18,6 +22,8 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     groups:
       pre-commit:
         patterns: ["*"]
