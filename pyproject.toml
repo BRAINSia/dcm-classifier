@@ -199,6 +199,32 @@ source = [
 [tool.coverage.html]
 directory = "coverage_html_report"
 
+[tool.mypy]
+files = ["src"]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+
+[[tool.mypy.overrides]]
+# These ship without type information.
+module = ["deprecation", "itk", "onnxruntime"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Parked so mypy could be adopted with no source change.
+# Each module is removed by the commit that types it.
+module = [
+    "dcm_classifier.classify_support",  # 9 errors
+    "dcm_classifier.dicom_series",  # 11
+    "dcm_classifier.dicom_volume",  # 20
+    "dcm_classifier.example_image_processing",  # 58
+    "dcm_classifier.image_type_inference",  # 48
+    "dcm_classifier.study_processing",  # 10
+    "dcm_classifier.utility_functions",  # 30
+]
+ignore_errors = true
+
 [tool.codespell]
 skip = "*.ipynb,*.onnx,*.dcm,tests/testing_data"
 # TE is the MRI echo time; "Vas collapse flag" is a DICOM private field name.
