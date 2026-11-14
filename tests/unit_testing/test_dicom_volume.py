@@ -245,7 +245,7 @@ def test_ax_dcm_volume_acq_plane(mock_volume_study):
 def test_sag_dcm_volume_acq_plane(mock_volume_study):
     for series_num, series in mock_volume_study.get_study_dictionary().items():
         for volume in series.get_volume_list():
-            if series_num == 10 or series_num == 13:
+            if series_num in {10, 13}:
                 assert volume.get_acquisition_plane() == "sag"
 
 
