@@ -392,10 +392,6 @@ class ImageTypeClassifierBase:
         :return: A tuple containing the inferred modality and a Pandas DataFrame containing classification results.
         :rtype: Tuple[str, pd.DataFrame]
         """
-        # check if all features are present for inference
-        # if len(self.classification_feature_list) < len(inference_features):
-        #     return "INVALID", None
-
         # check if the volume was invalidated
         for field in self.classification_feature_list:
             if feature_dict[field] == "INVALID":
