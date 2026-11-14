@@ -171,10 +171,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         :rtype: list[dict[str, str]]
         """
         list_of_volume_info_dictionaries: list[dict[str, str]] = list()
-        for (
-            series_number,
-            series_object,
-        ) in self.series_dictionary.items():
+        for series_object in self.series_dictionary.values():
             for vol_index, subseries_vol_info in enumerate(
                 series_object.volume_info_list
             ):
@@ -237,10 +234,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             `set_inferer` method before calling this method.
 
         """
-        for (
-            series_number,
-            series_object,
-        ) in self.series_dictionary.items():
+        for series_object in self.series_dictionary.values():
             self.inferer.set_series(series_object)
             self.inferer.run_inference()
         self.fixup_adjacent_series()
@@ -539,7 +533,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 file_info_dict[tuple(img_position)].append(file_info)
 
             # Sort files within each position group
-            for ipp_key, file_info in file_info_dict.items():
+            for file_info in file_info_dict.values():
                 file_info.sort(
                     key=lambda x: (
                         x["acquisition_date_time"],

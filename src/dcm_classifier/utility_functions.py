@@ -204,7 +204,7 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
     # TODO: https://pydicom.github.io/pydicom/dev/auto_examples/metadata_processing/plot_add_dict_entries.html
     # Add these private tags to the DICOM dictionary for better processing
 
-    for k, v in private_tags_map.items():
+    for v in private_tags_map.values():
         if v in dicom_header_info:
             # ensure safe extraction of the dicom element
             if isinstance(dicom_header_info[v], pydicom.dataelem.RawDataElement):
@@ -301,7 +301,7 @@ def get_diffusion_gradient_direction(
         }
     )
     gradient_direction = None
-    for k, v in private_tags_map.items():
+    for v in private_tags_map.values():
         if v in dicom_header_info:
             # ensure safe extraction of the dicom element
             if isinstance(dicom_header_info[v], pydicom.dataelem.RawDataElement):

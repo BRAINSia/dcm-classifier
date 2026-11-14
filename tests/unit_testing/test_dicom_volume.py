@@ -122,7 +122,7 @@ def test_invalid_volume_modality(mock_volumes):
 
 # Test asserts false because the mock volume has a flair modality but that is an MR modality...
 def test_is_MR_modality(mock_volume_study):
-    for series_num, series in mock_volume_study.get_study_dictionary().items():
+    for series in mock_volume_study.get_study_dictionary().values():
         for volume in series.get_volume_list():
             assert volume.is_MR_modality() is False
 
@@ -184,7 +184,7 @@ def test_dcm_vol_has_contrast(contrast_file_path):
     )
     study.run_inference()
 
-    for series_number, series in study.series_dictionary.items():
+    for series in study.series_dictionary.values():
         assert series.get_volume_list()[0].get_has_contrast() is True
 
         assert series.get_volume_list()[0].get_contrast_agent() != "None"
@@ -198,7 +198,7 @@ def test_dcm_vol_no_contrast(no_contrast_file_path):
     )
     study.run_inference()
 
-    for series_number, series in study.series_dictionary.items():
+    for series in study.series_dictionary.values():
         assert series.get_volume_list()[0].get_has_contrast() is False
 
         assert series.get_volume_list()[0].get_contrast_agent() == "None"
