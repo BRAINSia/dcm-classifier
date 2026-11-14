@@ -33,15 +33,15 @@ def test_classify_study_json(get_data_dir):
     json_file = testing_output_dir / "json" / "output.json"
     assert json_file.exists(), "JSON dump file should have been created."
 
-    with open(json_file) as f:
+    with Path(json_file).open() as f:
         json_content = json.load(f)
 
     # get baseline json file content
-    with open(
+    with Path(
         testing_output_dir.parent
         / "integration_testing/classify_study_data"
-        / "output.json",
-    ) as f:
+        / "output.json"
+    ).open() as f:
         baseline_json_content = json.load(f)
 
     # Compare the JSON content with the baseline, ignoring the first line and comparing only values

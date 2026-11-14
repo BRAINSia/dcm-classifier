@@ -126,7 +126,7 @@ def prepare_study(
         json_file: Path = (
             output_directory / f"{series.get_series_modality()}_{series_uid}.json"
         )
-        with open(json_file, "w") as f:
+        with Path(json_file).open("w") as f:
             json.dump(sub_volumes_data, f, indent=4, default=to_json_value)
     return problems
 

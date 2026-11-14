@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 import onnxruntime as rt
@@ -239,7 +241,7 @@ def train(x: np.array, y: np.array, columns, samples_per_class=800):
     onx = convert_sklearn(
         clf, name="RandomForestImageTypeClassifier", initial_types=initial_type
     )
-    with open(model_filename, "wb") as f:
+    with Path(model_filename).open("wb") as f:
         f.write(onx.SerializeToString())
 
     return forest_importances
@@ -366,7 +368,7 @@ def k_fold_cross_validation(x, y, input_vector_size, n_splits=5, samples_per_cla
     onx = convert_sklearn(
         best_model, name="RandomForestImageTypeClassifier", initial_types=initial_type
     )
-    with open(model_filename, "wb") as f:
+    with Path(model_filename).open("wb") as f:
         f.write(onx.SerializeToString())
 
     return best_model

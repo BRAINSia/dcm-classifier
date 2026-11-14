@@ -223,7 +223,7 @@ def simple_classify_study(
     json_output_dict: dict[str, Any] = {str(session_directory): session_dictionary}
     # save the dictionary to a file
     if json_dumppath is not None:
-        with open(json_dumppath, "w") as f:
+        with Path(json_dumppath).open("w") as f:
             json.dump(json_output_dict, f, indent=4, sort_keys=True)
 
     if len(list_of_dictionaries) > 0:  # Check if the list is not empty
