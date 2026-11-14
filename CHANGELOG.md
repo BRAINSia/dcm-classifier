@@ -1,0 +1,127 @@
+# Changelog
+
+Releases after 0.9.9 are described in the
+[GitHub releases](https://github.com/BRAINSia/dcm-classifier/releases).
+Earlier releases list their commit subjects as written at the time.
+
+## v0.9.9 -- 2025-04-15 (git log --pretty=%s v0.9.8..HEAD)
+
+- ADD: added test for simple classify study on empty directory
+- BUG: fixed key error in simple classify study when no dicoms are found
+- ADD: added testing for classify support function
+- ENH: Resolve circular dependancies by using separate module.
+- ENH: Force sorting of json keys during dump
+- ENH: Update to allow programatic calling simple_classify_study
+- ENH: updated package version number to 0.9.8
+- ENH: added check list to pr request template to ensure package versioning is maintained
+
+## v0.9.8 -- 2025-03-31 (git log --pretty=%s v0.9.7..HEAD)
+
+- BUG: Fix warning errors due to testing non-dicom element tags
+- BUG: Throw error on INVALID_KEY_BEHAVIOR
+- ENH: added additional json output flag
+- ENH: changed deprecated get_series_desc. method to general get_dicom_field_by_name method
+- ENH: update tag version to 0.9.7
+
+## v0.9.7 -- 2025-03-01 (git log --pretty=%s v0.9.6..HEAD)
+
+- BUG: added missing deprecation dependency to pyproject dependencies
+- ENH: update tag version to 0.9.6
+
+## v0.9.6 -- 2025-02-21 (git log --pretty=%s v0.9.5..HEAD)
+
+- ENH: deprecation warning checks added to series and volume dicom field getter tests
+- DOC: updates to docstrings for deprecated functions
+- ADD: added deprecation decorators to non-specific dicom field getters
+- ENH: Remove redundant subvolume splitting
+- DOC: Improve diagnostics output specificity
+- DOC: Provided enhanced documentation for valid field_names
+- BUG: fix optional field sanitization using a general existence check
+- ENH: updated test for ensuring dicom fields dont change to include SeriesDescription
+
+## v0.9.5 -- 2025-02-15 (git log --pretty=%s v0.9.4..HEAD)
+
+- ENH: Secondary sub volume splitting with robust slice ordering
+- ENH: Script for processing multiple studies
+- ENH: Allow for organized output of dicom data
+- ADD: Acquisition Date Time Parsing
+- ENH: Add flexible get_dicom_field_by_name interface
+- ENH: Add SeriesDescription to optional fields
+- BUG: Use default value incase field doesn't exist
+- ADD: added modality testing for perfusion data
+- ADD: add postprocessing series modality overriding for PERFUSION modality
+- ENH: update ImageType one-hot encoding to include PERFUSION flag
+
+## v0.9.4 -- 2024-09-03 (git log --pretty=%s v0.6.0rc10..v0.9.4 |fgrep -v DOC |fgrep -v STYLE > /tmp/oneliner)
+
+- FIX: updated dwi gradient direction file to hardcoded file
+- BUG: fixed invalid header field curation
+- FIX: fixed testing data not being pulled from lfs
+- FIX: fixed workflow not being run on every pull request
+- FIX: fixed docs requirments errors
+- ADD: added function to check if 2 imgs have same physical space
+
+## v0.9.1
+
+- ENH: Update to v0.9.1 for t2w->trace2 fix
+- BUG: Rare case of tracew with bvalue=0 from single series misclassified
+- BUG: Non-zero bvalue single volumes listed as t2w
+
+## v0.9.0
+
+- FIX: fix type and use of the optional model path
+- ADD: added acquisition time invalid santizied value to test
+
+## v0.8.3
+
+- BUG: Provide defaults when dicom headers are missing fields.{
+
+## v0.8.2
+
+- ENH: updata testing data including new cases
+- ENH: change UNKNOWN to INVALID for data that failed validation at inference
+- ADD: add test case for empty bvalue
+- BUG: Avoid unset (None) values needed for processing
+- BUG: Extracting BValue where field exists, but is empty
+- BUG: fixed defualt value comparison type error in series and sanitization
+
+## v0.8.1
+
+- ENH: fix Series# bug
+
+## v0.8.0
+
+- BUG: move classify study dictionary values into try excepts
+- ADD: added EndNote, RIS, and Bibtex citations
+- ENH: update citation text
+
+## v0.7.0
+
+- ENH: specify model path to model within package
+- ADD: added model file to dcm_classifier directory
+- ENH: changed requirements and dev requirements to install pkgs >= min version no.
+- ADD: added dependencies to install for classifier pip install
+- ENH: changed action to occur on pull requests to main
+- BUG: updated python version to 3.10.12
+- ENH: update package version
+- ENH: resolve bug in development for accessing package version
+- ADD: added tests covering cases in get coded dict
+- ADD: added no field file to data tar file
+- FIX: renamed test_mag_1 method to new name ensure_mag_1
+- ENH: file namic testing renamed to utility functions
+- ADD: added variety of tests for testing
+- ENH: fixed test for file with all dcm fields
+- ADD: add additional testing data
+- ADD: added further testing for all fields and contrast
+- ADD: added markdown files for issues and pull requests (#24)
+- ENH: sanitize series description as it is missing in test data
+- ENH: Add ability to dump all volumes as .nii to dir
+- ADD: add checks for pydicom DataElement
+- BUG: fixed incorrect feature name sanitization
+- ENH: Avoid crash if AcquisitionTime is not set.
+- ENH: Add **version** information for dcm_classifier package
+- ENH: moved dropped fields to separate list at bottom of file
+
+## v0.6.0rc10 -- 2024-03-18 very early release candidate
+
+- -- bug fixes
