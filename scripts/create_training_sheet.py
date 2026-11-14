@@ -59,7 +59,7 @@ def one_hot_encoding_from_str_col(
         # frame[col_name].replace(replace_dict, inplace=True)
         frame[col_name] = frame[col_name].replace(replace_dict)
 
-        for manufacturer in manufacturers + ["other"]:
+        for manufacturer in [*manufacturers, "other"]:
             series = pd.Series(
                 (frame[col_name].str.contains(manufacturer)).fillna(0).astype("int16"),
                 name=f"{col_name}_{manufacturer}",

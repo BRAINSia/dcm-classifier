@@ -68,7 +68,7 @@ def generate_training_data(label_dataframe: str, dicom_dataframe: str, name: str
         x - training data
         y - labels
     """
-    input_output_training_columns = plane_cols + ["Orientation", "SeriesInstanceUID"]
+    input_output_training_columns = [*plane_cols, "Orientation", "SeriesInstanceUID"]
     input_output_training_columns = make_unique_ordered_list(
         input_output_training_columns
     )
