@@ -32,8 +32,6 @@ def combine_all_excel_files(
                     df = pd.read_excel(file.read(), engine="openpyxl")
                 elif file_extension == ".xls":
                     df = pd.read_excel(file.read())
-                # elif file_extension == ".csv":
-                #     df = pd.read_csv(file.read())
                 else:
                     raise ValueError(f"Unknown file extension {file_extension}")
 
@@ -77,17 +75,17 @@ removal_features = [
 
 def remove_rows_with_duplicate_values(
     input_frame: str | pd.DataFrame, outpath: str = None, save_to_excel: bool = True
-) -> None | pd.DataFrame:
+) -> pd.DataFrame:
     """
     Remove rows with duplicate values from a pandas dataframe
 
     Args:
         input_frame: str | pd.DataFrame: either a path to an excel file or a pandas dataframe
-        outpath: str: path to save the dataframe to, if not provided, the dataframe is returned
+        outpath: str: path to save the dataframe to
         save_to_excel: bool: whether to save the dataframe to an excel file
 
     Returns:
-        None | pd.DataFrame: if save_to_excel is True, None is returned, otherwise the dataframe is returned
+        pd.DataFrame: the dataframe, which is also saved when save_to_excel is True and outpath is given
     """
     if isinstance(input_frame, str):
         df = pd.read_excel(input_frame)
@@ -101,8 +99,7 @@ def remove_rows_with_duplicate_values(
 
     if save_to_excel and outpath is not None:
         df.to_excel(outpath, index=False)
-    else:
-        return df
+    return df
 
 
 def identify_unusable_cols(frame: pd.DataFrame) -> list[str]:
@@ -129,7 +126,7 @@ def merge_labels_and_training_data(
     labels: (str | Path) | pd.DataFrame,
     training_data: (str | Path) | pd.DataFrame,
     save_to_excel: bool = True,
-) -> pd.DataFrame | None:
+) -> pd.DataFrame:
     """
     Merge labels and training data into one dataframe
 
@@ -139,7 +136,7 @@ def merge_labels_and_training_data(
         save_to_excel: bool: whether to save the dataframe to an excel file
 
     Returns:
-        pd.DataFrame | None: if save_to_excel is True and the training_data is a path to an excel file, None is returned, otherwise the dataframe is returned
+        pd.DataFrame: the merged dataframe, which is also saved when save_to_excel is True and training_data is a path to an excel file
 
     """
     final_df_name = None
@@ -170,8 +167,7 @@ def merge_labels_and_training_data(
     # save to excel if save_to_excel is True
     if save_to_excel and final_df_name is not None:
         merged_df.to_excel(final_df_name, index=False)
-    else:
-        return merged_df
+    return merged_df
 
 
 def pydicom_read_cache(

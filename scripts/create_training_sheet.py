@@ -91,7 +91,7 @@ def parse_column_headers(
     input_file: (str | Path) | pd.DataFrame,
     output_path: str | Path = None,
     save_to_excel: bool = True,
-) -> pd.DataFrame | None:
+) -> pd.DataFrame:
     index_field = "FileName"
 
     if type(input_file) is pd.DataFrame:
@@ -138,8 +138,7 @@ def parse_column_headers(
                 print(f"KeyError: {current_header}")
     if save_to_excel:
         new_data_frame.to_excel(output_path, index=False)
-    else:
-        return new_data_frame
+    return new_data_frame
 
 
 if __name__ == "__main__":
