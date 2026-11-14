@@ -261,7 +261,7 @@ def test_run_inference_validate_features(get_data_dir):
 
     # remove the fields that are validated in the inference
 
-    for series_num, series in study.series_dictionary.items():
+    for series in study.series_dictionary.values():
         for vol in series.get_volume_list():
             del vol.__getattribute__("volume_info_dict")["ImageType"]
             del vol.__getattribute__("volume_info_dict")["SeriesNumber"]
@@ -270,7 +270,7 @@ def test_run_inference_validate_features(get_data_dir):
 
     study.run_inference()
 
-    for series_num, series in study.series_dictionary.items():
+    for series in study.series_dictionary.values():
         for vol in series.get_volume_list():
             assert vol.get_volume_modality() == "INVALID"
 

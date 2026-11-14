@@ -213,7 +213,7 @@ def override_study_UIDs(session_dir: str) -> None:
     )
 
     study_uid = pydicom.uid.generate_uid()
-    for series_number, series in study.series_dictionary.items():
+    for series in study.series_dictionary.values():
         series_uid = pydicom.uid.generate_uid()
         for volume in series.get_volume_list():
             for file in volume.get_one_volume_dcm_filenames():

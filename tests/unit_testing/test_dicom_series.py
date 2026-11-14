@@ -198,7 +198,7 @@ def test_dcm_series_no_contrast(no_contrast_file_path):
     )
     study.run_inference()
 
-    for series_number, series in study.series_dictionary.items():
+    for series in study.series_dictionary.values():
         assert series.get_has_contrast() is False, (
             f"File {series.get_volume_list()[0].get_one_volume_dcm_filenames()[0].name} came back with contrast"
         )
@@ -212,7 +212,7 @@ def test_dcm_series_has_contrast(contrast_file_path):
     )
     study.run_inference()
 
-    for series_number, series in study.series_dictionary.items():
+    for series in study.series_dictionary.values():
         assert series.get_has_contrast() is True
 
 
@@ -224,5 +224,5 @@ def test_image_is_perfusion(perfusion_file_path):
     )
     study.run_inference()
 
-    for series_number, series in study.series_dictionary.items():
+    for series in study.series_dictionary.values():
         assert series.get_series_modality() == "perfusion"
