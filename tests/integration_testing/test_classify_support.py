@@ -181,7 +181,7 @@ def test_classify_study_mr_sop_class_only(
 
 
 @pytest.mark.parametrize(
-    "volume_dictionary, reason",
+    ("volume_dictionary", "reason"),
     [
         ({}, "Required DICOM fields are missing or invalid"),
         ({"EchoTime": 3.69}, "Inference features are missing or invalid"),
