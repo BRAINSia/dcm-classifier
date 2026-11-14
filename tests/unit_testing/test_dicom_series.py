@@ -55,7 +55,7 @@ def test_all_fields_dont_change():
                     raise KeyError(msg) from None
 
                 if isinstance(field_value, pydicom.dataelem.RawDataElement):
-                    e = pydicom.dataelem.DataElement_from_raw(field_value)
+                    e = pydicom.dataelem.convert_raw_data_element(field_value)
                 else:
                     e = field_value
 

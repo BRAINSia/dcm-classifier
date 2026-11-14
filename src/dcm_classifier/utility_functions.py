@@ -210,7 +210,7 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
         if v in dicom_header_info:
             # ensure safe extraction of the dicom element
             if isinstance(dicom_header_info[v], pydicom.dataelem.RawDataElement):
-                dicom_element = pydicom.dataelem.DataElement_from_raw(
+                dicom_element = pydicom.dataelem.convert_raw_data_element(
                     dicom_header_info[v]
                 )
             else:
@@ -307,7 +307,7 @@ def get_diffusion_gradient_direction(
         if v in dicom_header_info:
             # ensure safe extraction of the dicom element
             if isinstance(dicom_header_info[v], pydicom.dataelem.RawDataElement):
-                gradient_direction_element = pydicom.dataelem.DataElement_from_raw(
+                gradient_direction_element = pydicom.dataelem.convert_raw_data_element(
                     dicom_header_info[v]
                 )
             else:
