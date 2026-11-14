@@ -18,6 +18,7 @@
 import warnings
 from collections import defaultdict
 from pathlib import Path, PurePath
+from typing import ClassVar
 
 import itk
 import pydicom
@@ -49,7 +50,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         inferer (Optional[ImageTypeClassifierBase]): An image type classifier for inference.
     """
 
-    series_restrictions_list_dwi_subvolumes: list[str] = [
+    series_restrictions_list_dwi_subvolumes: ClassVar[list[str]] = [
         # https://www.na-mic.org/wiki/NAMIC_Wiki:DTI:DICOM_for_DWI_and_DTI
         # STANDARD
         "0018|9075",  # S 1 Diffusion Directionality
