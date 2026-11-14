@@ -17,8 +17,9 @@
 #  =========================================================================
 import warnings
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path, PurePath
-from typing import ClassVar
+from typing import Any, ClassVar, TypedDict
 
 import itk
 import pydicom
@@ -32,6 +33,13 @@ from .utility_functions import (
     is_mr_sop_class,
     parse_acquisition_datetime,
 )
+
+
+class _FileRecord(TypedDict):
+    acquisition_date_time: datetime
+    acquisition_number: int
+    instance_number: int
+    filename: str
 
 
 class ProcessOneDicomStudyToVolumesMappingBase:
@@ -235,12 +243,15 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             `set_inferer` method before calling this method.
 
         """
+        if self.inferer is None:
+            msg = "No image type classifier is set; call set_inferer first."
+            raise AttributeError(msg)
         for series_object in self.series_dictionary.values():
             self.inferer.set_series(series_object)
             self.inferer.run_inference()
         self.fixup_adjacent_series()
 
-    def fixup_adjacent_series(self):
+    def fixup_adjacent_series(self) -> None:
         """
         Fix up adjacent series that are part of the same family of images.
 
@@ -477,10 +488,13 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         # Name order makes the read order, and the error fallback, OS independent.
         subseries_filenames = sorted(subseries_filenames)
 
-        file_info_dict = defaultdict(list)
+        file_info_dict: defaultdict[tuple[Any, ...], list[_FileRecord]] = defaultdict(
+            list
+        )
+        ordered_filenames: list[Path | str] = list(subseries_filenames)
 
         try:
-            file_records = []
+            file_records: list[tuple[Any, _FileRecord]] = []
             for dcm_file in subseries_filenames:
                 try:
                     ds = pydicom.dcmread(dcm_file, stop_before_pixels=True)
@@ -520,7 +534,8 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 key=lambda r: (r[1]["instance_number"], str(r[1]["filename"]))
             )
             read_filenames = {str(r[1]["filename"]) for r in file_records}
-            subseries_filenames = [r[1]["filename"] for r in file_records] + [
+            ordered_filenames = [r[1]["filename"] for r in file_records]
+            ordered_filenames += [
                 f for f in subseries_filenames if str(f) not in read_filenames
             ]
             for recorded_position, file_info in file_records:
@@ -533,8 +548,8 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 file_info_dict[tuple(img_position)].append(file_info)
 
             # Sort files within each position group
-            for file_info in file_info_dict.values():
-                file_info.sort(
+            for position_records in file_info_dict.values():
+                position_records.sort(
                     key=lambda x: (
                         x["acquisition_date_time"],
                         x["acquisition_number"],
@@ -544,7 +559,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
             # Volume splitting logic
             num_unique_positions = len(file_info_dict)
-            num_files = len(subseries_filenames)
+            num_files = len(ordered_filenames)
 
             if 0 < num_unique_positions < num_files:
                 num_volumes = num_files // num_unique_positions
@@ -561,7 +576,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 # Create volume objects
                 sub_volume_info_list: list[DicomSingleVolumeInfoBase] = []
                 for i in range(num_volumes):
-                    sub_volume_filenames = [
+                    sub_volume_filenames: list[Path | str] = [
                         file_info_dict[ipp_key][i]["filename"]
                         for ipp_key in file_info_dict
                     ]
@@ -578,4 +593,4 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             print(f"Error in volume splitting: {global_error}")
 
         # Default to single volume if all else fails
-        return [DicomSingleVolumeInfoBase(one_volume_dcm_filenames=subseries_filenames)]
+        return [DicomSingleVolumeInfoBase(one_volume_dcm_filenames=ordered_filenames)]
