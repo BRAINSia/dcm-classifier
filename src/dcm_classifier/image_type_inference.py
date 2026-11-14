@@ -22,6 +22,7 @@ from .utility_functions import (
     infer_diffusion_from_gradient,
 )
 from pathlib import Path
+import contextlib
 import math
 import os
 import warnings
@@ -74,11 +75,9 @@ def _read_cgroup_cpu_quota(cgroup_directory: Path) -> float | None:
             period = (cgroup_directory / "cpu.cfs_period_us").read_text().strip()
         except OSError:
             return None
-    try:
+    with contextlib.suppress(ValueError):
         if int(quota) > 0 and int(period) > 0:
             return int(quota) / int(period)
-    except ValueError:
-        pass
     return None
 
 
@@ -146,11 +145,9 @@ def allowed_cpu_count() -> int | None:
     if quota is not None:
         limits.append(math.ceil(quota))
     for variable in cpu_limit_variables:
-        try:
+        with contextlib.suppress(KeyError, ValueError):
             # OMP_NUM_THREADS may list one value per nesting level, "4,2"
             limits.append(int(os.environ[variable].split(",")[0]))
-        except (KeyError, ValueError):
-            pass
     limits = [limit for limit in limits if limit > 0]
     return min(limits) if limits else None
 

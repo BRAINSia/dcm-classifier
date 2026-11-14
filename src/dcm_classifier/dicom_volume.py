@@ -121,10 +121,7 @@ class DicomSingleVolumeInfoBase:
         self.itk_image: FImageType | None = None
 
         # process volume DICOM files
-        (
-            _one_study_found,
-            self.volume_info_dict,
-        ) = self._make_one_study_info_mapping_from_filelist()
+        _, self.volume_info_dict = self._make_one_study_info_mapping_from_filelist()
 
     @deprecated(
         deprecated_in="0.9.6",
