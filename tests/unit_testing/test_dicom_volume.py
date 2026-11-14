@@ -23,19 +23,19 @@ inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_
 def test_get_series_uid(mock_volumes):
     with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
         series_uid = DicomSingleVolumeInfoBase(mock_volumes[0]).get_series_uid()
-        assert series_uid == "1.2.276.0.7230010.3.1.3.168456204.6074.1606326635.433425"
+    assert series_uid == "1.2.276.0.7230010.3.1.3.168456204.6074.1606326635.433425"
 
 
 def test_get_series_number(mock_volumes):
     with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
         series_number = DicomSingleVolumeInfoBase(mock_volumes[0]).get_series_number()
-        assert series_number == 700
+    assert series_number == 700
 
 
 def test_get_study_uid(mock_volumes):
     with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
         study_uid = DicomSingleVolumeInfoBase(mock_volumes[0]).get_study_uid()
-        assert study_uid == "1.2.276.0.7230010.3.1.2.168456204.6074.1606326635.433364"
+    assert study_uid == "1.2.276.0.7230010.3.1.2.168456204.6074.1606326635.433364"
 
 
 def test_get_b_value(mock_volumes):
@@ -58,8 +58,8 @@ def test_get_series_pixel_spacing(mock_volumes):
         pixel_spacing = DicomSingleVolumeInfoBase(
             mock_volumes[0]
         ).get_series_pixel_spacing()
-        assert isinstance(pixel_spacing, str)
-        assert pixel_spacing == "[0.9375, 0.9375]"
+    assert isinstance(pixel_spacing, str)
+    assert pixel_spacing == "[0.9375, 0.9375]"
 
 
 def test_image_diagnostics(mock_volumes):
