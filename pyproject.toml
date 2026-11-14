@@ -224,6 +224,7 @@ extend-select = [
     "RUF015",  # unnecessary-iterable-allocation-for-first-element
     "RUF059",  # unused-unpacked-variable
     "SIM101",  # duplicate-isinstance-call
+    "SIM102",  # collapsible-if
     "SIM103",  # needless-bool
     "SIM108",  # if-else-block-instead-of-if-exp
     "SIM114",  # if-with-same-arms
@@ -288,7 +289,6 @@ ignore = [
     "PTH123",  # builtin-open (11)
     "PTH207",  # glob (2)
     "RUF005",  # collection-literal-concatenation (4)
-    "SIM102",  # collapsible-if (1)
     "TRY003",  # raise-vanilla-args (15)
     "TRY004",  # type-check-without-type-error (5)
     "TRY300",  # try-consider-else (4)

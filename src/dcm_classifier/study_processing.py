@@ -270,33 +270,31 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                             int(current_series_number + 1),
                             int(current_series_number - 1),
                         ]
-                        if adjacent_series_number in list_of_candidate_adjacent:
-                            if adjacent_series_obj.get_series_modality() == "tracew":
-                                # if an adjacent image is a tracew image, and has same physical space as
-                                # the current image then assume it is also a tracew image
-                                itk_volume = series_obj.get_volume_list()[
-                                    0
-                                ].get_itk_image()
-                                itk_adjacent_volume = (
-                                    adjacent_series_obj.get_volume_list()[
-                                        0
-                                    ].get_itk_image()
-                                )
+                        if (
+                            adjacent_series_number in list_of_candidate_adjacent
+                            and adjacent_series_obj.get_series_modality() == "tracew"
+                        ):
+                            # if an adjacent image is a tracew image, and has same physical space as
+                            # the current image then assume it is also a tracew image
+                            itk_volume = series_obj.get_volume_list()[0].get_itk_image()
+                            itk_adjacent_volume = adjacent_series_obj.get_volume_list()[
+                                0
+                            ].get_itk_image()
 
-                                same_physical_space: bool = (
-                                    check_two_images_have_same_physical_space(
-                                        itk_volume, itk_adjacent_volume
-                                    )
+                            same_physical_space: bool = (
+                                check_two_images_have_same_physical_space(
+                                    itk_volume, itk_adjacent_volume
                                 )
+                            )
 
-                                if same_physical_space:
-                                    series_obj.set_series_modality("tracew")
-                                else:
-                                    print(
-                                        f"Adjacent series {adjacent_series_number} does not have same physical space as {current_series_number}"
-                                    )
-                                    print(itk_volume)
-                                    print(itk_adjacent_volume)
+                            if same_physical_space:
+                                series_obj.set_series_modality("tracew")
+                            else:
+                                print(
+                                    f"Adjacent series {adjacent_series_number} does not have same physical space as {current_series_number}"
+                                )
+                                print(itk_volume)
+                                print(itk_adjacent_volume)
 
     def validate(self) -> None:
         pass
