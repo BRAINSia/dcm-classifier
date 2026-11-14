@@ -113,9 +113,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         """
         # checks if the variable is any instance of pathlib
-        if isinstance(path_rep, (PurePath, str)):
-            return True
-        return False
+        return bool(isinstance(path_rep, (PurePath, str)))
 
     def __init__(
         self,

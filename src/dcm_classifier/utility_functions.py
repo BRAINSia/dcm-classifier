@@ -274,9 +274,7 @@ def ensure_magnitude_of_1(vector: np.ndarray) -> bool:
     :rtype: bool
     """
     magnitude = np.linalg.norm(vector)
-    if np.absolute(1 - magnitude) > 1e-2:
-        return False
-    return True
+    return not np.absolute(1 - magnitude) > 0.01
 
 
 def get_diffusion_gradient_direction(
