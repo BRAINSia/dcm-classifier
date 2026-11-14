@@ -215,7 +215,6 @@ ignore_missing_imports = true
 # Parked so mypy could be adopted with no source change.
 # Each module is removed by the commit that types it.
 module = [
-    "dcm_classifier.dicom_series",  # 11
     "dcm_classifier.dicom_volume",  # 20
     "dcm_classifier.example_image_processing",  # 58
     "dcm_classifier.image_type_inference",  # 48
