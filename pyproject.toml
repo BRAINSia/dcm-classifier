@@ -207,6 +207,7 @@ extend-select = [
     "C416",  # unnecessary-comprehension
     "EM101",  # raw-string-in-exception
     "EM102",  # f-string-in-exception
+    "EXE001",  # shebang-not-executable
     "I001",  # unsorted-imports
     "PD002",  # pandas-use-of-inplace-argument
     "PERF102",  # incorrect-dict-iterator
@@ -275,7 +276,6 @@ ignore = [
     "ARG005",  # unused-lambda-argument (3)
     "B008",  # function-call-in-default-argument (1)
     "BLE001",  # blind-except (17)
-    "EXE001",  # shebang-not-executable (6)
     "PD011",  # pandas-use-of-dot-values (2)
     "PD015",  # pandas-use-of-pd-merge (4)
     "PERF401",  # manual-list-comprehension (10)
