@@ -48,8 +48,7 @@ jobs:
           activate-environment: true
           cache-dependency-glob: pyproject.toml
       - run: uv pip install . --group test
-      # Empty pythonpath makes pytest import the installed package, not src/.
-      - run: python -m pytest -ra -o pythonpath=
+      - run: python -m pytest
 
   docs:
     runs-on: ubuntu-24.04
@@ -81,5 +80,5 @@ jobs:
           activate-environment: true
           cache-dependency-glob: pyproject.toml
           cache-suffix: lowest
-      - run: uv pip install --resolution lowest-direct -r pyproject.toml --group test
-      - run: python -m pytest -ra
+      - run: uv pip install --resolution lowest-direct . --group test
+      - run: python -m pytest
