@@ -211,14 +211,6 @@ enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 module = ["deprecation", "itk", "onnxruntime"]
 ignore_missing_imports = true
 
-[[tool.mypy.overrides]]
-# Parked so mypy could be adopted with no source change.
-# Each module is removed by the commit that types it.
-module = [
-    "dcm_classifier.example_image_processing",  # 58
-]
-ignore_errors = true
-
 [tool.codespell]
 skip = "*.ipynb,*.onnx,*.dcm,tests/testing_data"
 # TE is the MRI echo time; "Vas collapse flag" is a DICOM private field name.

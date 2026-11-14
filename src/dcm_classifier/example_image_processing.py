@@ -2,22 +2,26 @@ import re
 import shutil
 import unicodedata
 from pathlib import Path
+from typing import TypeAlias
 
 import itk
 import numpy as np
 import pydicom
 
 from .dicom_series import DicomSingleSeries
-from .utility_functions import get_bvalue, itk_read_from_dicomfn_list
+from .utility_functions import (
+    FImageType,
+    UCImageType,
+    get_bvalue,
+    itk_read_from_dicomfn_list,
+)
 
-FImageType = itk.Image[itk.F, 3]
-TracewImageType = itk.Image[itk.F, 4]
-UCImageType = itk.Image[itk.UC, 3]
+TracewImageType: TypeAlias = itk.Image[itk.F, 4]  # noqa: UP040
 
 
 def compute_tracew_adc_from_diffusion(
     series: DicomSingleSeries, tracew_bval: int = 1000
-) -> (FImageType, FImageType):
+) -> tuple[FImageType, FImageType]:
     """
     Compute the trace-weighted image from a diffusion series.
 
@@ -30,7 +34,7 @@ def compute_tracew_adc_from_diffusion(
     :rtype: FImageType
     """
     volume_list = series.get_volume_list()
-    bval_volumes_dict = {}
+    bval_volumes_dict: dict[float, list[FImageType]] = {}
     for volume in volume_list:
         bval = volume.get_volume_bvalue()
         dcm_files = volume.get_one_volume_dcm_filenames()
@@ -160,7 +164,7 @@ def compute_adc_from_multi_b_values(
     return itk_clamp_image_filter(ADC, 0)
 
 
-def read_dwi_series_itk(dicom_directory: Path) -> (float, FImageType):
+def read_dwi_series_itk(dicom_directory: Path) -> tuple[float, FImageType]:
     """
     Given a directory of DICOM images of coherent DICOMs, read the volume and b-value.
 
@@ -239,7 +243,7 @@ def rglob_for_singular_result_from_pattern_list(
     return None
 
 
-def cmd_exists(cmd):
+def cmd_exists(cmd: str) -> bool:
     """
     Check if a command exists in the system's PATH.
 
@@ -252,7 +256,9 @@ def cmd_exists(cmd):
     return shutil.which(cmd) is not None
 
 
-def compare_RGB_slices(refr_slice_fn: Path, test_slice_fn: Path) -> (int, dict):
+def compare_RGB_slices(
+    refr_slice_fn: Path, test_slice_fn: Path
+) -> tuple[int, dict[str, FImageType]]:
     """
     Compare two RGB image slices and count the number of pixels with differences.
 
@@ -265,7 +271,7 @@ def compare_RGB_slices(refr_slice_fn: Path, test_slice_fn: Path) -> (int, dict):
 
     """
 
-    images_dict: dict[FImageType] = {}
+    images_dict: dict[str, FImageType] = {}
     refr_slice = itk.imread(filename=refr_slice_fn, pixel_type=itk.F)
     test_slice = itk.imread(filename=test_slice_fn, pixel_type=itk.F)
     cif = itk.ComparisonImageFilter[FImageType, FImageType].New(
@@ -293,7 +299,7 @@ def compare_3d_float_images(
     difference_threshold: float,
     tolerance_radius: float,
     force_exact_directions: bool,
-) -> (int, dict, bool):
+) -> tuple[int, dict[str, FImageType], bool]:
     """
     Compare two 3D float images and count the number of pixels with differences.
 
@@ -312,7 +318,7 @@ def compare_3d_float_images(
 
     """
 
-    images_dict: dict[FImageType] = {}
+    images_dict: dict[str, FImageType] = {}
     images_dict["refr"] = itk.imread(filename=refr_fn, pixel_type=itk.F)
     images_dict["test"] = itk.imread(filename=test_fn, pixel_type=itk.F)
 
@@ -386,7 +392,7 @@ def slugify(
     return re.sub(r"[-\s]+", "-", value).strip("-_")
 
 
-def get_min_max(inputImage: FImageType) -> (float, float):
+def get_min_max(inputImage: FImageType) -> tuple[float, float]:
     """
     Calculate and return the minimum and maximum pixel values of the given image.
 
