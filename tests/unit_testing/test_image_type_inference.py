@@ -202,3 +202,19 @@ def test_classifier_with_open_session_can_be_pickled():
     restored = pickle.loads(pickle.dumps(inferer))
     assert restored.num_threads == 1
     assert restored.get_inference_session() is not None
+
+
+@pytest.mark.parametrize(
+    ("row_x", "column_z", "plane"),
+    [
+        (1.0, 0.0, "ax"),
+        (0.0, 1.0, "sag"),
+        (1.0, 1.0, "cor"),
+    ],
+)
+def test_infer_acquisition_plane(row_x, column_z, plane):
+    features = {
+        "ImageOrientationPatient_0": row_x,
+        "ImageOrientationPatient_5": column_z,
+    }
+    assert ImageTypeClassifierBase().infer_acquisition_plane(features) == plane
