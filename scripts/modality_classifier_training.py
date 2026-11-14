@@ -433,7 +433,7 @@ def inference_metric_test(model_filename: str, model_df: str, out_file: str, fea
     # df.fillna({col: 0 if "Type" in col else -12345 for col in df.columns}, inplace=True)
 
     # Assuming 'label' column contains the true labels
-    true_labels_encoded = df["label_encoded"].values
+    true_labels_encoded = df["label_encoded"].to_numpy()
 
     # drop columns with 'Unnamed' in the name
     e_inputs = df.loc[:, ~df.columns.str.contains("^Unnamed")]

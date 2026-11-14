@@ -119,7 +119,7 @@ def simple_classify_study(
                 for col in vol_probabilities.columns:
                     if "SeriesNumber" in col or "CODE" in col:
                         continue
-                    dictionary[col] = str(vol_probabilities[col].values[0])
+                    dictionary[col] = str(vol_probabilities[col].to_numpy()[0])
             print(vol_probabilities.to_string(index=False))
 
             # Bvalue
