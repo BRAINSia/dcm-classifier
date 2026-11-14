@@ -22,13 +22,14 @@ from .utility_functions import (
     infer_diffusion_from_gradient,
 )
 from pathlib import Path
+import math
+import os
 import warnings
 
 import numpy as np
 import pandas as pd
 
 from typing import Any
-
 
 imagetype_to_integer_mapping = {
     "t1w": 0,
@@ -46,6 +47,113 @@ imagetype_to_integer_mapping = {
 current_file_path = Path(__file__).absolute()
 dcm_classifier_path = current_file_path.parent
 
+# Environment variables that state how many CPUs or threads this process may use.
+cpu_limit_variables: tuple[str, ...] = (
+    # set by a batch scheduler for the job
+    "SLURM_CPUS_PER_TASK",
+    "SLURM_CPUS_ON_NODE",
+    "NSLOTS",  # Sun Grid Engine; also read by ITK
+    "NCPUS",  # PBS Professional
+    "PBS_NUM_PPN",  # Torque
+    "LSB_DJOB_NUMPROC",  # LSF
+    # set by a caller, such as a nipype interface, to budget threads
+    "OMP_NUM_THREADS",
+    "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS",
+)
+
+
+def _read_cgroup_cpu_quota(cgroup_directory: Path) -> float | None:
+    """CPU quota of one cgroup directory in units of CPUs, or None when unlimited."""
+    try:
+        # cgroup v2: "<quota> <period>", with quota "max" when unlimited
+        quota, period = (cgroup_directory / "cpu.max").read_text().split()
+    except (OSError, ValueError):
+        try:
+            # cgroup v1: quota is -1 when unlimited
+            quota = (cgroup_directory / "cpu.cfs_quota_us").read_text().strip()
+            period = (cgroup_directory / "cpu.cfs_period_us").read_text().strip()
+        except OSError:
+            return None
+    try:
+        if int(quota) > 0 and int(period) > 0:
+            return int(quota) / int(period)
+    except ValueError:
+        pass
+    return None
+
+
+def cgroup_cpu_quota(
+    proc_cgroup_file: Path = Path("/proc/self/cgroup"),
+    cgroup_root: Path = Path("/sys/fs/cgroup"),
+) -> float | None:
+    """
+    CPU time quota imposed on this process by Linux control groups, in units of CPUs.
+
+    This is the limit set by ``docker run --cpus``, Kubernetes CPU limits, and AWS ECS task sizes.
+    Such a quota does not change the CPU affinity of the process. The process's cgroup and all
+    of its ancestors are checked, for both cgroup v1 and v2.
+
+    :param proc_cgroup_file: File listing the cgroups of the process.
+    :param cgroup_root: Mount point of the cgroup filesystem.
+    :return: Smallest quota found, or None when there is none.
+    :rtype: float | None
+    """
+    try:
+        lines = proc_cgroup_file.read_text().splitlines()
+    except OSError:
+        return None
+    quotas: list[float] = []
+    for line in lines:
+        fields = line.split(":", 2)
+        if len(fields) != 3:
+            continue
+        controllers, cgroup_path = fields[1], fields[2]
+        if controllers == "":
+            hierarchy_root = cgroup_root
+        elif "cpu" in controllers.split(","):
+            hierarchy_root = cgroup_root / controllers
+            if not hierarchy_root.is_dir():
+                hierarchy_root = cgroup_root / "cpu"
+        else:
+            continue
+        directory = hierarchy_root / cgroup_path.strip("/")
+        while True:
+            quota = _read_cgroup_cpu_quota(directory)
+            if quota is not None:
+                quotas.append(quota)
+            if directory == hierarchy_root or directory == directory.parent:
+                break
+            directory = directory.parent
+    return min(quotas) if quotas else None
+
+
+def allowed_cpu_count() -> int | None:
+    """
+    Number of CPUs this process has been granted, which can be fewer than the machine has.
+
+    The result is the smallest of the limits that can be found:
+    the CPU affinity of the process (``taskset``, cpusets from SLURM or PBS cgroups, ``docker run --cpuset-cpus``),
+    the cgroup CPU quota (``docker run --cpus``, Kubernetes, AWS ECS), and
+    the CPU or thread count given in the environment by a batch scheduler or by the caller (see ``cpu_limit_variables``).
+
+    :return: Number of granted CPUs, at least 1, or None when no limit can be determined.
+    :rtype: int | None
+    """
+    limits: list[int] = []
+    if hasattr(os, "sched_getaffinity"):
+        limits.append(len(os.sched_getaffinity(0)))
+    quota = cgroup_cpu_quota()
+    if quota is not None:
+        limits.append(math.ceil(quota))
+    for variable in cpu_limit_variables:
+        try:
+            # OMP_NUM_THREADS may list one value per nesting level, "4,2"
+            limits.append(int(os.environ[variable].split(",")[0]))
+        except (KeyError, ValueError):
+            pass
+    limits = [limit for limit in limits if limit > 0]
+    return min(limits) if limits else None
+
 
 class ImageTypeClassifierBase:
     """
@@ -61,6 +169,8 @@ class ImageTypeClassifierBase:
 
         min_probability_threshold (float): Minimum probability threshold for classification, defaults to 0.4. If maximum class probability is below this threshold, the image type is set to "unknown".
 
+        num_threads (int | None): Number of threads the ONNX Runtime session may use. Defaults to allowed_cpu_count(), or to the ONNX Runtime default (None) when no limit can be determined.
+
     """
 
     def __init__(
@@ -69,6 +179,7 @@ class ImageTypeClassifierBase:
         classification_feature_list: list[str] = inference_features,
         image_type_map: dict[str, int] = imagetype_to_integer_mapping,
         min_probability_threshold: float = 0.4,
+        num_threads: int | None = None,
     ):
         """
         Initialize the ImageTypeClassifierBase.
@@ -77,12 +188,21 @@ class ImageTypeClassifierBase:
         :param classification_feature_list: List of features used for classification.
         :param image_type_map: Mapping between class name and model integer output.
         :param min_probability_threshold: Minimum probability threshold for classification, defaults to 0.4. If maximum class probability
+        :param num_threads: Number of threads the ONNX Runtime session may use. Defaults to allowed_cpu_count(), or to the ONNX Runtime default when no limit can be determined.
         :type classification_model_filename: str | Path
         :type classification_feature_list: list[str]
         :type image_type_map: dict[str, int]
         :type min_probability_threshold: float
+        :type num_threads: int | None
 
         """
+        if num_threads is None:
+            num_threads = allowed_cpu_count()
+        if num_threads is not None and num_threads < 1:
+            raise ValueError(f"num_threads must be at least 1, got {num_threads}")
+        self.num_threads: int | None = num_threads
+        self._inference_session: Any = None
+        self._inference_session_model_filename: Path | None = None
         if classification_model_filename is None:
             self.classification_model_filename = (
                 dcm_classifier_path / "models" / "ova_rf_classifier.onnx"
@@ -98,6 +218,39 @@ class ImageTypeClassifierBase:
         self.series: DicomSingleSeries | None = None
         self.series_number: int | None = None
         self.info_dict: dict[str, Any] | None = None
+
+    def __getstate__(self) -> dict[str, Any]:
+        # An ONNX Runtime session cannot be pickled; it is rebuilt on first use.
+        state = self.__dict__.copy()
+        state["_inference_session"] = None
+        state["_inference_session_model_filename"] = None
+        return state
+
+    def get_inference_session(self) -> Any:
+        """
+        Get the ONNX Runtime session for the classification model, creating it on first use.
+
+        The session is limited to ``num_threads`` threads and is reused across calls.
+
+        :return: ONNX Runtime inference session.
+        :rtype: onnxruntime.InferenceSession
+        """
+        model_filename = Path(self.classification_model_filename)
+        if (
+            self._inference_session is None
+            or self._inference_session_model_filename != model_filename
+        ):
+            import onnxruntime as rt
+
+            options = rt.SessionOptions()
+            # 0 lets ONNX Runtime choose the thread count.
+            options.intra_op_num_threads = self.num_threads or 0
+            options.inter_op_num_threads = 1
+            self._inference_session = rt.InferenceSession(
+                model_filename.as_posix(), sess_options=options
+            )
+            self._inference_session_model_filename = model_filename
+        return self._inference_session
 
     def get_min_probability_threshold(self) -> float:
         """
@@ -249,16 +402,11 @@ class ImageTypeClassifierBase:
                 return "INVALID", None
 
         # TODO: ensure the ordering of features is correct
-        import onnxruntime as rt
-
         e_inputs: pd.DataFrame = pd.DataFrame([feature_dict])
         # Drop all dicom images without a SeriesNumber
         # e_inputs = e_inputs[e_inputs["SeriesNumber"].notna()]
 
-        # Load the ONNX model
-        sess: rt.InferenceSession = rt.InferenceSession(
-            self.classification_model_filename.as_posix()
-        )
+        sess = self.get_inference_session()
 
         input_name: str = sess.get_inputs()[0].name
         label_name: str = sess.get_outputs()[0].name
