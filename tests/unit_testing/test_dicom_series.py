@@ -132,12 +132,6 @@ def test_dwig_dcm_series_modality(get_dwi_study):
         assert series.get_series_modality() == "dwig"
 
 
-# def test_b0_volume_modality(get_dwi_study):
-#     for series_num, series in get_dwi_study.get_study_dictionary().items():
-#         for vol in series.get_volume_list():
-#             print(vol.get_volume_index())
-
-
 def test_tracew_dcm_series_modality(mock_tracew_series):
     for series in mock_tracew_series:
         assert series.get_series_modality() == "tracew"

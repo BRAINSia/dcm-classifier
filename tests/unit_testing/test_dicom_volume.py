@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from dcm_classifier.dicom_config import MISSING_VALUE
 from dcm_classifier.dicom_volume import (
     DicomSingleVolumeInfoBase,
 )
@@ -60,15 +61,6 @@ def test_get_series_pixel_spacing(mock_volumes):
         assert pixel_spacing == "[0.9375, 0.9375]"
 
 
-# sad path, validate is False due to sentinel b-value seen in test above
-# def test_validate(mock_volumes):
-#     mock_volume = DicomSingleVolumeInfoBase(mock_volumes[0])
-#     volume_validate = mock_volume.validate()
-#     assert volume_validate is False
-#     assert distance_between_slices != "-12345.0"
-#     assert mock_volume.get_volume_bvalue() == -12345
-
-
 def test_image_diagnostics(mock_volumes):
     volume_info = DicomSingleVolumeInfoBase(mock_volumes[0])
     _ = volume_info.get_image_diagnostics()
@@ -80,25 +72,10 @@ def test_get_series_size(mock_volumes):
     assert series_size == "[256, 256, 22]"
 
 
-# sad path: testing inconsistent slice error is being found in the validation report string
-# def test_generate_validation_report_str(mock_volumes):
-#     # volume_info = DicomSingleVolumeInfoBase(mock_volumes[1])
-#     # volume_info.validate()
-#     # validation_report_str = volume_info.generate_validation_report_str()
-#     # assert "ERROR: Inconsistent slice thickness found" in validation_report_str
-#     # assert "Identified image type: DWI" in validation_report_str
-#     # assert "Identified bvalue: 100" in validation_report_str
-#     # assert "Identified SeriesNumber: 702" in validation_report_str
-
-
-# @pytest.mark.skip(reason="Not implemented yet")
 def test_get_invalid_vol_itk_image(mock_volumes):
-    # TODO - implement this test
     with pytest.raises(FileNotFoundError) as ex:
         _ = DicomSingleVolumeInfoBase(mock_volumes[0]).get_itk_image()
     assert "No DICOMs in: " in str(ex.value)
-    # assert image is not None
-    # assert isinstance(image, FImageType)
 
 
 def test_get_itk_image(get_data_dir):
@@ -180,16 +157,14 @@ def test_setting_invalid_modality_probabilities(mock_tracew_series):
             )
 
 
-# def test_getting_invalid_series_number(get_data_dir):
-#     dicom_path = (
-#         get_data_dir.parent / "invalid_data" / "invalid_fields" / "invalidSeriesNum.dcm"
-#     )
-#     assert dicom_path.exists()
-#     vol = DicomSingleVolumeInfoBase(dicom_path.as_posix())
-#
-#     with pytest.raises(ValueError) as ex:
-#         vol.get_series_number()
-#     assert vol.get_series_number() == -12345
+@pytest.mark.parametrize("file_name", ["invalidSeriesNum.dcm", "noSeriesNum.dcm"])
+def test_unusable_series_number_reads_as_missing(get_data_dir, file_name):
+    dicom_path = get_data_dir.parent / "invalid_data" / "invalid_fields" / file_name
+    with pytest.warns(UserWarning, match="SeriesNumber"):
+        volume = DicomSingleVolumeInfoBase([dicom_path.as_posix()])
+
+    with pytest.warns(DeprecationWarning):
+        assert volume.get_series_number() == MISSING_VALUE
 
 
 def test_get_volume_index(mock_tracew_series):
