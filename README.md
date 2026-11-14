@@ -56,15 +56,17 @@ Setup virtual environment
 
 `$ python3 -m venv <venv_path> && source <venv_path>/bin/activate`
 
-Install required packages
+Install the package and its required packages
 
-`$ pip install -r requirements.txt`
+`$ pip install .`
 
 ## Developer Instructions
 
 For development, clone the repository and install the developer requirements in a virtual environment. Development allows for training of new models using the scripts directory.
 
-`$ pip install -r requirements_dev.txt`
+`$ pip install -e ".[training]" --group dev`
+
+The `--group` option needs pip 25.1 or newer. With uv, the equivalent is `uv sync --extra training --group dev`. The `training` extra can be left out when only the package and its tests are being changed.
 
 Install pre-commit hooks
 
