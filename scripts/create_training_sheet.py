@@ -119,9 +119,7 @@ def parse_column_headers(
                 encoded_frame = one_hot_encoding_from_array(
                     input_df, current_header, index_field
                 )
-                new_data_frame = pd.merge(
-                    left=new_data_frame, right=encoded_frame, on=index_field
-                )
+                new_data_frame = new_data_frame.merge(encoded_frame, on=index_field)
             except KeyError:
                 print(f"KeyError: {current_header}")
 
@@ -130,9 +128,7 @@ def parse_column_headers(
                 encoded_frame = one_hot_encoding_from_str_col(
                     input_df, current_header, index_field
                 )
-                new_data_frame = pd.merge(
-                    left=new_data_frame, right=encoded_frame, on=index_field
-                )
+                new_data_frame = new_data_frame.merge(encoded_frame, on=index_field)
             except KeyError:
                 print(f"KeyError: {current_header}")
     if save_to_excel:

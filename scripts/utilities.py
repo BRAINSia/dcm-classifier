@@ -158,9 +158,8 @@ def merge_labels_and_training_data(
         final_df_name = training_data.replace(".xlsx", "_labeled.xlsx")
 
     # merge on "FileName"
-    merged_df = pd.merge(
-        left=trainings_df,
-        right=label_df,
+    merged_df = trainings_df.merge(
+        label_df,
         how="left",
         left_on="FileName",
         right_on="FileName",

@@ -75,7 +75,7 @@ def generate_training_data(label_dataframe: str, dicom_dataframe: str, name: str
     label_df = pd.read_excel(label_dataframe)
     dicom_df = pd.read_excel(dicom_dataframe)
 
-    df = pd.merge(dicom_df, label_df, on="SeriesInstanceUID")
+    df = dicom_df.merge(label_df, on="SeriesInstanceUID")
     pima = pd.DataFrame(df[input_output_training_columns])
 
     pima["Orientation"] = pima["Orientation"].replace(plane_to_integer_mapping)
