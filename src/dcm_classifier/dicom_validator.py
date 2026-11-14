@@ -76,7 +76,7 @@ class DicomValidatorBase:
     Identified PrimaryInfo:
     {self.single_volume_info.get_image_diagnostics()}
     Identified dictionary:
-    {json.dumps(self.single_volume_info.volume_info_dict, indent=2, sort_keys=True, default=lambda o: str(o))}
+    {json.dumps(self.single_volume_info.volume_info_dict, indent=2, sort_keys=True, default=str)}
     """
             else:
                 long_form_data = ""
