@@ -1,11 +1,11 @@
 [build-system]
 # 1.26 reads the SPDX license and license-files fields.
-requires = ["hatchling>=1.26"]
+requires = ["hatchling>=1.26", "hatch-vcs>=0.5"]
 build-backend = "hatchling.build"
 
 [project]
 name = "dcm_classifier"
-version = '0.9.9'
+dynamic = ["version"]
 authors = [
   { name="Michal Brzus", email="michal-brzus@uiowa.edu" },
   { name="Hans Johnson", email="hans-johnson@uiowa.edu" },
@@ -98,8 +98,9 @@ dev = [
 [project.scripts]
 dcm-classify-study = "dcm_classifier.classify_study:main"
 
-[tool.hatchling.data]
-include = ["models/ova_rf_classifier.onnx"]
+[tool.hatch.version]
+# The version comes from the nearest v* git tag.
+source = "vcs"
 
 [tool.pytest]
 minversion = "9.0"
