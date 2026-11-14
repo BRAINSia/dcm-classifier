@@ -113,7 +113,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         """
         # checks if the variable is any instance of pathlib
-        if isinstance(path_rep, PurePath) or isinstance(path_rep, str):
+        if isinstance(path_rep, (PurePath, str)):
             return True
         return False
 
