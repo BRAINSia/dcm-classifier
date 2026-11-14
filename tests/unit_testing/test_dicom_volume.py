@@ -109,9 +109,8 @@ def test_get_modality(mock_volumes):
 
 
 def test_no_files_provided():
-    with pytest.raises(ValueError) as ex:
+    with pytest.raises(ValueError, match="No file names provided list"):
         _ = DicomSingleVolumeInfoBase([])
-    assert "No file names provided list" in str(ex.value)
 
 
 def test_invalid_volume_modality(mock_volumes):
@@ -128,9 +127,8 @@ def test_is_MR_modality(mock_volume_study):
 def test_setting_invalid_modality(mock_tracew_series):
     for series in mock_tracew_series:
         for volume in series.get_volume_list():
-            with pytest.raises(ValueError) as ex:
+            with pytest.raises(ValueError, match="Can only set_modality with a string"):
                 volume.set_volume_modality(4)
-            assert "ERROR: Can only set_modality with a string." in str(ex.value)
 
 
 def test_get_series_modality_from_subvol(mock_tracew_series):
@@ -148,12 +146,11 @@ def test_get_parent_series(mock_tracew_series):
 def test_setting_invalid_modality_probabilities(mock_tracew_series):
     for series in mock_tracew_series:
         for volume in series.get_volume_list():
-            with pytest.raises(ValueError) as ex:
+            with pytest.raises(
+                ValueError,
+                match=r"Can only set_modality_probabilities with a pd\.DataFrame",
+            ):
                 volume.set_modality_probabilities(4)
-            assert (
-                "ERROR: Can only set_modality_probabilities with a pd.DataFrame."
-                in str(ex.value)
-            )
 
 
 @pytest.mark.parametrize("file_name", ["invalidSeriesNum.dcm", "noSeriesNum.dcm"])

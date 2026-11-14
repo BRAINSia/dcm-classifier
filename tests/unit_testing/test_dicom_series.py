@@ -86,25 +86,23 @@ def test_series_modality_probabilities(mock_t1_series):
 
 def test_set_invalid_series_modality(mock_tracew_series):
     for series in mock_tracew_series:
-        with pytest.raises(ValueError) as ex:
+        with pytest.raises(ValueError, match="Can only set_modality with a string"):
             series.set_series_modality(4)
-        assert "ERROR: Can only set_modality with a string." in str(ex.value)
 
 
 def test_set_invalid_series_modality_probabilities(mock_tracew_series):
     for series in mock_tracew_series:
-        with pytest.raises(ValueError) as ex:
+        with pytest.raises(
+            ValueError,
+            match=r"Can only set_modality_probabilities with a pd\.DataFrame",
+        ):
             series.set_modality_probabilities(4)
-        assert "ERROR: Can only set_modality_probabilities with a pd.DataFrame." in str(
-            ex.value
-        )
 
 
 def test_set_invalid_isotropic(mock_tracew_series):
     for series in mock_tracew_series:
-        with pytest.raises(ValueError) as ex:
+        with pytest.raises(ValueError, match="Can only set_is_isotropic with"):
             series.set_is_isotropic(4)
-        assert "ERROR: " in str(ex.value)
 
 
 def test_get_is_isotropic(mock_tracew_series):
@@ -114,16 +112,14 @@ def test_get_is_isotropic(mock_tracew_series):
 
 def test_set_invalid_contrast(mock_tracew_series):
     for series in mock_tracew_series:
-        with pytest.raises(ValueError) as ex:
+        with pytest.raises(ValueError, match="Can only set_has_contrast with"):
             series.set_has_contrast(4)
-        assert "ERROR: " in str(ex.value)
 
 
 def test_set_invalid_acq_plane(mock_tracew_series):
     for series in mock_tracew_series:
-        with pytest.raises(ValueError) as ex:
+        with pytest.raises(ValueError, match="Can only set_acquisition_plane with"):
             series.set_acquisition_plane(4)
-        assert "ERROR: " in str(ex.value)
 
 
 def test_dwig_dcm_series_modality(get_dwi_study):

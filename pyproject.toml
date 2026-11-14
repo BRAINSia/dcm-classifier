@@ -221,6 +221,7 @@ extend-select = [
     "PLR5501",  # collapsible-else-if
     "PLW2901",  # redefined-loop-name
     "PT006",  # pytest-parametrize-names-wrong-type
+    "PT011",  # pytest-raises-too-broad
     "PT018",  # pytest-composite-assertion
     "PT030",  # pytest-warns-too-broad
     "PT031",  # pytest-warns-with-multiple-statements
@@ -288,7 +289,6 @@ ignore = [
     "BLE001",  # blind-except (17)
     "PLC0415",  # import-outside-top-level (3)
     "PLW0603",  # global-statement (1)
-    "PT011",  # pytest-raises-too-broad (10)
     "TRY003",  # raise-vanilla-args (15)
     "TRY004",  # type-check-without-type-error (5)
     "TRY300",  # try-consider-else (4)
