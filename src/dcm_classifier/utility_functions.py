@@ -461,14 +461,13 @@ def sanitize_dicom_dataset(
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
                 vprint(f"Missing required {field} value {dicom_filename}:\n{e}")
+        # check that the field is not empty or None
+        elif dataset[field].value is None or str(dataset[field].value) == "":
+            dataset_dictionary[field] = INVALID_VALUE
+            missing_fields.append(field)
+            vprint(f"Missing required field {dicom_filename}")
         else:
-            # check that the field is not empty or None
-            if dataset[field].value is None or str(dataset[field].value) == "":
-                dataset_dictionary[field] = INVALID_VALUE
-                missing_fields.append(field)
-                vprint(f"Missing required field {dicom_filename}")
-            else:
-                dataset_dictionary[field] = dataset[field].value
+            dataset_dictionary[field] = dataset[field].value
 
     # set the default values for optional dicom fields
     for field in optional_info_list:
@@ -655,13 +654,12 @@ def sanitize_dicom_dataset(
                 dataset_dictionary[field] = validate_numerical_dataset_element(
                     dataset_value
                 )
+        elif field not in dataset:
+            # field is not present, set to default value
+            dataset_dictionary[field] = f"Unknown{field}"
         else:
-            if field not in dataset:
-                # field is not present, set to default value
-                dataset_dictionary[field] = f"Unknown{field}"
-            else:
-                # field is present, set to value
-                dataset_dictionary[field] = dataset_value
+            # field is present, set to value
+            dataset_dictionary[field] = dataset_value
 
     # Warn the user if there are INVALID_VALUE fields
     if len(missing_fields) > 0:
@@ -847,10 +845,9 @@ def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) ->
     multi_value_list = value_list
     if isinstance(value_list, pydicom.multival.MultiValue):
         multi_value_list = tuple(value_list)
-    else:
-        # Some dicom have a string representation of the arrays
-        if "/" in value_list:
-            multi_value_list = value_list.split("/")
+    # Some dicom have a string representation of the arrays
+    elif "/" in value_list:
+        multi_value_list = value_list.split("/")
     del value_list
 
     name = name.replace(" ", "").replace("(", "").replace(")", "")

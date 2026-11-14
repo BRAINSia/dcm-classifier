@@ -323,11 +323,10 @@ class ImageTypeClassifierBase:
 
         if float(feature_dict["ImageOrientationPatient_5"]) <= 0.5:
             return "ax"
+        elif float(feature_dict["ImageOrientationPatient_0"]) <= 0.707:
+            return "sag"
         else:
-            if float(feature_dict["ImageOrientationPatient_0"]) <= 0.707:
-                return "sag"
-            else:
-                return "cor"
+            return "cor"
 
     def infer_isotropic(self, feature_dict: dict = None) -> bool | None:
         """
@@ -553,23 +552,22 @@ class ImageTypeClassifierBase:
                     self.series.set_series_modality(
                         self.series.get_volume_list()[0].get_volume_modality()
                     )
+            elif "pd" in unique_modalities and "t2w" in unique_modalities:
+                self.series.set_series_modality("PDT2")
+            # DWI series usually contains b0 and dwig gradient volumes
+            elif "dwig" in unique_modalities:
+                self._update_diffusion_series_modality()
+            # TRACEW series often contains b0 and tracew volumes
+            # TODO: get more data for testing
+            elif "tracew" in unique_modalities:
+                self.series.set_series_modality("tracew")
+            elif MISSING_VALUE not in unique_bvals:
+                self._update_diffusion_series_modality()
             else:
-                if "pd" in unique_modalities and "t2w" in unique_modalities:
-                    self.series.set_series_modality("PDT2")
-                # DWI series usually contains b0 and dwig gradient volumes
-                elif "dwig" in unique_modalities:
-                    self._update_diffusion_series_modality()
-                # TRACEW series often contains b0 and tracew volumes
-                # TODO: get more data for testing
-                elif "tracew" in unique_modalities:
-                    self.series.set_series_modality("tracew")
-                elif MISSING_VALUE not in unique_bvals:
-                    self._update_diffusion_series_modality()
-                else:
-                    # if other scenarios are not met, we set the modality to the first volume's modality
-                    self.series.set_series_modality(
-                        self.series.get_volume_list()[0].get_volume_modality()
-                    )
+                # if other scenarios are not met, we set the modality to the first volume's modality
+                self.series.set_series_modality(
+                    self.series.get_volume_list()[0].get_volume_modality()
+                )
 
         """Override PERFUSION data"""
         # TODO: This is temporary fix and should be removed when the model is retrained with PERFUSION data and class
