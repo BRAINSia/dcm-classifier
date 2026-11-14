@@ -9,9 +9,9 @@ from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 
 current_file_path = Path(__file__).parent.resolve()
-inference_model_path = list(
-    Path(__file__).parent.parent.parent.rglob("models/rf_classifier.onnx")
-)[0]
+inference_model_path = next(
+    iter(Path(__file__).parent.parent.parent.rglob("models/rf_classifier.onnx"))
+)
 
 
 # this test is meant to ensure no dicom fields are changed when putting them into the volumes dictionary after sanitizing

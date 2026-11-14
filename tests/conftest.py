@@ -11,9 +11,9 @@ from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMapping
 
 # Previous code for generating mock volumes from botimage
 adjacent_testing_data_path: Path = Path(__file__).parent / "testing_data"
-inference_model_path = list(
-    Path(__file__).parent.parent.rglob("models/rf_classifier.onnx")
-)[0]
+inference_model_path = next(
+    iter(Path(__file__).parent.parent.rglob("models/rf_classifier.onnx"))
+)
 
 # path to the testing data directory
 test_data_dir_path: Path = Path(__file__).parent / "testing_data"

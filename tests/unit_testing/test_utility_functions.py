@@ -25,9 +25,9 @@ from dcm_classifier.utility_functions import (
 
 relative_testing_data_path: Path = Path(__file__).parent.parent / "testing_data"
 current_file_path: Path = Path(__file__).parent
-inference_model_path = list(
-    current_file_path.parent.parent.rglob("models/ova_rf_classifier.onnx")
-)[0]
+inference_model_path = next(
+    iter(current_file_path.parent.parent.rglob("models/ova_rf_classifier.onnx"))
+)
 
 
 def test_rglob_for_singular_result():
@@ -129,7 +129,7 @@ def test_multiple_series_UID():
 
 def test_diff_grad_dir():
     assert dicom_file_dir.exists()
-    file = list(dicom_file_dir.rglob("*.dcm"))[0]
+    file = next(iter(dicom_file_dir.rglob("*.dcm")))
     ds = pydicom.dcmread(file, stop_before_pixels=True)
 
     assert get_diffusion_gradient_direction(ds) is None
@@ -287,7 +287,7 @@ def test_unit_vector():
 def test_get_gradient_direction(get_data_dir):
     # testing no gradient, not dwi series
     no_grad_dir = get_data_dir / "1" / "DICOM"
-    no_grad = list(no_grad_dir.rglob("*.dcm"))[0]
+    no_grad = next(iter(no_grad_dir.rglob("*.dcm")))
     ds = pydicom.dcmread(no_grad)
     assert get_diffusion_gradient_direction(ds) is None
 
@@ -328,7 +328,7 @@ def test_is_integer():
 
 def test_is_mr_sop_class(contrast_file_path):
     dcm_header_info = pydicom.dcmread(
-        list(contrast_file_path.rglob("*.dcm"))[0], stop_before_pixels=True
+        next(iter(contrast_file_path.rglob("*.dcm"))), stop_before_pixels=True
     )
     assert is_mr_sop_class(dcm_header_info)
 

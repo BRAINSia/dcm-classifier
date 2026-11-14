@@ -214,6 +214,7 @@ extend-select = [
     "RET506",  # superfluous-else-raise
     "RET508",  # superfluous-else-break
     "RUF013",  # implicit-optional
+    "RUF015",  # unnecessary-iterable-allocation-for-first-element
     "RUF059",  # unused-unpacked-variable
     "SIM101",  # duplicate-isinstance-call
     "SIM103",  # needless-bool
@@ -285,7 +286,6 @@ ignore = [
     "PTH207",  # glob (2)
     "RUF005",  # collection-literal-concatenation (4)
     "RUF012",  # mutable-class-default (1)
-    "RUF015",  # unnecessary-iterable-allocation-for-first-element (7)
     "SIM102",  # collapsible-if (1)
     "SIM118",  # in-dict-keys (7)
     "TRY003",  # raise-vanilla-args (15)

@@ -13,9 +13,9 @@ from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMapping
 from dcm_classifier.utility_functions import FImageType
 
 current_file_path = Path(__file__).parent
-inference_model_path = list(
-    Path(__file__).parent.parent.parent.rglob("models/rf_classifier.onnx")
-)[0]
+inference_model_path = next(
+    iter(Path(__file__).parent.parent.parent.rglob("models/rf_classifier.onnx"))
+)
 
 inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
 
