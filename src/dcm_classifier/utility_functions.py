@@ -853,11 +853,11 @@ def convert_array_to_index_value(name: str, value_list: MultiValue | ndarray) ->
     # Note Absolute value as only the magnitude can have importance
     try:
         number_list = [abs(float(x)) for x in multi_value_list]
-    except Exception as e:
+    except Exception:
         print(
             f"Failed conversion of {name} : {type(multi_value_list)} to float list {multi_value_list} "
         )
-        raise e
+        raise
 
     named_list = []
     for index in range(len(number_list)):
