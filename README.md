@@ -74,13 +74,15 @@ Run pre-commit hooks to ensure code quality
 
 `$ pre-commit run -a`
 
-Run the classify study script, the path to a model can be omitted and the default model provided in the package will be used.
+Installing the package provides the `dcm-classify-study` command. The path to a model can be omitted and the default model provided in the package will be used.
 
-`$ python3 <path_to_scripts_directory>/classify_study.py -d <path_to_dicom_session>`
+`$ dcm-classify-study -d <path_to_dicom_session>`
 
 or pass the path to a separate model
 
-`$ python3 <path_to_scripts_directory>/classify_study.py -m models/ova_rf_classifier.onnx -d <path_to_dicom_session>`
+`$ dcm-classify-study -m models/ova_rf_classifier.onnx -d <path_to_dicom_session>`
+
+The same command is available from a source checkout as `python3 scripts/classify_study.py`.
 
 ### Testing
 
