@@ -99,8 +99,7 @@ def itk_read_from_dicomfn_list(
         isr.SetSpacingWarningRelThreshold(0.01)
         isr.SetFileNames(ordered_filenames)
         isr.Update()
-        itk_image = isr.GetOutput()
-    return itk_image
+        return isr.GetOutput()
 
 
 def is_number(s: Any) -> bool:

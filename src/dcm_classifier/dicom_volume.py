@@ -578,9 +578,8 @@ class DicomSingleVolumeInfoBase:
         volume_info: str = json.dumps(
             self.get_primary_volume_info(0), indent=4, sort_keys=True
         )
-        msg = f"""
+        return f"""
     {"*" * 40}
     {volume_info}
     {"*" * 40}
     """
-        return msg
