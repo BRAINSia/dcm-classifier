@@ -20,6 +20,7 @@ import collections
 import numbers
 import tempfile
 import warnings
+from collections.abc import Sequence
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
@@ -50,7 +51,7 @@ UCImageType = itk.Image[itk.UC, 3]
 
 
 def itk_read_from_dicomfn_list(
-    single_volume_dcm_files_list: list[str | Path],
+    single_volume_dcm_files_list: Sequence[str | Path],
 ) -> FImageType:
     """
     Read DICOM files from a list and return an ITK image.

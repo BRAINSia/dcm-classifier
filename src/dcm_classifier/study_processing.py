@@ -167,7 +167,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 )
         self.inferer: ImageTypeClassifierBase | None = inferer
 
-    def get_list_of_primary_volume_info(self) -> list[dict[str, str]]:
+    def get_list_of_primary_volume_info(self) -> list[dict[str, str | int]]:
         """
         Retrieve a list of dictionaries containing primary volume information from all series.
 
@@ -179,12 +179,12 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         :return: A list of dictionaries containing primary volume information.
         :rtype: list[dict[str, str]]
         """
-        list_of_volume_info_dictionaries: list[dict[str, str]] = []
+        list_of_volume_info_dictionaries: list[dict[str, str | int]] = []
         for series_object in self.series_dictionary.values():
             for vol_index, subseries_vol_info in enumerate(
                 series_object.volume_info_list
             ):
-                primary_volume_info: dict[str, str] = (
+                primary_volume_info: dict[str, str | int] = (
                     subseries_vol_info.get_primary_volume_info(vol_index)
                 )
                 list_of_volume_info_dictionaries.append(primary_volume_info)
