@@ -20,12 +20,12 @@ import collections
 import json
 from copy import deepcopy
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import pandas as pd
 import pydicom
-from deprecation import deprecated
 
+from ._deprecation import deprecated
 from .dicom_config import (
     MISSING_VALUE,
     optional_DICOM_fields,
@@ -40,6 +40,9 @@ from .utility_functions import (
     sanitize_dicom_dataset,
     vprint,
 )
+
+if TYPE_CHECKING:
+    from .dicom_series import DicomSingleSeries
 
 
 class DicomSingleVolumeInfoBase:
@@ -111,7 +114,7 @@ class DicomSingleVolumeInfoBase:
             self.has_diffusion_gradient = False
 
         # set default values
-        self.parent_series = None
+        self.parent_series: DicomSingleSeries | None = None
         self.volume_index: int | None = None
         self.volume_modality: str = "INVALID"
         self.series_modality: str = "INVALID"
@@ -139,7 +142,10 @@ class DicomSingleVolumeInfoBase:
         :return: The Series Description.
         :rtype: str
         """
-        return self._pydicom_info.get("SeriesDescription", "UNKNOWN_SeriesDescription")
+        return cast(
+            "str",
+            self._pydicom_info.get("SeriesDescription", "UNKNOWN_SeriesDescription"),
+        )
 
     def set_volume_modality(self, modality: str) -> None:
         """
@@ -149,7 +155,7 @@ class DicomSingleVolumeInfoBase:
         :type modality: str
         """
         if not isinstance(modality, str):
-            msg = f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."
+            msg = f"ERROR: Can only set_modality with a string.  Got type(modality) = {type(modality)}."  # type: ignore[unreachable]
             raise ValueError(msg)
         self.volume_modality = modality
 
@@ -169,6 +175,9 @@ class DicomSingleVolumeInfoBase:
         :return: The modality information.
         :rtype: str
         """
+        if self.parent_series is None:
+            msg = "The volume has not been added to a series."
+            raise AttributeError(msg)
         return self.parent_series.get_series_modality()
 
     def set_is_isotropic(self, isotropic: bool) -> None:
@@ -216,7 +225,7 @@ class DicomSingleVolumeInfoBase:
         :return: True if the volume is a mosaic.
         :rtype: bool
         """
-        return self.volume_info_dict.get("ImageType_MOSAIC", 0) == 1
+        return bool(self.volume_info_dict.get("ImageType_MOSAIC", 0) == 1)
 
     def get_contrast_agent(self) -> str:
         """
@@ -229,7 +238,7 @@ class DicomSingleVolumeInfoBase:
             return self.get_dicom_field_by_name(field_name="ContrastBolusAgent")
         return "None"
 
-    def set_parent_series(self, series) -> None:
+    def set_parent_series(self, series: "DicomSingleSeries") -> None:
         """
         Sets the parent series of the DICOM volume.
 
@@ -238,7 +247,7 @@ class DicomSingleVolumeInfoBase:
         """
         self.parent_series = series
 
-    def get_parent_series(self):
+    def get_parent_series(self) -> "DicomSingleSeries | None":
         """
         Retrieves the parent series of the DICOM volume.
 
@@ -260,7 +269,7 @@ class DicomSingleVolumeInfoBase:
             not isinstance(modality_probability, pd.DataFrame)
             and modality_probability is not None
         ):
-            msg = (
+            msg = (  # type: ignore[unreachable]
                 "ERROR: Can only set_modality_probabilities with a pd.DataFrame."
                 f"Got type(modality_probability) = {type(modality_probability)}."
             )
@@ -295,7 +304,7 @@ class DicomSingleVolumeInfoBase:
         """
         return self.acquisition_plane
 
-    def get_primary_volume_info(self, vol_index: int) -> dict[str, str]:
+    def get_primary_volume_info(self, vol_index: int) -> dict[str, str | int]:
         """
         Get primary volume information for the specified volume index.
 
@@ -342,7 +351,7 @@ class DicomSingleVolumeInfoBase:
 
         return self.itk_image
 
-    def get_dicom_field_by_name(self, field_name) -> str:
+    def get_dicom_field_by_name(self, field_name: str) -> str:
         """
         Get the element f"{field_name}" from the reference DICOM file (i.e. the first file found).
         This should be the same for all volumes and is picked from the first volume.
@@ -353,7 +362,7 @@ class DicomSingleVolumeInfoBase:
         :return: The series f"{field_name}" value.
         :rtype: str
         """
-        return self._pydicom_info.get(field_name, f"UNKNOWN_{field_name}")
+        return cast("str", self._pydicom_info.get(field_name, f"UNKNOWN_{field_name}"))
 
     @deprecated(
         deprecated_in="0.9.6",
@@ -369,7 +378,10 @@ class DicomSingleVolumeInfoBase:
         :return: The Series Instance UID.
         :rtype: str
         """
-        return self._pydicom_info.get("SeriesInstanceUID", "UNKNOWN_SeriesInstanceUID")
+        return cast(
+            "str",
+            self._pydicom_info.get("SeriesInstanceUID", "UNKNOWN_SeriesInstanceUID"),
+        )
 
     @deprecated(
         deprecated_in="0.9.6",
@@ -385,7 +397,10 @@ class DicomSingleVolumeInfoBase:
         :return: The Study Instance UID.
         :rtype: str
         """
-        return self._pydicom_info.get("StudyInstanceUID", "UNKNOWN_StudyInstanceUID")
+        return cast(
+            "str",
+            self._pydicom_info.get("StudyInstanceUID", "UNKNOWN_StudyInstanceUID"),
+        )
 
     @deprecated(
         deprecated_in="0.9.6",
@@ -509,7 +524,9 @@ class DicomSingleVolumeInfoBase:
                 vprint(f"Skipping non-MR modality : {self._pydicom_info.Modality}")
         return status
 
-    def _make_one_study_info_mapping_from_filelist(self) -> (str, dict):
+    def _make_one_study_info_mapping_from_filelist(
+        self,
+    ) -> tuple[str, dict[str, Any]]:
         """
         Create a dictionary containing information about the DICOM volume from the list of DICOM files.
 
