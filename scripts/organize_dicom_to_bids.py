@@ -72,7 +72,7 @@ if __name__ == "__main__":
     bids_dicom_path = (
         "/localscratch/Users/mbrzus/Stroke_Data/IOWA_STROKE_RETRO_DICOM_NEW_BIDS"
     )
-    if not os.path.exists(bids_dicom_path):
+    if not Path(bids_dicom_path).exists():
         os.system(f"mkdir -p {bids_dicom_path}")
 
     # organize data to BIDS
