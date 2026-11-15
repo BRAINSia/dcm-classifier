@@ -205,6 +205,7 @@ extend-select = [
     "SIM108",  # if-else-block-instead-of-if-exp
     "SIM114",  # if-with-same-arms
     "SIM118",  # in-dict-keys
+    "TRY003",  # raise-vanilla-args
     "TRY201",  # verbose-raise
     "TRY300",  # try-consider-else
     # Rule families recommended by the Scientific Python guide.
@@ -248,7 +249,6 @@ ignore = [
     "ARG001",  # unused arguments are part of public and callback signatures
     "BLE001",  # broad handlers report an unreadable file and carry on
     "PLW0603",  # module-level state in a training script
-    "TRY003",  # messages would move into custom exception classes
     "TRY004",  # TypeError for wrong types changes the exceptions raised
 ]
 
