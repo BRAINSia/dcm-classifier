@@ -406,6 +406,8 @@ def vprint(msg: str, verbose: bool = False) -> None:
     """
     Log a message at INFO if the 'verbose' flag is set, and at DEBUG otherwise.
 
+    Deprecated, and to be removed in 2.0.0: use the standard ``logging`` module.
+
     :param msg: The message to log.
     :type msg: str
 
@@ -413,6 +415,11 @@ def vprint(msg: str, verbose: bool = False) -> None:
     :type verbose: bool, optional
 
     """
+    warnings.warn(
+        "vprint is deprecated and will be removed in 2.0.0; use the logging module",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     logger.log(logging.INFO if verbose else logging.DEBUG, "%s", msg)
 
 
@@ -464,21 +471,21 @@ def sanitize_dicom_dataset(
             elif not is_number(dataset[field].value):
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
-                vprint(f"Missing required {field} value {dicom_filename}")
+                logger.debug("Missing required %s value %s", field, dicom_filename)
             else:
                 dataset_dictionary[field] = dataset[field].value
         elif field == "SeriesNumber":
             if not is_integer(dataset[field].value):
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
-                vprint(f"Missing required {field} value {dicom_filename}")
+                logger.debug("Missing required %s value %s", field, dicom_filename)
             else:
                 dataset_dictionary[field] = dataset[field].value
         elif field in {"PixelBandwidth", "SliceThickness"}:
             if not is_number(dataset[field].value):
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
-                vprint(f"Missing required {field} value {dicom_filename}")
+                logger.debug("Missing required %s value %s", field, dicom_filename)
             else:
                 dataset_dictionary[field] = dataset[field].value
         elif field == "PixelSpacing":
@@ -487,12 +494,14 @@ def sanitize_dicom_dataset(
             except Exception as e:
                 dataset_dictionary[field] = INVALID_VALUE
                 missing_fields.append(field)
-                vprint(f"Missing required {field} value {dicom_filename}:\n{e}")
+                logger.debug(
+                    "Missing required %s value %s:\n%s", field, dicom_filename, e
+                )
         # check that the field is not empty or None
         elif dataset[field].value is None or str(dataset[field].value) == "":
             dataset_dictionary[field] = INVALID_VALUE
             missing_fields.append(field)
-            vprint(f"Missing required field {dicom_filename}")
+            logger.debug("Missing required field %s", dicom_filename)
         else:
             dataset_dictionary[field] = dataset[field].value
 
@@ -514,8 +523,11 @@ def sanitize_dicom_dataset(
                 # indicate that there is no SAR for the computed image
                 _default_inferred_value: int | str = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = validate_numerical_dataset_element(
@@ -526,8 +538,11 @@ def sanitize_dicom_dataset(
                 # Manufacturer is not a required field, it can be unknown
                 _default_inferred_value = "UnknownManufacturer"
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = dataset_value
@@ -536,8 +551,11 @@ def sanitize_dicom_dataset(
                 # ImageType is not a required field, it can be unknown
                 _default_inferred_value = "UnknownImageType"
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = dataset_value
@@ -552,8 +570,11 @@ def sanitize_dicom_dataset(
                 # EchoNumber(s) is not a required field, it can be unknown
                 _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = validate_numerical_dataset_element(
@@ -564,8 +585,11 @@ def sanitize_dicom_dataset(
                 # EchoTrainLength is not a required field, it can be unknown
                 _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = validate_numerical_dataset_element(
@@ -576,8 +600,11 @@ def sanitize_dicom_dataset(
                 # ScanningSequence is not a required field, it can be unknown
                 _default_inferred_value = "UnknownScanningSequence"
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = dataset_value
@@ -586,8 +613,11 @@ def sanitize_dicom_dataset(
                 # SequenceVariant is not a required field, it can be unknown
                 _default_inferred_value = "UnknownSequenceVariant"
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = dataset_value
@@ -596,8 +626,11 @@ def sanitize_dicom_dataset(
                 # InplanePhaseEncodingDirection is not a required field, it can be unknown
                 _default_inferred_value = "UnknownInplanePhaseEncodingDirection"
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = dataset_value
@@ -606,8 +639,11 @@ def sanitize_dicom_dataset(
                 # dBdt is not a required field, it can be unknown
                 _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = validate_numerical_dataset_element(
@@ -618,8 +654,11 @@ def sanitize_dicom_dataset(
                 # ImagingFrequency is not a required field, it can be unknown
                 _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = validate_numerical_dataset_element(
@@ -630,8 +669,11 @@ def sanitize_dicom_dataset(
                 # MRAcquisitionType is not a required field, it can be unknown
                 _default_inferred_value = "UnknownMRAcquisitionType"
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = dataset_value
@@ -640,8 +682,11 @@ def sanitize_dicom_dataset(
                 # NumberOfAverages is not a required field, it can be unknown
                 _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = validate_numerical_dataset_element(
@@ -652,8 +697,11 @@ def sanitize_dicom_dataset(
                 # InversionTime is not a required field, it can be unknown
                 _default_inferred_value = MISSING_VALUE
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = validate_numerical_dataset_element(
@@ -664,8 +712,11 @@ def sanitize_dicom_dataset(
                 # VariableFlipAngleFlag is not a required field, it can be unknown
                 _default_inferred_value = "UnknownVariableFlipAngleFlag"
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = dataset_value
@@ -674,8 +725,11 @@ def sanitize_dicom_dataset(
                 # AcquisitionTime is not a required field, it can be unknown
                 _default_inferred_value = "000000.00"
                 dataset_dictionary[field] = _default_inferred_value
-                vprint(
-                    f"Inferring optional {field} value of '{_default_inferred_value}' for missing field in {dicom_filename}"
+                logger.debug(
+                    "Inferring optional %s value of '%s' for missing field in %s",
+                    field,
+                    _default_inferred_value,
+                    dicom_filename,
                 )
             else:
                 dataset_dictionary[field] = validate_numerical_dataset_element(
