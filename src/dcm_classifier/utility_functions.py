@@ -54,6 +54,23 @@ FImageType: TypeAlias = itk.Image[itk.F, 3]  # noqa: UP040
 UCImageType: TypeAlias = itk.Image[itk.UC, 3]  # noqa: UP040
 
 
+def new_gdcm_series_file_names() -> Any:
+    """
+    Create an ``itk.GDCMSeriesFileNames`` that orders every series it finds.
+
+    ITK 6 raises when slice positions repeat, as in every multi-volume series,
+    unless ``FailOnAmbiguousOrdering`` is off; ITK 5.4 has no such check.
+
+    :return: A names generator with ``UseSeriesDetails`` on.
+    :rtype: itk.GDCMSeriesFileNames
+    """
+    names_generator = itk.GDCMSeriesFileNames.New()
+    if hasattr(names_generator, "SetFailOnAmbiguousOrdering"):
+        names_generator.SetFailOnAmbiguousOrdering(False)
+    names_generator.SetUseSeriesDetails(True)
+    return names_generator
+
+
 def itk_read_from_dicomfn_list(
     single_volume_dcm_files_list: Sequence[str | Path],
 ) -> FImageType:
@@ -77,10 +94,14 @@ def itk_read_from_dicomfn_list(
         ]:
             new_dcm_file: Path = tmp_symlink_dir_path / dcm_file_path.name
             new_dcm_file.symlink_to(dcm_file_path)
+        source_dir = (
+            Path(single_volume_dcm_files_list[0]).parent.as_posix()
+            if single_volume_dcm_files_list
+            else ""
+        )
         del single_volume_dcm_files_list
 
-        namesGenerator = itk.GDCMSeriesFileNames.New()
-        namesGenerator.SetUseSeriesDetails(True)
+        namesGenerator = new_gdcm_series_file_names()
         # namesGenerator.AddSeriesRestriction("0008|0021")
         # namesGenerator.SetGlobalWarningDisplay(False)
         namesGenerator.SetDirectory(tmp_symlink_dir_path.as_posix())
@@ -94,6 +115,12 @@ def itk_read_from_dicomfn_list(
 
         seriesIdentifier = seriesUID_list[0]
         ordered_filenames = namesGenerator.GetFileNames(seriesIdentifier)
+        if getattr(namesGenerator, "GetDidUseAmbiguousOrdering", lambda: False)():
+            logger.warning(
+                "Slices from %s could not be ordered by position; "
+                "ordered by InstanceNumber or file name instead",
+                source_dir,
+            )
 
         isr = itk.ImageSeriesReader[FImageType].New()
         # Typical clinical image slice spacing is > 1mm so a difference of 0.01 mm in slice spacing can be ignored.

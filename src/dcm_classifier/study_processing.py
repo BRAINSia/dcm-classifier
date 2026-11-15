@@ -22,7 +22,6 @@ from datetime import datetime
 from pathlib import Path, PurePath
 from typing import Any, ClassVar, TypedDict
 
-import itk
 import pydicom
 
 from .dicom_config import MISSING_VALUE
@@ -32,6 +31,7 @@ from .image_type_inference import ImageTypeClassifierBase
 from .utility_functions import (
     check_two_images_have_same_physical_space,
     is_mr_sop_class,
+    new_gdcm_series_file_names,
     parse_acquisition_datetime,
 )
 
@@ -349,8 +349,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             >>> series_mapping = study.__identify_single_volumes(study_directory_path)
             >>> series_info = series_mapping.get(1)  # Retrieve information for series number 1
         """
-        namesGenerator = itk.GDCMSeriesFileNames.New()
-        namesGenerator.SetUseSeriesDetails(True)
+        namesGenerator = new_gdcm_series_file_names()
         namesGenerator.SetLoadPrivateTags(True)
         namesGenerator.SetRecursive(True)
         # namesGenerator.AddSeriesRestriction("0008|0021")  # Date restriction

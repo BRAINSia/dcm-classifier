@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+import itk
 import numpy as np
 import pydicom
 import pytest
@@ -18,6 +19,7 @@ from dcm_classifier.utility_functions import (
     is_integer,
     is_mr_sop_class,
     itk_read_from_dicomfn_list,
+    new_gdcm_series_file_names,
     sanitize_dicom_dataset,
     validate_numerical_dataset_element,
     vprint,
@@ -311,3 +313,56 @@ def test_get_EADC_image_type():
     test_dict = {"ImageType": ["ORIGINAL", "PRIMARY", "EADC", "NONE"]}
 
     assert get_coded_dictionary_elements(test_dict)["ImageType_EADC"] == 1
+
+
+class _OrderingAwareNamesGenerator:
+    """An ITK 5.4 generator given the ITK 6 ambiguous-ordering API."""
+
+    real_new = staticmethod(itk.GDCMSeriesFileNames.New)
+
+    def __init__(self, used_fallback: bool) -> None:
+        self._generator = self.real_new()
+        self.fail_on_ambiguous_ordering = True
+        self.used_fallback = used_fallback
+
+    def SetFailOnAmbiguousOrdering(self, value: bool) -> None:
+        self.fail_on_ambiguous_ordering = value
+
+    def GetDidUseAmbiguousOrdering(self) -> bool:
+        return self.used_fallback
+
+    def __getattr__(self, name: str):
+        return getattr(self._generator, name)
+
+
+def _use_ordering_aware_generator(monkeypatch, used_fallback: bool) -> None:
+    generator_class = type(
+        "GDCMSeriesFileNames",
+        (),
+        {"New": staticmethod(lambda: _OrderingAwareNamesGenerator(used_fallback))},
+    )
+    monkeypatch.setattr(itk, "GDCMSeriesFileNames", generator_class)
+
+
+def test_names_generator_turns_off_fail_on_ambiguous_ordering(monkeypatch):
+    _use_ordering_aware_generator(monkeypatch, used_fallback=False)
+    generator = new_gdcm_series_file_names()
+    assert generator.fail_on_ambiguous_ordering is False
+    assert generator.GetUseSeriesDetails()
+
+
+def test_names_generator_without_ordering_api():
+    generator = new_gdcm_series_file_names()
+    assert generator.GetUseSeriesDetails()
+
+
+@pytest.mark.parametrize("used_fallback", [False, True])
+def test_read_warns_when_slice_order_is_ambiguous(
+    monkeypatch, caplog, get_data_dir, used_fallback
+):
+    _use_ordering_aware_generator(monkeypatch, used_fallback)
+    series_files = sorted((get_data_dir / "1" / "DICOM").iterdir())
+    with caplog.at_level(logging.WARNING, logger="dcm_classifier.utility_functions"):
+        image = itk_read_from_dicomfn_list(series_files)
+    assert image.GetLargestPossibleRegion().GetSize()[2] == len(series_files)
+    assert ("could not be ordered by position" in caplog.text) is used_fallback
