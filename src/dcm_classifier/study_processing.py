@@ -16,7 +16,6 @@
 #
 #  =========================================================================
 import logging
-import warnings
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path, PurePath
@@ -164,12 +163,12 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         )
         for series_number, series in self.series_dictionary.items():
             if series.get_is_mosaic():
-                warnings.warn(
-                    f"SeriesNumber {series_number} in {self.study_directory} contains "
-                    "Siemens mosaic images. "
+                logger.warning(
+                    "SeriesNumber %s in %s contains Siemens mosaic images. "
                     "Mosaic images are not unpacked into slices, so the geometry and "
                     "classification of this series may be wrong.",
-                    stacklevel=2,
+                    series_number,
+                    self.study_directory,
                 )
         self.inferer: ImageTypeClassifierBase | None = inferer
 
@@ -449,7 +448,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             number = self._unnumbered_series.setdefault(
                 series_uid, MISSING_VALUE - len(self._unnumbered_series)
             )
-            warnings.warn(f"{message}; filed under series {number}", stacklevel=2)
+            logger.warning("%s; filed under series %s", message, number)
             return number
 
     def _identify_and_split_sub_volumes_pydicom(

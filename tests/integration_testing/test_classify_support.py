@@ -141,16 +141,14 @@ def test_classify_study_with_no_readable_dicoms(get_data_dir, caplog):
     )
 
 
-def test_classify_study_json_keeps_invalid_volume(contrast_file_path, tmp_path):
+def test_classify_study_json_keeps_invalid_volume(contrast_file_path, tmp_path, caplog):
     ds = pydicom.dcmread(next(contrast_file_path.rglob("*.dcm")))
     del ds.FlipAngle
     ds.save_as(tmp_path / "missing_flip_angle.dcm")
 
-    with (
-        pytest.warns(UserWarning, match="Required DICOM fields"),
-        pytest.warns(UserWarning, match="Missing features"),
-    ):
-        session = simple_classify_study(session_directory=tmp_path)
+    session = simple_classify_study(session_directory=tmp_path)
+    assert "Required DICOM fields" in caplog.text
+    assert "Missing features" in caplog.text
     (volume,) = session[str(tmp_path)].values()
 
     assert volume["VolumeModality"] == "INVALID"

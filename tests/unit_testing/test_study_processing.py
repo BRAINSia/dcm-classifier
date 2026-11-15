@@ -1,4 +1,6 @@
+import logging
 import random
+import re
 import shutil
 from pathlib import Path
 
@@ -106,26 +108,29 @@ def test_split_orders_files_by_instance_number(get_data_dir, tmp_path):
     assert instance_numbers == sorted(instance_numbers)
 
 
-def test_mosaic_series_is_flagged_with_a_warning(get_data_dir):
+def test_mosaic_series_is_flagged_with_a_warning(get_data_dir, caplog):
     dwi_directory = get_data_dir.parent / "anonymized_dwi_series"
 
-    with pytest.warns(UserWarning, match="Siemens mosaic") as caught:
-        study = ProcessOneDicomStudyToVolumesMappingBase(dwi_directory)
+    study = ProcessOneDicomStudyToVolumesMappingBase(dwi_directory)
 
-    (mosaic_warning,) = (w for w in caught if "mosaic" in str(w.message))
-    assert f"SeriesNumber 2 in {dwi_directory}" in str(mosaic_warning.message)
+    (mosaic_warning,) = (
+        r
+        for r in caplog.records
+        if r.levelno == logging.WARNING and "mosaic" in r.getMessage()
+    )
+    assert f"SeriesNumber 2 in {dwi_directory}" in mosaic_warning.getMessage()
 
     series = study.series_dictionary[2]
     assert series.get_is_mosaic()
     assert all(volume.get_is_mosaic() for volume in series.get_volume_list())
 
 
-def test_non_mosaic_series_is_not_flagged(get_data_dir, recwarn):
+def test_non_mosaic_series_is_not_flagged(get_data_dir, caplog):
     study = ProcessOneDicomStudyToVolumesMappingBase(get_data_dir / "5")
 
     (series,) = study.series_dictionary.values()
     assert not series.get_is_mosaic()
-    assert not any("mosaic" in str(w.message) for w in recwarn)
+    assert "mosaic" not in caplog.text
 
 
 invalid_fields_directory: Path = (
@@ -138,23 +143,19 @@ invalid_fields_directory: Path = (
 
 @pytest.mark.parametrize("file_name", ["noSeriesNum.dcm", "invalidSeriesNum.dcm"])
 def test_unusable_series_number_does_not_stop_the_study(
-    get_data_dir, tmp_path, file_name
+    get_data_dir, tmp_path, file_name, caplog
 ):
     shutil.copy(invalid_fields_directory / file_name, tmp_path / file_name)
     valid_file = next((get_data_dir / "9").rglob("*.dcm"))
     shutil.copy(valid_file, tmp_path / "valid.dcm")
 
-    with (
-        pytest.warns(UserWarning, match="Required DICOM fields"),
-        pytest.warns(UserWarning, match=f"SeriesNumber is missing.*{file_name}"),
-    ):
-        study = ProcessOneDicomStudyToVolumesMappingBase(
-            tmp_path, inferer=ImageTypeClassifierBase()
-        )
-    with pytest.warns(
-        UserWarning, match=f"Missing features for SeriesNumber {MISSING_VALUE}"
-    ):
-        study.run_inference()
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        tmp_path, inferer=ImageTypeClassifierBase()
+    )
+    assert "Required DICOM fields" in caplog.text
+    assert re.search(f"SeriesNumber is missing.*{file_name}", caplog.text)
+    study.run_inference()
+    assert f"Missing features for SeriesNumber {MISSING_VALUE}" in caplog.text
 
     assert set(study.series_dictionary) == {9, MISSING_VALUE}
     (volume,) = study.series_dictionary[MISSING_VALUE].get_volume_list()
@@ -166,10 +167,7 @@ def test_unusable_series_number_does_not_stop_the_study(
 def test_unusable_series_number_raises_when_errors_are_requested(tmp_path, file_name):
     shutil.copy(invalid_fields_directory / file_name, tmp_path / file_name)
 
-    with (
-        pytest.warns(UserWarning, match="Required DICOM fields"),
-        pytest.raises(ValueError, match=f"SeriesNumber is missing.*{file_name}"),
-    ):
+    with pytest.raises(ValueError, match=f"SeriesNumber is missing.*{file_name}"):
         ProcessOneDicomStudyToVolumesMappingBase(tmp_path, raise_error_on_failure=True)
 
 
@@ -179,36 +177,28 @@ def _copy_unnumbered(tmp_path, file_name, series_uid):
     ds.save_as(tmp_path / file_name)
 
 
-def test_unnumbered_series_are_kept_apart(tmp_path):
+def test_unnumbered_series_are_kept_apart(tmp_path, caplog):
     _copy_unnumbered(tmp_path, "noSeriesNum.dcm", generate_uid())
     _copy_unnumbered(tmp_path, "invalidSeriesNum.dcm", generate_uid())
 
-    with (
-        pytest.warns(UserWarning, match="Required DICOM fields"),
-        pytest.warns(
-            UserWarning,
-            match=f"filed under series ({MISSING_VALUE}|{MISSING_VALUE - 1})$",
-        ),
-    ):
-        study = ProcessOneDicomStudyToVolumesMappingBase(tmp_path)
+    study = ProcessOneDicomStudyToVolumesMappingBase(tmp_path)
 
     assert set(study.series_dictionary) == {MISSING_VALUE, MISSING_VALUE - 1}
+    assert f"filed under series {MISSING_VALUE}\n" in caplog.text
+    assert f"filed under series {MISSING_VALUE - 1}\n" in caplog.text
     for series in study.series_dictionary.values():
         assert len(series.get_volume_list()) == 1
 
 
-def test_unnumbered_volumes_of_one_series_stay_together(tmp_path):
+def test_unnumbered_volumes_of_one_series_stay_together(tmp_path, caplog):
     series_uid = generate_uid()
     _copy_unnumbered(tmp_path, "noSeriesNum.dcm", series_uid)
     _copy_unnumbered(tmp_path, "invalidSeriesNum.dcm", series_uid)
 
-    with (
-        pytest.warns(UserWarning, match="Required DICOM fields"),
-        pytest.warns(UserWarning, match=f"filed under series {MISSING_VALUE}"),
-    ):
-        study = ProcessOneDicomStudyToVolumesMappingBase(tmp_path)
+    study = ProcessOneDicomStudyToVolumesMappingBase(tmp_path)
 
     assert set(study.series_dictionary) == {MISSING_VALUE}
+    assert caplog.text.count(f"filed under series {MISSING_VALUE}\n") == 2
 
 
 def test_split_does_not_depend_on_bvalue_tags(get_data_dir, tmp_path):

@@ -744,10 +744,10 @@ def sanitize_dicom_dataset(
 
     # Warn the user if there are INVALID_VALUE fields
     if len(missing_fields) > 0:
-        logger.debug("Missing or invalid fields: %s", missing_fields)
-        warnings.warn(
-            f"\nWARNING: Required DICOM fields: {missing_fields} in {dicom_filename} are missing or have invalid values.\n",
-            stacklevel=2,
+        logger.warning(
+            "Required DICOM fields: %s in %s are missing or have invalid values.",
+            missing_fields,
+            dicom_filename,
         )
         return dataset_dictionary, False
 
