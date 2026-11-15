@@ -59,7 +59,7 @@ Pull requests should be made against the `main` branch. Use the pull request tem
 The package version comes from the nearest `v*` git tag, through
 `hatch-vcs`; nothing in the source states it. To release:
 
-1. Draft a GitHub release on `main` with a new tag such as `v0.10.0`,
+1. Draft a GitHub release on `main` with a new tag such as `v1.1.0`,
    and let GitHub generate the notes.
 2. Publish the release. The `CD` workflow builds the sdist and wheel,
    attests them, and uploads them to PyPI through trusted publishing.
