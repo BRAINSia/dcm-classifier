@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 class _FileRecord(TypedDict):
+    image_position: Any
     acquisition_date_time: datetime
     acquisition_number: int
     instance_number: int
@@ -502,7 +503,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         ordered_filenames: list[Path | str] = list(subseries_filenames)
 
         try:
-            file_records: list[tuple[Any, _FileRecord]] = []
+            file_records: list[_FileRecord] = []
             for dcm_file in subseries_filenames:
                 try:
                     ds = pydicom.dcmread(dcm_file, stop_before_pixels=True)
@@ -519,15 +520,13 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                     inst_number = int(ds.get("InstanceNumber", MISSING_VALUE))
 
                     file_records.append(
-                        (
-                            img_position,
-                            {
-                                "acquisition_date_time": acquisition_date_time,
-                                "acquisition_number": acquisition_number,
-                                "instance_number": inst_number,
-                                "filename": dcm_file,
-                            },
-                        )
+                        {
+                            "image_position": img_position,
+                            "acquisition_date_time": acquisition_date_time,
+                            "acquisition_number": acquisition_number,
+                            "instance_number": inst_number,
+                            "filename": dcm_file,
+                        }
                     )
 
                 except Exception as file_error:
@@ -538,16 +537,14 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                     continue
 
             # InstanceNumber, not file system order, sets the slice order.
-            file_records.sort(
-                key=lambda r: (r[1]["instance_number"], str(r[1]["filename"]))
-            )
-            read_filenames = {str(r[1]["filename"]) for r in file_records}
-            ordered_filenames = [r[1]["filename"] for r in file_records]
+            file_records.sort(key=lambda r: (r["instance_number"], str(r["filename"])))
+            read_filenames = {str(r["filename"]) for r in file_records}
+            ordered_filenames = [r["filename"] for r in file_records]
             ordered_filenames += [
                 f for f in subseries_filenames if str(f) not in read_filenames
             ]
-            for recorded_position, file_info in file_records:
-                img_position = recorded_position
+            for file_info in file_records:
+                img_position = file_info["image_position"]
                 if img_position is None:
                     logger.warning(
                         "ImagePositionPatient not found in %s. Using default positioning.",
