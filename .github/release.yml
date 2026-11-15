@@ -1,0 +1,15 @@
+# Sections for the release notes GitHub generates from merged pull requests.
+changelog:
+  exclude:
+    authors:
+      - dependabot[bot]
+  categories:
+    - title: Bug fixes
+      labels:
+        - bug
+    - title: Enhancements
+      labels:
+        - enhancement
+    - title: Other changes
+      labels:
+        - "*"
