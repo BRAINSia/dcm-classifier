@@ -29,7 +29,7 @@ jobs:
       - run: uvx pre-commit run --all-files --show-diff-on-failure
 
   tests:
-    name: tests (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    name: tests (${{ matrix.os }}, Python ${{ matrix.python-version }}, ITK ${{ matrix.itk }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     permissions:
@@ -41,6 +41,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04, macos-26]
         python-version: ["3.12", "3.14"]
+        itk: ["5.4.8", "6"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -53,13 +54,21 @@ jobs:
           activate-environment: true
           cache-dependency-glob: pyproject.toml
       - run: uv pip install . --group test
+      - name: Install the ITK ${{ matrix.itk }} release line
+        env:
+          ITK_LINE: ${{ matrix.itk }}
+          UV_PRERELEASE: allow
+        run: |
+          if [ "$ITK_LINE" = "6" ]; then spec=">=6.0b2,<7"; else spec="==$ITK_LINE"; fi
+          uv pip install "itk$spec" "itk-core$spec" "itk-filtering$spec" "itk-io$spec" "itk-numerics$spec"
+          python -c "import itk; print(itk.Version.GetITKVersion())"
       - run: python -m coverage run -m pytest
       - run: python -m coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
       - run: python -m coverage xml
       - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           files: coverage.xml
-          flags: ${{ matrix.os }}-py${{ matrix.python-version }}
+          flags: ${{ matrix.os }}-py${{ matrix.python-version }}-itk${{ matrix.itk }}
           use_oidc: true
 
   docs:
