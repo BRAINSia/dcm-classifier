@@ -39,7 +39,6 @@ from .utility_functions import (
     get_diffusion_gradient_direction,
     itk_read_from_dicomfn_list,
     sanitize_dicom_dataset,
-    vprint,
 )
 
 logger = logging.getLogger(__name__)
@@ -414,9 +413,11 @@ class DicomSingleVolumeInfoBase:
         )
         if not status:
             if "Modality" not in self._pydicom_info:
-                vprint("Skipping DICOM file without Modality information")
+                logger.debug("Skipping DICOM file without Modality information")
             else:
-                vprint(f"Skipping non-MR modality : {self._pydicom_info.Modality}")
+                logger.debug(
+                    "Skipping non-MR modality : %s", self._pydicom_info.Modality
+                )
         return status
 
     def _make_one_study_info_mapping_from_filelist(

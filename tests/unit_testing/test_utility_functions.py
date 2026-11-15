@@ -44,8 +44,10 @@ def test_get_bvalue():
 
 def test_vprint(caplog):
     with caplog.at_level(logging.DEBUG, logger="dcm_classifier.utility_functions"):
-        assert vprint("verbose message", True) is None
-        assert vprint("quiet message") is None
+        with pytest.warns(DeprecationWarning, match="removed in 2.0.0"):
+            vprint("verbose message", True)
+        with pytest.warns(DeprecationWarning, match="removed in 2.0.0"):
+            vprint("quiet message")
 
     levels = {record.getMessage(): record.levelno for record in caplog.records}
     assert levels == {"verbose message": logging.INFO, "quiet message": logging.DEBUG}
