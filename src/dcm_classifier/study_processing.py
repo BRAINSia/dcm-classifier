@@ -550,7 +550,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 img_position = recorded_position
                 if img_position is None:
                     logger.warning(
-                        "Warning: ImagePositionPatient not found in %s. Using default positioning.",
+                        "ImagePositionPatient not found in %s. Using default positioning.",
                         file_info["filename"],
                     )
                     img_position = [0, 0, len(file_info_dict)]
@@ -578,7 +578,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                         msg = f"Inconsistent volume splitting: {num_files} files, {num_unique_positions} positions"
                         raise ValueError(msg)
                     logger.warning(
-                        "Warning: Detected %d sub-volumes. Total files: %d, Unique positions: %d.",
+                        "Detected %d sub-volumes. Total files: %d, Unique positions: %d.",
                         num_volumes,
                         num_files,
                         num_unique_positions,
