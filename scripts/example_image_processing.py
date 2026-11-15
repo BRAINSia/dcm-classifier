@@ -8,8 +8,8 @@ import itk
 import numpy as np
 import pydicom
 
-from .dicom_series import DicomSingleSeries
-from .utility_functions import (
+from dcm_classifier.dicom_series import DicomSingleSeries
+from dcm_classifier.utility_functions import (
     FImageType,
     UCImageType,
     get_bvalue,

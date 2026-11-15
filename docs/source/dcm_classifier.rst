@@ -30,14 +30,6 @@ dcm\_classifier.dicom\_volume
    :undoc-members:
    :show-inheritance:
 
-dcm\_classifier.example\_image\_processing
--------------------------------------------------
-
-.. automodule:: dcm_classifier.example_image_processing
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 dcm\_classifier.image\_type\_inference
 ---------------------------------------------
 
