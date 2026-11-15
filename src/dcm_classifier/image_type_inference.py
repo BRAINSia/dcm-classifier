@@ -386,8 +386,6 @@ class ImageTypeClassifierBase:
 
         # TODO: ensure the ordering of features is correct
         e_inputs: pd.DataFrame = pd.DataFrame([feature_dict])
-        # Drop all dicom images without a SeriesNumber
-        # e_inputs = e_inputs[e_inputs["SeriesNumber"].notna()]
 
         sess = self.get_inference_session()
 
