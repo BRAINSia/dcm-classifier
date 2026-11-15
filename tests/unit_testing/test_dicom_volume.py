@@ -15,11 +15,6 @@ inference_model_path = next(
     iter(Path(__file__).parent.parent.parent.rglob("models/rf_classifier.onnx"))
 )
 
-# The mock volumes have no SliceThickness, which the library reports.
-pytestmark = pytest.mark.filterwarnings(
-    "ignore:(?s).*Required DICOM fields.*SliceThickness:UserWarning"
-)
-
 inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
 
 
@@ -130,10 +125,10 @@ def test_setting_invalid_modality_probabilities(mock_tracew_series):
 
 
 @pytest.mark.parametrize("file_name", ["invalidSeriesNum.dcm", "noSeriesNum.dcm"])
-def test_unusable_series_number_warns_when_read(get_data_dir, file_name):
+def test_unusable_series_number_warns_when_read(get_data_dir, file_name, caplog):
     dicom_path = get_data_dir.parent / "invalid_data" / "invalid_fields" / file_name
-    with pytest.warns(UserWarning, match="SeriesNumber"):
-        DicomSingleVolumeInfoBase([dicom_path.as_posix()])
+    DicomSingleVolumeInfoBase([dicom_path.as_posix()])
+    assert "Required DICOM fields: ['SeriesNumber']" in caplog.text
 
 
 def test_get_volume_index(mock_tracew_series):

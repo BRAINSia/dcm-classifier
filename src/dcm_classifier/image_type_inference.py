@@ -17,9 +17,9 @@
 #  =========================================================================
 
 import contextlib
+import logging
 import math
 import os
-import warnings
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +31,8 @@ from .dicom_series import DicomSingleSeries
 from .utility_functions import (
     infer_diffusion_from_gradient,
 )
+
+logger = logging.getLogger(__name__)
 
 imagetype_to_integer_mapping = {
     "t1w": 0,
@@ -457,10 +459,11 @@ class ImageTypeClassifierBase:
                 if feature not in input_dict
             ]
             if len(missing_features) > 0:
-                warnings.warn(
-                    f"Missing features for SeriesNumber {self.series_number}: {missing_features}\n"
-                    f"Series contains: {series.volume_info_list[0].get_one_volume_dcm_filenames()}",
-                    stacklevel=2,
+                logger.warning(
+                    "Missing features for SeriesNumber %s: %s\nSeries contains: %s",
+                    self.series_number,
+                    missing_features,
+                    series.volume_info_list[0].get_one_volume_dcm_filenames(),
                 )
                 return False
             return True
