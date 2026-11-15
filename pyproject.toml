@@ -125,7 +125,6 @@ core = "sysmon"
 disable_warnings = ["no-sysmon"]
 omit = [
     "**/__init__.py",
-    "**/example_image_processing.py",
 ]
 
 [tool.coverage.report]
