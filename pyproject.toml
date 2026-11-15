@@ -211,6 +211,7 @@ extend-select = [
     "SIM114",  # if-with-same-arms
     "SIM118",  # in-dict-keys
     "TRY003",  # raise-vanilla-args
+    "TRY004",  # type-check-without-type-error
     "TRY201",  # verbose-raise
     "TRY300",  # try-consider-else
     # Rule families recommended by the Scientific Python guide.
@@ -253,7 +254,6 @@ ignore = [
     # Fixing these changes what callers see, so each needs a decision first.
     "BLE001",  # broad handlers report an unreadable file and carry on
     "PLW0603",  # module-level state in a training script
-    "TRY004",  # TypeError for wrong types changes the exceptions raised
 ]
 
 [tool.ruff.lint.per-file-ignores]
