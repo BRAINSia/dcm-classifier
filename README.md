@@ -1,3 +1,15 @@
+# dcm-classifier
+
+[![CI](https://github.com/BRAINSia/dcm-classifier/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BRAINSia/dcm-classifier/actions/workflows/ci.yml)
+[![Documentation](https://readthedocs.org/projects/dcm-classifier/badge/?version=latest)](https://dcm-classifier.readthedocs.io/en/latest/)
+[![Coverage](https://codecov.io/gh/BRAINSia/dcm-classifier/graph/badge.svg)](https://app.codecov.io/gh/BRAINSia/dcm-classifier)
+[![PyPI](https://img.shields.io/pypi/v/dcm-classifier)](https://pypi.org/project/dcm-classifier/)
+[![Python versions](https://img.shields.io/pypi/pyversions/dcm-classifier)](https://pypi.org/project/dcm-classifier/)
+[![Downloads](https://static.pepy.tech/badge/dcm-classifier/month)](https://pepy.tech/projects/dcm-classifier)
+[![License](https://img.shields.io/github/license/BRAINSia/dcm-classifier)](LICENSE)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![DOI](https://img.shields.io/badge/DOI-10.1117%2F12.3006568-blue)](https://doi.org/10.1117/12.3006568)
+
 # Introduction
 
 <!-- SPHINX-START -->
