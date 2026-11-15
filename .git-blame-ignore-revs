@@ -1,0 +1,8 @@
+# Formatting-only commits, skipped by git blame. GitHub reads this file;
+# locally: git config blame.ignoreRevsFile .git-blame-ignore-revs
+# Apply ruff format to the four files it formats unlike black
+a3c0494cf52a5c8c765ffaf1bec288d2ad1ebd46
+# Format Markdown with Prettier
+6cf003dc73283fdaa58e20d67c4f6033ddb909ed
+# I001 Import block is un-sorted or un-formatted
+38033c1972ab6cd79cfe27d39d4750cc299ea1a5
