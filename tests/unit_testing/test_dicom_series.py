@@ -152,20 +152,25 @@ def test_t2_dcm_series_modality(mock_t2_series):
         assert series.get_series_modality() == "t2w"
 
 
-# TODO: rewrite this for new behavior
-# def test_no_valid_dcms():
-#     with pytest.raises(FileNotFoundError) as ex:
-#         inferer = ImageTypeClassifierBase(
-#             classification_model_filename=inference_model_path
-#         )
-#         dicom_files_dir: Path = (
-#             current_file_path.parent / "testing_data" / "dummy_directory"
-#         )
-#         study = ProcessOneDicomStudyToVolumesMappingBase(
-#             study_directory=dicom_files_dir, inferer=inferer
-#         )
-#         study.run_inference()
-#     assert "No DICOMs in: " in str(ex.value)
+no_dicom_dir: Path = current_file_path.parent / "testing_data" / "dummy_directory"
+
+
+def test_no_valid_dcms_gives_an_empty_study(caplog):
+    with caplog.at_level("WARNING", logger="dcm_classifier.study_processing"):
+        study = ProcessOneDicomStudyToVolumesMappingBase(
+            study_directory=no_dicom_dir, inferer=inferer
+        )
+        study.run_inference()
+    assert study.series_dictionary == {}
+    assert "No readable dicoms DICOMs in: " in caplog.text
+
+
+def test_no_valid_dcms_raises_when_asked():
+    with pytest.raises(FileNotFoundError, match="No DICOMs in: "):
+        ProcessOneDicomStudyToVolumesMappingBase(
+            study_directory=no_dicom_dir, inferer=inferer, raise_error_on_failure=True
+        )
+
 
 inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
 
