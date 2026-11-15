@@ -273,7 +273,7 @@ class ImageTypeClassifierBase:
         check if the series is a diffusion series. If so, the series modality is overridden to dwig.
         This function is called during inference
         """
-        series = self._require_series()
+        series, _ = self._require_series()
         volume_list = series.get_volume_list()
         first_dcm_per_volume = [
             volume.get_one_volume_dcm_filenames()[0] for volume in volume_list
@@ -281,11 +281,11 @@ class ImageTypeClassifierBase:
         diff_modality = infer_diffusion_from_gradient(first_dcm_per_volume)
         series.set_series_modality(diff_modality)
 
-    def _require_series(self) -> DicomSingleSeries:
-        if self.series is None:
+    def _require_series(self) -> tuple[DicomSingleSeries, dict[str, Any]]:
+        if self.series is None or self.info_dict is None:
             msg = "No series is set; call set_series first."
             raise AttributeError(msg)
-        return self.series
+        return self.series, self.info_dict
 
     def set_series(self, series: DicomSingleSeries) -> None:
         """
@@ -435,11 +435,7 @@ class ImageTypeClassifierBase:
         This method performs image type classification and acquisition plane inference based on the provided features.
 
         """
-        series = self._require_series()
-        info_dict = self.info_dict
-        if info_dict is None:
-            msg = "No series is set; call set_series first."
-            raise AttributeError(msg)
+        series, info_dict = self._require_series()
 
         def validate_features(input_dict: dict[str, Any]) -> bool:
             """
