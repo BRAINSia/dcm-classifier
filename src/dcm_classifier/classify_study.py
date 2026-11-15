@@ -7,6 +7,16 @@ from .classify_support import simple_classify_study
 from .image_type_inference import ImageTypeClassifierBase
 
 
+class _LevelForProblemsFormatter(logging.Formatter):
+    """Show progress as plain text and prefix warnings and errors with their level."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        message = super().format(record)
+        if record.levelno >= logging.WARNING:
+            return f"{record.levelname}: {message}"
+        return message
+
+
 def main(argv: list[str] | None = None) -> None:
     """
     Command line entry point, installed as ``dcm-classify-study``.
@@ -59,8 +69,9 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     args = parser.parse_args(argv)
-    # The library logs its progress; the command shows it as plain output.
-    logging.basicConfig(level=logging.INFO, format="%(message)s", stream=sys.stdout)
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(_LevelForProblemsFormatter())
+    logging.basicConfig(level=logging.INFO, handlers=[handler])
     nifti_dir: Path | None = Path(args.nifti_dir) if args.nifti_dir else None
     output_dir: Path | None = Path(args.output) if args.output else None
     if args.model is None:
