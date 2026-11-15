@@ -536,7 +536,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                     # If error processing a single file, continue with others
                     continue
 
-            # InstanceNumber, not file system order, sets the slice order.
+            # Slices are ordered by InstanceNumber.
             file_records.sort(key=lambda r: (r["instance_number"], str(r["filename"])))
             read_filenames = {str(r["filename"]) for r in file_records}
             ordered_filenames = [r["filename"] for r in file_records]
