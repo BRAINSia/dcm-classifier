@@ -253,6 +253,7 @@ class DicomSingleSeries:
 
     @deprecated(
         deprecated_in="0.9.6",
+        removed_in="1.0.0",
         details="Use generic `get_dicom_field_by_name(field_name='SeriesInstanceUID')` instead of `get_series_uid()`",
     )
     def get_series_uid(self) -> str:
@@ -270,6 +271,7 @@ class DicomSingleSeries:
 
     @deprecated(
         deprecated_in="0.9.6",
+        removed_in="1.0.0",
         details="Use generic `get_dicom_field_by_name(field_name='StudyInstanceUID')` instead of `get_study_uid()`",
     )
     def get_study_uid(self) -> str:

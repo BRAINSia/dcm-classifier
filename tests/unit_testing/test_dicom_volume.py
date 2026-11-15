@@ -26,7 +26,9 @@ inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_
 
 
 def test_get_series_uid(mock_volumes):
-    with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
+    with pytest.warns(
+        DeprecatedWarning, match=r"removed in 1\.0\.0.*get_dicom_field_by_name"
+    ):
         series_uid = DicomSingleVolumeInfoBase(mock_volumes[0]).get_series_uid()
     assert series_uid == "1.2.276.0.7230010.3.1.3.168456204.6074.1606326635.433425"
 
