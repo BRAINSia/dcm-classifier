@@ -72,6 +72,8 @@ jobs:
           python-version: "3.13"
           activate-environment: true
           cache-dependency-glob: pyproject.toml
+      # Read the Docs runs uv sync, which must resolve for every supported Python.
+      - run: uv lock --dry-run
       - run: uv pip install . --group docs
       - run: python -m sphinx -W --keep-going -b html docs/source docs/_build/html
 
