@@ -15,6 +15,7 @@
 #    limitations under the License.
 #
 #  =========================================================================
+import logging
 import warnings
 from collections import defaultdict
 from datetime import datetime
@@ -33,6 +34,8 @@ from .utility_functions import (
     is_mr_sop_class,
     parse_acquisition_datetime,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class _FileRecord(TypedDict):
@@ -150,7 +153,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             self.study_directory = Path(study_directory)  # coerce to path object
             del study_directory
         else:
-            print(f"ERROR:  {self.study_directory} is not pathlike")
+            logger.error("ERROR:  %s is not pathlike", self.study_directory)
         self.raise_error_on_failure: bool = raise_error_on_failure
         self.search_series: dict[str, int] | None = search_series
         self.series_dictionary: dict[int, DicomSingleSeries] = (
@@ -301,11 +304,13 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                             if same_physical_space:
                                 series_obj.set_series_modality("tracew")
                             else:
-                                print(
-                                    f"Adjacent series {adjacent_series_number} does not have same physical space as {current_series_number}"
+                                logger.warning(
+                                    "Adjacent series %s does not have same physical space as %s",
+                                    adjacent_series_number,
+                                    current_series_number,
                                 )
-                                print(itk_volume)
-                                print(itk_adjacent_volume)
+                                logger.debug("%s", itk_volume)
+                                logger.debug("%s", itk_adjacent_volume)
 
     def validate(self) -> None:
         pass
@@ -359,12 +364,15 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             msg: str = f"No DICOMs in: {study_directory} (__identify_single_volumes)"
             if self.raise_error_on_failure:
                 raise FileNotFoundError(msg)
-            print(
-                f"No readable dicoms DICOMs in: {study_directory} (__identify_single_volumes)"
+            logger.warning(
+                "No readable dicoms DICOMs in: %s (__identify_single_volumes)",
+                study_directory,
             )
         else:
-            print(
-                f"The directory: {study_directory} contains {len(seriesUID)} DICOM series"
+            logger.info(
+                "The directory: %s contains %d DICOM series",
+                study_directory,
+                len(seriesUID),
             )
 
         volumes_dictionary: dict[int, DicomSingleSeries] = {}
@@ -399,7 +407,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 if sn not in volumes_dictionary:
                     volumes_dictionary[sn] = DicomSingleSeries(series_number=sn)
                 volumes_dictionary[sn].add_volume_to_series(volume_obj)
-            print(f"\t{sn} has {len(sub_volumes)} subvolumes")
+            logger.info("\t%s has %d subvolumes", sn, len(sub_volumes))
 
         # Optionally filter to only the user-requested series numbers
         if self.search_series is not None:
@@ -525,7 +533,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 except Exception as file_error:
                     if self.raise_error_on_failure:
                         raise
-                    print(f"Error processing file {dcm_file}: {file_error}")
+                    logger.warning("Error processing file %s: %s", dcm_file, file_error)
                     # If error processing a single file, continue with others
                     continue
 
@@ -541,8 +549,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             for recorded_position, file_info in file_records:
                 img_position = recorded_position
                 if img_position is None:
-                    print(
-                        f"Warning: ImagePositionPatient not found in {file_info['filename']}. Using default positioning."
+                    logger.warning(
+                        "Warning: ImagePositionPatient not found in %s. Using default positioning.",
+                        file_info["filename"],
                     )
                     img_position = [0, 0, len(file_info_dict)]
                 file_info_dict[tuple(img_position)].append(file_info)
@@ -568,9 +577,11 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                     if self.raise_error_on_failure:
                         msg = f"Inconsistent volume splitting: {num_files} files, {num_unique_positions} positions"
                         raise ValueError(msg)
-                    print(
-                        f"Warning: Detected {num_volumes} sub-volumes. "
-                        f"Total files: {num_files}, Unique positions: {num_unique_positions}."
+                    logger.warning(
+                        "Warning: Detected %d sub-volumes. Total files: %d, Unique positions: %d.",
+                        num_volumes,
+                        num_files,
+                        num_unique_positions,
                     )
 
                 # Create volume objects
@@ -590,7 +601,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         except Exception as global_error:
             if self.raise_error_on_failure:
                 raise
-            print(f"Error in volume splitting: {global_error}")
+            logger.warning("Error in volume splitting: %s", global_error)
 
         # Default to single volume if all else fails
         return [DicomSingleVolumeInfoBase(one_volume_dcm_filenames=ordered_filenames)]
