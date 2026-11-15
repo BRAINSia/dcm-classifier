@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 
-from io import StringIO
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import onnxruntime as rt
 import pandas as pd
-
-# from IPython.display import Image
-import pydotplus
+from create_dicom_fields_sheet import make_unique_ordered_list
 from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
 from sklearn import metrics
@@ -18,10 +15,8 @@ from sklearn.metrics import ConfusionMatrixDisplay, classification_report
 from sklearn.model_selection import train_test_split  # Import train_test_split function
 from sklearn.tree import (
     DecisionTreeClassifier,  # Import Decision Tree Classifier
-    export_graphviz,
+    plot_tree,
 )
-
-from .create_dicom_fields_sheet.py import make_unique_ordered_list
 
 # overwrite objects for new data modalities
 plane_to_integer_mapping = {
@@ -217,19 +212,15 @@ def train_model(x1, x2, y1, y2, use_dt):
     input_vector_size: int = len(plane_cols)
 
     if use_dt:
-        dot_data = StringIO()
-        export_graphviz(
+        plt.figure(figsize=(12, 8))
+        plot_tree(
             clf,
-            out_file=dot_data,
             filled=True,
             rounded=True,
-            special_characters=True,
             feature_names=plane_cols,
             class_names=list(plane_to_integer_mapping.keys()),
         )
-        graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
-        graph.write_png("../training_outputs/test_plane.png")
-        # Image(graph.create_png())
+        plt.savefig("../training_outputs/test_plane.png")
 
     # save the model file
     model_filename: str = "../training_outputs/dt_classifier_plane.onnx"
