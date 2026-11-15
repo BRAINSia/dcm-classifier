@@ -45,6 +45,8 @@ def docs(session: nox.Session) -> None:
     session.install(".", *nox.project.dependency_groups(PYPROJECT, "docs"))
     session.run(
         "sphinx-build",
+        "-W",
+        "--keep-going",
         "-b",
         "html",
         "docs/source",
