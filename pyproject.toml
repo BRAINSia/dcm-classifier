@@ -185,6 +185,7 @@ extend-select = [
     "PLC0415",  # import-outside-top-level
     "PLR1714",  # repeated-equality-comparison
     "PLR5501",  # collapsible-else-if
+    "PLW0603",  # global-statement
     "PLW2901",  # redefined-loop-name
     "PT006",  # pytest-parametrize-names-wrong-type
     "PT011",  # pytest-raises-too-broad
@@ -253,7 +254,6 @@ ignore = [
     "TRY301",  # the splitter's handler re-raises or reports what it raises
     # Fixing these changes what callers see, so each needs a decision first.
     "BLE001",  # broad handlers report an unreadable file and carry on
-    "PLW0603",  # module-level state in a training script
 ]
 
 [tool.ruff.lint.per-file-ignores]
