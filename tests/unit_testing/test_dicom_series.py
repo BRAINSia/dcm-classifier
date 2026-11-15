@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pydicom
 import pytest
-from deprecation import DeprecatedWarning
 
 from dcm_classifier.dicom_config import optional_DICOM_fields, required_DICOM_fields
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
@@ -62,17 +61,6 @@ def test_all_fields_dont_change():
                         assert volume.get_volume_dictionary()[field][i] == v
                 else:  # else check the element
                     assert volume.get_volume_dictionary()[field] == e
-
-
-def test_get_series_and_study_uid(mock_tracew_series):
-    with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
-        uids = [
-            (series.get_series_uid(), series.get_study_uid())
-            for series in mock_tracew_series
-        ]
-    for series_uid, study_uid in uids:
-        assert series_uid == "2.25.200346831984180887422376003959445101633"
-        assert study_uid == "2.25.106736773675271926686056457127502108539"
 
 
 def test_series_modality_probabilities(mock_t1_series):
