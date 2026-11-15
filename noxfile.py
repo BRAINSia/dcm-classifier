@@ -31,6 +31,21 @@ def tests(session: nox.Session) -> None:
     session.run("pytest", *session.posargs)
 
 
+ITK_PACKAGES = ("itk", "itk-core", "itk-filtering", "itk-io", "itk-numerics")
+
+
+@nox.session(default=False)
+@nox.parametrize("itk", ["==5.4.8", ">=6.0b2,<7"], ids=["5.4.8", "6"])
+def tests_itk(session: nox.Session, itk: str) -> None:
+    """Run the test suite against one ITK release line."""
+    session.install(".", *nox.project.dependency_groups(PYPROJECT, "test"))
+    session.install(
+        *(f"{name}{itk}" for name in ITK_PACKAGES), env={"UV_PRERELEASE": "allow"}
+    )
+    session.run("python", "-c", "import itk; print(itk.Version.GetITKVersion())")
+    session.run("pytest", *session.posargs)
+
+
 @nox.session(default=False)
 def coverage(session: nox.Session) -> None:
     """Run the test suite under coverage and report the lines it missed."""
