@@ -161,6 +161,7 @@ extend-exclude = ["*.ipynb"]
 [tool.ruff.lint]
 extend-select = [
     # Rules adopted one per commit, named so each stays enforced.
+    "ARG001",  # unused-function-argument
     "ARG005",  # unused-lambda-argument
     "B007",  # unused-loop-control-variable
     "B008",  # function-call-in-default-argument
@@ -250,7 +251,6 @@ ignore = [
     "T201",  # `print` found; printing is how the command line tools report
     "TRY301",  # the splitter's handler re-raises or reports what it raises
     # Fixing these changes what callers see, so each needs a decision first.
-    "ARG001",  # unused arguments are part of public and callback signatures
     "BLE001",  # broad handlers report an unreadable file and carry on
     "PLW0603",  # module-level state in a training script
     "TRY004",  # TypeError for wrong types changes the exceptions raised

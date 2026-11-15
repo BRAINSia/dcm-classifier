@@ -48,7 +48,8 @@ def write_cgroup(directory: Path, files: dict[str, str]) -> None:
         (directory / name).write_text(content)
 
 
-def test_no_limit_leaves_thread_count_to_onnxruntime(no_cpu_limits):
+@pytest.mark.usefixtures("no_cpu_limits")
+def test_no_limit_leaves_thread_count_to_onnxruntime():
     assert allowed_cpu_count() is None
     inferer = ImageTypeClassifierBase(
         classification_model_filename=inference_model_path
@@ -58,7 +59,8 @@ def test_no_limit_leaves_thread_count_to_onnxruntime(no_cpu_limits):
     assert options.intra_op_num_threads == 0
 
 
-def test_cpu_affinity_limits_thread_count(no_cpu_limits, monkeypatch):
+@pytest.mark.usefixtures("no_cpu_limits")
+def test_cpu_affinity_limits_thread_count(monkeypatch):
     monkeypatch.setattr(os, "sched_getaffinity", lambda _pid: {0, 1, 2}, raising=False)
     assert allowed_cpu_count() == 3
     inferer = ImageTypeClassifierBase(
@@ -69,7 +71,8 @@ def test_cpu_affinity_limits_thread_count(no_cpu_limits, monkeypatch):
 
 
 @pytest.mark.parametrize("variable", cpu_limit_variables)
-def test_environment_variable_limits_thread_count(no_cpu_limits, monkeypatch, variable):
+@pytest.mark.usefixtures("no_cpu_limits")
+def test_environment_variable_limits_thread_count(monkeypatch, variable):
     monkeypatch.setattr(
         os, "sched_getaffinity", lambda _pid: set(range(48)), raising=False
     )
@@ -78,17 +81,20 @@ def test_environment_variable_limits_thread_count(no_cpu_limits, monkeypatch, va
 
 
 @pytest.mark.parametrize("value", ["", "four", "0", "-2"])
-def test_unusable_environment_variable_is_ignored(no_cpu_limits, monkeypatch, value):
+@pytest.mark.usefixtures("no_cpu_limits")
+def test_unusable_environment_variable_is_ignored(monkeypatch, value):
     monkeypatch.setenv("NSLOTS", value)
     assert allowed_cpu_count() is None
 
 
-def test_nested_omp_num_threads_uses_outer_level(no_cpu_limits, monkeypatch):
+@pytest.mark.usefixtures("no_cpu_limits")
+def test_nested_omp_num_threads_uses_outer_level(monkeypatch):
     monkeypatch.setenv("OMP_NUM_THREADS", "4,2")
     assert allowed_cpu_count() == 4
 
 
-def test_smallest_limit_wins(no_cpu_limits, monkeypatch):
+@pytest.mark.usefixtures("no_cpu_limits")
+def test_smallest_limit_wins(monkeypatch):
     monkeypatch.setattr(
         os, "sched_getaffinity", lambda _pid: set(range(8)), raising=False
     )
@@ -97,7 +103,8 @@ def test_smallest_limit_wins(no_cpu_limits, monkeypatch):
     assert allowed_cpu_count() == 2
 
 
-def test_fractional_cgroup_quota_allows_one_thread(no_cpu_limits, monkeypatch):
+@pytest.mark.usefixtures("no_cpu_limits")
+def test_fractional_cgroup_quota_allows_one_thread(monkeypatch):
     monkeypatch.setattr(image_type_inference, "cgroup_cpu_quota", lambda: 0.5)
     assert allowed_cpu_count() == 1
 
