@@ -17,6 +17,7 @@
 #  =========================================================================
 
 import collections
+import logging
 import numbers
 import tempfile
 import warnings
@@ -45,6 +46,8 @@ from .dicom_config import (
 from .dicom_config import (
     inference_features as features,
 )
+
+logger = logging.getLogger(__name__)
 
 # Also ITK template arguments at run time, which a lazy `type` alias cannot be.
 FImageType: TypeAlias = itk.Image[itk.F, 3]  # noqa: UP040
@@ -233,8 +236,12 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
                 elif isinstance(value, numbers.Number):
                     pass
                 else:
-                    print(
-                        f"UNKNOWN CONVERSION OF VR={dicom_element.VR}: {type(dicom_element.value)} len={len(dicom_element.value)} ==> {value}"
+                    logger.warning(
+                        "UNKNOWN CONVERSION OF VR=%s: %s len=%d ==> %s",
+                        dicom_element.VR,
+                        type(dicom_element.value),
+                        len(dicom_element.value),
+                        value,
                     )
                     return MISSING_VALUE
             # print(f"Found BValue at {v} for {k}, {value} of type {dicom_element.VR}")
@@ -246,12 +253,16 @@ def get_bvalue(dicom_header_info: Dataset, round_to_nearst_10: bool = True) -> f
                 if result > 5000:
                     return MISSING_VALUE
             except ValueError:
-                print(
-                    f"UNKNOWN CONVERSION OF VR={dicom_element.VR}: {type(dicom_element.value)} len={len(dicom_element.value)} ==> {dicom_element.value} to float"
+                logger.warning(
+                    "UNKNOWN CONVERSION OF VR=%s: %s len=%d ==> %s to float",
+                    dicom_element.VR,
+                    type(dicom_element.value),
+                    len(dicom_element.value),
+                    dicom_element.value,
                 )
                 return MISSING_VALUE
             except Exception as e:
-                print(f"UNKNOWN IDENTIFICATION OF BVALUE: {e}")
+                logger.warning("UNKNOWN IDENTIFICATION OF BVALUE: %s", e)
                 return MISSING_VALUE
             if round_to_nearst_10:
                 result = round(result / 10.0) * 10
@@ -366,17 +377,16 @@ def infer_diffusion_from_gradient(filenames: list[Path]) -> str:
 
 def vprint(msg: str, verbose: bool = False) -> None:
     """
-    Conditionally print a message if the 'verbose' flag is set.
+    Log a message at INFO if the 'verbose' flag is set, and at DEBUG otherwise.
 
-    :param msg: The message to print.
+    :param msg: The message to log.
     :type msg: str
 
-    :param verbose: Whether to print the message. Default is False.
+    :param verbose: Whether to log the message at INFO. Default is False.
     :type verbose: bool, optional
 
     """
-    if verbose:
-        print(msg)
+    logger.log(logging.INFO if verbose else logging.DEBUG, "%s", msg)
 
 
 def sanitize_dicom_dataset(
@@ -653,7 +663,7 @@ def sanitize_dicom_dataset(
 
     # Warn the user if there are INVALID_VALUE fields
     if len(missing_fields) > 0:
-        print(f"\n\n\n{missing_fields}\n\n\n")
+        logger.debug("Missing or invalid fields: %s", missing_fields)
         warnings.warn(
             f"\nWARNING: Required DICOM fields: {missing_fields} in {dicom_filename} are missing or have invalid values.\n",
             stacklevel=2,
@@ -854,8 +864,11 @@ def convert_array_to_index_value(
     try:
         number_list = [abs(float(x)) for x in multi_value_list]
     except Exception:
-        print(
-            f"Failed conversion of {name} : {type(multi_value_list)} to float list {multi_value_list} "
+        logger.warning(
+            "Failed conversion of %s : %s to float list %s ",
+            name,
+            type(multi_value_list),
+            multi_value_list,
         )
         raise
 

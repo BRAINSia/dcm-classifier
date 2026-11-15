@@ -18,6 +18,7 @@
 
 import collections
 import json
+import logging
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
@@ -41,6 +42,8 @@ from .utility_functions import (
     sanitize_dicom_dataset,
     vprint,
 )
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from .dicom_series import DicomSingleSeries
@@ -475,9 +478,11 @@ class DicomSingleVolumeInfoBase:
             )
         except Exception as e:
             if "SeriesNumber" not in self._pydicom_info:
-                print("SeriesNumber not found in DICOM file")
+                logger.warning("SeriesNumber not found in DICOM file")
             else:
-                print(f"Can not convert to int {self._pydicom_info.SeriesNumber}: {e}")
+                logger.warning(
+                    "Can not convert to int %s: %s", self._pydicom_info.SeriesNumber, e
+                )
             return MISSING_VALUE
         else:
             return series_number_int

@@ -118,7 +118,7 @@ def test_classify_study_with_file_creation(get_data_dir):
     shutil.rmtree(testing_output_dir)
 
 
-def test_classify_study_with_no_readable_dicoms(get_data_dir, capsys):
+def test_classify_study_with_no_readable_dicoms(get_data_dir, caplog):
     testing_session_directory = get_data_dir.parent / "empty_directory"
 
     if not testing_output_dir.exists():
@@ -131,10 +131,13 @@ def test_classify_study_with_no_readable_dicoms(get_data_dir, capsys):
         session_directory=testing_session_directory,
     )
 
-    # check that 'No series found in the study.' message is printed
-    captured = capsys.readouterr()
-    assert "No series found in the study." in captured.out, (
-        "Should print 'No series found in the study.' message."
+    warnings = [
+        record.getMessage()
+        for record in caplog.records
+        if record.levelname == "WARNING"
+    ]
+    assert "No series found in the study." in warnings, (
+        "Should log 'No series found in the study.' as a warning."
     )
 
 

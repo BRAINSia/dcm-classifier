@@ -17,6 +17,7 @@
 #  =========================================================================
 
 import json
+import sys
 from pathlib import Path
 
 from .dicom_volume import DicomSingleVolumeInfoBase
@@ -105,7 +106,7 @@ class DicomValidatorBase:
         msg: str = self.generate_validation_report_str()
 
         if report_filename_to_append is None:
-            print(f"{msg}")
+            sys.stdout.write(f"{msg}\n")
         else:
             with Path(report_filename_to_append).open("a") as vfid:
                 vfid.write(f"{msg}\n")

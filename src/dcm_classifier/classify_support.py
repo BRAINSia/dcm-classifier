@@ -1,4 +1,5 @@
 import json
+import logging
 import shutil
 from collections import OrderedDict as ordered_dict
 from pathlib import Path
@@ -12,6 +13,8 @@ from dcm_classifier.dicom_config import optional_DICOM_fields, required_DICOM_fi
 from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
+
+logger = logging.getLogger(__name__)
 
 
 def _classification_failure_reason(volume: DicomSingleVolumeInfoBase) -> str:
@@ -122,7 +125,7 @@ def simple_classify_study(
                         if "SeriesNumber" in col or "CODE" in col:
                             continue
                         dictionary[col] = str(vol_probabilities[col].to_numpy()[0])
-                print(vol_probabilities.to_string(index=False))
+                logger.info("%s", vol_probabilities.to_string(index=False))
 
             # Bvalue
             try:
@@ -220,7 +223,7 @@ def simple_classify_study(
                 output_dir_path.mkdir(parents=True, exist_ok=True)
                 for dcm_file in volume.one_volume_dcm_filenames:
                     output_file_path: Path = output_dir_path / dcm_file.name
-                    print(f"Copying {dcm_file} to {output_file_path}")
+                    logger.info("Copying %s to %s", dcm_file, output_file_path)
                     shutil.copy(dcm_file, output_file_path, follow_symlinks=True)
             if dict_entry_name is not None:
                 session_dictionary[dict_entry_name] = dictionary
@@ -238,11 +241,11 @@ def simple_classify_study(
             table_msg: str = tabulate.tabulate(
                 cast("Any", df), headers="keys", tablefmt="psql", showindex=False
             )
-            print(table_msg)
+            logger.info("%s", table_msg)
         except KeyError:
-            print("No series found in the study.")
+            logger.warning("No series found in the study.")
     else:
-        print("No series found in the study.")
+        logger.warning("No series found in the study.")
     # all_inputs_df: pd.DataFrame = pd.DataFrame(list_of_inputs)
     # inputs_msg: str = tabulate.tabulate(
     #     all_inputs_df, headers="keys", tablefmt="psql", showindex=False

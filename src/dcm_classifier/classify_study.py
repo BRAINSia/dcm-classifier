@@ -1,4 +1,6 @@
 import argparse
+import logging
+import sys
 from pathlib import Path
 
 from .classify_support import simple_classify_study
@@ -57,6 +59,8 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     args = parser.parse_args(argv)
+    # The library logs its progress; the command shows it as plain output.
+    logging.basicConfig(level=logging.INFO, format="%(message)s", stream=sys.stdout)
     nifti_dir: Path | None = Path(args.nifti_dir) if args.nifti_dir else None
     output_dir: Path | None = Path(args.output) if args.output else None
     if args.model is None:
