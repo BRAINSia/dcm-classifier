@@ -83,7 +83,9 @@ test = [
 ]
 docs = [
     "myst-parser>=4.0",
-    "sphinx>=9.2",
+    # Sphinx 9.2 needs Python 3.13; the docs are built with 3.13, and the
+    # marker keeps a uv lock for the package's Python 3.12 solvable.
+    "sphinx>=9.2; python_version >= '3.13'",
     "sphinx-autodoc-typehints>=3.0",
     "sphinx-copybutton>=0.5.2",
     "sphinx-rtd-theme>=3.1",
