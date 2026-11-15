@@ -90,6 +90,24 @@ Install the package and its required packages
 
 `$ pip install .`
 
+**Threads on shared machines and clusters**
+
+The classifier's ONNX Runtime session uses as many threads as the process
+has been granted, not as many as the machine has. Pass
+`ImageTypeClassifierBase(num_threads=N)` to set the count yourself.
+Otherwise it uses the smallest of these limits that it finds:
+
+- the CPU affinity of the process (`taskset`, scheduler cpusets,
+  `docker run --cpuset-cpus`);
+- the cgroup CPU quota (`docker run --cpus`, Kubernetes, AWS ECS);
+- batch scheduler variables: `SLURM_CPUS_PER_TASK`, `SLURM_CPUS_ON_NODE`
+  (SLURM), `NSLOTS` (Sun Grid Engine), `NCPUS` (PBS Professional),
+  `PBS_NUM_PPN` (Torque), and `LSB_DJOB_NUMPROC` (LSF);
+- a thread budget from the caller: `OMP_NUM_THREADS` or
+  `ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS`.
+
+With none of these, ONNX Runtime chooses.
+
 ## Developer Instructions
 
 For development, clone the repository and install the developer requirements in a virtual environment. Development allows for training of new models using the scripts directory.
