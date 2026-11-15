@@ -252,8 +252,9 @@ ignore = [
     "PLR2004",  # Magic value used in comparison
     "T201",  # `print` found; printing is how the command line tools report
     "TRY301",  # the splitter's handler re-raises or reports what it raises
-    # Fixing these changes what callers see, so each needs a decision first.
-    "BLE001",  # broad handlers report an unreadable file and carry on
+    # Malformed DICOM headers fail in ways no exception list anticipates; the
+    # broad handlers turn them into sentinel values instead of failing a study.
+    "BLE001",  # blind-except
 ]
 
 [tool.ruff.lint.per-file-ignores]
