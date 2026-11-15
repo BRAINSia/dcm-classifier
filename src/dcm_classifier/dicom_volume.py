@@ -26,7 +26,6 @@ from typing import TYPE_CHECKING, Any, cast
 import pandas as pd
 import pydicom
 
-from ._deprecation import deprecated
 from ._validation import require_type
 from .dicom_config import (
     MISSING_VALUE,
@@ -131,25 +130,6 @@ class DicomSingleVolumeInfoBase:
 
         # process volume DICOM files
         _, self.volume_info_dict = self._make_one_study_info_mapping_from_filelist()
-
-    @deprecated(
-        deprecated_in="0.9.6",
-        details="Use generic `get_dicom_field_by_name(field_name='SeriesDescription')` instead of `get_volume_series_description()`",
-    )
-    def get_volume_series_description(self) -> str:
-        """
-        Get the Series Description of the DICOM volume.
-
-        .. deprecated:: 0.9.6
-         This is a deprecated method. Use get_dicom_field_by_name instead.
-
-        :return: The Series Description.
-        :rtype: str
-        """
-        return cast(
-            "str",
-            self._pydicom_info.get("SeriesDescription", "UNKNOWN_SeriesDescription"),
-        )
 
     def set_volume_modality(self, modality: str) -> None:
         """
@@ -361,60 +341,6 @@ class DicomSingleVolumeInfoBase:
         """
         return cast("str", self._pydicom_info.get(field_name, f"UNKNOWN_{field_name}"))
 
-    @deprecated(
-        deprecated_in="0.9.6",
-        details="Use generic `get_dicom_field_by_name(field_name='SeriesInstanceUID')` instead of `get_series_uid()`",
-    )
-    def get_series_uid(self) -> str:
-        """
-        Get the Series Instance UID of the DICOM volume.
-
-        .. deprecated:: 0.9.6
-         This is a deprecated method. Use get_dicom_field_by_name instead.
-
-        :return: The Series Instance UID.
-        :rtype: str
-        """
-        return cast(
-            "str",
-            self._pydicom_info.get("SeriesInstanceUID", "UNKNOWN_SeriesInstanceUID"),
-        )
-
-    @deprecated(
-        deprecated_in="0.9.6",
-        details="Use generic `get_dicom_field_by_name(field_name='StudyInstanceUID')` instead of `get_study_uid()`",
-    )
-    def get_study_uid(self) -> str:
-        """
-        Get the Study Instance UID of the DICOM volume.
-
-        .. deprecated:: 0.9.6
-         This is a deprecated method. Use get_dicom_field_by_name instead.
-
-        :return: The Study Instance UID.
-        :rtype: str
-        """
-        return cast(
-            "str",
-            self._pydicom_info.get("StudyInstanceUID", "UNKNOWN_StudyInstanceUID"),
-        )
-
-    @deprecated(
-        deprecated_in="0.9.6",
-        details="Use generic `get_dicom_field_by_name(field_name='PixelSpacing')` instead of `get_series_pixel_spacing()`",
-    )
-    def get_series_pixel_spacing(self) -> str:
-        """
-        Get the pixel spacing of the DICOM series.
-
-        .. deprecated:: 0.9.6
-         This is a deprecated method. Use get_dicom_field_by_name instead.
-
-        Returns:
-            str: The pixel spacing as a string.
-        """
-        return str(self._pydicom_info.get("PixelSpacing", "[NA,NA]"))
-
     def get_series_size(self) -> str:
         """
         Get the size of the DICOM series.
@@ -456,36 +382,6 @@ class DicomSingleVolumeInfoBase:
 
         """
         return self.bvalue
-
-    @deprecated(
-        deprecated_in="0.9.6",
-        details="Use generic `get_dicom_field_by_name(field_name='SeriesNumber')` instead of `get_series_number()`",
-    )
-    def get_series_number(self) -> int:
-        """
-        Get the Series Number of the DICOM volume.
-
-        .. deprecated:: 0.9.6
-         This is a deprecated method. Use get_dicom_field_by_name instead.
-
-        :return: The Series Number.
-        :rtype: int
-
-        """
-        try:
-            series_number_int: int = int(
-                self._pydicom_info.get("SeriesNumber", MISSING_VALUE)
-            )
-        except Exception as e:
-            if "SeriesNumber" not in self._pydicom_info:
-                logger.warning("SeriesNumber not found in DICOM file")
-            else:
-                logger.warning(
-                    "Can not convert to int %s: %s", self._pydicom_info.SeriesNumber, e
-                )
-            return MISSING_VALUE
-        else:
-            return series_number_int
 
     def get_volume_index(self) -> int | None:
         """

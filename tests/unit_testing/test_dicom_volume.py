@@ -2,9 +2,7 @@ from collections import OrderedDict
 from pathlib import Path
 
 import pytest
-from deprecation import DeprecatedWarning
 
-from dcm_classifier.dicom_config import MISSING_VALUE
 from dcm_classifier.dicom_volume import (
     DicomSingleVolumeInfoBase,
 )
@@ -25,24 +23,6 @@ pytestmark = pytest.mark.filterwarnings(
 inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
 
 
-def test_get_series_uid(mock_volumes):
-    with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
-        series_uid = DicomSingleVolumeInfoBase(mock_volumes[0]).get_series_uid()
-    assert series_uid == "1.2.276.0.7230010.3.1.3.168456204.6074.1606326635.433425"
-
-
-def test_get_series_number(mock_volumes):
-    with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
-        series_number = DicomSingleVolumeInfoBase(mock_volumes[0]).get_series_number()
-    assert series_number == 700
-
-
-def test_get_study_uid(mock_volumes):
-    with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
-        study_uid = DicomSingleVolumeInfoBase(mock_volumes[0]).get_study_uid()
-    assert study_uid == "1.2.276.0.7230010.3.1.2.168456204.6074.1606326635.433364"
-
-
 def test_get_b_value(mock_volumes):
     # happy path for a volune that does have a b-value
     b_value = DicomSingleVolumeInfoBase(mock_volumes[1]).get_volume_bvalue()
@@ -56,15 +36,6 @@ def test_get_b_value(mock_volumes):
 def test_primary_volume_info(mock_volumes):
     volume_info = DicomSingleVolumeInfoBase(mock_volumes[0]).get_primary_volume_info(0)
     assert isinstance(volume_info, OrderedDict)
-
-
-def test_get_series_pixel_spacing(mock_volumes):
-    with pytest.warns(DeprecatedWarning, match="Use generic `get_dicom_field_by_name"):
-        pixel_spacing = DicomSingleVolumeInfoBase(
-            mock_volumes[0]
-        ).get_series_pixel_spacing()
-    assert isinstance(pixel_spacing, str)
-    assert pixel_spacing == "[0.9375, 0.9375]"
 
 
 def test_image_diagnostics(mock_volumes):
@@ -159,14 +130,10 @@ def test_setting_invalid_modality_probabilities(mock_tracew_series):
 
 
 @pytest.mark.parametrize("file_name", ["invalidSeriesNum.dcm", "noSeriesNum.dcm"])
-def test_unusable_series_number_reads_as_missing(get_data_dir, file_name):
+def test_unusable_series_number_warns_when_read(get_data_dir, file_name):
     dicom_path = get_data_dir.parent / "invalid_data" / "invalid_fields" / file_name
     with pytest.warns(UserWarning, match="SeriesNumber"):
-        volume = DicomSingleVolumeInfoBase([dicom_path.as_posix()])
-
-    with pytest.warns(DeprecationWarning, match="get_dicom_field_by_name"):
-        series_number = volume.get_series_number()
-    assert series_number == MISSING_VALUE
+        DicomSingleVolumeInfoBase([dicom_path.as_posix()])
 
 
 def test_get_volume_index(mock_tracew_series):

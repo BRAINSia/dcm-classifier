@@ -41,7 +41,6 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "deprecation>=2.1.0",
     "itk>=5.4.8",
     "itk-core>=5.4.8",
     "itk-filtering>=5.4.8",
@@ -144,7 +143,7 @@ enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 
 [[tool.mypy.overrides]]
 # These ship without type information.
-module = ["deprecation", "itk", "onnxruntime"]
+module = ["itk", "onnxruntime"]
 ignore_missing_imports = true
 
 [tool.codespell]

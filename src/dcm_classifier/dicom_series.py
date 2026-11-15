@@ -19,7 +19,6 @@ from typing import Any
 
 import pandas as pd
 
-from ._deprecation import deprecated
 from ._validation import require_type
 from .dicom_volume import DicomSingleVolumeInfoBase
 
@@ -250,37 +249,3 @@ class DicomSingleSeries:
         :rtype: str
         """
         return self.volume_info_list[0].get_dicom_field_by_name(field_name)
-
-    @deprecated(
-        deprecated_in="0.9.6",
-        details="Use generic `get_dicom_field_by_name(field_name='SeriesInstanceUID')` instead of `get_series_uid()`",
-    )
-    def get_series_uid(self) -> str:
-        """
-        Get the series instance UID of the DICOM series.
-        This should be the same for all volumes and is picked from the first volume.
-
-        .. deprecated:: 0.9.6
-         This method is deprecated. Use get_dicom_field_by_name instead.
-
-        :return: The series instance UID.
-        :rtype: str
-        """
-        return self.get_dicom_field_by_name("SeriesInstanceUID")
-
-    @deprecated(
-        deprecated_in="0.9.6",
-        details="Use generic `get_dicom_field_by_name(field_name='StudyInstanceUID')` instead of `get_study_uid()`",
-    )
-    def get_study_uid(self) -> str:
-        """
-        Get the Study Instance UID of the DICOM series.
-        This should be the same for all volumes and is picked from the first volume.
-
-        .. deprecated:: 0.9.6
-         This method is deprecated. Use get_dicom_field_by_name instead.
-
-        :return: The Study Instance UID.
-        :rtype: str
-        """
-        return self.get_dicom_field_by_name("StudyInstanceUID")

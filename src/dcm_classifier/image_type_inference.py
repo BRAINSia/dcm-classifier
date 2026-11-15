@@ -287,10 +287,6 @@ class ImageTypeClassifierBase:
             raise AttributeError(msg)
         return self.series
 
-    def check_if_diffusion(self) -> None:  # pragma: no cover
-        msg = "This method check_if_diffusion is deprecated, use  update_diffusion_series_modality instead."
-        raise NotImplementedError(msg)
-
     def set_series(self, series: DicomSingleSeries) -> None:
         """
         Set the DICOM series for classification.
