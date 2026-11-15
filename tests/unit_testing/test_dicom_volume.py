@@ -103,7 +103,7 @@ def test_is_MR_modality(mock_volume_study):
 def test_setting_invalid_modality(mock_tracew_series):
     for series in mock_tracew_series:
         for volume in series.get_volume_list():
-            with pytest.raises(ValueError, match="Can only set_modality with a str"):
+            with pytest.raises(TypeError, match="Can only set_modality with a str"):
                 volume.set_volume_modality(4)
 
 
@@ -123,7 +123,7 @@ def test_setting_invalid_modality_probabilities(mock_tracew_series):
     for series in mock_tracew_series:
         for volume in series.get_volume_list():
             with pytest.raises(
-                ValueError,
+                TypeError,
                 match=r"Can only set_modality_probabilities with a DataFrame",
             ):
                 volume.set_modality_probabilities(4)
