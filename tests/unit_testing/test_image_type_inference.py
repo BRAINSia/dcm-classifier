@@ -240,3 +240,11 @@ def test_unknown_isotropy_is_reported_as_not_isotropic(get_data_dir, monkeypatch
         assert series.get_is_isotropic() is False
         for volume in series.get_volume_list():
             assert volume.get_is_isotropic() is False
+
+
+def test_run_inference_without_a_series_raises():
+    inferer = ImageTypeClassifierBase(
+        classification_model_filename=inference_model_path
+    )
+    with pytest.raises(AttributeError, match="No series is set"):
+        inferer.run_inference()
