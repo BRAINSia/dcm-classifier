@@ -410,6 +410,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 volumes_dictionary[sn].add_volume_to_series(volume_obj)
             logger.info("\t%s has %d subvolumes", sn, len(sub_volumes))
 
+        for series in volumes_dictionary.values():
+            series.order_volumes_by_acquisition()
+
         # Optionally filter to only the user-requested series numbers
         if self.search_series is not None:
             candidate_series_numbers: list[int] = [

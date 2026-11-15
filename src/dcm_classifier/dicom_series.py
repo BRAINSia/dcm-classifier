@@ -203,6 +203,27 @@ class DicomSingleSeries:
         self.volume_info_list.append(new_volume)
         self.organize_volumes()
 
+    def order_volumes_by_acquisition(self) -> None:
+        """
+        Sort the subvolumes into acquisition order and reassign their indices.
+
+        Volumes are ordered by the InstanceNumber of their first file, then by
+        b-value and file name; a volume without an InstanceNumber goes last.
+        """
+
+        def acquisition_key(
+            volume: DicomSingleVolumeInfoBase,
+        ) -> tuple[bool, int, float, str]:
+            first_file = str(volume.get_one_volume_dcm_filenames()[0])
+            try:
+                instance = int(volume.get_dicom_field_by_name("InstanceNumber"))
+            except (TypeError, ValueError):
+                return (True, 0, volume.get_volume_bvalue(), first_file)
+            return (False, instance, volume.get_volume_bvalue(), first_file)
+
+        self.volume_info_list.sort(key=acquisition_key)
+        self.organize_volumes()
+
     def organize_volumes(self) -> None:
         """
         Assign each subvolume its index within the series, in the order the subvolumes were added.
