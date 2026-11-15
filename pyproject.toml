@@ -148,13 +148,12 @@ ignore_missing_imports = true
 
 [tool.codespell]
 # CHANGELOG.md quotes old commit subjects verbatim.
-skip = "*.ipynb,*.onnx,*.dcm,tests/testing_data,CHANGELOG.md"
+skip = "*.onnx,*.dcm,tests/testing_data,CHANGELOG.md"
 # TE is the MRI echo time; "Vas collapse flag" is a DICOM private field name.
 ignore-words-list = "te,vas"
 
 [tool.ruff]
 line-length = 88
-extend-exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
 extend-select = [
