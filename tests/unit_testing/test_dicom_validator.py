@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from dcm_classifier.dicom_config import MISSING_VALUE
 from dcm_classifier.dicom_validator import DicomValidatorBase
 from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
 
@@ -49,4 +50,4 @@ def test_write_validation_report_append(mock_volumes, capsys):
     captured = capsys.readouterr()
     print(captured.out)
     assert "testing" in captured.out
-    assert "Identified bvalue: -12345" in captured.out
+    assert f"Identified bvalue: {MISSING_VALUE}" in captured.out

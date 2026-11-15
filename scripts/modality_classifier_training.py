@@ -17,6 +17,8 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import GridSearchCV, StratifiedKFold, train_test_split
 
+from dcm_classifier.dicom_config import MISSING_VALUE
+
 rcParams.update({"figure.autolayout": True})
 plt.rcParams.update({"font.size": 7})
 
@@ -89,7 +91,7 @@ def generate_training_data(input_dataframe: str):
 
     # Normalize the data
     df["label_encoded"] = df["label"].map(imagetype_to_integer_mapping)
-    df = df.fillna({col: 0 if "Type" in col else -12345 for col in df.columns})
+    df = df.fillna({col: 0 if "Type" in col else MISSING_VALUE for col in df.columns})
 
     # # Strip whitespace from string columns
     # str_cols = df.select_dtypes(include=["object"])
@@ -389,8 +391,6 @@ def inference_on_all_data(model_filename: str, model_df: str, out_file: str):
     # drop the FileName column
     e_inputs = e_inputs.drop(columns=["FileName", "label"])
     e_inputs = e_inputs[training_features]
-    # # ensure there are no empty or Nan values
-    # e_inputs.fillna({col: 0 if "Type" in col else -12345 for col in df.columns}, inplace=True)
     x = e_inputs.to_numpy().astype("float32")
     # Find rows with infinite values
     rows_with_inf = np.any(np.isinf(x), axis=1)
@@ -431,8 +431,6 @@ def inference_metric_test(model_filename: str, model_df: str, out_file: str, fea
     # available_classes = df["label"].unique()
     # Normalize the data
     df["label_encoded"] = df["label"].map(imagetype_to_integer_mapping)
-    # # ensure there are no empty or Nan values
-    # df.fillna({col: 0 if "Type" in col else -12345 for col in df.columns}, inplace=True)
 
     # Assuming 'label' column contains the true labels
     true_labels_encoded = df["label_encoded"].to_numpy()
@@ -448,7 +446,7 @@ def inference_metric_test(model_filename: str, model_df: str, out_file: str, fea
     # Add missing features if needed
     for feature in features:
         if feature not in e_inputs.columns:
-            e_inputs[feature] = 0 if "Type" in feature else -12345
+            e_inputs[feature] = 0 if "Type" in feature else MISSING_VALUE
 
     e_inputs = e_inputs[features]
     x = e_inputs.to_numpy().astype("float32")

@@ -6,7 +6,11 @@ import numpy as np
 import pydicom
 import pytest
 
-from dcm_classifier.dicom_config import optional_DICOM_fields, required_DICOM_fields
+from dcm_classifier.dicom_config import (
+    MISSING_VALUE,
+    optional_DICOM_fields,
+    required_DICOM_fields,
+)
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 from dcm_classifier.utility_functions import (
@@ -127,7 +131,7 @@ def test_no_echo_time():
     f = pydicom.dcmread(vol[0])
     ds_dict = sanitize_dicom_dataset(f, required_DICOM_fields, optional_DICOM_fields)[0]
 
-    assert ds_dict["EchoTime"] == -12345
+    assert ds_dict["EchoTime"] == MISSING_VALUE
 
 
 def test_no_pixel_bandwidth(caplog):
@@ -148,7 +152,7 @@ def test_empty_bvalue():
     f = pydicom.dcmread(vol[0])
     bval = get_bvalue(f)
 
-    assert bval == -12345
+    assert bval == MISSING_VALUE
 
 
 def test_invalid_fields(caplog):
@@ -182,9 +186,9 @@ def test_invalid_fields(caplog):
     # assert the fields that are in the dataset are set to one of these invalid values
     invalid_fields = [
         "INVALID_VALUE",
-        "-12345",
+        str(MISSING_VALUE),
         "Unknown",
-        "-12345.0",
+        str(float(MISSING_VALUE)),
         "None",
         "",
         "000000.00",
@@ -264,10 +268,10 @@ def test_validating_numerical_dataset():
     assert element == "1.0"
 
     element = validate_numerical_dataset_element("None")
-    assert element == -12345
+    assert element == MISSING_VALUE
 
     element = validate_numerical_dataset_element(None)
-    assert element == -12345
+    assert element == MISSING_VALUE
 
 
 def test_is_integer():
