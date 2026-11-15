@@ -5,6 +5,8 @@ import pytest
 from deprecation import DeprecatedWarning
 
 from dcm_classifier.dicom_config import optional_DICOM_fields, required_DICOM_fields
+from dcm_classifier.dicom_series import DicomSingleSeries
+from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
 from dcm_classifier.image_type_inference import ImageTypeClassifierBase
 from dcm_classifier.study_processing import ProcessOneDicomStudyToVolumesMappingBase
 
@@ -218,3 +220,24 @@ def test_image_is_perfusion(perfusion_file_path):
 
     for series in study.series_dictionary.values():
         assert series.get_series_modality() == "perfusion"
+
+
+def test_volumes_are_ordered_by_acquisition(mock_tracew_series):
+    (tracew,) = mock_tracew_series
+    volumes = [
+        DicomSingleVolumeInfoBase(v.get_one_volume_dcm_filenames())
+        for v in tracew.get_volume_list()
+    ]
+    series = DicomSingleSeries(series_number=5)
+    for volume in reversed(volumes):
+        series.add_volume_to_series(volume)
+
+    series.order_volumes_by_acquisition()
+
+    ordered = series.get_volume_list()
+    first_instances = [
+        int(v.get_dicom_field_by_name("InstanceNumber")) for v in ordered
+    ]
+    assert first_instances == sorted(first_instances)
+    assert [v.get_volume_bvalue() for v in ordered] == [0, 1000]
+    assert [v.get_volume_index() for v in ordered] == [0, 1]
