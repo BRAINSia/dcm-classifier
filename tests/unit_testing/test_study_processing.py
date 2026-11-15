@@ -173,6 +173,44 @@ def test_unusable_series_number_raises_when_errors_are_requested(tmp_path, file_
         ProcessOneDicomStudyToVolumesMappingBase(tmp_path, raise_error_on_failure=True)
 
 
+def _copy_unnumbered(tmp_path, file_name, series_uid):
+    ds = pydicom.dcmread(invalid_fields_directory / file_name)
+    ds.SeriesInstanceUID = series_uid
+    ds.save_as(tmp_path / file_name)
+
+
+def test_unnumbered_series_are_kept_apart(tmp_path):
+    _copy_unnumbered(tmp_path, "noSeriesNum.dcm", generate_uid())
+    _copy_unnumbered(tmp_path, "invalidSeriesNum.dcm", generate_uid())
+
+    with (
+        pytest.warns(UserWarning, match="Required DICOM fields"),
+        pytest.warns(
+            UserWarning,
+            match=f"filed under series ({MISSING_VALUE}|{MISSING_VALUE - 1})$",
+        ),
+    ):
+        study = ProcessOneDicomStudyToVolumesMappingBase(tmp_path)
+
+    assert set(study.series_dictionary) == {MISSING_VALUE, MISSING_VALUE - 1}
+    for series in study.series_dictionary.values():
+        assert len(series.get_volume_list()) == 1
+
+
+def test_unnumbered_volumes_of_one_series_stay_together(tmp_path):
+    series_uid = generate_uid()
+    _copy_unnumbered(tmp_path, "noSeriesNum.dcm", series_uid)
+    _copy_unnumbered(tmp_path, "invalidSeriesNum.dcm", series_uid)
+
+    with (
+        pytest.warns(UserWarning, match="Required DICOM fields"),
+        pytest.warns(UserWarning, match=f"filed under series {MISSING_VALUE}"),
+    ):
+        study = ProcessOneDicomStudyToVolumesMappingBase(tmp_path)
+
+    assert set(study.series_dictionary) == {MISSING_VALUE}
+
+
 def test_split_does_not_depend_on_bvalue_tags(get_data_dir, tmp_path):
     """Anonymization can remove the b-value tags (issue #68)."""
     tracew_directory = get_data_dir / "5"

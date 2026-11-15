@@ -157,6 +157,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             msg = f"study_directory must be path-like; got {study_directory!r}"
             raise TypeError(msg)
         self.raise_error_on_failure: bool = raise_error_on_failure
+        self._unnumbered_series: dict[str, int] = {}
         self.search_series: dict[str, int] | None = search_series
         self.series_dictionary: dict[int, DicomSingleSeries] = (
             self.__identify_single_volumes(self.study_directory, mr_sop_class_only)
@@ -427,8 +428,12 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         """
         Get the SeriesNumber a volume is filed under.
 
+        A volume without a usable SeriesNumber is filed by its SeriesInstanceUID:
+        each such series gets its own number, counting down from MISSING_VALUE.
+
         :param volume: The volume to file.
-        :return: The SeriesNumber, or MISSING_VALUE when it is absent or not an integer.
+        :return: The SeriesNumber, or a number at or below MISSING_VALUE when it is
+            absent or not an integer.
         :raises ValueError: If the SeriesNumber is unusable and raise_error_on_failure is set.
         """
         try:
@@ -440,10 +445,12 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             )
             if self.raise_error_on_failure:
                 raise ValueError(message) from None
-            warnings.warn(
-                f"{message}; filed under series {MISSING_VALUE}", stacklevel=2
+            series_uid = str(volume.get_dicom_field_by_name("SeriesInstanceUID"))
+            number = self._unnumbered_series.setdefault(
+                series_uid, MISSING_VALUE - len(self._unnumbered_series)
             )
-            return MISSING_VALUE
+            warnings.warn(f"{message}; filed under series {number}", stacklevel=2)
+            return number
 
     def _identify_and_split_sub_volumes_pydicom(
         self, subseries_filenames: list[str]
