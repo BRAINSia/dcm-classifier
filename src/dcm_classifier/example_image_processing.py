@@ -20,8 +20,31 @@
 
 import warnings
 
-from .image_processing import *
-from .image_processing import __all__  # noqa: F401
+from .image_processing import (
+    add_const_to_itk_images,
+    add_itk_images,
+    add_list_of_images,
+    compute_adc_from_multi_b_values,
+    itk_clamp_image_filter,
+    log_image,
+    multiply_itk_images,
+    scaled_by_bvalue_images,
+    sub_itk_images,
+    uniform_adc_scale_factor,
+)
+
+__all__ = [
+    "add_const_to_itk_images",
+    "add_itk_images",
+    "add_list_of_images",
+    "compute_adc_from_multi_b_values",
+    "itk_clamp_image_filter",
+    "log_image",
+    "multiply_itk_images",
+    "scaled_by_bvalue_images",
+    "sub_itk_images",
+    "uniform_adc_scale_factor",
+]
 
 warnings.warn(
     "dcm_classifier.example_image_processing is deprecated and will be removed in "
