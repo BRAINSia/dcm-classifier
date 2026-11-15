@@ -1,0 +1,15 @@
+# Codecov settings: https://docs.codecov.com/docs/codecov-yaml
+codecov:
+  notify:
+    # Report once all four test jobs (two OSes x two Pythons) have uploaded.
+    after_n_builds: 4
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        # Removing well-tested code lowers the percentage slightly.
+        threshold: 1%
+    patch:
+      default:
+        informational: true
