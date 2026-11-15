@@ -188,6 +188,32 @@ def test_unnumbered_series_are_kept_apart(tmp_path, caplog):
         assert len(series.get_volume_list()) == 1
 
 
+def test_unnumbered_series_are_numbered_by_series_instance_uid(tmp_path):
+    _copy_unnumbered(tmp_path, "noSeriesNum.dcm", "1.2.840.2")
+    _copy_unnumbered(tmp_path, "invalidSeriesNum.dcm", "1.2.840.1")
+
+    study = ProcessOneDicomStudyToVolumesMappingBase(tmp_path)
+
+    uids = {
+        number: str(series.get_dicom_field_by_name("SeriesInstanceUID"))
+        for number, series in study.series_dictionary.items()
+        if number <= MISSING_VALUE
+    }
+    assert uids == {MISSING_VALUE: "1.2.840.1", MISSING_VALUE - 1: "1.2.840.2"}
+
+
+def test_series_are_in_series_number_order(get_data_dir):
+    study = ProcessOneDicomStudyToVolumesMappingBase(get_data_dir)
+
+    numbers = list(study.series_dictionary)
+    numbered = [n for n in numbers if n > MISSING_VALUE]
+    unnumbered = [n for n in numbers if n <= MISSING_VALUE]
+    assert numbered == sorted(numbered)
+    assert unnumbered == sorted(unnumbered, reverse=True)
+    assert numbers == numbered + unnumbered
+    assert len(numbered) > 1
+
+
 def test_unnumbered_volumes_of_one_series_stay_together(tmp_path, caplog):
     series_uid = generate_uid()
     _copy_unnumbered(tmp_path, "noSeriesNum.dcm", series_uid)

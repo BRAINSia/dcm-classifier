@@ -37,6 +37,13 @@ from .utility_functions import (
 logger = logging.getLogger(__name__)
 
 
+def _series_number_order(item: tuple[int, Any]) -> tuple[bool, int]:
+    """Sort key: numbered series ascending, then unnumbered ones as filed."""
+    number = item[0]
+    unnumbered = number <= MISSING_VALUE
+    return unnumbered, -number if unnumbered else number
+
+
 class _FileRecord(TypedDict):
     image_position: Any
     acquisition_date_time: datetime
@@ -378,8 +385,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
         volumes_dictionary: dict[int, DicomSingleSeries] = {}
 
+        # Sorted so unnumbered series are numbered the same on every ITK version.
         # TODO Parallelize this loop to speed up the process NOT A PRIORITY
-        for seriesIdentifier in seriesUID:
+        for seriesIdentifier in sorted(seriesUID):
             # Get all filenames belonging to the current sub-series
             subseries_filenames: list[str] = namesGenerator.GetFileNames(
                 seriesIdentifier
@@ -410,6 +418,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 volumes_dictionary[sn].add_volume_to_series(volume_obj)
             logger.info("\t%s has %d subvolumes", sn, len(sub_volumes))
 
+        volumes_dictionary = dict(
+            sorted(volumes_dictionary.items(), key=_series_number_order)
+        )
         for series in volumes_dictionary.values():
             series.order_volumes_by_acquisition()
 
