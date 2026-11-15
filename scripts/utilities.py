@@ -174,7 +174,7 @@ def pydicom_read_cache(
     filename: Path | str, stop_before_pixels=True
 ) -> pydicom.Dataset:
     """
-    Reads a DICOM file header and caches the result to improve performance on subsequent reads.
+    Reads a DICOM file header.
 
     Args:
         filename: The path to the DICOM file to be read.
@@ -182,18 +182,9 @@ def pydicom_read_cache(
     Returns:
         (pydicom.Dataset): A pydicom.Dataset containing the DICOM file's header data.
     """
-    global pydicom_read_cache_static_filename_dict
-    pydicom_read_cache_static_filename_dict = {}
-
-    lookup_filename: str = str(filename)
-    if lookup_filename in pydicom_read_cache_static_filename_dict:
-        # print(f"Using cached value for {lookup_filename}")
-        pass
-    else:
-        pydicom_read_cache_static_filename_dict[lookup_filename] = pydicom.dcmread(
-            lookup_filename, stop_before_pixels=stop_before_pixels, force=True
-        )
-    return pydicom_read_cache_static_filename_dict.get(lookup_filename)
+    return pydicom.dcmread(
+        str(filename), stop_before_pixels=stop_before_pixels, force=True
+    )
 
 
 def override_study_UIDs(session_dir: str) -> None:
