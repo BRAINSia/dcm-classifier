@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from dcm_classifier.dicom_config import MISSING_VALUE
 from dcm_classifier.dicom_volume import (
     DicomSingleVolumeInfoBase,
 )
@@ -25,7 +26,7 @@ def test_get_b_value(mock_volumes):
 
     # sad path for a volume that doesn't have a b-value
     b_value = DicomSingleVolumeInfoBase(mock_volumes[0]).get_volume_bvalue()
-    assert b_value == -12345
+    assert b_value == MISSING_VALUE
 
 
 def test_primary_volume_info(mock_volumes):
@@ -185,10 +186,12 @@ def test_dataset_value_set_to_none(get_data_dir):
         series.get_volume_list()[0].get_volume_dictionary()["ContrastBolusAgent"]
         == "None"
     )
-    assert (
-        series.get_volume_list()[0].get_volume_dictionary()["InversionTime"] == "-12345"
+    assert series.get_volume_list()[0].get_volume_dictionary()["InversionTime"] == str(
+        MISSING_VALUE
     )
-    assert series.get_volume_list()[0].get_volume_dictionary()["SAR"] == "-12345"
+    assert series.get_volume_list()[0].get_volume_dictionary()["SAR"] == str(
+        MISSING_VALUE
+    )
 
 
 def test_t1w_dcm_volume_modality(mock_volume_study):

@@ -80,10 +80,8 @@ def test_get_study_dictionary_and_set_inferer():
 
 
 def test_un_pathlike_dir():
-    with pytest.raises(
-        TypeError, match="study_directory must be path-like; got -12345"
-    ):
-        ProcessOneDicomStudyToVolumesMappingBase(-12345)
+    with pytest.raises(TypeError, match="study_directory must be path-like; got 42"):
+        ProcessOneDicomStudyToVolumesMappingBase(42)
 
 
 # validate() is not implemented yet and only returns None
@@ -228,7 +226,7 @@ def test_split_does_not_depend_on_bvalue_tags(get_data_dir, tmp_path):
     stripped_volumes, stripped_bvalues = volumes_as_file_name_sets(tmp_path)
 
     assert original_bvalues == {0, 1000}
-    assert stripped_bvalues == {-12345}
+    assert stripped_bvalues == {MISSING_VALUE}
     assert len(original_volumes) == 2
     assert stripped_volumes == original_volumes
 
