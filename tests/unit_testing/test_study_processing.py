@@ -78,13 +78,10 @@ def test_get_study_dictionary_and_set_inferer():
 
 
 def test_un_pathlike_dir():
-    # Raises an attribute error because the study_directory attribute is not set but is called in print statement
-    with pytest.raises(AttributeError) as ex:
+    with pytest.raises(
+        TypeError, match="study_directory must be path-like; got -12345"
+    ):
         ProcessOneDicomStudyToVolumesMappingBase(-12345)
-    assert (
-        "'ProcessOneDicomStudyToVolumesMappingBase' object has no attribute 'study_directory'"
-        in str(ex.value)
-    )
 
 
 # validate() is not implemented yet and only returns None

@@ -153,7 +153,8 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             self.study_directory = Path(study_directory)  # coerce to path object
             del study_directory
         else:
-            logger.error("ERROR:  %s is not pathlike", self.study_directory)
+            msg = f"study_directory must be path-like; got {study_directory!r}"
+            raise TypeError(msg)
         self.raise_error_on_failure: bool = raise_error_on_failure
         self.search_series: dict[str, int] | None = search_series
         self.series_dictionary: dict[int, DicomSingleSeries] = (
