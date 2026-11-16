@@ -10,6 +10,7 @@
 :caption: Getting Started
 
 installation/index
+known_issues
 ```
 
 ```{toctree}
