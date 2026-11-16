@@ -21,6 +21,7 @@ import pandas as pd
 
 from ._validation import require_type
 from .dicom_volume import DicomSingleVolumeInfoBase
+from .utility_functions import SliceOrdering
 
 
 class DicomSingleSeries:
@@ -191,6 +192,15 @@ class DicomSingleSeries:
         :rtype: List[DicomSingleVolumeInfoBase]
         """
         return self.volume_info_list
+
+    def get_slice_orderings(self) -> set[SliceOrdering]:
+        """
+        Get how the slices of this series' volumes were ordered.
+
+        :return: The distinct SliceOrdering values of the volumes.
+        :rtype: set[SliceOrdering]
+        """
+        return {volume.get_slice_ordering() for volume in self.volume_info_list}
 
     def add_volume_to_series(self, new_volume: DicomSingleVolumeInfoBase) -> None:
         """

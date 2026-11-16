@@ -24,6 +24,7 @@ import warnings
 from collections.abc import Iterable, Sequence
 from copy import deepcopy
 from datetime import datetime
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, TypeAlias
 
@@ -71,20 +72,94 @@ def new_gdcm_series_file_names() -> Any:
     return names_generator
 
 
+class SliceOrdering(StrEnum):
+    """How the slices of a volume were put in order."""
+
+    #: ITK's GDCM reader sorted them by position along the slice normal.
+    GEOMETRIC = "geometric"
+    #: dcm-classifier split a multi-volume series and sorted each part by position.
+    GEOMETRIC_SUBVOLUME = "geometric_subvolume"
+    #: Positions could not be sorted; slices follow InstanceNumber.
+    FALLBACK_INSTANCE_NUMBER = "fallback_instance_number"
+    #: Positions could not be sorted and InstanceNumbers are incomplete; slices follow file names.
+    FALLBACK_FILENAME = "fallback_filename"
+
+
+#: Largest difference between direction cosines still treated as one orientation.
+ORIENTATION_TOLERANCE = 1e-4
+#: Smallest separation, in mm along the slice normal, between two slice positions.
+POSITION_TOLERANCE = 1e-3
+
+
+def geometric_slice_order(datasets: Sequence[Dataset]) -> list[int] | None:
+    """
+    Order slices by the projection of ImagePositionPatient on the slice normal.
+
+    :param datasets: The headers of one volume's slices.
+    :return: Indexes into ``datasets`` in ascending position, or None when the
+        slices lack a position, do not share an orientation, or repeat a position.
+    """
+    try:
+        orientations = np.array(
+            [[float(c) for c in ds.ImageOrientationPatient] for ds in datasets]
+        )
+        positions = np.array(
+            [[float(c) for c in ds.ImagePositionPatient] for ds in datasets]
+        )
+    except (AttributeError, TypeError, ValueError):
+        return None
+    if orientations.shape[1:] != (6,) or positions.shape[1:] != (3,):
+        return None
+    if np.abs(orientations - orientations[0]).max() > ORIENTATION_TOLERANCE:
+        return None
+    normal = np.cross(orientations[0, :3], orientations[0, 3:])
+    projections = positions @ normal
+    order = np.argsort(projections, kind="stable")
+    if len(order) > 1 and np.diff(projections[order]).min() < POSITION_TOLERANCE:
+        return None
+    return [int(i) for i in order]
+
+
+def fallback_slice_ordering(datasets: Sequence[Dataset]) -> SliceOrdering:
+    """
+    Name the order used for slices that cannot be sorted by position.
+
+    :param datasets: The headers of one volume's slices.
+    :return: FALLBACK_INSTANCE_NUMBER when every slice has a distinct
+        InstanceNumber, otherwise FALLBACK_FILENAME.
+    """
+    numbers = [ds.get("InstanceNumber") for ds in datasets]
+    if None in numbers or not all(is_integer(n) for n in numbers):
+        return SliceOrdering.FALLBACK_FILENAME
+    if len({int(n) for n in numbers}) != len(numbers):
+        return SliceOrdering.FALLBACK_FILENAME
+    return SliceOrdering.FALLBACK_INSTANCE_NUMBER
+
+
 def itk_read_from_dicomfn_list(
     single_volume_dcm_files_list: Sequence[str | Path],
+    *,
+    keep_order: bool = False,
 ) -> FImageType:
     """
     Read DICOM files from a list and return an ITK image.
 
     :param single_volume_dcm_files_list: A list of DICOM file paths.
     :type single_volume_dcm_files_list: list[str | Path]
+    :param keep_order: Read the files in the order given instead of letting
+        ITK's GDCM reader sort them.
 
     :return: The ITK image created from the DICOM files with pixel type itk.F (float).
     :rtype: FImageType
 
     :raises FileNotFoundError: If no DICOM files are found in the input list.
     """
+    if keep_order:
+        if not single_volume_dcm_files_list:
+            msg = "No DICOMs given (itk_read_from_dicomfn_list)"
+            raise FileNotFoundError(msg)
+        return _read_series_in_order([str(f) for f in single_volume_dcm_files_list])
+
     with tempfile.TemporaryDirectory(
         prefix="all_dcm_for_volume_", suffix="_TMP"
     ) as tmpdir_symlink:
@@ -122,13 +197,17 @@ def itk_read_from_dicomfn_list(
                 source_dir,
             )
 
-        isr = itk.ImageSeriesReader[FImageType].New()
-        # Typical clinical image slice spacing is > 1mm so a difference of 0.01 mm in slice spacing can be ignored.
-        # to suppress warnings like 'Non uniform sampling or missing slices detected,  maximum nonuniformity:0.000480769'
-        isr.SetSpacingWarningRelThreshold(0.01)
-        isr.SetFileNames(ordered_filenames)
-        isr.Update()
-        return isr.GetOutput()
+        return _read_series_in_order(ordered_filenames)
+
+
+def _read_series_in_order(ordered_filenames: Sequence[str]) -> FImageType:
+    isr = itk.ImageSeriesReader[FImageType].New()
+    # Typical clinical image slice spacing is > 1mm so a difference of 0.01 mm in slice spacing can be ignored.
+    # to suppress warnings like 'Non uniform sampling or missing slices detected,  maximum nonuniformity:0.000480769'
+    isr.SetSpacingWarningRelThreshold(0.01)
+    isr.SetFileNames(ordered_filenames)
+    isr.Update()
+    return isr.GetOutput()
 
 
 def is_number(s: Any) -> bool:

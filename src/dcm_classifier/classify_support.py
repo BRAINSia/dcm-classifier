@@ -30,6 +30,7 @@ def simple_classify_study(
     output_dir: Path | None = None,
     nifti_dir: Path | None = None,
     mr_sop_class_only: bool = False,
+    allow_fallback_ordering: bool = False,
 ) -> dict[str, Any]:
     """
 
@@ -40,6 +41,7 @@ def simple_classify_study(
         output_dir: Path to the output the newly organized dicom data or None to avoid organizing dicom data
         nifti_dir: Path to the directory where the NIFTI files are stored for each volume
         mr_sop_class_only: Only process series whose first file has an MR SOP Class UID
+        allow_fallback_ordering: Accept volumes whose slices could not be ordered by position
 
     Returns:
 
@@ -54,6 +56,7 @@ def simple_classify_study(
         study_directory=session_directory,
         inferer=inferer,
         mr_sop_class_only=mr_sop_class_only,
+        allow_fallback_ordering=allow_fallback_ordering,
     )
     study.run_inference()
     list_of_inputs: list[dict[str, Any]] = []
@@ -85,6 +88,9 @@ def simple_classify_study(
                 vol_modality = "None"
                 current_dict["Volume Modality"] = "None"
             dictionary["VolumeModality"] = vol_modality
+            slice_ordering = str(volume.get_slice_ordering())
+            dictionary["SliceOrdering"] = slice_ordering
+            current_dict["Order"] = slice_ordering
             if invalid_volume:
                 dictionary["ClassificationFailureReason"] = (
                     _classification_failure_reason(volume)

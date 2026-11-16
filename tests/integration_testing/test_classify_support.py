@@ -27,6 +27,7 @@ def test_classify_study_json(get_data_dir):
     simple_classify_study(
         session_directory=testing_session_directory,
         json_dumppath=(testing_output_dir / "json" / "output.json"),
+        allow_fallback_ordering=True,
     )
 
     # Check that the JSON file now exists and contains proper JSON.
@@ -67,6 +68,7 @@ def test_classify_study_with_file_creation(get_data_dir):
         json_dumppath=(testing_output_dir / "json" / "output.json"),
         output_dir=(testing_output_dir / "organized_dicom"),
         nifti_dir=(testing_output_dir / "nifti"),
+        allow_fallback_ordering=True,
     )
 
     # Check that the JSON file now exists and contains proper JSON. we will omit checking the content in this test

@@ -28,7 +28,10 @@ from .dicom_series import DicomSingleSeries
 from .dicom_volume import DicomSingleVolumeInfoBase
 from .image_type_inference import ImageTypeClassifierBase
 from .utility_functions import (
+    SliceOrdering,
     check_two_images_have_same_physical_space,
+    fallback_slice_ordering,
+    geometric_slice_order,
     is_mr_sop_class,
     new_gdcm_series_file_names,
     parse_acquisition_datetime,
@@ -50,6 +53,7 @@ class _FileRecord(TypedDict):
     acquisition_number: int
     instance_number: int
     filename: str
+    dataset: pydicom.Dataset
 
 
 class ProcessOneDicomStudyToVolumesMappingBase:
@@ -141,6 +145,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         inferer: ImageTypeClassifierBase | None = None,
         raise_error_on_failure: bool = False,
         mr_sop_class_only: bool = False,
+        allow_fallback_ordering: bool = False,
     ) -> None:
         """
         Initialize an instance of ProcessOneDicomStudyToVolumesMappingBase.
@@ -152,6 +157,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
         :param search_series: Optional[Dict[str, int]]: A dictionary of series to search within the study.
         :param inferer: Optional[ImageTypeClassifierBase]: An image type classifier for inference.
         :param mr_sop_class_only: bool: Optional. Only process series whose first file has an MR SOP Class UID.
+        :param allow_fallback_ordering: bool: Optional. By default, raise ValueError for a
+            volume whose slices could not be ordered by position. True accepts such
+            volumes with a warning; their images may have wrong geometry.
 
         """
         if ProcessOneDicomStudyToVolumesMappingBase._is_pathlike_object(
@@ -169,6 +177,22 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             self.__identify_single_volumes(self.study_directory, mr_sop_class_only)
         )
         for series_number, series in self.series_dictionary.items():
+            fallbacks = series.get_slice_orderings() - {
+                SliceOrdering.GEOMETRIC,
+                SliceOrdering.GEOMETRIC_SUBVOLUME,
+            }
+            if fallbacks:
+                message = (
+                    f"SeriesNumber {series_number} in {self.study_directory} has volumes "
+                    f"whose slices could not be ordered by position: "
+                    f"{', '.join(sorted(fallbacks))}"
+                )
+                if not allow_fallback_ordering:
+                    msg = (
+                        f"{message}. Pass allow_fallback_ordering=True to accept them."
+                    )
+                    raise ValueError(msg)
+                logger.warning(message)
             if series.get_is_mosaic():
                 logger.warning(
                     "SeriesNumber %s in %s contains Siemens mosaic images. "
@@ -392,6 +416,9 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             subseries_filenames: list[str] = namesGenerator.GetFileNames(
                 seriesIdentifier
             )
+            itk_fallback = bool(
+                getattr(namesGenerator, "GetDidUseAmbiguousOrdering", lambda: False)()
+            )
 
             if (
                 mr_sop_class_only
@@ -406,7 +433,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
 
             # Use our pydicom-based splitter to handle multi-volume logic
             sub_volumes = self._identify_and_split_sub_volumes_pydicom(
-                subseries_filenames
+                subseries_filenames, itk_fallback=itk_fallback
             )
 
             # Organize these sub-volumes by their SeriesNumber
@@ -466,7 +493,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             return number
 
     def _identify_and_split_sub_volumes_pydicom(
-        self, subseries_filenames: list[str]
+        self, subseries_filenames: list[str], itk_fallback: bool = False
     ) -> list[DicomSingleVolumeInfoBase]:
         """
         Identify and split multi-volume DICOM sub-series into separate volumes using pydicom.
@@ -481,6 +508,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             5) Return a list of DicomSingleVolumeInfoBase objects.
 
         :param subseries_filenames: List of DICOM file paths from one sub-series.
+        :param itk_fallback: ITK could not order these files by position.
         :return: A list of DicomSingleVolumeInfoBase objects, each representing a 3D volume.
 
         ASSUMPTIONS:
@@ -521,6 +549,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             list
         )
         ordered_filenames: list[Path | str] = list(subseries_filenames)
+        single_volume_ordering = SliceOrdering.FALLBACK_FILENAME
 
         try:
             file_records: list[_FileRecord] = []
@@ -546,6 +575,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                             "acquisition_number": acquisition_number,
                             "instance_number": inst_number,
                             "filename": dcm_file,
+                            "dataset": ds,
                         }
                     )
 
@@ -604,21 +634,47 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                 # Create volume objects
                 sub_volume_info_list: list[DicomSingleVolumeInfoBase] = []
                 for i in range(num_volumes):
-                    sub_volume_filenames: list[Path | str] = [
-                        file_info_dict[ipp_key][i]["filename"]
-                        for ipp_key in file_info_dict
-                    ]
+                    records = [file_info_dict[ipp_key][i] for ipp_key in file_info_dict]
+                    datasets = [r["dataset"] for r in records]
+                    order = geometric_slice_order(datasets)
+                    if order is None:
+                        ordering = fallback_slice_ordering(datasets)
+                    else:
+                        records = [records[j] for j in order]
+                        ordering = SliceOrdering.GEOMETRIC_SUBVOLUME
                     sub_volume_info_list.append(
                         DicomSingleVolumeInfoBase(
-                            one_volume_dcm_filenames=sub_volume_filenames
+                            one_volume_dcm_filenames=[r["filename"] for r in records],
+                            slice_ordering=ordering,
                         )
                     )
                 return sub_volume_info_list
+
+            datasets = [r["dataset"] for r in file_records]
+            if (
+                not itk_fallback
+                and len(file_records) == len(subseries_filenames)
+                and geometric_slice_order(datasets) is not None
+            ):
+                return [
+                    DicomSingleVolumeInfoBase(
+                        one_volume_dcm_filenames=ordered_filenames,
+                        slice_ordering=SliceOrdering.GEOMETRIC,
+                    )
+                ]
+            if len(file_records) == len(subseries_filenames):
+                single_volume_ordering = fallback_slice_ordering(datasets)
 
         except Exception as global_error:
             if self.raise_error_on_failure:
                 raise
             logger.warning("Error in volume splitting: %s", global_error)
 
-        # Default to single volume if all else fails
-        return [DicomSingleVolumeInfoBase(one_volume_dcm_filenames=ordered_filenames)]
+        if single_volume_ordering == SliceOrdering.FALLBACK_FILENAME:
+            ordered_filenames = list(subseries_filenames)
+        return [
+            DicomSingleVolumeInfoBase(
+                one_volume_dcm_filenames=ordered_filenames,
+                slice_ordering=single_volume_ordering,
+            )
+        ]

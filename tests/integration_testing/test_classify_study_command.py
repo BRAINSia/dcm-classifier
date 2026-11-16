@@ -15,10 +15,23 @@ baseline_json_path: Path = (
 )
 
 
+def test_main_refuses_fallback_volumes_by_default(get_data_dir):
+    with pytest.raises(ValueError, match="allow_fallback_ordering"):
+        main(["--session_directory", get_data_dir.as_posix()])
+
+
 def test_main_writes_json_catalog(get_data_dir, tmp_path):
     json_path = tmp_path / "output.json"
 
-    main(["--session_directory", get_data_dir.as_posix(), "--json", str(json_path)])
+    main(
+        [
+            "--session_directory",
+            get_data_dir.as_posix(),
+            "--json",
+            str(json_path),
+            "--allow_fallback_ordering",
+        ]
+    )
 
     json_content = json.loads(json_path.read_text())
     baseline_json_content = json.loads(baseline_json_path.read_text())

@@ -229,7 +229,7 @@ def test_unknown_isotropy_is_reported_as_not_isotropic(get_data_dir, monkeypatch
     )
     monkeypatch.setattr(inferer, "infer_isotropic", lambda **_: None)
     study = ProcessOneDicomStudyToVolumesMappingBase(
-        study_directory=get_data_dir, inferer=inferer
+        study_directory=get_data_dir, inferer=inferer, allow_fallback_ordering=True
     )
     study.run_inference()
     for series in study.series_dictionary.values():

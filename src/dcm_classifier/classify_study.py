@@ -67,6 +67,14 @@ def main(argv: list[str] | None = None) -> None:
         action="store_true",
         help="Only process series whose first file has an MR SOP Class UID",
     )
+    parser.add_argument(
+        "--allow_fallback_ordering",
+        action="store_true",
+        help=(
+            "Accept volumes whose slices could not be ordered by position "
+            "(their images may have wrong geometry); by default the study is refused"
+        ),
+    )
 
     args = parser.parse_args(argv)
     handler = logging.StreamHandler(sys.stdout)
@@ -89,6 +97,7 @@ def main(argv: list[str] | None = None) -> None:
         output_dir,
         nifti_dir,
         mr_sop_class_only=args.mr_sop_class_only,
+        allow_fallback_ordering=args.allow_fallback_ordering,
     )
 
 
