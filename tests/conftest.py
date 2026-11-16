@@ -23,8 +23,11 @@ testing_dicom_dir: Path = test_data_dir_path / "anonymized_testing_data"
 
 # run study on anonymized data
 inferer = ImageTypeClassifierBase(classification_model_filename=inference_model_path)
+# Series 2, 3, and 4 are reformats whose slices cannot be ordered by position.
 study = ProcessOneDicomStudyToVolumesMappingBase(
-    study_directory=(testing_dicom_dir / "anonymized_data"), inferer=inferer
+    study_directory=(testing_dicom_dir / "anonymized_data"),
+    inferer=inferer,
+    allow_fallback_ordering=True,
 )
 study.run_inference()
 

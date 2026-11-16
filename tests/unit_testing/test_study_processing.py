@@ -33,7 +33,7 @@ def test_get_list_of_primary_volume_info(get_data_dir):
     # study_path = relative_testing_data_path.parent.parent.parent / "dcm_files"
 
     study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(
-        get_data_dir
+        get_data_dir, allow_fallback_ordering=True
     )
     volume_info_dictionaries = (
         study_to_volume_mapping_base.get_list_of_primary_volume_info()
@@ -52,7 +52,9 @@ def test_get_study_dictionary_and_set_inferer():
         Path(__file__).parents[2] / "models" / "rf_classifier.onnx"
     )
 
-    study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(study_path)
+    study_to_volume_mapping_base = ProcessOneDicomStudyToVolumesMappingBase(
+        study_path, allow_fallback_ordering=True
+    )
     study_dictionary = study_to_volume_mapping_base.get_study_dictionary()
     assert isinstance(study_dictionary, dict)
     assert len(study_dictionary) == 15
@@ -203,7 +205,9 @@ def test_unnumbered_series_are_numbered_by_series_instance_uid(tmp_path):
 
 
 def test_series_are_in_series_number_order(get_data_dir):
-    study = ProcessOneDicomStudyToVolumesMappingBase(get_data_dir)
+    study = ProcessOneDicomStudyToVolumesMappingBase(
+        get_data_dir, allow_fallback_ordering=True
+    )
 
     numbers = list(study.series_dictionary)
     numbered = [n for n in numbers if n > MISSING_VALUE]

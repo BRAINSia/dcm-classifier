@@ -34,6 +34,7 @@ from .dicom_config import (
 )
 from .utility_functions import (
     FImageType,
+    SliceOrdering,
     get_bvalue,
     get_coded_dictionary_elements,
     get_diffusion_gradient_direction,
@@ -82,12 +83,18 @@ class DicomSingleVolumeInfoBase:
 
     """
 
-    def __init__(self, one_volume_dcm_filenames: list[Path | str]) -> None:
+    def __init__(
+        self,
+        one_volume_dcm_filenames: list[Path | str],
+        slice_ordering: SliceOrdering = SliceOrdering.GEOMETRIC,
+    ) -> None:
         """
         Initializes a DicomSingleVolumeInfoBase instance with a list of DICOM file paths.
 
         :param one_volume_dcm_filenames:
         :type one_volume_dcm_filenames: list[Path | str]
+        :param slice_ordering: How the slices are ordered. With GEOMETRIC, ITK's
+            GDCM reader sorts the files; otherwise they are read in the order given.
 
         """
         self.one_volume_dcm_filenames: list[Path] = [
@@ -126,6 +133,7 @@ class DicomSingleVolumeInfoBase:
         self.is_isotropic: bool = False
         self.has_contrast: bool = False
         self.itk_image: FImageType | None = None
+        self.slice_ordering = SliceOrdering(slice_ordering)
 
         # process volume DICOM files
         _, self.volume_info_dict = self._make_one_study_info_mapping_from_filelist()
@@ -310,7 +318,18 @@ class DicomSingleVolumeInfoBase:
             if isinstance(value, float):
                 value = f"{value:#.3f}"
             return_dict[return_key] = value
+        return_dict["SliceOrdering"] = str(self.slice_ordering)
         return return_dict
+
+    def get_slice_ordering(self) -> SliceOrdering:
+        """
+        Get how the slices of this volume were ordered.
+
+        :return: GEOMETRIC or GEOMETRIC_SUBVOLUME when ordered by position,
+            otherwise a ``FALLBACK_*`` value.
+        :rtype: SliceOrdering
+        """
+        return self.slice_ordering
 
     def get_itk_image(self) -> FImageType:
         """
@@ -322,7 +341,8 @@ class DicomSingleVolumeInfoBase:
         """
         if self.itk_image is None:
             self.itk_image = itk_read_from_dicomfn_list(
-                self.get_one_volume_dcm_filenames()
+                self.get_one_volume_dcm_filenames(),
+                keep_order=self.slice_ordering != SliceOrdering.GEOMETRIC,
             )
 
         return self.itk_image

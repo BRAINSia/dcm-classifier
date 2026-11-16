@@ -132,6 +132,11 @@ or pass the path to a separate model
 
 `$ dcm-classify-study -m models/ova_rf_classifier.onnx -d <path_to_dicom_session>`
 
+A session with a volume whose slices cannot be ordered by position (for
+example a reformat whose slices differ in orientation) is refused. Add
+`--allow_fallback_ordering` to accept such volumes; each is reported in the
+`Order` column, and its image geometry may be wrong.
+
 The same command is available from a source checkout as `python3 scripts/classify_study.py`.
 
 ### Limitations
