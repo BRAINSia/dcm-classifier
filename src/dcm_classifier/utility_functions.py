@@ -87,6 +87,11 @@ class SliceOrdering(StrEnum):
     #: every file is kept in one volume that is not a valid 3D image.
     FALLBACK_REPEATED_POSITIONS = "fallback_repeated_positions"
 
+    @property
+    def is_fallback(self) -> bool:
+        """True when the slices were not put in order by position."""
+        return self not in (SliceOrdering.GEOMETRIC, SliceOrdering.GEOMETRIC_SUBVOLUME)
+
 
 #: Largest difference between direction cosines still treated as one orientation.
 ORIENTATION_TOLERANCE = 1e-4
@@ -137,6 +142,34 @@ def fallback_slice_ordering(datasets: Sequence[Dataset]) -> SliceOrdering:
     if len({int(n) for n in numbers}) != len(numbers):
         return SliceOrdering.FALLBACK_FILENAME
     return SliceOrdering.FALLBACK_INSTANCE_NUMBER
+
+
+def infer_slice_ordering(
+    filenames: Sequence[Path],
+) -> tuple[SliceOrdering, list[Path]]:
+    """
+    Label a volume's slices from their headers, reordering a fallback volume to match.
+
+    :param filenames: The files of one volume.
+    :return: The ordering and the files in the order that ordering reads them;
+        FALLBACK_FILENAME when any header cannot be read or decoded.
+    """
+    # pydicom decodes values lazily, so a corrupt value can raise at any step below.
+    try:
+        datasets = [
+            pydicom.dcmread(f, stop_before_pixels=True, force=True) for f in filenames
+        ]
+        if geometric_slice_order(datasets) is not None:
+            return SliceOrdering.GEOMETRIC, list(filenames)
+        ordering = fallback_slice_ordering(datasets)
+        if ordering == SliceOrdering.FALLBACK_INSTANCE_NUMBER:
+            instance_numbers = [int(ds.InstanceNumber) for ds in datasets]
+            return ordering, [
+                f for _, f in sorted(zip(instance_numbers, filenames, strict=True))
+            ]
+    except Exception as error:
+        logger.debug("Cannot read the slice headers: %s", error)
+    return SliceOrdering.FALLBACK_FILENAME, sorted(filenames, key=str)
 
 
 def itk_read_from_dicomfn_list(
@@ -205,8 +238,7 @@ def itk_read_from_dicomfn_list(
 
 def _read_series_in_order(ordered_filenames: Sequence[str]) -> FImageType:
     isr = itk.ImageSeriesReader[FImageType].New()
-    # Typical clinical image slice spacing is > 1mm so a difference of 0.01 mm in slice spacing can be ignored.
-    # to suppress warnings like 'Non uniform sampling or missing slices detected,  maximum nonuniformity:0.000480769'
+    # Clinical slice spacing exceeds 1 mm, so a 1% spacing difference is not a missing slice.
     isr.SetSpacingWarningRelThreshold(0.01)
     isr.SetFileNames(ordered_filenames)
     isr.Update()

@@ -14,11 +14,12 @@ import pytest
 from pydicom.dataset import FileMetaDataset
 from pydicom.uid import ExplicitVRLittleEndian, MRImageStorage, generate_uid
 
+from dcm_classifier.dicom_volume import DicomSingleVolumeInfoBase
 from dcm_classifier.study_processing import (
     ProcessOneDicomStudyToVolumesMappingBase,
     _acquisition_time,
 )
-from dcm_classifier.utility_functions import SliceOrdering
+from dcm_classifier.utility_functions import SliceOrdering, infer_slice_ordering
 
 SLICE_SPACING = 4.0
 GEOMETRIC = {SliceOrdering.GEOMETRIC, SliceOrdering.GEOMETRIC_SUBVOLUME}
@@ -540,3 +541,91 @@ def test_acquisition_time_accepts_only_valid_dicom_values(tags, expected):
     parsed = _acquisition_time(ds)
     assert (None if parsed is None else str(parsed)) == expected
 
+
+def test_volume_without_a_label_reads_its_slices_in_the_order_it_names(tmp_path):
+    n = _write(
+        tmp_path, [range(6)], sagittal_rank=2, descending_acquisitions=frozenset({0})
+    )
+    files = sorted(tmp_path.glob("*.dcm"), key=lambda f: -int(f.stem[2:]))
+    volume = DicomSingleVolumeInfoBase(files)
+    assert volume.get_slice_ordering() == SliceOrdering.FALLBACK_INSTANCE_NUMBER
+    numbers = [
+        int(pydicom.dcmread(f, stop_before_pixels=True).InstanceNumber)
+        for f in volume.get_one_volume_dcm_filenames()
+    ]
+    assert numbers == sorted(numbers)
+    assert len(numbers) == n
+
+
+def test_volume_without_a_label_is_geometric_when_positions_sort(tmp_path):
+    _write(tmp_path, [range(6)])
+    volume = DicomSingleVolumeInfoBase(sorted(tmp_path.glob("*.dcm")))
+    assert volume.get_slice_ordering() == SliceOrdering.GEOMETRIC
+
+
+def test_volume_without_a_label_reads_files_saved_without_a_preamble(tmp_path):
+    _write(tmp_path, [range(6)])
+    for path in tmp_path.glob("*.dcm"):
+        raw = path.read_bytes()
+        path.write_bytes(raw[132:])
+    volume = DicomSingleVolumeInfoBase(sorted(tmp_path.glob("*.dcm")))
+    assert volume.get_slice_ordering() == SliceOrdering.GEOMETRIC
+
+
+def test_volume_without_a_label_keeps_the_first_given_file_as_reference(tmp_path):
+    _write(tmp_path, [range(6)], sagittal_rank=2)
+    files = sorted(tmp_path.glob("*.dcm"), reverse=True)
+    volume = DicomSingleVolumeInfoBase(files)
+    assert volume.get_slice_ordering().is_fallback
+    first = pydicom.dcmread(files[0], stop_before_pixels=True)
+    assert volume._pydicom_info.SOPInstanceUID == first.SOPInstanceUID
+
+
+@pytest.mark.parametrize("error", [ValueError, KeyError, RuntimeError])
+def test_volume_without_a_label_survives_any_header_read_error(
+    tmp_path, monkeypatch, error
+):
+    n = _write(tmp_path, [range(6)])
+    files = sorted(tmp_path.glob("*.dcm"))
+    read = pydicom.dcmread
+
+    def flaky_read(path, *args, **kwargs):
+        if Path(path).name == "IM0006.dcm":
+            raise error
+        return read(path, *args, **kwargs)
+
+    monkeypatch.setattr("dcm_classifier.utility_functions.pydicom.dcmread", flaky_read)
+    ordering, ordered = infer_slice_ordering(files)
+    assert ordering == SliceOrdering.FALLBACK_FILENAME
+    assert ordered == sorted(files, key=str)
+    assert len(ordered) == n
+
+
+def _rewrite_element(
+    path: Path, group: int, element: int, vr: bytes, value: bytes
+) -> None:
+    """Replace one explicit-VR element so its value fails only when decoded."""
+    raw = path.read_bytes()
+    at = raw.index(group.to_bytes(2, "little") + element.to_bytes(2, "little"), 132)
+    length = int.from_bytes(raw[at + 6 : at + 8], "little")
+    new = raw[at : at + 4] + vr + len(value).to_bytes(2, "little") + value
+    path.write_bytes(raw[:at] + new + raw[at + 8 + length :])
+
+
+@pytest.mark.parametrize(
+    ("element", "vr", "value", "sagittal_rank"),
+    [
+        ((0x0020, 0x0032), b"FD", b"\x01" * 7, None),
+        ((0x0020, 0x0013), b"US", b"\x01" * 3, 4),
+    ],
+    ids=["position", "instance-number"],
+)
+def test_volume_without_a_label_survives_a_value_that_fails_to_decode(
+    tmp_path, element, vr, value, sagittal_rank
+):
+    n = _write(tmp_path, [range(6)], sagittal_rank=sagittal_rank)
+    files = sorted(tmp_path.glob("*.dcm"))
+    _rewrite_element(files[2], *element, vr, value)
+    ordering, ordered = infer_slice_ordering(files)
+    assert ordering == SliceOrdering.FALLBACK_FILENAME
+    assert len(ordered) == n
