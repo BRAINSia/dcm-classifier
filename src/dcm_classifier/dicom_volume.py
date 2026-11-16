@@ -38,6 +38,7 @@ from .utility_functions import (
     get_bvalue,
     get_coded_dictionary_elements,
     get_diffusion_gradient_direction,
+    infer_slice_ordering,
     itk_read_from_dicomfn_list,
     sanitize_dicom_dataset,
 )
@@ -86,7 +87,7 @@ class DicomSingleVolumeInfoBase:
     def __init__(
         self,
         one_volume_dcm_filenames: list[Path | str],
-        slice_ordering: SliceOrdering = SliceOrdering.GEOMETRIC,
+        slice_ordering: SliceOrdering | None = None,
     ) -> None:
         """
         Initializes a DicomSingleVolumeInfoBase instance with a list of DICOM file paths.
@@ -95,6 +96,8 @@ class DicomSingleVolumeInfoBase:
         :type one_volume_dcm_filenames: list[Path | str]
         :param slice_ordering: How the slices are ordered. With GEOMETRIC, ITK's
             GDCM reader sorts the files; otherwise they are read in the order given.
+            When omitted, it is worked out from the headers, and a file that cannot
+            be read makes the volume FALLBACK_FILENAME.
 
         """
         self.one_volume_dcm_filenames: list[Path] = [
@@ -103,12 +106,16 @@ class DicomSingleVolumeInfoBase:
         if len(self.one_volume_dcm_filenames) == 0:
             msg = "No file names provided list"
             raise ValueError(msg)
+        _first_filename_for_volume: Path = self.one_volume_dcm_filenames[0]
+        if slice_ordering is None:
+            slice_ordering, self.one_volume_dcm_filenames = infer_slice_ordering(
+                self.one_volume_dcm_filenames
+            )
 
         # The ro_user_supplied_dcm_filenames should never be overridden after initialization
         # it is needed for repeated validation calls
         self.ro_user_supplied_dcm_filenames = list(self.one_volume_dcm_filenames)
 
-        _first_filename_for_volume: Path = self.one_volume_dcm_filenames[0]
         # print(f"USING REFERENCE VOLUME:  {_first_filename_for_volume} for pydicom info")
         self._pydicom_info: pydicom.Dataset = pydicom.dcmread(
             _first_filename_for_volume, stop_before_pixels=True, force=True

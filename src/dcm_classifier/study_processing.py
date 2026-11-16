@@ -400,10 +400,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             self.__identify_single_volumes(self.study_directory, mr_sop_class_only)
         )
         for series_number, series in self.series_dictionary.items():
-            fallbacks = series.get_slice_orderings() - {
-                SliceOrdering.GEOMETRIC,
-                SliceOrdering.GEOMETRIC_SUBVOLUME,
-            }
+            fallbacks = {o for o in series.get_slice_orderings() if o.is_fallback}
             if fallbacks:
                 message = (
                     f"SeriesNumber {series_number} in {self.study_directory} has volumes "
