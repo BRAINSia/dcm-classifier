@@ -4,6 +4,10 @@ Releases after 0.9.9 are described in the
 [GitHub releases](https://github.com/BRAINSia/dcm-classifier/releases).
 Earlier releases list their commit subjects as written at the time.
 
+Releases up to 0.9.5rc2 can pack several acquisitions of the same slices
+into one volume, and 0.9.6 to 1.1.0 can drop or pack files when slice
+positions repeat unevenly; see `docs/source/known_issues.md`.
+
 ## v0.9.9 -- 2025-04-15 (git log --pretty=%s v0.9.8..HEAD)
 
 - ADD: added test for simple classify study on empty directory
