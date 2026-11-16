@@ -16,11 +16,14 @@
 #
 #  =========================================================================
 import logging
+import re
 from collections import defaultdict
 from datetime import datetime
+from itertools import pairwise
 from pathlib import Path, PurePath
-from typing import Any, ClassVar, TypedDict
+from typing import TYPE_CHECKING, Any, ClassVar, TypedDict
 
+import numpy as np
 import pydicom
 
 from .dicom_config import MISSING_VALUE
@@ -28,6 +31,7 @@ from .dicom_series import DicomSingleSeries
 from .dicom_volume import DicomSingleVolumeInfoBase
 from .image_type_inference import ImageTypeClassifierBase
 from .utility_functions import (
+    ORIENTATION_TOLERANCE,
     SliceOrdering,
     check_two_images_have_same_physical_space,
     fallback_slice_ordering,
@@ -36,6 +40,9 @@ from .utility_functions import (
     new_gdcm_series_file_names,
     parse_acquisition_datetime,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
 
@@ -49,11 +56,227 @@ def _series_number_order(item: tuple[int, Any]) -> tuple[bool, int]:
 
 class _FileRecord(TypedDict):
     image_position: Any
+    orientation: Any
     acquisition_date_time: datetime
+    acquisition_time: datetime | None
     acquisition_number: int
     instance_number: int
+    tags: dict[str, str | None]
     filename: str
+    # The header itself is used only by geometric_slice_order and fallback_slice_ordering.
     dataset: pydicom.Dataset
+
+
+_SPLIT_TAGS = ("TemporalPositionIdentifier", "AcquisitionNumber")
+
+
+def _acquisition_order(record: _FileRecord) -> tuple[datetime, int, int]:
+    return (
+        record["acquisition_date_time"],
+        record["acquisition_number"],
+        record["instance_number"],
+    )
+
+
+def _tag_value(ds: pydicom.Dataset, keyword: str) -> Any:
+    try:
+        return ds.get(keyword)
+    except (ValueError, TypeError, KeyError, AttributeError) as error:
+        logger.debug("Unreadable %s: %s", keyword, error)
+        return None
+
+
+def _tag_text(ds: pydicom.Dataset, keyword: str) -> str | None:
+    value = _tag_value(ds, keyword)
+    text = "" if value is None else str(value).strip()
+    return text or None
+
+
+def _int_or_missing(ds: pydicom.Dataset, keyword: str) -> int:
+    text = _tag_text(ds, keyword)
+    try:
+        return int(text) if text is not None else MISSING_VALUE
+    except ValueError:
+        return MISSING_VALUE
+
+
+_DICOM_DATE = re.compile(r"\d{8}")
+_DICOM_TIME = re.compile(r"(\d{2})(?:(\d{2})(?:(\d{2})(?:\.(\d{1,6}))?)?)?")
+_DICOM_DATETIME = re.compile(
+    r"(\d{8})(\d{2}(?:\d{2}(?:\d{2}(?:\.\d{1,6})?)?)?)?([+-]\d{2})?(\d{2})?"
+)
+
+
+def _acquisition_time(ds: pydicom.Dataset) -> datetime | None:
+    """AcquisitionDateTime, or AcquisitionDate with AcquisitionTime; None unless it parses."""
+    text = _tag_text(ds, "AcquisitionDateTime")
+    if text is not None:
+        match = _DICOM_DATETIME.fullmatch(text)
+        if match is None:
+            return None
+        day, clock, offset_hours, offset_minutes = match.groups()
+        if (offset_hours is None) != (offset_minutes is None):
+            return None
+        if offset_hours is not None:
+            sign = -1 if offset_hours.startswith("-") else 1
+            minutes = sign * (abs(int(offset_hours)) * 60 + int(offset_minutes))
+            # DICOM limits the UTC offset to -1200 through +1400.
+            if int(offset_minutes) >= 60 or not -720 <= minutes <= 840:
+                return None
+        # A date without a time cannot order slices acquired the same day.
+        if clock is None:
+            return None
+    else:
+        day, clock = _tag_text(ds, "AcquisitionDate"), _tag_text(ds, "AcquisitionTime")
+        if day is None or clock is None or not _DICOM_DATE.fullmatch(day):
+            return None
+    parts = _DICOM_TIME.fullmatch(clock)
+    if parts is None:
+        return None
+    hour, minute, second, fraction = parts.groups()
+    try:
+        return datetime.strptime(
+            f"{day}{hour}{minute or '00'}{second or '00'}{(fraction or '').ljust(6, '0')}",
+            "%Y%m%d%H%M%S%f",
+        )
+    except ValueError:
+        return None
+
+
+def _file_record(ds: pydicom.Dataset, filename: str) -> _FileRecord:
+    """Every header value the volume splitters use, read once."""
+    return {
+        "image_position": ds.get("ImagePositionPatient"),
+        "orientation": _tag_value(ds, "ImageOrientationPatient"),
+        "acquisition_date_time": parse_acquisition_datetime(ds),
+        "acquisition_time": _acquisition_time(ds),
+        "acquisition_number": _int_or_missing(ds, "AcquisitionNumber"),
+        "instance_number": _int_or_missing(ds, "InstanceNumber"),
+        "tags": {tag: _tag_text(ds, tag) for tag in _SPLIT_TAGS},
+        "filename": filename,
+        "dataset": ds,
+    }
+
+
+def _position_ranks(
+    by_position: dict[tuple[Any, ...], list[_FileRecord]],
+) -> dict[tuple[Any, ...], int] | None:
+    """Rank of each position along the shared slice normal, or None when it is unknown."""
+    try:
+        cosines = [
+            np.asarray(r["orientation"], float)
+            for records in by_position.values()
+            for r in records
+        ]
+        points = {key: np.asarray(key, float) for key in by_position}
+    except (AttributeError, TypeError, ValueError):
+        return None
+    if any(c.shape != (6,) for c in cosines) or any(
+        v.shape != (3,) for v in points.values()
+    ):
+        return None
+    if any(np.max(np.abs(c - cosines[0])) > ORIENTATION_TOLERANCE for c in cosines):
+        return None
+    normal = np.cross(cosines[0][:3], cosines[0][3:])
+    along = {key: float(np.dot(v, normal)) for key, v in points.items()}
+    return {key: rank for rank, key in enumerate(sorted(along, key=along.__getitem__))}
+
+
+def _split_by_repeat(
+    by_position: dict[tuple[Any, ...], list[_FileRecord]],
+) -> list[list[_FileRecord]] | None:
+    """Split by repeat rank at each position, when every position repeats equally."""
+    counts = {len(records) for records in by_position.values()}
+    if len(counts) != 1:
+        return None
+    numbered = {
+        r["acquisition_number"] != MISSING_VALUE
+        for records in by_position.values()
+        for r in records
+    }
+    # Repeats cannot be ranked when only some acquisition numbers can be read.
+    if len(numbered) != 1:
+        return None
+    records = [r for group in by_position.values() for r in group]
+    if any(r["instance_number"] == MISSING_VALUE for r in records):
+        return None
+    repeats = counts.pop()
+    parsed = {id(r): r["acquisition_time"] for r in records}
+    clock = {key: when for key, when in parsed.items() if when is not None}
+
+    def split(
+        sort_key: "Callable[[_FileRecord], Any]",
+        order_key: "Callable[[_FileRecord], Any]",
+    ) -> list[list[_FileRecord]] | None:
+        ranked = [sorted(group, key=sort_key) for group in by_position.values()]
+        parts = [[group[i] for group in ranked] for i in range(repeats)]
+        bounds = [(min(map(order_key, p)), max(map(order_key, p))) for p in parts]
+        # Each repeat must finish before the next starts, or ranks do not identify acquisitions.
+        separated = len(by_position) == 1 or all(
+            a[1] < b[0] for a, b in pairwise(bounds)
+        )
+        return parts if separated else None
+
+    by_instance = split(
+        lambda r: (r["acquisition_number"], r["instance_number"]),
+        lambda r: r["instance_number"],
+    )
+    if by_instance is None:
+        return None
+    # Times that parse cross-check InstanceNumber; any disagreement means one is wrong.
+    timed = [[r for r in group if id(r) in clock] for group in by_position.values()]
+    if any(
+        [r["instance_number"] for r in sorted(group, key=lambda r: clock[id(r)])]
+        != sorted(r["instance_number"] for r in group)
+        for group in timed
+    ):
+        return None
+    if len(clock) < len(records):
+        return by_instance
+    by_time = split(
+        lambda r: (clock[id(r)], r["acquisition_number"], r["instance_number"]),
+        lambda r: clock[id(r)],
+    )
+    if by_time is not None and [{id(r) for r in p} for p in by_time] != [
+        {id(r) for r in p} for p in by_instance
+    ]:
+        return None
+    return by_instance
+
+
+def _split_by_acquisition(
+    by_position: dict[tuple[Any, ...], list[_FileRecord]],
+) -> tuple[list[list[_FileRecord]] | None, bool]:
+    """Split by acquisition tags giving contiguous slabs without repeats; True if tags conflict."""
+    ranks = _position_ranks(by_position)
+    if ranks is None:
+        return None, False
+    keyed = [(key, r) for key, records in by_position.items() for r in records]
+    splits: list[list[list[_FileRecord]]] = []
+    for tag in _SPLIT_TAGS:
+        values = [r["tags"][tag] for _, r in keyed]
+        if any(v is None for v in values):
+            continue
+        groups: defaultdict[str, list[tuple[tuple[Any, ...], _FileRecord]]] = (
+            defaultdict(list)
+        )
+        for value, item in zip(values, keyed, strict=True):
+            groups[str(value)].append(item)
+        if not all(len({key for key, _ in g}) == len(g) for g in groups.values()):
+            continue
+        # A tag numbering every slice does not identify volumes, except for one-position series.
+        if len(by_position) > 1 and min(len(g) for g in groups.values()) < 2:
+            continue
+        spans = [sorted(ranks[key] for key, _ in g) for g in groups.values()]
+        if any(s[-1] - s[0] + 1 != len(s) for s in spans):
+            continue
+        parts = [[r for _, r in g] for g in groups.values()]
+        splits.append(sorted(parts, key=lambda p: min(map(_acquisition_order, p))))
+    # When both tags separate the repeats they must agree, or one of them is wrong.
+    volumes = {tuple(frozenset(id(r) for r in part) for part in s) for s in splits}
+    if len(volumes) > 1:
+        return None, True
+    return (splits[0] if splits else None), False
 
 
 class ProcessOneDicomStudyToVolumesMappingBase:
@@ -563,21 +786,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                         msg = f"ImagePositionPatient not found in {dcm_file}"
                         raise ValueError(msg)
 
-                    # Safe extraction of metadata with fallback values
-                    acquisition_date_time = parse_acquisition_datetime(ds)
-                    acquisition_number = int(ds.get("AcquisitionNumber", MISSING_VALUE))
-                    inst_number = int(ds.get("InstanceNumber", MISSING_VALUE))
-
-                    file_records.append(
-                        {
-                            "image_position": img_position,
-                            "acquisition_date_time": acquisition_date_time,
-                            "acquisition_number": acquisition_number,
-                            "instance_number": inst_number,
-                            "filename": dcm_file,
-                            "dataset": ds,
-                        }
-                    )
+                    file_records.append(_file_record(ds, dcm_file))
 
                 except Exception as file_error:
                     if self.raise_error_on_failure:
@@ -613,34 +822,45 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                     )
                 )
 
-            # Volume splitting logic
-            num_unique_positions = len(file_info_dict)
-            num_files = len(ordered_filenames)
-
-            if 0 < num_unique_positions < num_files:
-                num_volumes = num_files // num_unique_positions
-
-                if num_volumes * num_unique_positions != num_files:
-                    if self.raise_error_on_failure:
-                        msg = f"Inconsistent volume splitting: {num_files} files, {num_unique_positions} positions"
-                        raise ValueError(msg)
-                    logger.warning(
-                        "Detected %d sub-volumes. Total files: %d, Unique positions: %d.",
-                        num_volumes,
-                        num_files,
-                        num_unique_positions,
+            all_read = len(file_records) == len(subseries_filenames)
+            if 0 < len(file_info_dict) < len(file_records):
+                groups = None
+                if all_read:
+                    groups, conflict = _split_by_acquisition(file_info_dict)
+                    if groups is None and not conflict:
+                        groups = _split_by_repeat(file_info_dict)
+                if groups is None:
+                    msg = (
+                        f"Repeated slice positions cannot be separated into volumes: "
+                        f"{len(subseries_filenames)} files, "
+                        f"{len(file_info_dict)} positions"
                     )
+                    if self.raise_error_on_failure:
+                        raise ValueError(msg)
+                    logger.warning(msg)
+                    return [
+                        DicomSingleVolumeInfoBase(
+                            one_volume_dcm_filenames=ordered_filenames,
+                            slice_ordering=SliceOrdering.FALLBACK_REPEATED_POSITIONS,
+                        )
+                    ]
 
-                # Create volume objects
                 sub_volume_info_list: list[DicomSingleVolumeInfoBase] = []
-                for i in range(num_volumes):
-                    records = [file_info_dict[ipp_key][i] for ipp_key in file_info_dict]
-                    datasets = [r["dataset"] for r in records]
+                for group in groups:
+                    datasets = [r["dataset"] for r in group]
                     order = geometric_slice_order(datasets)
                     if order is None:
                         ordering = fallback_slice_ordering(datasets)
+                        by_instance = ordering == SliceOrdering.FALLBACK_INSTANCE_NUMBER
+                        records = sorted(
+                            group,
+                            key=lambda r: (
+                                r["instance_number"] if by_instance else 0,
+                                str(r["filename"]),
+                            ),
+                        )
                     else:
-                        records = [records[j] for j in order]
+                        records = [group[j] for j in order]
                         ordering = SliceOrdering.GEOMETRIC_SUBVOLUME
                     sub_volume_info_list.append(
                         DicomSingleVolumeInfoBase(
@@ -653,7 +873,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
             datasets = [r["dataset"] for r in file_records]
             if (
                 not itk_fallback
-                and len(file_records) == len(subseries_filenames)
+                and all_read
                 and geometric_slice_order(datasets) is not None
             ):
                 return [
@@ -662,7 +882,7 @@ class ProcessOneDicomStudyToVolumesMappingBase:
                         slice_ordering=SliceOrdering.GEOMETRIC,
                     )
                 ]
-            if len(file_records) == len(subseries_filenames):
+            if all_read:
                 single_volume_ordering = fallback_slice_ordering(datasets)
 
         except Exception as global_error:
