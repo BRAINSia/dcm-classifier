@@ -83,6 +83,9 @@ class SliceOrdering(StrEnum):
     FALLBACK_INSTANCE_NUMBER = "fallback_instance_number"
     #: Positions could not be sorted and InstanceNumbers are incomplete; slices follow file names.
     FALLBACK_FILENAME = "fallback_filename"
+    #: Slice positions repeat and the repeats cannot be separated into acquisitions;
+    #: every file is kept in one volume that is not a valid 3D image.
+    FALLBACK_REPEATED_POSITIONS = "fallback_repeated_positions"
 
 
 #: Largest difference between direction cosines still treated as one orientation.
